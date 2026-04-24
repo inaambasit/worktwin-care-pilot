@@ -3,23 +3,27 @@ import { useState } from 'react'
 import AppLayout from '@/components/AppLayout'
 import {
   Send, BookOpen, PlayCircle, Lock, List, Zap,
-  AlertTriangle, CheckSquare, ChevronDown,
+  AlertTriangle, CheckSquare, ChevronDown, Shield,
 } from 'lucide-react'
 import Link from 'next/link'
 
+const MEDICATION_Q = 'What do I do if a service user refuses medication?'
+const SAFEGUARDING_Q = 'How do I report a safeguarding concern?'
+
 const suggestedPrompts = [
-  'What do I do if a service user refuses medication?',
-  'How do I report a safeguarding concern?',
+  MEDICATION_Q,
+  SAFEGUARDING_Q,
   'What is the correct incident reporting procedure?',
   'What are my responsibilities under the infection control policy?',
   'How do I complete a risk assessment?',
   'What do I do if I witness a colleague acting inappropriately?',
 ]
 
-const sampleAnswer = {
-  question: 'What do I do if a service user refuses medication?',
+const medicationAnswer = {
+  question: MEDICATION_Q,
   answer:
     'If a service user refuses their prescribed medication, you must respect their right to refuse — this is part of their autonomy and is protected in law. Do not force or pressurise the service user to take medication under any circumstances. Document the refusal immediately and follow the steps set out in the Medication Administration Policy.',
+  disclaimer: 'This is policy guidance, not clinical advice. Follow company policy and speak to the senior person on duty if unsure.',
   nextSteps: [
     'Stay calm and listen — ask if there is a reason for the refusal',
     'Record the refusal on the Medication Administration Record (MAR) chart immediately',
@@ -44,6 +48,34 @@ const sampleAnswer = {
     'Would you like to practise a medication refusal scenario to build your confidence before your next shift?',
 }
 
+const safeguardingAnswer = {
+  question: SAFEGUARDING_Q,
+  answer:
+    'If you have a safeguarding concern, you must act immediately. Do not attempt to investigate the concern yourself — your role is to report, not to investigate. Safeguarding protects the welfare of vulnerable individuals and must always be treated as urgent. Follow the procedure set out in the Safeguarding Policy.',
+  disclaimer: null,
+  nextSteps: [
+    'Do not investigate the concern yourself — that is not your role',
+    'Record factual information only: what you saw, heard or were told, in your own words',
+    'Report immediately to the Designated Safeguarding Lead or your line manager',
+    'If there is immediate risk to safety, escalate urgently — do not delay',
+    'Complete the formal safeguarding concern form as directed by your manager',
+    'Do not discuss the concern with colleagues or the person alleged to have caused harm',
+    'Follow the Safeguarding Policy — do not wait to seek guidance before reporting',
+  ],
+  source: {
+    title: 'Safeguarding Policy',
+    section: 'Section 3.1 — Reporting a Concern',
+    reviewed: 'Last reviewed: March 2025',
+  },
+  escalateIf: [
+    'There is immediate risk to the safety of a service user or staff member',
+    'The concern involves a child or vulnerable adult',
+    'The person causing harm is in a position of trust, such as a staff member or manager',
+    'You are unsure whether the concern meets the reporting threshold — if in doubt, always report',
+  ],
+  learningOption: 'Would you like to practise a safeguarding scenario to build your confidence?',
+}
+
 const checklistItems = [
   'Stay calm — do not force or pressurise',
   'Record refusal on MAR chart',
@@ -64,17 +96,26 @@ const quizQuestion = {
   correct: 1,
 }
 
+type ActiveAnswer = 'medication' | 'safeguarding' | null
+
 export default function AskPage() {
   const [input, setInput] = useState('')
-  const [showAnswer, setShowAnswer] = useState(true)
+  const [activeAnswer, setActiveAnswer] = useState<ActiveAnswer>(null)
   const [showChecklist, setShowChecklist] = useState(false)
   const [showQuiz, setShowQuiz] = useState(false)
   const [noteSaved, setNoteSaved] = useState(false)
   const [selectedOption, setSelectedOption] = useState<number | null>(null)
 
+  const showAnswer = activeAnswer !== null
+  const current = activeAnswer === 'safeguarding' ? safeguardingAnswer : medicationAnswer
+
   function handlePrompt(prompt: string) {
     setInput(prompt)
-    setShowAnswer(true)
+    if (prompt === SAFEGUARDING_Q) {
+      setActiveAnswer('safeguarding')
+    } else {
+      setActiveAnswer('medication')
+    }
     setShowChecklist(false)
     setShowQuiz(false)
     setNoteSaved(false)
@@ -95,7 +136,7 @@ export default function AskPage() {
           </p>
         </div>
 
-        {/* Suggested prompts */}
+        {/* Suggested prompts — shown when no answer is active */}
         {!showAnswer && (
           <div>
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Suggested questions</p>
@@ -104,8 +145,13 @@ export default function AskPage() {
                 <button
                   key={p}
                   onClick={() => handlePrompt(p)}
-                  className="text-sm border border-slate-200 bg-white hover:bg-teal-50 hover:border-teal-300 text-slate-700 hover:text-teal-800 rounded-full px-3 py-1.5 transition-colors"
+                  className={`text-sm border bg-white rounded-full px-3 py-1.5 transition-colors ${
+                    p === SAFEGUARDING_Q
+                      ? 'border-amber-300 text-amber-800 hover:bg-amber-50 hover:border-amber-400'
+                      : 'border-slate-200 text-slate-700 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-800'
+                  }`}
                 >
+                  {p === SAFEGUARDING_Q && <Shield size={12} className="inline mr-1.5 text-amber-600" />}
                   {p}
                 </button>
               ))}
@@ -119,7 +165,7 @@ export default function AskPage() {
             {/* Question bubble */}
             <div className="flex justify-end">
               <div className="bg-teal-700 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-sm text-sm">
-                {sampleAnswer.question}
+                {current.question}
               </div>
             </div>
 
@@ -134,7 +180,12 @@ export default function AskPage() {
                   <p className="text-sm font-semibold text-slate-800">WorkTwin</p>
                   <span className="text-xs text-slate-400">· Source-cited answer</span>
                 </div>
-                <p className="text-slate-700 text-sm leading-relaxed">{sampleAnswer.answer}</p>
+                <p className="text-slate-700 text-sm leading-relaxed">{current.answer}</p>
+                {current.disclaimer && (
+                  <p className="mt-3 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                    <span className="font-semibold">Note: </span>{current.disclaimer}
+                  </p>
+                )}
               </div>
 
               {/* What to do next */}
@@ -143,7 +194,7 @@ export default function AskPage() {
                   What you should do next
                 </h3>
                 <ol className="space-y-2">
-                  {sampleAnswer.nextSteps.map((step, i) => (
+                  {current.nextSteps.map((step, i) => (
                     <li key={i} className="flex items-start gap-2.5 text-sm text-slate-700">
                       <span className="w-5 h-5 rounded-full bg-teal-100 text-teal-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
                         {i + 1}
@@ -159,9 +210,9 @@ export default function AskPage() {
                 <BookOpen size={16} className="text-teal-600 shrink-0 mt-0.5" />
                 <div>
                   <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-0.5">Source</p>
-                  <p className="text-sm font-semibold text-slate-800">{sampleAnswer.source.title}</p>
-                  <p className="text-xs text-slate-500">{sampleAnswer.source.section}</p>
-                  <p className="text-xs text-slate-400">{sampleAnswer.source.reviewed}</p>
+                  <p className="text-sm font-semibold text-slate-800">{current.source.title}</p>
+                  <p className="text-xs text-slate-500">{current.source.section}</p>
+                  <p className="text-xs text-slate-400">{current.source.reviewed}</p>
                 </div>
               </div>
 
@@ -172,7 +223,7 @@ export default function AskPage() {
                   <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider">Escalate if</p>
                 </div>
                 <ul className="space-y-1.5">
-                  {sampleAnswer.escalateIf.map((item, i) => (
+                  {current.escalateIf.map((item, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-amber-800">
                       <span className="text-amber-500 shrink-0 mt-0.5">·</span>
                       {item}
@@ -180,7 +231,7 @@ export default function AskPage() {
                   ))}
                 </ul>
                 <Link
-                  href="/admin/escalation"
+                  href="/escalation"
                   className="mt-2 inline-block text-xs text-amber-700 underline font-medium"
                 >
                   View escalation contacts →
@@ -193,7 +244,7 @@ export default function AskPage() {
                   <Zap size={15} className="text-teal-600" />
                   <p className="text-xs font-semibold text-teal-700 uppercase tracking-wider">Learning option</p>
                 </div>
-                <p className="text-sm text-teal-800">{sampleAnswer.learningOption}</p>
+                <p className="text-sm text-teal-800">{current.learningOption}</p>
               </div>
 
               {/* Action buttons */}
@@ -216,25 +267,29 @@ export default function AskPage() {
                   <Lock size={15} />
                   {noteSaved ? 'Saved to private notes ✓' : 'Save to private notes'}
                 </button>
-                <button
-                  onClick={() => { setShowChecklist(!showChecklist); setShowQuiz(false) }}
-                  className="flex items-center gap-1.5 text-sm border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium px-4 py-2 rounded-lg transition-colors"
-                >
-                  <List size={15} />
-                  Turn into checklist
-                </button>
-                <button
-                  onClick={() => { setShowQuiz(!showQuiz); setShowChecklist(false) }}
-                  className="flex items-center gap-1.5 text-sm border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium px-4 py-2 rounded-lg transition-colors"
-                >
-                  <CheckSquare size={15} />
-                  Quiz me
-                </button>
+                {activeAnswer === 'medication' && (
+                  <>
+                    <button
+                      onClick={() => { setShowChecklist(!showChecklist); setShowQuiz(false) }}
+                      className="flex items-center gap-1.5 text-sm border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium px-4 py-2 rounded-lg transition-colors"
+                    >
+                      <List size={15} />
+                      Turn into checklist
+                    </button>
+                    <button
+                      onClick={() => { setShowQuiz(!showQuiz); setShowChecklist(false) }}
+                      className="flex items-center gap-1.5 text-sm border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium px-4 py-2 rounded-lg transition-colors"
+                    >
+                      <CheckSquare size={15} />
+                      Quiz me
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 
-            {/* Checklist panel */}
-            {showChecklist && (
+            {/* Checklist panel — medication only */}
+            {showChecklist && activeAnswer === 'medication' && (
               <div className="bg-white border border-teal-200 rounded-2xl p-5 shadow-sm">
                 <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
                   <List size={16} className="text-teal-600" />
@@ -257,8 +312,8 @@ export default function AskPage() {
               </div>
             )}
 
-            {/* Quiz panel */}
-            {showQuiz && (
+            {/* Quiz panel — medication only */}
+            {showQuiz && activeAnswer === 'medication' && (
               <div className="bg-white border border-violet-200 rounded-2xl p-5 shadow-sm">
                 <h3 className="font-semibold text-slate-900 mb-1 flex items-center gap-2">
                   <CheckSquare size={16} className="text-violet-600" />
@@ -317,7 +372,7 @@ export default function AskPage() {
         <div className="sticky bottom-0 bg-slate-50 pt-2">
           {showAnswer && (
             <div className="mb-2 flex flex-wrap gap-2">
-              {suggestedPrompts.slice(1, 4).map((p) => (
+              {suggestedPrompts.slice(0, 4).map((p) => (
                 <button
                   key={p}
                   onClick={() => handlePrompt(p)}

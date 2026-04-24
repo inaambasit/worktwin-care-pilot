@@ -78,7 +78,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3">Support</p>
               </div>
               <Link
-                href="/admin/escalation"
+                href="/escalation"
                 className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
               >
                 <AlertTriangle size={16} className="text-amber-500" />
@@ -91,7 +91,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Demo switcher + user */}
         <div className="border-t border-slate-200 p-3 space-y-3">
           <div>
-            <p className="text-xs text-slate-400 mb-1.5 px-1">Demo: switch view</p>
+            <p className="text-xs text-slate-400 mb-0.5 px-1 font-medium">Demo only: switch view</p>
+            <p className="text-xs text-slate-300 mb-1.5 px-1 leading-tight">In a real deployment, admin access is permission-controlled.</p>
             <div className="flex gap-1.5">
               <Link
                 href="/dashboard"

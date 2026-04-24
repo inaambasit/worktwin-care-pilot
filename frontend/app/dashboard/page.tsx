@@ -143,7 +143,7 @@ export default function DashboardPage() {
             <p className="text-xs text-amber-700 mt-0.5">
               For safeguarding, medication incidents, HR concerns or health and safety issues, speak to your
               escalation contact — not only WorkTwin.{' '}
-              <Link href="/admin/escalation" className="underline font-medium">View escalation contacts</Link>
+              <Link href="/escalation" className="underline font-medium">View escalation contacts</Link>
             </p>
           </div>
         </div>

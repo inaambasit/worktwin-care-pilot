@@ -10,10 +10,10 @@ const topQuestions = [
 ]
 
 const trainingGaps = [
-  { topic: 'Medication administration', staffCount: 8, desc: 'Staff regularly asking about MAR completion and refusal procedures' },
-  { topic: 'Mental Capacity Act application', staffCount: 5, desc: 'Questions about when and how to apply MCA in day-to-day care' },
-  { topic: 'Infection control protocols', staffCount: 3, desc: 'Recurring questions around PPE selection and disposal' },
-  { topic: 'Incident classification', staffCount: 4, desc: 'Uncertainty around what qualifies as a notifiable incident' },
+  { topic: 'Medication administration', groupLabel: 'Recurring theme', desc: 'Staff regularly asking about MAR completion and refusal procedures' },
+  { topic: 'Mental Capacity Act application', groupLabel: 'Common question area', desc: 'Questions about when and how to apply MCA in day-to-day care' },
+  { topic: 'Infection control protocols', groupLabel: 'Several staff', desc: 'Recurring questions around PPE selection and disposal' },
+  { topic: 'Incident classification', groupLabel: 'Common question area', desc: 'Uncertainty around what qualifies as a notifiable incident' },
 ]
 
 const unansweredThemes = [
@@ -110,14 +110,17 @@ export default function InsightsPage() {
             <TrendingUp size={16} className="text-amber-600" />
             <h2 className="font-semibold text-slate-900">Training gaps identified</h2>
           </div>
-          <p className="text-xs text-slate-400 mb-4">
-            Topics where repeated questions suggest staff need more structured training. Numbers are approximate staff counts, not named individuals.
+          <p className="text-xs text-slate-400 mb-2">
+            Topics where repeated questions suggest staff need more structured training.
+          </p>
+          <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-4">
+            Shown only when group size is large enough to prevent identification of individuals.
           </p>
           <div className="space-y-3">
-            {trainingGaps.map(({ topic, staffCount, desc }) => (
+            {trainingGaps.map(({ topic, groupLabel, desc }) => (
               <div key={topic} className="flex items-start gap-3 p-3 bg-amber-50 rounded-xl border border-amber-100">
-                <div className="w-8 h-8 rounded-full bg-amber-200 text-amber-800 font-bold text-sm flex items-center justify-center shrink-0">
-                  {staffCount}
+                <div className="shrink-0 mt-0.5 bg-amber-200 text-amber-800 font-semibold text-xs px-2 py-1 rounded-lg whitespace-nowrap">
+                  {groupLabel}
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-amber-900">{topic}</p>
@@ -171,9 +174,14 @@ export default function InsightsPage() {
           </div>
         </div>
 
-        <p className="text-xs text-slate-400 text-center pb-2">
-          All data is aggregated and anonymised. WorkTwin never surfaces individual staff names, questions or conversations in this view.
-        </p>
+        <div className="bg-teal-50 border border-teal-200 rounded-2xl px-4 py-3">
+          <p className="text-xs text-teal-800 font-semibold mb-1">Privacy guarantee</p>
+          <p className="text-xs text-teal-700 leading-relaxed">
+            Insights are aggregated and anonymised. Small groups are suppressed to reduce the risk of identifying
+            individuals. Managers do not see private employee chat transcripts. WorkTwin never surfaces individual
+            staff names, questions or conversation history in this view.
+          </p>
+        </div>
       </div>
     </AppLayout>
   )

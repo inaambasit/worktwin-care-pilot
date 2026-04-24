@@ -3,10 +3,10 @@ import Link from 'next/link'
 import { Users, FileText, BarChart2, Shield, Phone, AlertTriangle, TrendingUp, BookOpen } from 'lucide-react'
 
 const summaryCards = [
-  { label: 'Staff on platform', value: '24', sub: 'Active users', icon: Users, colour: 'teal' },
+  { label: 'Pilot participants', value: '24', sub: 'Organisation usage', icon: Users, colour: 'teal' },
   { label: 'Approved documents', value: '18', sub: '2 under review', icon: FileText, colour: 'blue' },
   { label: 'Escalations this month', value: '3', sub: 'All resolved', icon: AlertTriangle, colour: 'amber' },
-  { label: 'Onboarding in progress', value: '4', sub: 'New starters', icon: BookOpen, colour: 'violet' },
+  { label: 'Onboarding cohorts', value: '4', sub: 'New starters', icon: BookOpen, colour: 'violet' },
 ]
 
 const adminSections = [

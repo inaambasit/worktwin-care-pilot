@@ -9,3 +9,6 @@ dist/
 build/
 *.pyc
 .DS_Store
+
+# TypeScript build cache
+*.tsbuildinfo

@@ -1,0 +1,354 @@
+'use client'
+import { useState } from 'react'
+import AppLayout from '@/components/AppLayout'
+import {
+  Send, BookOpen, PlayCircle, Lock, List, Zap,
+  AlertTriangle, CheckSquare, ChevronDown,
+} from 'lucide-react'
+import Link from 'next/link'
+
+const suggestedPrompts = [
+  'What do I do if a service user refuses medication?',
+  'How do I report a safeguarding concern?',
+  'What is the correct incident reporting procedure?',
+  'What are my responsibilities under the infection control policy?',
+  'How do I complete a risk assessment?',
+  'What do I do if I witness a colleague acting inappropriately?',
+]
+
+const sampleAnswer = {
+  question: 'What do I do if a service user refuses medication?',
+  answer:
+    'If a service user refuses their prescribed medication, you must respect their right to refuse — this is part of their autonomy and is protected in law. Do not force or pressurise the service user to take medication under any circumstances. Document the refusal immediately and follow the steps set out in the Medication Administration Policy.',
+  nextSteps: [
+    'Stay calm and listen — ask if there is a reason for the refusal',
+    'Record the refusal on the Medication Administration Record (MAR) chart immediately',
+    'Notify your line manager or the senior carer on duty',
+    'If capacity may be in question, follow the Mental Capacity Act guidance in the policy',
+    'Contact the prescribing GP or clinician if there is clinical risk',
+    'Never leave medication unattended or unsecured',
+  ],
+  source: {
+    title: 'Medication Administration Policy',
+    section: 'Section 4.2 — Refusal of Medication',
+    reviewed: 'Last reviewed: January 2025',
+  },
+  escalateIf: [
+    'The service user appears distressed, in pain, or frightened',
+    'You believe the service user may lack mental capacity',
+    'The refusal occurs more than once without a clear reason',
+    'Any immediate clinical risk is present',
+    'You are unsure of the correct next step',
+  ],
+  learningOption:
+    'Would you like to practise a medication refusal scenario to build your confidence before your next shift?',
+}
+
+const checklistItems = [
+  'Stay calm — do not force or pressurise',
+  'Record refusal on MAR chart',
+  'Notify line manager or senior carer on duty',
+  'Check Mental Capacity Act guidance if needed',
+  'Contact GP if clinical risk is present',
+  'Keep medication secured',
+]
+
+const quizQuestion = {
+  question: 'What is the FIRST thing you must do when a service user refuses medication?',
+  options: [
+    'Persuade them by explaining the importance of the medication',
+    'Record the refusal on the MAR chart and notify your manager',
+    'Contact the GP immediately',
+    'Leave the medication on the bedside table for later',
+  ],
+  correct: 1,
+}
+
+export default function AskPage() {
+  const [input, setInput] = useState('')
+  const [showAnswer, setShowAnswer] = useState(true)
+  const [showChecklist, setShowChecklist] = useState(false)
+  const [showQuiz, setShowQuiz] = useState(false)
+  const [noteSaved, setNoteSaved] = useState(false)
+  const [selectedOption, setSelectedOption] = useState<number | null>(null)
+
+  function handlePrompt(prompt: string) {
+    setInput(prompt)
+    setShowAnswer(true)
+    setShowChecklist(false)
+    setShowQuiz(false)
+    setNoteSaved(false)
+    setSelectedOption(null)
+  }
+
+  function handleSaveNote() {
+    setNoteSaved(true)
+  }
+
+  return (
+    <AppLayout>
+      <div className="max-w-3xl mx-auto space-y-5">
+        <div>
+          <h1 className="text-xl font-bold text-slate-900">Ask WorkTwin</h1>
+          <p className="text-sm text-slate-500 mt-0.5">
+            Answers grounded in your company&apos;s approved documents. All conversations are private to you.
+          </p>
+        </div>
+
+        {/* Suggested prompts */}
+        {!showAnswer && (
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Suggested questions</p>
+            <div className="flex flex-wrap gap-2">
+              {suggestedPrompts.map((p) => (
+                <button
+                  key={p}
+                  onClick={() => handlePrompt(p)}
+                  className="text-sm border border-slate-200 bg-white hover:bg-teal-50 hover:border-teal-300 text-slate-700 hover:text-teal-800 rounded-full px-3 py-1.5 transition-colors"
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Answer card */}
+        {showAnswer && (
+          <div className="space-y-4">
+            {/* Question bubble */}
+            <div className="flex justify-end">
+              <div className="bg-teal-700 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-sm text-sm">
+                {sampleAnswer.question}
+              </div>
+            </div>
+
+            {/* Answer card */}
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+              {/* Answer */}
+              <div className="p-5 border-b border-slate-100">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-6 h-6 rounded-full bg-teal-700 flex items-center justify-center shrink-0">
+                    <span className="text-white text-xs font-bold">W</span>
+                  </div>
+                  <p className="text-sm font-semibold text-slate-800">WorkTwin</p>
+                  <span className="text-xs text-slate-400">· Source-cited answer</span>
+                </div>
+                <p className="text-slate-700 text-sm leading-relaxed">{sampleAnswer.answer}</p>
+              </div>
+
+              {/* What to do next */}
+              <div className="p-5 border-b border-slate-100 bg-slate-50">
+                <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                  What you should do next
+                </h3>
+                <ol className="space-y-2">
+                  {sampleAnswer.nextSteps.map((step, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm text-slate-700">
+                      <span className="w-5 h-5 rounded-full bg-teal-100 text-teal-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                        {i + 1}
+                      </span>
+                      {step}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+
+              {/* Source */}
+              <div className="px-5 py-4 border-b border-slate-100 flex items-start gap-3">
+                <BookOpen size={16} className="text-teal-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-0.5">Source</p>
+                  <p className="text-sm font-semibold text-slate-800">{sampleAnswer.source.title}</p>
+                  <p className="text-xs text-slate-500">{sampleAnswer.source.section}</p>
+                  <p className="text-xs text-slate-400">{sampleAnswer.source.reviewed}</p>
+                </div>
+              </div>
+
+              {/* Escalate if */}
+              <div className="px-5 py-4 border-b border-slate-100 bg-amber-50">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle size={15} className="text-amber-600" />
+                  <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider">Escalate if</p>
+                </div>
+                <ul className="space-y-1.5">
+                  {sampleAnswer.escalateIf.map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-amber-800">
+                      <span className="text-amber-500 shrink-0 mt-0.5">·</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/admin/escalation"
+                  className="mt-2 inline-block text-xs text-amber-700 underline font-medium"
+                >
+                  View escalation contacts →
+                </Link>
+              </div>
+
+              {/* Learning option */}
+              <div className="px-5 py-4 border-b border-slate-100 bg-teal-50">
+                <div className="flex items-center gap-2 mb-1">
+                  <Zap size={15} className="text-teal-600" />
+                  <p className="text-xs font-semibold text-teal-700 uppercase tracking-wider">Learning option</p>
+                </div>
+                <p className="text-sm text-teal-800">{sampleAnswer.learningOption}</p>
+              </div>
+
+              {/* Action buttons */}
+              <div className="px-5 py-4 flex flex-wrap gap-2">
+                <Link
+                  href="/scenarios"
+                  className="flex items-center gap-1.5 text-sm bg-teal-700 hover:bg-teal-800 text-white font-medium px-4 py-2 rounded-lg transition-colors"
+                >
+                  <PlayCircle size={15} />
+                  Practise this scenario
+                </Link>
+                <button
+                  onClick={handleSaveNote}
+                  className={`flex items-center gap-1.5 text-sm border font-medium px-4 py-2 rounded-lg transition-colors ${
+                    noteSaved
+                      ? 'border-teal-200 bg-teal-50 text-teal-700'
+                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <Lock size={15} />
+                  {noteSaved ? 'Saved to private notes ✓' : 'Save to private notes'}
+                </button>
+                <button
+                  onClick={() => { setShowChecklist(!showChecklist); setShowQuiz(false) }}
+                  className="flex items-center gap-1.5 text-sm border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium px-4 py-2 rounded-lg transition-colors"
+                >
+                  <List size={15} />
+                  Turn into checklist
+                </button>
+                <button
+                  onClick={() => { setShowQuiz(!showQuiz); setShowChecklist(false) }}
+                  className="flex items-center gap-1.5 text-sm border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium px-4 py-2 rounded-lg transition-colors"
+                >
+                  <CheckSquare size={15} />
+                  Quiz me
+                </button>
+              </div>
+            </div>
+
+            {/* Checklist panel */}
+            {showChecklist && (
+              <div className="bg-white border border-teal-200 rounded-2xl p-5 shadow-sm">
+                <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                  <List size={16} className="text-teal-600" />
+                  Medication refusal checklist
+                </h3>
+                <div className="space-y-2">
+                  {checklistItems.map((item, i) => (
+                    <label key={i} className="flex items-center gap-3 cursor-pointer group">
+                      <input type="checkbox" className="w-4 h-4 rounded accent-teal-600 cursor-pointer" />
+                      <span className="text-sm text-slate-700 group-hover:text-slate-900">{item}</span>
+                    </label>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setShowChecklist(false)}
+                  className="mt-4 text-xs text-slate-400 hover:text-slate-600"
+                >
+                  <ChevronDown size={12} className="inline" /> Hide checklist
+                </button>
+              </div>
+            )}
+
+            {/* Quiz panel */}
+            {showQuiz && (
+              <div className="bg-white border border-violet-200 rounded-2xl p-5 shadow-sm">
+                <h3 className="font-semibold text-slate-900 mb-1 flex items-center gap-2">
+                  <CheckSquare size={16} className="text-violet-600" />
+                  Quick quiz
+                </h3>
+                <p className="text-sm text-slate-600 mb-4">{quizQuestion.question}</p>
+                <div className="space-y-2">
+                  {quizQuestion.options.map((opt, i) => {
+                    const isSelected = selectedOption === i
+                    const isCorrect = i === quizQuestion.correct
+                    const revealed = selectedOption !== null
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => !revealed && setSelectedOption(i)}
+                        disabled={revealed}
+                        className={`w-full text-left text-sm px-4 py-3 rounded-xl border transition-colors ${
+                          !revealed
+                            ? 'border-slate-200 hover:border-teal-300 hover:bg-teal-50 text-slate-700'
+                            : isCorrect
+                            ? 'border-teal-300 bg-teal-50 text-teal-800 font-medium'
+                            : isSelected
+                            ? 'border-red-200 bg-red-50 text-red-700'
+                            : 'border-slate-100 text-slate-400'
+                        }`}
+                      >
+                        <span className="font-semibold mr-2 text-slate-400">
+                          {String.fromCharCode(65 + i)}.
+                        </span>
+                        {opt}
+                        {revealed && isCorrect && ' ✓'}
+                        {revealed && isSelected && !isCorrect && ' ✗'}
+                      </button>
+                    )
+                  })}
+                </div>
+                {selectedOption !== null && (
+                  <p className={`mt-3 text-sm font-medium ${selectedOption === quizQuestion.correct ? 'text-teal-700' : 'text-red-600'}`}>
+                    {selectedOption === quizQuestion.correct
+                      ? 'Correct — well done! The MAR chart must be completed immediately.'
+                      : 'Not quite. The correct answer is B — record on the MAR chart and notify your manager first.'}
+                  </p>
+                )}
+                <button
+                  onClick={() => setShowQuiz(false)}
+                  className="mt-3 text-xs text-slate-400 hover:text-slate-600"
+                >
+                  <ChevronDown size={12} className="inline" /> Hide quiz
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Input bar */}
+        <div className="sticky bottom-0 bg-slate-50 pt-2">
+          {showAnswer && (
+            <div className="mb-2 flex flex-wrap gap-2">
+              {suggestedPrompts.slice(1, 4).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => handlePrompt(p)}
+                  className="text-xs border border-slate-200 bg-white hover:bg-teal-50 hover:border-teal-300 text-slate-600 rounded-full px-3 py-1.5 transition-colors"
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="flex gap-2 bg-white border border-slate-200 rounded-2xl p-1.5 shadow-sm">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && input && handlePrompt(input)}
+              placeholder="Ask a question about your policies or procedures…"
+              className="flex-1 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 outline-none bg-transparent"
+            />
+            <button
+              onClick={() => input && handlePrompt(input)}
+              className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl transition-colors"
+            >
+              <Send size={16} />
+            </button>
+          </div>
+          <p className="text-xs text-slate-400 text-center mt-2">
+            Your questions are private. WorkTwin answers from approved documents only.
+          </p>
+        </div>
+      </div>
+    </AppLayout>
+  )
+}

@@ -3,9 +3,11 @@ import { useState } from 'react'
 import AppLayout from '@/components/AppLayout'
 import {
   Send, BookOpen, PlayCircle, Lock, List, Zap,
-  AlertTriangle, CheckSquare, ChevronDown, Shield,
+  AlertTriangle, CheckSquare, ChevronDown, Shield, Loader2,
 } from 'lucide-react'
 import Link from 'next/link'
+import { askWorktwin } from '@/lib/api'
+import type { AskResponse } from '@/lib/types'
 
 const MEDICATION_Q = 'What do I do if a service user refuses medication?'
 const SAFEGUARDING_Q = 'How do I report a safeguarding concern?'
@@ -19,11 +21,41 @@ const suggestedPrompts = [
   'What do I do if I witness a colleague acting inappropriately?',
 ]
 
-const medicationAnswer = {
+// ---------------------------------------------------------------------------
+// Display types — internal to this page, used by both live API and demo fallback
+// ---------------------------------------------------------------------------
+
+interface DisplaySource {
+  title: string
+  section: string
+  reviewed: string
+}
+
+interface DisplayAnswer {
+  question: string
+  answer: string
+  disclaimer: string | null
+  nextSteps: string[]
+  source: DisplaySource
+  escalateIf: string[]
+  learningOption: string
+  requiresEscalation: boolean
+  allowedToAnswer: boolean
+  riskCategory: string
+  isDemo: boolean
+}
+
+// ---------------------------------------------------------------------------
+// Demo fallback answers — shown when the backend is unreachable.
+// TODO (Milestone 4): Remove these once the RAG pipeline returns real source-cited answers.
+// ---------------------------------------------------------------------------
+
+const medicationAnswer: DisplayAnswer = {
   question: MEDICATION_Q,
   answer:
     'If a service user refuses their prescribed medication, you must respect their right to refuse — this is part of their autonomy and is protected in law. Do not force or pressurise the service user to take medication under any circumstances. Document the refusal immediately and follow the steps set out in the Medication Administration Policy.',
-  disclaimer: 'This is policy guidance, not clinical advice. Follow company policy and speak to the senior person on duty if unsure.',
+  disclaimer:
+    'This is policy guidance, not clinical advice. Follow company policy and speak to the senior person on duty if unsure.',
   nextSteps: [
     'Stay calm and listen — ask if there is a reason for the refusal',
     'Record the refusal on the Medication Administration Record (MAR) chart immediately',
@@ -46,9 +78,13 @@ const medicationAnswer = {
   ],
   learningOption:
     'Would you like to practise a medication refusal scenario to build your confidence before your next shift?',
+  requiresEscalation: false,
+  allowedToAnswer: true,
+  riskCategory: 'medication',
+  isDemo: true,
 }
 
-const safeguardingAnswer = {
+const safeguardingAnswer: DisplayAnswer = {
   question: SAFEGUARDING_Q,
   answer:
     'If you have a safeguarding concern, you must act immediately. Do not attempt to investigate the concern yourself — your role is to report, not to investigate. Safeguarding protects the welfare of vulnerable individuals and must always be treated as urgent. Follow the procedure set out in the Safeguarding Policy.',
@@ -74,6 +110,10 @@ const safeguardingAnswer = {
     'You are unsure whether the concern meets the reporting threshold — if in doubt, always report',
   ],
   learningOption: 'Would you like to practise a safeguarding scenario to build your confidence?',
+  requiresEscalation: false,
+  allowedToAnswer: true,
+  riskCategory: 'safeguarding',
+  isDemo: true,
 }
 
 const checklistItems = [
@@ -96,30 +136,83 @@ const quizQuestion = {
   correct: 1,
 }
 
-type ActiveAnswer = 'medication' | 'safeguarding' | null
+// ---------------------------------------------------------------------------
+// Maps an AskResponse from the live backend into the page's display format.
+// TODO (Milestone 4): Once RAG is connected, source.title and source.section will
+// reflect real document names and section references returned by the retrieval pipeline.
+// ---------------------------------------------------------------------------
+
+function mapApiResponse(question: string, res: AskResponse): DisplayAnswer {
+  return {
+    question,
+    answer: res.answer,
+    disclaimer: null,
+    nextSteps: res.next_steps,
+    source: {
+      title: res.sources[0]?.document_name ?? 'Company Policy',
+      section: res.sources[0]?.section ?? 'See full policy',
+      reviewed: res.sources[0]?.page != null ? `Page ${res.sources[0].page}` : '',
+    },
+    escalateIf: res.escalate_if,
+    learningOption: res.learning_option ?? '',
+    requiresEscalation: res.requires_escalation,
+    allowedToAnswer: res.allowed_to_answer,
+    riskCategory: res.risk_category,
+    isDemo: false,
+  }
+}
+
+function getDemoFallback(question: string): DisplayAnswer | null {
+  if (question === MEDICATION_Q) return medicationAnswer
+  if (question === SAFEGUARDING_Q) return safeguardingAnswer
+  return null
+}
+
+// ---------------------------------------------------------------------------
+// Page component
+// ---------------------------------------------------------------------------
 
 export default function AskPage() {
   const [input, setInput] = useState('')
-  const [activeAnswer, setActiveAnswer] = useState<ActiveAnswer>(null)
+  const [currentAnswer, setCurrentAnswer] = useState<DisplayAnswer | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
+  const [isDemoFallback, setIsDemoFallback] = useState(false)
   const [showChecklist, setShowChecklist] = useState(false)
   const [showQuiz, setShowQuiz] = useState(false)
   const [noteSaved, setNoteSaved] = useState(false)
   const [selectedOption, setSelectedOption] = useState<number | null>(null)
 
-  const showAnswer = activeAnswer !== null
-  const current = activeAnswer === 'safeguarding' ? safeguardingAnswer : medicationAnswer
+  const showAnswer = currentAnswer !== null && !isLoading
 
-  function handlePrompt(prompt: string) {
+  async function handlePrompt(prompt: string) {
     setInput(prompt)
-    if (prompt === SAFEGUARDING_Q) {
-      setActiveAnswer('safeguarding')
-    } else {
-      setActiveAnswer('medication')
-    }
     setShowChecklist(false)
     setShowQuiz(false)
     setNoteSaved(false)
     setSelectedOption(null)
+    setApiError(null)
+    setCurrentAnswer(null)
+    setIsDemoFallback(false)
+    setIsLoading(true)
+
+    try {
+      const response = await askWorktwin(prompt)
+      setCurrentAnswer(mapApiResponse(prompt, response))
+    } catch {
+      // Backend unreachable — use demo answers for known questions, error otherwise
+      const demo = getDemoFallback(prompt)
+      if (demo) {
+        setCurrentAnswer(demo)
+        setIsDemoFallback(true)
+      } else {
+        setApiError(
+          'WorkTwin could not connect to the knowledge base. Please try again or speak to your manager.',
+        )
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   function handleSaveNote() {
@@ -136,8 +229,8 @@ export default function AskPage() {
           </p>
         </div>
 
-        {/* Suggested prompts — shown when no answer is active */}
-        {!showAnswer && (
+        {/* Suggested prompts — shown when idle or after an error */}
+        {!showAnswer && !isLoading && (
           <div>
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Suggested questions</p>
             <div className="flex flex-wrap gap-2">
@@ -159,137 +252,236 @@ export default function AskPage() {
           </div>
         )}
 
-        {/* Answer card */}
-        {showAnswer && (
+        {/* Loading state */}
+        {isLoading && (
+          <div className="space-y-4">
+            <div className="flex justify-end">
+              <div className="bg-teal-700 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-sm text-sm">
+                {input}
+              </div>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex items-center gap-3">
+              <Loader2 size={18} className="text-teal-600 animate-spin shrink-0" />
+              <span className="text-sm text-slate-600">WorkTwin is checking the knowledge base…</span>
+            </div>
+          </div>
+        )}
+
+        {/* Error state — backend unreachable and no demo fallback available */}
+        {apiError && !isLoading && (
+          <div className="space-y-4">
+            <div className="flex justify-end">
+              <div className="bg-teal-700 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-sm text-sm">
+                {input}
+              </div>
+            </div>
+            <div className="bg-red-50 border border-red-200 rounded-2xl p-5 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertTriangle size={16} className="text-red-600 shrink-0" />
+                <p className="text-sm font-semibold text-red-700">Could not reach WorkTwin</p>
+              </div>
+              <p className="text-sm text-red-600">{apiError}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Answer area */}
+        {showAnswer && currentAnswer && (
           <div className="space-y-4">
             {/* Question bubble */}
             <div className="flex justify-end">
               <div className="bg-teal-700 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-sm text-sm">
-                {current.question}
+                {currentAnswer.question}
               </div>
             </div>
 
-            {/* Answer card */}
-            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-              {/* Answer */}
-              <div className="p-5 border-b border-slate-100">
+            {/* Demo fallback notice — backend was unreachable */}
+            {isDemoFallback && (
+              <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-800">
+                <AlertTriangle size={13} className="shrink-0 text-amber-600" />
+                Backend unavailable — showing demo answer. WorkTwin will serve live answers once connected.
+              </div>
+            )}
+
+            {/* Live backend notice — connected but RAG not yet wired up */}
+            {/* TODO (Milestone 4): Remove this notice once document upload and RAG pipeline are live */}
+            {!currentAnswer.isDemo && !isDemoFallback && (
+              <div className="flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-xl px-4 py-2.5 text-xs text-teal-800">
+                <Zap size={13} className="shrink-0 text-teal-600" />
+                WorkTwin is connected. Real, source-cited answers from your company documents will be
+                available once document upload is set up (coming in Milestone 4).
+              </div>
+            )}
+
+            {/* Not allowed to answer */}
+            {!currentAnswer.allowedToAnswer && (
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="w-6 h-6 rounded-full bg-teal-700 flex items-center justify-center shrink-0">
-                    <span className="text-white text-xs font-bold">W</span>
-                  </div>
-                  <p className="text-sm font-semibold text-slate-800">WorkTwin</p>
-                  <span className="text-xs text-slate-400">· Source-cited answer</span>
+                  <Shield size={16} className="text-amber-600" />
+                  <p className="text-sm font-semibold text-slate-800">WorkTwin cannot answer this directly</p>
                 </div>
-                <p className="text-slate-700 text-sm leading-relaxed">{current.answer}</p>
-                {current.disclaimer && (
-                  <p className="mt-3 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                    <span className="font-semibold">Note: </span>{current.disclaimer}
-                  </p>
-                )}
+                <p className="text-sm text-slate-600">
+                  This question falls outside WorkTwin&apos;s permitted answer scope, or no approved document covers
+                  this topic. Please speak to your manager, your Designated Safeguarding Lead, or refer to the relevant policy.
+                </p>
+                <Link href="/escalation" className="mt-3 inline-block text-sm text-teal-700 underline font-medium">
+                  View escalation contacts →
+                </Link>
               </div>
+            )}
 
-              {/* What to do next */}
-              <div className="p-5 border-b border-slate-100 bg-slate-50">
-                <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
-                  What you should do next
-                </h3>
-                <ol className="space-y-2">
-                  {current.nextSteps.map((step, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-slate-700">
-                      <span className="w-5 h-5 rounded-full bg-teal-100 text-teal-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
-                        {i + 1}
-                      </span>
-                      {step}
-                    </li>
-                  ))}
-                </ol>
-              </div>
-
-              {/* Source */}
-              <div className="px-5 py-4 border-b border-slate-100 flex items-start gap-3">
-                <BookOpen size={16} className="text-teal-600 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-0.5">Source</p>
-                  <p className="text-sm font-semibold text-slate-800">{current.source.title}</p>
-                  <p className="text-xs text-slate-500">{current.source.section}</p>
-                  <p className="text-xs text-slate-400">{current.source.reviewed}</p>
+            {/* Escalation required — show safe wording, never the answer */}
+            {currentAnswer.requiresEscalation && (
+              <div className="bg-amber-50 border border-amber-300 rounded-2xl p-5 shadow-sm">
+                <div className="flex items-center gap-2 mb-3">
+                  <AlertTriangle size={16} className="text-amber-600" />
+                  <p className="text-sm font-semibold text-amber-800">This topic requires human escalation</p>
                 </div>
-              </div>
-
-              {/* Escalate if */}
-              <div className="px-5 py-4 border-b border-slate-100 bg-amber-50">
-                <div className="flex items-center gap-2 mb-2">
-                  <AlertTriangle size={15} className="text-amber-600" />
-                  <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider">Escalate if</p>
-                </div>
-                <ul className="space-y-1.5">
-                  {current.escalateIf.map((item, i) => (
+                <p className="text-sm text-amber-700 mb-3">
+                  For safeguarding, medication incidents, HR, legal, or wellbeing concerns, WorkTwin does not provide
+                  a direct answer. Please escalate to the appropriate person immediately.
+                </p>
+                <ul className="space-y-1.5 mb-3">
+                  {currentAnswer.escalateIf.map((item, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-amber-800">
                       <span className="text-amber-500 shrink-0 mt-0.5">·</span>
                       {item}
                     </li>
                   ))}
                 </ul>
-                <Link
-                  href="/escalation"
-                  className="mt-2 inline-block text-xs text-amber-700 underline font-medium"
-                >
+                <Link href="/escalation" className="inline-block text-sm text-amber-700 underline font-medium">
                   View escalation contacts →
                 </Link>
               </div>
+            )}
 
-              {/* Learning option */}
-              <div className="px-5 py-4 border-b border-slate-100 bg-teal-50">
-                <div className="flex items-center gap-2 mb-1">
-                  <Zap size={15} className="text-teal-600" />
-                  <p className="text-xs font-semibold text-teal-700 uppercase tracking-wider">Learning option</p>
+            {/* Main answer card — only shown when permitted and no escalation required */}
+            {currentAnswer.allowedToAnswer && !currentAnswer.requiresEscalation && (
+              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                {/* Answer */}
+                <div className="p-5 border-b border-slate-100">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-6 h-6 rounded-full bg-teal-700 flex items-center justify-center shrink-0">
+                      <span className="text-white text-xs font-bold">W</span>
+                    </div>
+                    <p className="text-sm font-semibold text-slate-800">WorkTwin</p>
+                    <span className="text-xs text-slate-400">· Source-cited answer</span>
+                  </div>
+                  <p className="text-slate-700 text-sm leading-relaxed">{currentAnswer.answer}</p>
+                  {currentAnswer.disclaimer && (
+                    <p className="mt-3 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                      <span className="font-semibold">Note: </span>{currentAnswer.disclaimer}
+                    </p>
+                  )}
                 </div>
-                <p className="text-sm text-teal-800">{current.learningOption}</p>
-              </div>
 
-              {/* Action buttons */}
-              <div className="px-5 py-4 flex flex-wrap gap-2">
-                <Link
-                  href="/scenarios"
-                  className="flex items-center gap-1.5 text-sm bg-teal-700 hover:bg-teal-800 text-white font-medium px-4 py-2 rounded-lg transition-colors"
-                >
-                  <PlayCircle size={15} />
-                  Practise this scenario
-                </Link>
-                <button
-                  onClick={handleSaveNote}
-                  className={`flex items-center gap-1.5 text-sm border font-medium px-4 py-2 rounded-lg transition-colors ${
-                    noteSaved
-                      ? 'border-teal-200 bg-teal-50 text-teal-700'
-                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                  }`}
-                >
-                  <Lock size={15} />
-                  {noteSaved ? 'Saved to private notes ✓' : 'Save to private notes'}
-                </button>
-                {activeAnswer === 'medication' && (
-                  <>
-                    <button
-                      onClick={() => { setShowChecklist(!showChecklist); setShowQuiz(false) }}
-                      className="flex items-center gap-1.5 text-sm border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium px-4 py-2 rounded-lg transition-colors"
-                    >
-                      <List size={15} />
-                      Turn into checklist
-                    </button>
-                    <button
-                      onClick={() => { setShowQuiz(!showQuiz); setShowChecklist(false) }}
-                      className="flex items-center gap-1.5 text-sm border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium px-4 py-2 rounded-lg transition-colors"
-                    >
-                      <CheckSquare size={15} />
-                      Quiz me
-                    </button>
-                  </>
+                {/* What to do next */}
+                <div className="p-5 border-b border-slate-100 bg-slate-50">
+                  <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                    What you should do next
+                  </h3>
+                  <ol className="space-y-2">
+                    {currentAnswer.nextSteps.map((step, i) => (
+                      <li key={i} className="flex items-start gap-2.5 text-sm text-slate-700">
+                        <span className="w-5 h-5 rounded-full bg-teal-100 text-teal-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                          {i + 1}
+                        </span>
+                        {step}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+
+                {/* Source */}
+                <div className="px-5 py-4 border-b border-slate-100 flex items-start gap-3">
+                  <BookOpen size={16} className="text-teal-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-0.5">Source</p>
+                    <p className="text-sm font-semibold text-slate-800">{currentAnswer.source.title}</p>
+                    <p className="text-xs text-slate-500">{currentAnswer.source.section}</p>
+                    {currentAnswer.source.reviewed && (
+                      <p className="text-xs text-slate-400">{currentAnswer.source.reviewed}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Escalate if */}
+                <div className="px-5 py-4 border-b border-slate-100 bg-amber-50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertTriangle size={15} className="text-amber-600" />
+                    <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider">Escalate if</p>
+                  </div>
+                  <ul className="space-y-1.5">
+                    {currentAnswer.escalateIf.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-amber-800">
+                        <span className="text-amber-500 shrink-0 mt-0.5">·</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href="/escalation"
+                    className="mt-2 inline-block text-xs text-amber-700 underline font-medium"
+                  >
+                    View escalation contacts →
+                  </Link>
+                </div>
+
+                {/* Learning option */}
+                {currentAnswer.learningOption && (
+                  <div className="px-5 py-4 border-b border-slate-100 bg-teal-50">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Zap size={15} className="text-teal-600" />
+                      <p className="text-xs font-semibold text-teal-700 uppercase tracking-wider">Learning option</p>
+                    </div>
+                    <p className="text-sm text-teal-800">{currentAnswer.learningOption}</p>
+                  </div>
                 )}
+
+                {/* Action buttons */}
+                <div className="px-5 py-4 flex flex-wrap gap-2">
+                  <Link
+                    href="/scenarios"
+                    className="flex items-center gap-1.5 text-sm bg-teal-700 hover:bg-teal-800 text-white font-medium px-4 py-2 rounded-lg transition-colors"
+                  >
+                    <PlayCircle size={15} />
+                    Practise this scenario
+                  </Link>
+                  <button
+                    onClick={handleSaveNote}
+                    className={`flex items-center gap-1.5 text-sm border font-medium px-4 py-2 rounded-lg transition-colors ${
+                      noteSaved
+                        ? 'border-teal-200 bg-teal-50 text-teal-700'
+                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Lock size={15} />
+                    {noteSaved ? 'Saved to private notes ✓' : 'Save to private notes'}
+                  </button>
+                  {currentAnswer.riskCategory === 'medication' && (
+                    <>
+                      <button
+                        onClick={() => { setShowChecklist(!showChecklist); setShowQuiz(false) }}
+                        className="flex items-center gap-1.5 text-sm border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium px-4 py-2 rounded-lg transition-colors"
+                      >
+                        <List size={15} />
+                        Turn into checklist
+                      </button>
+                      <button
+                        onClick={() => { setShowQuiz(!showQuiz); setShowChecklist(false) }}
+                        className="flex items-center gap-1.5 text-sm border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium px-4 py-2 rounded-lg transition-colors"
+                      >
+                        <CheckSquare size={15} />
+                        Quiz me
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Checklist panel — medication only */}
-            {showChecklist && activeAnswer === 'medication' && (
+            {showChecklist && currentAnswer.riskCategory === 'medication' && (
               <div className="bg-white border border-teal-200 rounded-2xl p-5 shadow-sm">
                 <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
                   <List size={16} className="text-teal-600" />
@@ -313,7 +505,7 @@ export default function AskPage() {
             )}
 
             {/* Quiz panel — medication only */}
-            {showQuiz && activeAnswer === 'medication' && (
+            {showQuiz && currentAnswer.riskCategory === 'medication' && (
               <div className="bg-white border border-violet-200 rounded-2xl p-5 shadow-sm">
                 <h3 className="font-semibold text-slate-900 mb-1 flex items-center gap-2">
                   <CheckSquare size={16} className="text-violet-600" />
@@ -388,15 +580,16 @@ export default function AskPage() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && input && handlePrompt(input)}
+              onKeyDown={(e) => e.key === 'Enter' && input.trim() && handlePrompt(input.trim())}
               placeholder="Ask a question about your policies or procedures…"
               className="flex-1 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 outline-none bg-transparent"
             />
             <button
-              onClick={() => input && handlePrompt(input)}
-              className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl transition-colors"
+              onClick={() => input.trim() && handlePrompt(input.trim())}
+              disabled={isLoading}
+              className="px-4 py-2 bg-teal-700 hover:bg-teal-800 disabled:bg-teal-400 text-white rounded-xl transition-colors"
             >
-              <Send size={16} />
+              {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
             </button>
           </div>
           <p className="text-xs text-slate-400 text-center mt-2">

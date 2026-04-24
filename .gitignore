@@ -12,3 +12,7 @@ build/
 
 # TypeScript build cache
 *.tsbuildinfo
+
+# Claude local settings
+.claude/settings.local.json
+.claude/

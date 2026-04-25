@@ -664,6 +664,9 @@ def health_check():
 @app.get("/debug/storage-config")
 def debug_storage_config():
     """Returns booleans and safe metadata only. Never logs or returns secret values."""
+    if os.getenv("DEBUG_ENDPOINTS_ENABLED", "").lower() != "true":
+        raise HTTPException(status_code=404, detail="Not Found")
+
     _raw_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 
     if not _raw_key:

@@ -87,6 +87,18 @@ export interface DocumentRecord {
 }
 
 // ---------------------------------------------------------------------------
+// Document list response (Milestone 4C.1)
+// ---------------------------------------------------------------------------
+
+export type RegistrySource = 'database' | 'demo_fallback'
+
+export interface DocumentListResponse {
+  documents: DocumentRecord[]
+  registry_source: RegistrySource
+  registry_warning: string | null
+}
+
+// ---------------------------------------------------------------------------
 // Milestone 4B — PDF upload result
 // ---------------------------------------------------------------------------
 

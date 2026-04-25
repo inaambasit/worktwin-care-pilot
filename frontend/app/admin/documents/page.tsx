@@ -240,6 +240,8 @@ export default function DocumentRegistryPage() {
   const [docs, setDocs] = useState<DocumentRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [usingFallback, setUsingFallback] = useState(false)
+  const [registrySource, setRegistrySource] = useState<'database' | 'demo_fallback' | null>(null)
+  const [registryWarning, setRegistryWarning] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('All')
   const [actioning, setActioning] = useState<string | null>(null)
@@ -256,8 +258,18 @@ export default function DocumentRegistryPage() {
   const loadDocs = useCallback(() => {
     setLoading(true)
     fetchDocuments()
-      .then(data => { setDocs(data); setUsingFallback(false) })
-      .catch(() => { setDocs(SAMPLE_DOCS); setUsingFallback(true) })
+      .then(data => {
+        setDocs(data.documents)
+        setRegistrySource(data.registry_source)
+        setRegistryWarning(data.registry_warning)
+        setUsingFallback(false)
+      })
+      .catch(() => {
+        setDocs(SAMPLE_DOCS)
+        setUsingFallback(true)
+        setRegistrySource(null)
+        setRegistryWarning(null)
+      })
       .finally(() => setLoading(false))
   }, [])
 
@@ -362,7 +374,7 @@ export default function DocumentRegistryPage() {
               All approved policies, SOPs and training materials. Only documents marked &ldquo;Approved for AI&rdquo; are used to answer staff questions.
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap justify-end">
             <button onClick={loadDocs} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 border border-slate-200 rounded-lg px-3 py-1.5 hover:bg-slate-50 transition-colors">
               <RefreshCw size={12} />
               Refresh
@@ -370,6 +382,21 @@ export default function DocumentRegistryPage() {
             <span className="text-xs text-slate-500 bg-slate-100 rounded-full px-3 py-1.5 font-medium whitespace-nowrap">
               {counts.approved} approved · {counts.all} total
             </span>
+            {!usingFallback && registrySource && (
+              <span className={`text-xs font-medium rounded-full px-3 py-1.5 whitespace-nowrap border ${
+                registrySource === 'database'
+                  ? 'bg-teal-50 text-teal-700 border-teal-100'
+                  : registryWarning
+                    ? 'bg-amber-50 text-amber-700 border-amber-200'
+                    : 'bg-slate-100 text-slate-500 border-slate-200'
+              }`}>
+                {registrySource === 'database'
+                  ? 'Live registry'
+                  : registryWarning
+                    ? 'Database unavailable — demo fallback'
+                    : 'Demo sample registry'}
+              </span>
+            )}
           </div>
         </div>
 
@@ -766,6 +793,27 @@ export default function DocumentRegistryPage() {
           </div>
         )}
 
+        {/* DB configured but unavailable — backend up, table missing or DB error */}
+        {!usingFallback && registrySource === 'demo_fallback' && registryWarning && (
+          <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-700">
+            <AlertTriangle size={13} className="shrink-0 mt-0.5" />
+            <span>
+              Database unavailable — showing demo sample data.{' '}
+              {registryWarning.includes('001_document_registry.sql')
+                ? <>Run <code className="font-mono">backend/sql/001_document_registry.sql</code> in Supabase SQL Editor to create the registry table, then refresh.</>
+                : registryWarning}
+            </span>
+          </div>
+        )}
+
+        {/* Live registry — DB active and responding */}
+        {!usingFallback && registrySource === 'database' && (
+          <div className="flex items-center gap-2 bg-teal-50 border border-teal-100 rounded-xl px-4 py-2 text-xs text-teal-700">
+            <CheckCircle2 size={12} className="shrink-0" />
+            <span>Live registry mode — showing documents saved in Supabase. Uploaded documents are not AI-answerable until Milestone 4D/4E.</span>
+          </div>
+        )}
+
         {/* Status tabs */}
         <div className="flex flex-wrap gap-2 items-center">
           <Filter size={13} className="text-slate-400" />
@@ -885,7 +933,18 @@ export default function DocumentRegistryPage() {
                   </tr>
                 ) : filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={12} className="px-4 py-10 text-center text-slate-400">No documents match the current filter</td>
+                    <td colSpan={12} className="px-4 py-10 text-center">
+                      {!usingFallback && registrySource === 'database' && docs.length === 0 ? (
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium text-slate-600">No persistent documents yet.</p>
+                          <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                            Upload a dummy or sample PDF first. Sample demo records are no longer shown once the database registry is active.
+                          </p>
+                        </div>
+                      ) : (
+                        <span className="text-slate-400">No documents match the current filter.</span>
+                      )}
+                    </td>
                   </tr>
                 ) : filtered.map((doc, i) => {
                   const sc = STATUS_CONFIG[doc.status]
@@ -1022,7 +1081,7 @@ export default function DocumentRegistryPage() {
             <strong>Platform flexibility:</strong> The <em>Vertical</em> field means this registry is not limited to care.
             It can hold policies for finance, property management, recruitment, healthcare admin, training providers
             and other regulated SMEs — all managed in one place.
-            Document indexing (RAG pipeline) is coming in <strong>Milestone 4C/4D</strong>.
+            Document indexing (RAG pipeline) is coming in <strong>Milestone 4D/4E</strong>.
           </p>
         </div>
 

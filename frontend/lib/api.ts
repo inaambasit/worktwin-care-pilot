@@ -1,6 +1,6 @@
 // WorkTwin API helper — calls the FastAPI backend at NEXT_PUBLIC_API_URL.
 
-import type { AskRequest, AskResponse, DocumentRecord, UploadDocumentResult } from './types'
+import type { AskRequest, AskResponse, DocumentRecord, DocumentListResponse, UploadDocumentResult } from './types'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
@@ -45,7 +45,7 @@ export async function fetchDocuments(params?: {
   status?: string
   category?: string
   vertical?: string
-}): Promise<DocumentRecord[]> {
+}): Promise<DocumentListResponse> {
   const qs = new URLSearchParams()
   if (params?.status) qs.set('status', params.status)
   if (params?.category) qs.set('category', params.category)
@@ -53,7 +53,7 @@ export async function fetchDocuments(params?: {
   const url = `${API_BASE_URL}/documents${qs.toString() ? `?${qs}` : ''}`
   const response = await fetch(url, { signal: AbortSignal.timeout(5_000) })
   if (!response.ok) throw new Error(`API error: ${response.status}`)
-  return response.json() as Promise<DocumentRecord[]>
+  return response.json() as Promise<DocumentListResponse>
 }
 
 export async function fetchDocument(id: string): Promise<DocumentRecord> {

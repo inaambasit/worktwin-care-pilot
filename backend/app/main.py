@@ -318,6 +318,12 @@ class DocumentUpdate(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
 
 
+class DocumentListResponse(BaseModel):
+    documents: List[DocumentRecord]
+    registry_source: Literal["database", "demo_fallback"]
+    registry_warning: Optional[str] = None
+
+
 # ---------------------------------------------------------------------------
 # In-memory document registry (placeholder — Milestone 4B will add real storage)
 # All documents here are sample demo data only. No real personal data.
@@ -847,24 +853,39 @@ def ask_worktwin(payload: AskRequest):
 # Document Registry endpoints (Milestone 4A — in-memory placeholder)
 # ---------------------------------------------------------------------------
 
-@app.get("/documents", response_model=List[DocumentRecord])
+@app.get("/documents", response_model=DocumentListResponse)
 def list_documents(
     status: Optional[str] = None,
     category: Optional[str] = None,
     vertical: Optional[str] = None,
     organisation_id: Optional[str] = None,
 ):
+    """
+    Returns documents with registry source metadata.
+
+    registry_source: "database" when reading live from Supabase,
+                     "demo_fallback" when using in-memory sample data.
+    registry_warning: non-null when DB is configured but unavailable.
+    Never exposes secrets or internal keys.
+    """
+    registry_warning: Optional[str] = None
+
     if _DB_CONFIGURED:
         try:
-            return _list_registry_records(
+            records = _list_registry_records(
                 organisation_id=organisation_id,
                 status=status,
                 category=category,
                 vertical=vertical,
             )
-        except RuntimeError:
-            pass  # fall through to in-memory demo data
+            return DocumentListResponse(
+                documents=records,
+                registry_source="database",
+            )
+        except RuntimeError as exc:
+            registry_warning = str(exc)
 
+    # Demo fallback — DB not configured or unavailable
     docs = _documents
     if status:
         docs = [d for d in docs if d["status"] == status]
@@ -872,7 +893,11 @@ def list_documents(
         docs = [d for d in docs if d["category"] == category]
     if vertical:
         docs = [d for d in docs if d["vertical"] == vertical]
-    return docs
+    return DocumentListResponse(
+        documents=docs,
+        registry_source="demo_fallback",
+        registry_warning=registry_warning,
+    )
 
 
 @app.get("/documents/{doc_id}", response_model=DocumentRecord)

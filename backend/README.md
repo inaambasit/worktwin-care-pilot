@@ -233,6 +233,43 @@ If `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are set, the backend attempts 
 If the DB table is missing, `registry_status` is `"failed"` and `registry_error` contains:
 > Document registry table is not configured. Run backend/sql/001_document_registry.sql in Supabase SQL Editor.
 
+## Milestone 4C.1: Registry clarity and demo seed
+
+### What Milestone 4C.1 adds
+
+- `GET /documents` now returns `{ documents, registry_source, registry_warning }` instead of a raw list
+  - `registry_source`: `"database"` when reading live from Supabase, `"demo_fallback"` otherwise
+  - `registry_warning`: non-null when DB is configured but unavailable (e.g. table missing or DB error)
+- Admin documents page shows a live/demo registry indicator pill in the header
+- "Live registry" or "Demo sample registry" or "Database unavailable — demo fallback" states are clearly labelled
+- Empty-state messaging when the live DB has no documents yet: "No persistent documents yet. Upload a dummy or sample PDF first."
+- Optional demo seed SQL: `backend/sql/002_seed_demo_document_registry.sql`
+
+### Milestone 4C is complete when
+
+- `document_registry` table exists in Supabase (run `001_document_registry.sql`)
+- An uploaded document persists across backend restarts
+- `GET /documents` returns `registry_source: "database"` and the admin page shows the "Live registry" indicator
+- `GET /documents` returns `registry_source: "demo_fallback"` (with or without a warning) when the DB is not configured or unavailable
+
+### Important constraints (still apply through Milestone 4C/4C.1)
+
+- Only dummy or sample PDFs should be uploaded — no real Thumhara/QCS policy documents until governance review is passed
+- Uploaded documents are **not AI-answerable** — embedding_status remains `pending` and no RAG pipeline is active
+- No chunking, no embeddings, no pgvector, no LLM calls
+
+### Optional demo seed
+
+`backend/sql/002_seed_demo_document_registry.sql` inserts the 12 sample policy metadata records into the live `document_registry` table.
+
+- Run ONLY in development or demo environments — **not for production client data**
+- Requires `001_document_registry.sql` to have been run first
+- Uses `ON CONFLICT (id) DO NOTHING` — safe to re-run
+- Storage keys are placeholder paths — no real files exist for these records
+- `embedding_status` is `not_started` for all records — no actual embeddings
+
+To seed: open Supabase SQL Editor, paste the file contents, click Run.
+
 ## Next steps (Milestone 4D / 4E)
 
 - Text chunking with organisation_id, document_id and role-access metadata

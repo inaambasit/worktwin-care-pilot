@@ -664,6 +664,48 @@ def archive_document(doc_id: str):
 
 
 # ---------------------------------------------------------------------------
+# Staff-safe policy library endpoint (Milestone 4A.1)
+# Returns only approved documents visible to the supplied user_role.
+# This endpoint is intentionally narrower than /documents (admin).
+# ---------------------------------------------------------------------------
+
+@app.get("/policies", response_model=List[DocumentRecord])
+def list_policies(
+    user_role: Optional[str] = None,
+    vertical: Optional[str] = None,
+    category: Optional[str] = None,
+    language: Optional[str] = None,
+):
+    """
+    Staff-safe policy library.
+
+    Safety guarantees enforced here (pre-RAG):
+    - Only approved documents are returned.
+    - Documents are filtered by the caller's role — a staff member only
+      receives policies their role is permitted to see.
+    - No embedding status, storage keys or internal pipeline metadata
+      are used to determine visibility; only explicit access_roles.
+    - No AI answers are served from this endpoint — it is read-only metadata.
+    - Documents with approved_for_ai_answers=False or escalation_required=True
+      are still listed here so staff can read the policy, but the frontend
+      must block the "Ask WorkTwin" CTA for those documents.
+    """
+    docs = [d for d in _documents if d["status"] == "approved"]
+    if user_role:
+        docs = [
+            d for d in docs
+            if "All Staff" in d["access_roles"] or user_role in d["access_roles"]
+        ]
+    if vertical:
+        docs = [d for d in docs if d["vertical"] == vertical]
+    if category:
+        docs = [d for d in docs if d["category"] == category]
+    if language:
+        docs = [d for d in docs if language in d["available_languages"]]
+    return docs
+
+
+# ---------------------------------------------------------------------------
 # Legacy document upload placeholder (kept for backward compatibility)
 # ---------------------------------------------------------------------------
 

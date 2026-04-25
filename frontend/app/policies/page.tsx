@@ -1,16 +1,17 @@
 'use client'
 import { useState, useEffect } from 'react'
 import AppLayout from '@/components/AppLayout'
-import { fetchDocuments } from '@/lib/api'
+import { fetchPolicies } from '@/lib/api'
 import type { DocumentRecord } from '@/lib/types'
 import { LANGUAGE_NAMES } from '@/lib/types'
 import {
   BookOpen, Search, CheckCircle, Globe, Users, MessageCircle,
-  X, Calendar, Tag, AlertTriangle, Shield, FileText, ChevronRight,
+  X, Calendar, AlertTriangle, Shield, FileText, ChevronRight,
+  Brain, UserCheck, Lock,
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
-// Sample fallback data (shown when backend is not running)
+// Sample fallback data — approved policies only (shown when backend unavailable)
 // ---------------------------------------------------------------------------
 const SAMPLE_DOCS: DocumentRecord[] = [
   {
@@ -149,10 +150,40 @@ function formatBytes(bytes?: number): string {
 }
 
 // ---------------------------------------------------------------------------
+// Per-language approval status (sample — real per-language approval in 4B+)
+// Primary language is always Approved (document is approved).
+// Other languages derive status from translation_status and position in list.
+// ---------------------------------------------------------------------------
+function getLanguageStatus(doc: DocumentRecord, lang: string): { label: string; colour: string } {
+  if (lang === doc.primary_language) {
+    return { label: 'Approved', colour: 'bg-teal-100 text-teal-800' }
+  }
+  if (doc.translation_status === 'complete') {
+    return { label: 'Approved', colour: 'bg-teal-100 text-teal-800' }
+  }
+  if (doc.translation_status === 'in_progress') {
+    const idx = doc.available_languages.indexOf(lang)
+    if (idx <= 1) return { label: 'Approved', colour: 'bg-teal-100 text-teal-800' }
+    if (idx === 2) return { label: 'Pending review', colour: 'bg-amber-100 text-amber-800' }
+    return { label: 'Human review required', colour: 'bg-red-100 text-red-800' }
+  }
+  return { label: 'Pending review', colour: 'bg-amber-100 text-amber-800' }
+}
+
+// ---------------------------------------------------------------------------
+// CTA safety gate: must NOT show "Ask WorkTwin" if document is unsafe for AI
+// ---------------------------------------------------------------------------
+function isSafeForAiCta(doc: DocumentRecord): boolean {
+  return doc.approved_for_ai_answers && !doc.escalation_required
+}
+
+// ---------------------------------------------------------------------------
 // Detail modal
 // ---------------------------------------------------------------------------
 
 function PolicyModal({ doc, onClose }: { doc: DocumentRecord; onClose: () => void }) {
+  const safeForAi = isSafeForAiCta(doc)
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
@@ -180,8 +211,35 @@ function PolicyModal({ doc, onClose }: { doc: DocumentRecord; onClose: () => voi
           <div className="flex items-start gap-2 bg-teal-50 border border-teal-100 rounded-xl px-4 py-3">
             <CheckCircle size={15} className="text-teal-600 mt-0.5 shrink-0" />
             <p className="text-xs text-teal-800 font-medium">
-              This is an approved Thumhara Centre policy. All staff should follow it.
+              Approved policy — all Thumhara Centre staff should follow it.
             </p>
+          </div>
+
+          {/* Safety labels row */}
+          <div className="flex flex-wrap gap-2">
+            {doc.approved_for_ai_answers && !doc.escalation_required ? (
+              <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 border border-teal-100">
+                <Brain size={11} />
+                AI answers allowed
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
+                <Lock size={11} />
+                AI answer disabled for this document
+              </span>
+            )}
+            {doc.escalation_required && (
+              <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-100">
+                <AlertTriangle size={11} />
+                Human escalation required
+              </span>
+            )}
+            {doc.is_sensitive && (
+              <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-red-50 text-red-700 border border-red-100">
+                <Shield size={11} />
+                Sensitive
+              </span>
+            )}
           </div>
 
           {/* Escalation notice */}
@@ -189,7 +247,7 @@ function PolicyModal({ doc, onClose }: { doc: DocumentRecord; onClose: () => voi
             <div className="flex items-start gap-2 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
               <AlertTriangle size={15} className="text-amber-600 mt-0.5 shrink-0" />
               <p className="text-xs text-amber-800 font-medium">
-                Topics covered by this policy may require human escalation. Always speak to your manager or designated lead when in doubt.
+                Topics covered by this policy require human escalation. Always speak to your manager or designated lead — do not rely on AI guidance alone.
               </p>
             </div>
           )}
@@ -210,7 +268,7 @@ function PolicyModal({ doc, onClose }: { doc: DocumentRecord; onClose: () => voi
               <p className="text-slate-800 font-semibold">{formatDate(doc.review_due_date)}</p>
             </div>
             <div className="bg-slate-50 rounded-xl p-3">
-              <p className="text-slate-400 font-medium mb-0.5">File</p>
+              <p className="text-slate-400 font-medium mb-0.5">File size</p>
               <p className="text-slate-800 font-semibold">{formatBytes(doc.file_size_bytes)}</p>
             </div>
             <div className="bg-slate-50 rounded-xl p-3">
@@ -219,31 +277,32 @@ function PolicyModal({ doc, onClose }: { doc: DocumentRecord; onClose: () => voi
             </div>
           </div>
 
-          {/* Languages */}
-          <div>
-            <div className="flex items-center gap-1.5 mb-2">
-              <Globe size={13} className="text-slate-400" />
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Available languages</p>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {doc.available_languages.map(lang => (
-                <span key={lang} className={`text-xs px-2 py-0.5 rounded-full font-medium ${lang === doc.primary_language ? 'bg-teal-100 text-teal-800' : 'bg-slate-100 text-slate-600'}`}>
-                  {LANGUAGE_NAMES[lang] ?? lang}
-                  {lang === doc.primary_language && ' ✓'}
-                </span>
-              ))}
-            </div>
-            {doc.translation_status === 'in_progress' && (
-              <p className="text-xs text-slate-400 mt-1.5 italic">
-                Additional translations are being prepared. The approved English version is the current source of truth.
+          {/* Per-language approval status */}
+          {doc.available_languages.length > 0 && (
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Globe size={13} className="text-slate-400" />
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Language approval status</p>
+              </div>
+              <div className="space-y-1.5">
+                {doc.available_languages.map(lang => {
+                  const ls = getLanguageStatus(doc, lang)
+                  return (
+                    <div key={lang} className="flex items-center justify-between">
+                      <span className="text-xs text-slate-600 font-medium">
+                        {LANGUAGE_NAMES[lang] ?? lang}
+                        {lang === doc.primary_language && <span className="text-slate-400 font-normal"> (source of truth)</span>}
+                      </span>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${ls.colour}`}>{ls.label}</span>
+                    </div>
+                  )
+                })}
+              </div>
+              <p className="text-xs text-slate-400 mt-2 italic">
+                Approved English policies remain the source of truth unless a human-reviewed translation has been approved.
               </p>
-            )}
-            {doc.translation_status === 'pending' && (
-              <p className="text-xs text-slate-400 mt-1.5 italic">
-                Translation has been requested. The approved English version is the current source of truth.
-              </p>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Tags */}
           {doc.tags.length > 0 && (
@@ -257,15 +316,33 @@ function PolicyModal({ doc, onClose }: { doc: DocumentRecord; onClose: () => voi
           )}
         </div>
 
-        {/* Footer */}
+        {/* Footer — CTA is gated by safety flags */}
         <div className="p-5 border-t border-slate-100 flex gap-2">
-          <a
-            href={`/ask?policy=${encodeURIComponent(doc.title)}`}
-            className="flex-1 flex items-center justify-center gap-2 bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
-          >
-            <MessageCircle size={15} />
-            Ask WorkTwin about this policy
-          </a>
+          {safeForAi ? (
+            <a
+              href={`/ask?policy=${encodeURIComponent(doc.title)}`}
+              className="flex-1 flex items-center justify-center gap-2 bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
+            >
+              <MessageCircle size={15} />
+              Ask WorkTwin about this policy
+            </a>
+          ) : doc.escalation_required ? (
+            <div className="flex-1 flex flex-col gap-1.5">
+              <div className="flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium px-4 py-2.5 rounded-xl">
+                <UserCheck size={15} />
+                Human escalation required
+              </div>
+              <p className="text-center text-xs text-slate-400">Speak to the relevant lead — do not rely on AI for this topic.</p>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col gap-1.5">
+              <div className="flex items-center justify-center gap-2 bg-slate-100 text-slate-500 text-sm font-medium px-4 py-2.5 rounded-xl">
+                <Lock size={15} />
+                View policy guidance only
+              </div>
+              <p className="text-center text-xs text-slate-400">AI answer disabled for this document.</p>
+            </div>
+          )}
           <button
             onClick={onClose}
             className="px-4 py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900 rounded-xl hover:bg-slate-50 transition-colors"
@@ -291,10 +368,10 @@ export default function PoliciesPage() {
   const [selected, setSelected] = useState<DocumentRecord | null>(null)
 
   useEffect(() => {
-    fetchDocuments({ status: 'approved' })
+    fetchPolicies()
       .then(setDocs)
       .catch(() => {
-        setDocs(SAMPLE_DOCS.filter(d => d.status === 'approved'))
+        setDocs(SAMPLE_DOCS)
         setUsingFallback(true)
       })
       .finally(() => setLoading(false))
@@ -337,7 +414,7 @@ export default function PoliciesPage() {
             <p className="text-sm font-semibold text-teal-900">Approved company documents</p>
             <p className="text-xs text-teal-700 mt-0.5">
               All documents in this library have been reviewed and approved by Thumhara Centre management.
-              Approved English-language policies are the source of truth. Translations are provided where available.
+              Approved English-language policies are the source of truth. Translations are provided where a human-reviewed version has been approved.
             </p>
           </div>
         </div>
@@ -397,73 +474,105 @@ export default function PoliciesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {filtered.map(doc => (
-              <button
-                key={doc.id}
-                onClick={() => setSelected(doc)}
-                className="bg-white border border-slate-200 rounded-2xl p-5 text-left hover:border-teal-300 hover:shadow-sm transition-all group"
-              >
-                {/* Category + flags */}
-                <div className="flex items-center justify-between mb-3">
-                  <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${CATEGORY_COLOURS[doc.category] ?? 'bg-slate-100 text-slate-600'}`}>
-                    {doc.category}
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    {doc.escalation_required && (
-                      <span title="May require human escalation">
-                        <AlertTriangle size={13} className="text-amber-500" />
+            {filtered.map(doc => {
+              const safeForAi = isSafeForAiCta(doc)
+              return (
+                <button
+                  key={doc.id}
+                  onClick={() => setSelected(doc)}
+                  className="bg-white border border-slate-200 rounded-2xl p-5 text-left hover:border-teal-300 hover:shadow-sm transition-all group"
+                >
+                  {/* Category + flags */}
+                  <div className="flex items-center justify-between mb-3">
+                    <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${CATEGORY_COLOURS[doc.category] ?? 'bg-slate-100 text-slate-600'}`}>
+                      {doc.category}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {doc.escalation_required && (
+                        <span title="Human escalation required">
+                          <AlertTriangle size={13} className="text-amber-500" />
+                        </span>
+                      )}
+                      {doc.available_languages.length > 1 && (
+                        <span title={`Available in ${doc.available_languages.map(l => LANGUAGE_NAMES[l] ?? l).join(', ')}`}>
+                          <Globe size={13} className="text-slate-400" />
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="font-semibold text-slate-900 text-sm leading-snug mb-2 group-hover:text-teal-700 transition-colors">
+                    {doc.title}
+                  </h3>
+
+                  {/* Description */}
+                  {doc.description && (
+                    <p className="text-xs text-slate-500 leading-relaxed line-clamp-2 mb-3">
+                      {doc.description}
+                    </p>
+                  )}
+
+                  {/* Safety labels */}
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-teal-50 text-teal-700">
+                      <CheckCircle size={10} />
+                      Approved policy
+                    </span>
+                    {safeForAi ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-50 text-slate-500">
+                        <Brain size={10} />
+                        AI answers allowed
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-400">
+                        <Lock size={10} />
+                        {doc.escalation_required ? 'Human escalation required' : 'AI answer disabled'}
                       </span>
                     )}
                     {doc.available_languages.length > 1 && (
-                      <span title={`Available in ${doc.available_languages.map(l => LANGUAGE_NAMES[l] ?? l).join(', ')}`}>
-                        <Globe size={13} className="text-slate-400" />
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-50 text-slate-500">
+                        <Globe size={10} />
+                        {doc.translation_status === 'complete' ? 'Translation available' :
+                         doc.translation_status === 'in_progress' ? 'Translation pending' :
+                         doc.translation_status === 'pending' ? 'Translation pending' :
+                         'Translation available'}
                       </span>
                     )}
                   </div>
-                </div>
 
-                {/* Title */}
-                <h3 className="font-semibold text-slate-900 text-sm leading-snug mb-2 group-hover:text-teal-700 transition-colors">
-                  {doc.title}
-                </h3>
-
-                {/* Description */}
-                {doc.description && (
-                  <p className="text-xs text-slate-500 leading-relaxed line-clamp-2 mb-3">
-                    {doc.description}
-                  </p>
-                )}
-
-                {/* Footer metadata */}
-                <div className="flex items-center justify-between pt-3 border-t border-slate-50">
-                  <div className="flex items-center gap-3 text-xs text-slate-400">
-                    <span>v{doc.version}</span>
-                    {doc.review_due_date && (
+                  {/* Footer metadata */}
+                  <div className="flex items-center justify-between pt-3 border-t border-slate-50">
+                    <div className="flex items-center gap-3 text-xs text-slate-400">
+                      <span>v{doc.version}</span>
+                      {doc.review_due_date && (
+                        <span className="flex items-center gap-1">
+                          <Calendar size={11} />
+                          {formatDate(doc.review_due_date)}
+                        </span>
+                      )}
                       <span className="flex items-center gap-1">
-                        <Calendar size={11} />
-                        {formatDate(doc.review_due_date)}
+                        <Users size={11} />
+                        {doc.access_roles[0]}{doc.access_roles.length > 1 ? ` +${doc.access_roles.length - 1}` : ''}
                       </span>
-                    )}
-                    <span className="flex items-center gap-1">
-                      <Users size={11} />
-                      {doc.access_roles[0]}{doc.access_roles.length > 1 ? ` +${doc.access_roles.length - 1}` : ''}
-                    </span>
+                    </div>
+                    <ChevronRight size={14} className="text-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
-                  <ChevronRight size={14} className="text-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-              </button>
-            ))}
+                </button>
+              )
+            })}
           </div>
         )}
 
-        {/* Bilingual notice */}
+        {/* Multilingual notice */}
         <div className="flex items-start gap-3 bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4">
           <Globe size={16} className="text-slate-400 mt-0.5 shrink-0" />
           <div>
-            <p className="text-xs font-semibold text-slate-600">Multilingual support in progress</p>
+            <p className="text-xs font-semibold text-slate-600">Multilingual support</p>
             <p className="text-xs text-slate-400 mt-0.5">
               Policies are being prepared in Urdu, Punjabi, Arabic, Bengali, Gujarati and other languages.
-              Approved English policies remain the source of truth until a translation is formally approved.
+              Approved English policies remain the source of truth unless a human-reviewed translation has been approved.
+              Per-language approval status is shown in each policy detail.
             </p>
           </div>
         </div>

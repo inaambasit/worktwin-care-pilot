@@ -64,6 +64,28 @@ export async function fetchDocument(id: string): Promise<DocumentRecord> {
   return response.json() as Promise<DocumentRecord>
 }
 
+// ---------------------------------------------------------------------------
+// Staff-safe policy library (Milestone 4A.1)
+// Calls GET /policies — approved, role-visible documents only.
+// ---------------------------------------------------------------------------
+
+export async function fetchPolicies(params?: {
+  user_role?: string
+  vertical?: string
+  category?: string
+  language?: string
+}): Promise<DocumentRecord[]> {
+  const qs = new URLSearchParams()
+  if (params?.user_role) qs.set('user_role', params.user_role)
+  if (params?.vertical) qs.set('vertical', params.vertical)
+  if (params?.category) qs.set('category', params.category)
+  if (params?.language) qs.set('language', params.language)
+  const url = `${API_BASE_URL}/policies${qs.toString() ? `?${qs}` : ''}`
+  const response = await fetch(url, { signal: AbortSignal.timeout(5_000) })
+  if (!response.ok) throw new Error(`API error: ${response.status}`)
+  return response.json() as Promise<DocumentRecord[]>
+}
+
 export async function approveDocument(id: string): Promise<DocumentRecord> {
   const response = await fetch(`${API_BASE_URL}/documents/${id}/approve`, {
     method: 'POST',

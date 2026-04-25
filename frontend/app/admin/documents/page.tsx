@@ -194,7 +194,6 @@ export default function DocumentRegistryPage() {
   const [docs, setDocs] = useState<DocumentRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [usingFallback, setUsingFallback] = useState(false)
-  const [dragging, setDragging] = useState(false)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('All')
   const [actioning, setActioning] = useState<string | null>(null)
@@ -287,20 +286,19 @@ export default function DocumentRegistryPage() {
           </div>
         </div>
 
-        {/* Upload area */}
-        <div
-          onDragOver={e => { e.preventDefault(); setDragging(true) }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={e => { e.preventDefault(); setDragging(false) }}
-          className={`border-2 border-dashed rounded-2xl p-6 text-center transition-colors ${
-            dragging ? 'border-teal-400 bg-teal-50' : 'border-slate-200 bg-white hover:border-teal-300 hover:bg-teal-50/50'
-          }`}
-        >
-          <Upload size={22} className="mx-auto text-slate-400 mb-2" />
-          <p className="text-sm font-semibold text-slate-700">Drop approved documents here to upload</p>
-          <p className="text-xs text-slate-400 mt-1">Supports PDF, DOCX, TXT · Max 25 MB · Milestone 4B will enable real upload and indexing</p>
-          <button className="mt-3 text-sm bg-teal-700 hover:bg-teal-800 text-white font-medium px-4 py-2 rounded-lg transition-colors opacity-60 cursor-not-allowed" disabled>
-            Browse files (coming in 4B)
+        {/* Upload area — disabled until Milestone 4B safety gates are built */}
+        <div className="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center bg-slate-50 opacity-70 select-none">
+          <Upload size={22} className="mx-auto text-slate-300 mb-2" />
+          <p className="text-sm font-semibold text-slate-500">Document upload is disabled</p>
+          <p className="text-xs text-slate-400 mt-1 max-w-lg mx-auto leading-relaxed">
+            Upload will be enabled in Milestone 4B after secure storage, file validation,
+            metadata stripping and safety checks are implemented.
+          </p>
+          <button
+            disabled
+            className="mt-3 text-sm bg-slate-200 text-slate-400 font-medium px-4 py-2 rounded-lg cursor-not-allowed"
+          >
+            Browse files — available in Milestone 4B
           </button>
         </div>
 
@@ -353,6 +351,48 @@ export default function DocumentRegistryPage() {
             Approved English policies are the source of truth unless an approved translation exists.
             Use the <em>Available Languages</em> column to track translation status.
           </p>
+        </div>
+
+        {/* Document safety semantics */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+          <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Document safety flags explained</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div className="flex items-start gap-2 bg-slate-50 rounded-xl p-3">
+              <Users size={13} className="text-teal-600 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-semibold text-slate-700">Visible to staff</p>
+                <p className="text-slate-400 mt-0.5">Status is Approved and the user&apos;s role matches access_roles (or &ldquo;All Staff&rdquo;). Visible in the Policy Library.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2 bg-slate-50 rounded-xl p-3">
+              <Brain size={13} className="text-teal-600 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-semibold text-slate-700">Approved for AI answers</p>
+                <p className="text-slate-400 mt-0.5">WorkTwin may use this document in RAG to answer staff questions. Only documents with this flag enabled feed the AI.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2 bg-slate-50 rounded-xl p-3">
+              <Shield size={13} className="text-amber-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-semibold text-slate-700">Sensitive</p>
+                <p className="text-slate-400 mt-0.5">Document covers sensitive topics. Staff can read it, but extra care is required when discussing or sharing its content.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2 bg-slate-50 rounded-xl p-3">
+              <AlertTriangle size={13} className="text-amber-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-semibold text-slate-700">Escalation required</p>
+                <p className="text-slate-400 mt-0.5">Any question touching this topic must be escalated to a human lead. The &ldquo;Ask WorkTwin&rdquo; CTA is blocked in the Policy Library.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2 bg-slate-50 rounded-xl p-3 sm:col-span-2">
+              <XCircle size={13} className="text-red-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-semibold text-slate-700">Human-only (AI answer disabled)</p>
+                <p className="text-slate-400 mt-0.5">approved_for_ai_answers is false. This document will never be used to generate AI answers, and will not be embedded even in Milestone 4B. Applies to safeguarding, disciplinary, HR and other sensitive policy types.</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Registry table */}

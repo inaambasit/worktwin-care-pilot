@@ -47,14 +47,14 @@ curl "http://localhost:8000/policies?category=Medication"
 | GET | / | Root — service identity and status |
 | GET | /health | Health check |
 | POST | /ask | Placeholder answer endpoint |
-| GET | /policies | Staff-safe policy library (Milestone 4A.1) |
-| GET | /documents | Admin document registry (all statuses) |
-| GET | /documents/{id} | Single document |
-| POST | /documents | Create document record |
+| GET | /policies | Staff-safe policy library (Milestone 4A.1) — reads from Supabase DB when configured |
+| GET | /documents | Admin document registry — reads from Supabase DB when configured (Milestone 4C) |
+| GET | /documents/{id} | Single document — DB first, in-memory fallback |
+| POST | /documents | Create document record (in-memory) |
 | PATCH | /documents/{id} | Update document record |
-| POST | /documents/{id}/approve | Approve a document |
-| POST | /documents/{id}/archive | Archive a document |
-| POST | /documents/upload | Safe PDF upload with validation, Supabase storage, text extraction and personal-data risk check (Milestone 4B) |
+| POST | /documents/{id}/approve | Approve a document — updates DB when configured |
+| POST | /documents/{id}/archive | Archive a document — updates DB when configured |
+| POST | /documents/upload | Safe PDF upload — validates, stores in Supabase Storage, persists to DB registry (Milestone 4C) |
 
 ## CORS
 
@@ -150,13 +150,93 @@ The backend will return HTTP 503 with a JSON body including `storage_status: "no
 - **No real file upload** — `/documents/upload` returns a placeholder response.
 - **No personal data in demo store** — all in-memory documents are sample policy metadata only.
 
-## Next steps (Milestone 4B)
+## Milestone 4C: Persistent document registry
 
-- Secure file storage (S3 or Supabase)
-- File validation and metadata stripping
-- Text extraction (PyMuPDF / python-docx)
-- Chunking with organisation_id, document_id, role access metadata
-- Embeddings and pgvector storage
+### What Milestone 4C adds
+
+- Supabase Postgres `document_registry` table — document metadata survives restarts
+- Backend-only PostgREST / Data API access — no frontend direct DB access
+- `GET /documents` reads from DB when configured; falls back to in-memory sample data
+- `GET /policies` reads approved records from DB when configured
+- `POST /documents/upload` persists the registry record to DB after storage upload
+- Upload response includes `registry_status`: `saved` | `failed` | `not_configured`
+- Approve and archive endpoints update DB records when configured
+- `DocumentRecord` model now includes extraction and personal-data risk fields
+
+### SQL migration
+
+File: `backend/sql/001_document_registry.sql`
+
+Run this **once** in Supabase SQL Editor before uploading real documents:
+
+1. Open your Supabase project
+2. Go to **SQL Editor**
+3. Paste the contents of `backend/sql/001_document_registry.sql`
+4. Click **Run**
+
+Table name: `document_registry`
+
+### Database access — backend only
+
+The service role key is used exclusively by the Render backend via PostgREST calls:
+
+```
+{SUPABASE_URL}/rest/v1/document_registry
+```
+
+Headers used:
+- `apikey: SUPABASE_SERVICE_ROLE_KEY`
+- `Authorization: Bearer SUPABASE_SERVICE_ROLE_KEY`
+
+The key is **never** logged, returned in API responses, or exposed to the frontend.
+
+### Registry vs storage
+
+| Env var | Required for | What it does |
+|---------|-------------|--------------|
+| `SUPABASE_URL` | Storage + DB | Project URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | Storage + DB | Backend-only secret |
+| `SUPABASE_STORAGE_BUCKET` | Storage | Private bucket name |
+
+If `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are set, the backend attempts DB calls (`_DB_CONFIGURED = True`). The same env vars drive both storage uploads and DB persistence.
+
+### No RAG / embeddings yet
+
+- `embedding_status` is stored as `pending` after every upload
+- No chunking, no embeddings, no pgvector, no LLM calls in this milestone
+- Do not upload real Thumhara/QCS policy files until dummy persistence test passes
+
+### Manual test steps
+
+1. Run the SQL migration in Supabase SQL Editor
+2. Upload a dummy PDF via the admin UI at `/admin/documents`
+3. Confirm `registry_status: saved` in the upload result
+4. Click **Refresh** — the uploaded document should appear in the registry list
+5. Check Supabase Table Editor → `document_registry` for the persisted row
+6. Test **Approve** and **Archive** actions — they should update the DB row
+
+### Milestone 4C upload response shape
+
+```json
+{
+  "upload_status": "success",
+  "storage_status": "uploaded",
+  "registry_status": "saved",
+  "document_id": "...",
+  "extraction_status": "success",
+  "personal_data_risk": "low",
+  "embedding_status": "pending",
+  "document": { ... }
+}
+```
+
+If the DB table is missing, `registry_status` is `"failed"` and `registry_error` contains:
+> Document registry table is not configured. Run backend/sql/001_document_registry.sql in Supabase SQL Editor.
+
+## Next steps (Milestone 4D / 4E)
+
+- Text chunking with organisation_id, document_id and role-access metadata
+- Embedding generation and pgvector storage
 - RAG retrieval pipeline
-- LLM response generation with strict grounding prompt
+- LLM response generation with strict source-grounding prompt
 - Authentication and organisation membership verification

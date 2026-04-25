@@ -324,7 +324,7 @@ export default function DocumentRegistryPage() {
       })
       setUploadResult(result)
       // If upload was fully successful, reload the doc list
-      if (result.storage_status === 'uploaded') {
+      if (result.storage_status === 'uploaded' && result.registry_status === 'saved') {
         loadDocs()
       }
     } catch (err) {
@@ -678,7 +678,44 @@ export default function DocumentRegistryPage() {
                       <p className="text-slate-400 font-medium">Embedding</p>
                       <p className="text-amber-700 font-medium">{uploadResult.embedding_status ?? 'pending'}</p>
                     </div>
+                    {uploadResult.registry_status && (
+                      <div className={`bg-white/60 rounded-lg p-2 ${uploadResult.registry_status === 'failed' ? 'ring-1 ring-red-300' : ''}`}>
+                        <p className="text-slate-400 font-medium">Registry</p>
+                        <p className={`font-medium ${
+                          uploadResult.registry_status === 'saved' ? 'text-teal-700' :
+                          uploadResult.registry_status === 'failed' ? 'text-red-600' :
+                          'text-amber-700'
+                        }`}>
+                          {uploadResult.registry_status === 'saved' ? 'Saved ✓' :
+                           uploadResult.registry_status === 'failed' ? 'Failed' :
+                           'Not configured'}
+                        </p>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Registry error */}
+                  {uploadResult.registry_status === 'not_configured' && (
+                    <div className="bg-amber-100 border border-amber-200 rounded-lg px-3 py-2">
+                      <p className="text-xs font-semibold text-amber-900">Document registry table is not configured</p>
+                      <p className="text-xs text-amber-800 mt-0.5">
+                        Run <code className="font-mono">backend/sql/001_document_registry.sql</code> in Supabase SQL Editor, then re-upload.
+                      </p>
+                    </div>
+                  )}
+                  {uploadResult.registry_status === 'failed' && uploadResult.registry_error && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                      <p className="text-xs font-semibold text-red-800 flex items-center gap-1">
+                        <XCircle size={12} /> Registry save failed
+                      </p>
+                      <p className="text-xs text-red-700 mt-0.5">{uploadResult.registry_error}</p>
+                      {uploadResult.registry_error?.includes('001_document_registry.sql') && (
+                        <p className="text-xs text-red-600 mt-1">
+                          Run <code className="font-mono">backend/sql/001_document_registry.sql</code> in Supabase SQL Editor to create the table.
+                        </p>
+                      )}
+                    </div>
+                  )}
 
                   {/* Personal data warnings */}
                   {uploadResult.personal_data_warnings && uploadResult.personal_data_warnings.length > 0 && (
@@ -720,9 +757,12 @@ export default function DocumentRegistryPage() {
         </div>
 
         {usingFallback && (
-          <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-700">
-            <AlertTriangle size={13} className="shrink-0" />
-            Demo mode — showing sample data. Start the backend (<code className="font-mono">uvicorn app.main:app --reload</code>) to load the live registry.
+          <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-700">
+            <AlertTriangle size={13} className="shrink-0 mt-0.5" />
+            <span>
+              Demo mode — showing sample data. Start the backend (<code className="font-mono">uvicorn app.main:app --reload</code>) to load the live registry.
+              If the backend is running, ensure <code className="font-mono">backend/sql/001_document_registry.sql</code> has been run in Supabase SQL Editor.
+            </span>
           </div>
         )}
 

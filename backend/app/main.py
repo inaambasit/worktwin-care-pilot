@@ -29,11 +29,13 @@ app.add_middleware(
 _SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 _SUPABASE_STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "worktwin-documents")
 _supabase = None
-_SUPABASE_HTTP_KEY: str = ""   # used only for HTTP fallback; never logged or returned
+_SUPABASE_HTTP_KEY: str = ""   # used only for HTTP storage fallback; never logged or returned
+_SUPABASE_DB_KEY: str = ""     # used only for PostgREST DB calls; never logged or returned
 _STORAGE_METHOD: str = "none"  # "supabase_client" | "http_fallback" | "none"
 
 _raw_service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 if _SUPABASE_URL and _raw_service_key:
+    _SUPABASE_DB_KEY = _raw_service_key  # store for PostgREST calls in both code paths
     try:
         from supabase import create_client as _create_supabase_client
         _supabase = _create_supabase_client(_SUPABASE_URL, _raw_service_key)
@@ -47,7 +49,8 @@ if _SUPABASE_URL and _raw_service_key:
         _SUPABASE_HTTP_KEY = _raw_service_key
         _STORAGE_METHOD = "http_fallback"
 
-del _raw_service_key  # remove temp; _SUPABASE_HTTP_KEY holds the value when needed
+del _raw_service_key  # remove temp; _SUPABASE_HTTP_KEY / _SUPABASE_DB_KEY hold the values when needed
+_DB_CONFIGURED: bool = bool(_SUPABASE_URL and _SUPABASE_DB_KEY)
 
 try:
     from pypdf import PdfReader as _PdfReader
@@ -75,6 +78,99 @@ def _http_upload_to_supabase(storage_path: str, file_bytes: bytes) -> None:
         resp = httpx.put(url, content=file_bytes, headers=headers, timeout=30)
     if resp.status_code not in (200, 201):
         raise RuntimeError(f"Supabase Storage HTTP upload failed: status {resp.status_code}")
+
+
+# ---------------------------------------------------------------------------
+# Supabase document_registry DB helpers (Milestone 4C)
+# PostgREST / Data API calls — _SUPABASE_DB_KEY is backend-only, never logged or returned.
+# ---------------------------------------------------------------------------
+
+_DB_TABLE_MISSING_MSG = (
+    "Document registry table is not configured. "
+    "Run backend/sql/001_document_registry.sql in Supabase SQL Editor."
+)
+
+
+def _db_headers() -> Dict[str, str]:
+    return {
+        "apikey": _SUPABASE_DB_KEY,
+        "Authorization": f"Bearer {_SUPABASE_DB_KEY}",
+        "Content-Type": "application/json",
+    }
+
+
+def _is_table_missing_error(status: int, body: str) -> bool:
+    low = body.lower()
+    return status in (400, 404, 422) and (
+        "does not exist" in low or "relation" in low or "document_registry" in low
+    )
+
+
+def _create_registry_record(record: Dict[str, Any]) -> Dict[str, Any]:
+    import httpx as _httpx
+    url = f"{_SUPABASE_URL}/rest/v1/document_registry"
+    headers = {**_db_headers(), "Prefer": "return=representation"}
+    payload = {k: v for k, v in record.items() if v is not None}
+    resp = _httpx.post(url, json=payload, headers=headers, timeout=15)
+    if resp.status_code in (200, 201):
+        data = resp.json()
+        return data[0] if isinstance(data, list) else data
+    if _is_table_missing_error(resp.status_code, resp.text):
+        raise RuntimeError(_DB_TABLE_MISSING_MSG)
+    raise RuntimeError(f"DB insert failed: HTTP {resp.status_code}")
+
+
+def _list_registry_records(
+    organisation_id: Optional[str] = None,
+    status: Optional[str] = None,
+    category: Optional[str] = None,
+    vertical: Optional[str] = None,
+) -> List[Dict[str, Any]]:
+    import httpx as _httpx
+    url = f"{_SUPABASE_URL}/rest/v1/document_registry"
+    params: Dict[str, str] = {"order": "created_at.desc", "limit": "500"}
+    if organisation_id:
+        params["organisation_id"] = f"eq.{organisation_id}"
+    if status:
+        params["status"] = f"eq.{status}"
+    if category:
+        params["category"] = f"eq.{category}"
+    if vertical:
+        params["vertical"] = f"eq.{vertical}"
+    resp = _httpx.get(url, params=params, headers=_db_headers(), timeout=15)
+    if resp.status_code == 200:
+        return resp.json()
+    if _is_table_missing_error(resp.status_code, resp.text):
+        raise RuntimeError(_DB_TABLE_MISSING_MSG)
+    raise RuntimeError(f"DB list failed: HTTP {resp.status_code}")
+
+
+def _get_registry_record(document_id: str) -> Optional[Dict[str, Any]]:
+    import httpx as _httpx
+    url = f"{_SUPABASE_URL}/rest/v1/document_registry"
+    params = {"id": f"eq.{document_id}", "limit": "1"}
+    resp = _httpx.get(url, params=params, headers=_db_headers(), timeout=15)
+    if resp.status_code == 200:
+        data = resp.json()
+        return data[0] if data else None
+    return None
+
+
+def _update_registry_record(document_id: str, updates: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    import httpx as _httpx
+    url = f"{_SUPABASE_URL}/rest/v1/document_registry"
+    params = {"id": f"eq.{document_id}"}
+    headers = {**_db_headers(), "Prefer": "return=representation"}
+    resp = _httpx.patch(url, json=updates, params=params, headers=headers, timeout=15)
+    if resp.status_code in (200, 201):
+        data = resp.json()
+        if isinstance(data, list):
+            return data[0] if data else None
+        return data
+    if resp.status_code == 204:
+        return _get_registry_record(document_id)
+    return None
+
 
 # ---------------------------------------------------------------------------
 # Privacy and safety contract (enforced in the real build, documented here)
@@ -163,6 +259,12 @@ class DocumentRecord(BaseModel):
     version: str = "1.0"
     review_due_date: Optional[str] = None    # ISO date string YYYY-MM-DD
     embedding_status: EmbeddingStatus = "not_started"
+    extraction_status: Optional[str] = None
+    extracted_text_preview: Optional[str] = None
+    extracted_character_count: Optional[int] = None
+    extracted_page_count: Optional[int] = None
+    personal_data_risk: Optional[str] = None
+    personal_data_warnings: List[str] = []
     created_by: str = "admin"
     created_at: str
     updated_at: str
@@ -750,7 +852,19 @@ def list_documents(
     status: Optional[str] = None,
     category: Optional[str] = None,
     vertical: Optional[str] = None,
+    organisation_id: Optional[str] = None,
 ):
+    if _DB_CONFIGURED:
+        try:
+            return _list_registry_records(
+                organisation_id=organisation_id,
+                status=status,
+                category=category,
+                vertical=vertical,
+            )
+        except RuntimeError:
+            pass  # fall through to in-memory demo data
+
     docs = _documents
     if status:
         docs = [d for d in docs if d["status"] == status]
@@ -763,6 +877,13 @@ def list_documents(
 
 @app.get("/documents/{doc_id}", response_model=DocumentRecord)
 def get_document(doc_id: str):
+    if _DB_CONFIGURED:
+        try:
+            record = _get_registry_record(doc_id)
+            if record is not None:
+                return record
+        except Exception:
+            pass  # fall through to in-memory
     doc = _find_doc(doc_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -795,6 +916,13 @@ def update_document(doc_id: str, payload: DocumentUpdate):
 
 @app.post("/documents/{doc_id}/approve", response_model=DocumentRecord)
 def approve_document(doc_id: str):
+    if _DB_CONFIGURED:
+        try:
+            updated = _update_registry_record(doc_id, {"status": "approved", "updated_at": _now()})
+            if updated is not None:
+                return updated
+        except Exception:
+            pass
     doc = _find_doc(doc_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -805,6 +933,13 @@ def approve_document(doc_id: str):
 
 @app.post("/documents/{doc_id}/archive", response_model=DocumentRecord)
 def archive_document(doc_id: str):
+    if _DB_CONFIGURED:
+        try:
+            updated = _update_registry_record(doc_id, {"status": "archived", "updated_at": _now()})
+            if updated is not None:
+                return updated
+        except Exception:
+            pass
     doc = _find_doc(doc_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -840,19 +975,39 @@ def list_policies(
       are still listed here so staff can read the policy, but the frontend
       must block the "Ask WorkTwin" CTA for those documents.
     """
-    docs = [d for d in _documents if d["status"] == "approved"]
+    if _DB_CONFIGURED:
+        try:
+            db_docs = _list_registry_records(status="approved")
+            docs: List[Dict[str, Any]] = db_docs
+            if user_role:
+                docs = [
+                    d for d in docs
+                    if "All Staff" in (d.get("access_roles") or [])
+                    or user_role in (d.get("access_roles") or [])
+                ]
+            if vertical:
+                docs = [d for d in docs if d.get("vertical") == vertical]
+            if category:
+                docs = [d for d in docs if d.get("category") == category]
+            if language:
+                docs = [d for d in docs if language in (d.get("available_languages") or [])]
+            return docs
+        except RuntimeError:
+            pass  # fall through to in-memory demo data
+
+    docs_mem = [d for d in _documents if d["status"] == "approved"]
     if user_role:
-        docs = [
-            d for d in docs
+        docs_mem = [
+            d for d in docs_mem
             if "All Staff" in d["access_roles"] or user_role in d["access_roles"]
         ]
     if vertical:
-        docs = [d for d in docs if d["vertical"] == vertical]
+        docs_mem = [d for d in docs_mem if d["vertical"] == vertical]
     if category:
-        docs = [d for d in docs if d["category"] == category]
+        docs_mem = [d for d in docs_mem if d["category"] == category]
     if language:
-        docs = [d for d in docs if language in d["available_languages"]]
-    return docs
+        docs_mem = [d for d in docs_mem if language in d["available_languages"]]
+    return docs_mem
 
 
 # ---------------------------------------------------------------------------
@@ -1017,7 +1172,7 @@ async def upload_document_pdf(
             detail=f"Supabase storage upload failed: {exc}",
         )
 
-    # ---- 9. Build in-memory registry record ----
+    # ---- 9. Build registry record ----
     now = _now()
     access_roles_list = [r.strip() for r in access_roles.split(",") if r.strip()]
     available_languages_list = [la.strip() for la in available_languages.split(",") if la.strip()]
@@ -1047,17 +1202,36 @@ async def upload_document_pdf(
         "version": version,
         "review_due_date": review_due_date,
         "embedding_status": "pending",
+        "extraction_status": extraction_status,
+        "extracted_text_preview": extracted_text_preview,
+        "extracted_character_count": extracted_char_count,
+        "extracted_page_count": extracted_page_count,
+        "personal_data_risk": personal_data_risk,
+        "personal_data_warnings": personal_data_warnings,
         "created_by": "admin",
         "created_at": now,
         "updated_at": now,
-        "metadata": {"upload_source": "admin_upload", "milestone": "4B"},
+        "metadata": {"upload_source": "admin_upload", "milestone": "4C"},
     }
-    _documents.append(doc)
 
-    # ---- 10. Return result ----
-    return {
+    # ---- 10. Persist to Supabase document_registry DB ----
+    registry_status = "not_configured"
+    registry_error: Optional[str] = None
+
+    if _DB_CONFIGURED:
+        try:
+            persisted = _create_registry_record(doc)
+            doc = persisted
+            registry_status = "saved"
+        except RuntimeError as exc:
+            registry_status = "failed"
+            registry_error = str(exc)
+
+    # ---- 11. Return result ----
+    result: Dict[str, Any] = {
         "upload_status": "success",
         "storage_status": "uploaded",
+        "registry_status": registry_status,
         "document_id": document_id,
         "file_name": safe_name,
         "file_size_bytes": file_size,
@@ -1077,3 +1251,6 @@ async def upload_document_pdf(
         ),
         "document": doc,
     }
+    if registry_error:
+        result["registry_error"] = registry_error
+    return result

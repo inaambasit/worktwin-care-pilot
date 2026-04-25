@@ -93,6 +93,8 @@ export interface DocumentRecord {
 export interface UploadDocumentResult {
   upload_status?: 'success' | 'failed'
   storage_status: 'uploaded' | 'not_configured' | 'failed'
+  registry_status?: 'saved' | 'failed' | 'not_configured'
+  registry_error?: string
   document_id?: string
   file_name?: string
   file_size_bytes?: number

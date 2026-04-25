@@ -270,9 +270,113 @@ If the DB table is missing, `registry_status` is `"failed"` and `registry_error`
 
 To seed: open Supabase SQL Editor, paste the file contents, click Run.
 
-## Next steps (Milestone 4D / 4E)
+## Milestone 4D: Extracted text storage and chunking preparation
 
-- Text chunking with organisation_id, document_id and role-access metadata
+### What Milestone 4D adds
+
+- Full extracted text is stored server-side in a new `document_extractions` table — never exposed in the staff UI
+- Text is split into chunks (~1,000–1,200 characters with 150-character overlap) using a simple, deterministic character-based chunker — no AI, no NLP
+- Chunks are stored in a new `document_chunks` table, carrying `organisation_id`, `document_id`, `access_roles`, `vertical`, `category`, and safety flags on every row
+- `embedding_status` on each chunk is always `not_started` — no embeddings are generated yet
+- `document_registry.metadata` is updated with `chunk_count` after chunking
+- Upload response now includes `extraction_storage_status`, `chunking_status`, `chunk_count`, and a `chunking_note`
+- New admin/debug endpoint: `GET /documents/{id}/chunks` — returns chunk metadata and 250-character previews; full chunk text is never returned
+
+### What Milestone 4D does NOT do
+
+- No embeddings — no pgvector, no embedding model calls
+- No RAG — no retrieval pipeline
+- No LLM API calls of any kind
+- No staff-facing chunk display
+- No AI answers from chunks
+- No real Thumhara/QCS policy documents yet — dummy/sample PDFs only until governance review passes
+
+### SQL migrations
+
+| File | Purpose |
+|------|---------|
+| `backend/sql/003_document_chunks.sql` | Creates `document_chunks` table with RLS |
+| `backend/sql/004_document_extractions.sql` | Creates `document_extractions` table with RLS |
+
+Run both in Supabase SQL Editor **after** `001_document_registry.sql`.
+
+### Chunking rules
+
+- Target ~1,200 characters per chunk
+- 150-character overlap between adjacent chunks
+- Advances by step = `max_chars − overlap_chars` (= 1,050 chars) per iteration
+- End of each window snaps to the nearest word boundary within the last 100 characters
+- All chunks carry: `organisation_id`, `document_id`, `access_roles`, `vertical`, `category`, `is_sensitive`, `escalation_required`, `approved_for_ai_answers`
+- `embedding_status = not_started` on every chunk — no embeddings in this milestone
+
+### Safety guarantees (Milestone 4D)
+
+- Full extracted text is stored in `document_extractions`, not in the API response or the staff UI
+- Chunk text is stored in `document_chunks` — accessible only via the admin/debug endpoint (250-char preview only; full text never returned)
+- Staff cannot see chunks or extracted text
+- `approved_for_ai_answers` is inherited from the document flags at upload time
+- Escalation-required and sensitive documents still get chunks, but `embedding_status = not_started` and `approved_for_ai_answers` remains false unless explicitly set
+
+### Milestone 4D upload response shape
+
+```json
+{
+  "upload_status": "success",
+  "storage_status": "uploaded",
+  "registry_status": "saved",
+  "extraction_status": "success",
+  "extraction_storage_status": "saved",
+  "chunking_status": "prepared",
+  "chunk_count": 42,
+  "embedding_status": "pending",
+  "chunking_note": "Chunks prepared. Embeddings and AI answers are not enabled yet.",
+  "document_id": "...",
+  ...
+}
+```
+
+### Admin/debug chunk endpoint
+
+`GET /documents/{id}/chunks` — returns:
+
+```json
+{
+  "document_id": "...",
+  "chunk_count": 42,
+  "chunks": [
+    {
+      "id": "...",
+      "chunk_index": 0,
+      "chunk_character_count": 1187,
+      "embedding_status": "not_started",
+      "approved_for_ai_answers": false,
+      "escalation_required": false,
+      "chunk_preview": "First 250 characters of the chunk text..."
+    }
+  ],
+  "embedding_note": "Embeddings and AI answers are not enabled yet."
+}
+```
+
+### Manual test steps (Milestone 4D)
+
+1. Run `003_document_chunks.sql` in Supabase SQL Editor
+2. Run `004_document_extractions.sql` in Supabase SQL Editor
+3. Upload a dummy PDF via `/admin/documents`
+4. Confirm the upload result shows:
+   - `storage_status: uploaded`
+   - `registry_status: saved`
+   - `extraction_storage_status: saved`
+   - `chunking_status: prepared`
+   - `chunk_count > 0`
+   - `embedding_status: pending`
+5. Check Supabase Table Editor → `document_extractions` for a row with the full text
+6. Check Supabase Table Editor → `document_chunks` for chunk rows
+7. Call `GET /documents/{id}/chunks` and confirm 250-char previews are returned
+8. Confirm no AI answers, no embeddings, no RAG are enabled
+
+## Next steps (Milestone 4E)
+
 - Embedding generation and pgvector storage
 - RAG retrieval pipeline
 - LLM response generation with strict source-grounding prompt

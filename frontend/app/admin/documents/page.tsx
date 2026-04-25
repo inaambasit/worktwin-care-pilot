@@ -719,6 +719,39 @@ export default function DocumentRegistryPage() {
                         </p>
                       </div>
                     )}
+                    {uploadResult.extraction_storage_status && (
+                      <div className={`bg-white/60 rounded-lg p-2 ${uploadResult.extraction_storage_status === 'failed' ? 'ring-1 ring-red-300' : ''}`}>
+                        <p className="text-slate-400 font-medium">Extraction stored</p>
+                        <p className={`font-medium ${
+                          uploadResult.extraction_storage_status === 'saved' ? 'text-teal-700' :
+                          uploadResult.extraction_storage_status === 'failed' ? 'text-red-600' :
+                          'text-amber-700'
+                        }`}>
+                          {uploadResult.extraction_storage_status === 'saved' ? 'Saved ✓' :
+                           uploadResult.extraction_storage_status === 'failed' ? 'Failed' :
+                           uploadResult.extraction_storage_status === 'skipped' ? 'Skipped' :
+                           'Not configured'}
+                        </p>
+                      </div>
+                    )}
+                    {uploadResult.chunking_status && (
+                      <div className={`bg-white/60 rounded-lg p-2 ${uploadResult.chunking_status === 'failed' ? 'ring-1 ring-red-300' : ''}`}>
+                        <p className="text-slate-400 font-medium">Chunks</p>
+                        <p className={`font-medium ${
+                          uploadResult.chunking_status === 'prepared' ? 'text-teal-700' :
+                          uploadResult.chunking_status === 'failed' ? 'text-red-600' :
+                          uploadResult.chunking_status === 'no_text' ? 'text-amber-700' :
+                          'text-amber-700'
+                        }`}>
+                          {uploadResult.chunking_status === 'prepared'
+                            ? `${uploadResult.chunk_count ?? 0} prepared ✓`
+                            : uploadResult.chunking_status === 'failed' ? 'Failed'
+                            : uploadResult.chunking_status === 'no_text' ? 'No text'
+                            : uploadResult.chunking_status === 'skipped' ? 'Skipped'
+                            : 'Not configured'}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Registry error */}
@@ -770,6 +803,14 @@ export default function DocumentRegistryPage() {
                     </div>
                   )}
 
+                  {/* Chunking note */}
+                  {uploadResult.chunking_note && (
+                    <div className="flex items-start gap-2 bg-teal-100/60 border border-teal-200 rounded-lg px-3 py-2">
+                      <CheckCircle2 size={12} className="text-teal-600 shrink-0 mt-0.5" />
+                      <p className="text-xs text-teal-800">{uploadResult.chunking_note}</p>
+                    </div>
+                  )}
+
                   {/* AI answers note */}
                   {uploadResult.ai_answers_note && (
                     <p className="text-[11px] text-slate-500 flex items-start gap-1">
@@ -810,7 +851,7 @@ export default function DocumentRegistryPage() {
         {!usingFallback && registrySource === 'database' && (
           <div className="flex items-center gap-2 bg-teal-50 border border-teal-100 rounded-xl px-4 py-2 text-xs text-teal-700">
             <CheckCircle2 size={12} className="shrink-0" />
-            <span>Live registry mode — showing documents saved in Supabase. Uploaded documents are not AI-answerable until Milestone 4D/4E.</span>
+            <span>Live registry mode — showing documents saved in Supabase. Chunks prepared for future embedding. Embeddings and AI answers not enabled yet.</span>
           </div>
         )}
 
@@ -1025,11 +1066,16 @@ export default function DocumentRegistryPage() {
                       {/* Review due */}
                       <td className="px-4 py-3.5 text-slate-500 whitespace-nowrap">{formatDate(doc.review_due_date)}</td>
 
-                      {/* Embedding */}
+                      {/* Embedding / Chunks */}
                       <td className="px-4 py-3.5">
-                        <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${ec.colour}`}>
-                          {ec.label}
-                        </span>
+                        <div className="space-y-0.5">
+                          <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${ec.colour}`}>
+                            {ec.label}
+                          </span>
+                          {typeof doc.metadata?.chunk_count === 'number' && (
+                            <p className="text-[11px] text-slate-400 pl-1">{doc.metadata.chunk_count} chunks</p>
+                          )}
+                        </div>
                       </td>
 
                       {/* Actions */}

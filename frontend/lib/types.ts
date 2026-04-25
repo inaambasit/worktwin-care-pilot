@@ -80,6 +80,11 @@ export interface DocumentRecord {
   version: string
   review_due_date?: string
   embedding_status: EmbeddingStatus
+  extraction_status?: string
+  extracted_character_count?: number | null
+  extracted_page_count?: number | null
+  personal_data_risk?: string
+  personal_data_warnings?: string[]
   created_by: string
   created_at: string
   updated_at: string
@@ -112,6 +117,8 @@ export interface UploadDocumentResult {
   file_size_bytes?: number
   storage_key?: string | null
   extraction_status?: 'success' | 'failed' | 'skipped'
+  extraction_storage_status?: 'saved' | 'failed' | 'not_configured' | 'skipped'
+  extraction_storage_error?: string
   extracted_text_preview?: string | null
   extracted_character_count?: number | null
   extracted_page_count?: number | null
@@ -119,6 +126,10 @@ export interface UploadDocumentResult {
   personal_data_risk?: 'low' | 'possible'
   personal_data_warnings?: string[]
   embedding_status?: string
+  chunking_status?: 'prepared' | 'failed' | 'not_configured' | 'skipped' | 'no_text'
+  chunking_error?: string
+  chunk_count?: number
+  chunking_note?: string
   ai_answers_note?: string
   document?: DocumentRecord
   // 503 not-configured fields

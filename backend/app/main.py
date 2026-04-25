@@ -173,6 +173,89 @@ def _update_registry_record(document_id: str, updates: Dict[str, Any]) -> Option
 
 
 # ---------------------------------------------------------------------------
+# Milestone 4D — text chunking and extraction storage helpers
+# No AI, no embeddings, no external LLM calls.
+# Backend / service role only — never exposed to staff UI.
+# ---------------------------------------------------------------------------
+
+def _chunk_text(text: str, max_chars: int = 1200, overlap_chars: int = 150) -> List[str]:
+    """
+    Deterministic character-based chunker. No AI, no NLP, no external calls.
+    Advances by (max_chars - overlap_chars) per step, snapping the end to a
+    word boundary within the last 100 characters of each window.
+    """
+    if not text:
+        return []
+    step = max(max_chars - overlap_chars, 100)
+    chunks: List[str] = []
+    pos = 0
+    text_len = len(text)
+    while pos < text_len:
+        end = min(pos + max_chars, text_len)
+        if end < text_len:
+            wb = text.rfind(' ', max(pos, end - 100), end)
+            if wb > pos:
+                end = wb + 1
+        chunk = text[pos:end].strip()
+        if chunk:
+            chunks.append(chunk)
+        pos += step
+    return chunks
+
+
+def _create_extraction_record(record: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Insert a row into document_extractions.
+    Full extracted text is stored here — backend/admin only, never returned in API responses.
+    """
+    import httpx as _httpx
+    url = f"{_SUPABASE_URL}/rest/v1/document_extractions"
+    headers = {**_db_headers(), "Prefer": "return=representation"}
+    payload = {k: v for k, v in record.items() if v is not None}
+    resp = _httpx.post(url, json=payload, headers=headers, timeout=30)
+    if resp.status_code in (200, 201):
+        data = resp.json()
+        return data[0] if isinstance(data, list) else data
+    raise RuntimeError(f"Extraction record insert failed: HTTP {resp.status_code}")
+
+
+def _create_document_chunks(chunks_data: List[Dict[str, Any]], batch_size: int = 100) -> int:
+    """
+    Bulk-insert chunk rows into document_chunks in batches.
+    No embeddings are stored — embedding_status is always 'not_started' at this stage.
+    """
+    if not chunks_data:
+        return 0
+    import httpx as _httpx
+    url = f"{_SUPABASE_URL}/rest/v1/document_chunks"
+    headers = {**_db_headers(), "Prefer": "return=minimal"}
+    total = 0
+    for i in range(0, len(chunks_data), batch_size):
+        batch = chunks_data[i:i + batch_size]
+        resp = _httpx.post(url, json=batch, headers=headers, timeout=60)
+        if resp.status_code not in (200, 201, 204):
+            raise RuntimeError(f"Chunk batch insert failed: HTTP {resp.status_code}")
+        total += len(batch)
+    return total
+
+
+def _list_document_chunks(document_id: str) -> List[Dict[str, Any]]:
+    """Fetch chunk metadata (no chunk_text) for a document. Admin/debug use only."""
+    import httpx as _httpx
+    url = f"{_SUPABASE_URL}/rest/v1/document_chunks"
+    params = {
+        "document_id": f"eq.{document_id}",
+        "order": "chunk_index.asc",
+        "limit": "1000",
+        "select": "id,document_id,chunk_index,chunk_character_count,source_page_start,source_page_end,embedding_status,approved_for_ai_answers,escalation_required,is_sensitive,status,vertical,category",
+    }
+    resp = _httpx.get(url, params=params, headers=_db_headers(), timeout=15)
+    if resp.status_code == 200:
+        return resp.json()
+    return []
+
+
+# ---------------------------------------------------------------------------
 # Privacy and safety contract (enforced in the real build, documented here)
 #
 # - Private employee chat transcripts are NEVER exposed to managers or admins.
@@ -973,6 +1056,53 @@ def archive_document(doc_id: str):
     return doc
 
 
+@app.get("/documents/{doc_id}/chunks")
+def list_document_chunks_admin(doc_id: str):
+    """
+    Admin/debug endpoint — Milestone 4D.
+    Returns chunk metadata and 250-character previews only.
+    Full chunk text is never returned. No embeddings are stored or returned.
+    """
+    if not _DB_CONFIGURED:
+        raise HTTPException(status_code=503, detail="Database not configured.")
+
+    import httpx as _httpx
+    url = f"{_SUPABASE_URL}/rest/v1/document_chunks"
+    params = {
+        "document_id": f"eq.{doc_id}",
+        "order": "chunk_index.asc",
+        "limit": "1000",
+        "select": "id,chunk_index,chunk_text,chunk_character_count,source_page_start,source_page_end,embedding_status,approved_for_ai_answers,escalation_required",
+    }
+    resp = _httpx.get(url, params=params, headers=_db_headers(), timeout=15)
+    if resp.status_code != 200:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch chunks: HTTP {resp.status_code}")
+
+    raw: List[Dict[str, Any]] = resp.json()
+    chunks_out = [
+        {
+            "id": c.get("id"),
+            "document_id": doc_id,
+            "chunk_index": c.get("chunk_index"),
+            "chunk_character_count": c.get("chunk_character_count"),
+            "source_page_start": c.get("source_page_start"),
+            "source_page_end": c.get("source_page_end"),
+            "embedding_status": c.get("embedding_status"),
+            "approved_for_ai_answers": c.get("approved_for_ai_answers"),
+            "escalation_required": c.get("escalation_required"),
+            "chunk_preview": (c.get("chunk_text") or "")[:250],
+        }
+        for c in raw
+    ]
+
+    return {
+        "document_id": doc_id,
+        "chunk_count": len(chunks_out),
+        "chunks": chunks_out,
+        "embedding_note": "Embeddings and AI answers are not enabled yet.",
+    }
+
+
 # ---------------------------------------------------------------------------
 # Staff-safe policy library endpoint (Milestone 4A.1)
 # Returns only approved documents visible to the supplied user_role.
@@ -1120,9 +1250,10 @@ async def upload_document_pdf(
                 ),
             )
 
-    # ---- 5. Text extraction preview ----
+    # ---- 5. Text extraction (full text stored backend-only; 2,000-char preview in result) ----
     extraction_status = "skipped"
     extracted_text_preview: Optional[str] = None
+    _full_extracted_text: str = ""   # full text — stored in document_extractions; never returned in API responses
     extracted_char_count: Optional[int] = None
     extracted_page_count: Optional[int] = None
     extraction_warnings: List[str] = []
@@ -1131,13 +1262,12 @@ async def upload_document_pdf(
         try:
             reader = _PdfReader(io.BytesIO(file_bytes))
             extracted_page_count = len(reader.pages)
-            full_text = ""
+            page_parts: List[str] = []
             for page in reader.pages:
-                full_text += page.extract_text() or ""
-                if len(full_text) >= 2000:
-                    break
-            extracted_text_preview = full_text[:2000].strip()
-            extracted_char_count = len(extracted_text_preview)
+                page_parts.append(page.extract_text() or "")
+            _full_extracted_text = "".join(page_parts)
+            extracted_char_count = len(_full_extracted_text)
+            extracted_text_preview = _full_extracted_text[:2000].strip()
             extraction_status = "success"
             if extracted_char_count == 0:
                 extraction_warnings.append(
@@ -1174,6 +1304,9 @@ async def upload_document_pdf(
                 "extraction_warnings": extraction_warnings,
                 "personal_data_risk": personal_data_risk,
                 "personal_data_warnings": personal_data_warnings,
+                "extraction_storage_status": "not_configured",
+                "chunking_status": "not_configured",
+                "chunk_count": 0,
             },
         )
 
@@ -1236,7 +1369,7 @@ async def upload_document_pdf(
         "created_by": "admin",
         "created_at": now,
         "updated_at": now,
-        "metadata": {"upload_source": "admin_upload", "milestone": "4C"},
+        "metadata": {"upload_source": "admin_upload", "milestone": "4D"},
     }
 
     # ---- 10. Persist to Supabase document_registry DB ----
@@ -1252,30 +1385,121 @@ async def upload_document_pdf(
             registry_status = "failed"
             registry_error = str(exc)
 
+    # ---- 10a. Store full extracted text in document_extractions ----
+    extraction_storage_status = "not_configured"
+    extraction_storage_error: Optional[str] = None
+
+    if _DB_CONFIGURED:
+        if registry_status == "saved":
+            try:
+                _create_extraction_record({
+                    "organisation_id": organisation_id,
+                    "document_id": document_id,
+                    "extraction_status": extraction_status,
+                    "extracted_text": _full_extracted_text if _full_extracted_text else None,
+                    "extracted_character_count": extracted_char_count,
+                    "extracted_page_count": extracted_page_count,
+                    "extraction_warnings": extraction_warnings,
+                    "personal_data_risk": personal_data_risk,
+                    "personal_data_warnings": personal_data_warnings,
+                    "metadata": {"milestone": "4D"},
+                })
+                extraction_storage_status = "saved"
+            except Exception as exc:
+                extraction_storage_status = "failed"
+                extraction_storage_error = str(exc)
+        else:
+            extraction_storage_status = "skipped"
+
+    # ---- 10b. Create document chunks from extracted text ----
+    chunking_status = "not_configured"
+    chunk_count = 0
+    chunking_error: Optional[str] = None
+
+    if _DB_CONFIGURED:
+        if registry_status == "saved" and _full_extracted_text:
+            try:
+                raw_chunks = _chunk_text(_full_extracted_text)
+                chunk_count = len(raw_chunks)
+                now_ts = _now()
+                chunks_payload = [
+                    {
+                        "organisation_id": organisation_id,
+                        "document_id": document_id,
+                        "chunk_index": idx,
+                        "chunk_text": chunk,
+                        "chunk_character_count": len(chunk),
+                        "access_roles": access_roles_list,
+                        "status": "pending",
+                        "vertical": vertical,
+                        "category": category,
+                        "approved_for_ai_answers": _parse_bool(approved_for_ai_answers),
+                        "escalation_required": _parse_bool(escalation_required),
+                        "is_sensitive": _parse_bool(is_sensitive),
+                        "embedding_status": "not_started",
+                        "created_at": now_ts,
+                        "updated_at": now_ts,
+                        "metadata": {"milestone": "4D"},
+                    }
+                    for idx, chunk in enumerate(raw_chunks)
+                ]
+                if chunks_payload:
+                    _create_document_chunks(chunks_payload)
+                    # Non-critical: update registry metadata with chunk_count
+                    try:
+                        meta = {**(doc.get("metadata") or {}), "chunk_count": chunk_count}
+                        _update_registry_record(document_id, {"metadata": meta, "updated_at": _now()})
+                        if isinstance(doc, dict):
+                            doc.setdefault("metadata", {})["chunk_count"] = chunk_count
+                    except Exception:
+                        pass
+                chunking_status = "prepared" if chunk_count > 0 else "no_text"
+            except Exception as exc:
+                chunk_count = 0
+                chunking_status = "failed"
+                chunking_error = str(exc)
+        elif registry_status != "saved":
+            chunking_status = "skipped"
+        else:
+            chunking_status = "no_text"
+
     # ---- 11. Return result ----
     result: Dict[str, Any] = {
         "upload_status": "success",
         "storage_status": "uploaded",
         "registry_status": registry_status,
+        "extraction_status": extraction_status,
+        "extraction_storage_status": extraction_storage_status,
+        "chunking_status": chunking_status,
+        "chunk_count": chunk_count,
+        "embedding_status": "pending",
         "document_id": document_id,
         "file_name": safe_name,
         "file_size_bytes": file_size,
         "storage_key": storage_path,
-        "extraction_status": extraction_status,
         "extracted_text_preview": extracted_text_preview,
         "extracted_character_count": extracted_char_count,
         "extracted_page_count": extracted_page_count,
         "extraction_warnings": extraction_warnings,
         "personal_data_risk": personal_data_risk,
         "personal_data_warnings": personal_data_warnings,
-        "embedding_status": "pending",
+        "chunking_note": (
+            "Chunks prepared. Embeddings and AI answers are not enabled yet."
+            if chunk_count > 0 else None
+        ),
         "ai_answers_note": (
             "Uploaded document is not yet available for AI answers. "
-            "This will be enabled in a later milestone after chunking, "
-            "embeddings and source-citation checks."
+            "Chunks have been prepared for future embedding in a later milestone."
+            if chunk_count > 0 else
+            "Uploaded document is not yet available for AI answers. "
+            "Chunking, embeddings and source-citation checks will be enabled in a later milestone."
         ),
         "document": doc,
     }
     if registry_error:
         result["registry_error"] = registry_error
+    if extraction_storage_error:
+        result["extraction_storage_error"] = extraction_storage_error
+    if chunking_error:
+        result["chunking_error"] = chunking_error
     return result

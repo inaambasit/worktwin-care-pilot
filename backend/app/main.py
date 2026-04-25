@@ -64,12 +64,17 @@ class AskResponse(BaseModel):
     # Answers below a minimum threshold should not be returned to the user.
     source_confidence: Optional[float] = None
 
-    # TODO: Broad risk category assigned during question classification.
+    # TODO: Broad, vertical-agnostic risk category assigned during question classification.
     # Used to route to escalation contacts and apply topic-level access controls.
-    # Values: "standard" | "medication" | "safeguarding" | "hr" | "legal" | "wellbeing"
+    # Values: "standard" | "policy" | "hr" | "legal" | "wellbeing" | "compliance" | "vertical_sensitive"
     risk_category: Literal[
-        "standard", "medication", "safeguarding", "hr", "legal", "wellbeing"
+        "standard", "policy", "hr", "legal", "wellbeing", "compliance", "vertical_sensitive"
     ] = "standard"
+
+    # TODO: Optional vertical-specific subcategory, e.g. "medication",
+    # "safeguarding" or another sector template label. This should never replace
+    # the broad risk_category used by shared platform logic.
+    vertical_subcategory: Optional[str] = None
 
     # TODO: Anonymised topic label for aggregated insight logging.
     # This must NEVER include any personally identifying information.
@@ -108,18 +113,19 @@ def ask_worktwin(payload: AskRequest):
             "Add source-cited answer generation.",
         ],
         sources=[
-            Source(document_name="Demo Medication Policy", section="Refusal of Medication", page=4)
+            Source(document_name="Demo Company Policy", section="See relevant policy section", page=None)
         ],
         escalate_if=[
             "The situation involves immediate risk.",
             "The policy does not clearly answer the question.",
-            "A safeguarding, medication, HR or legal issue is involved.",
+            "A safeguarding, medication, HR, legal, compliance or wellbeing issue is involved.",
         ],
         learning_option="Would you like to practise this with a short scenario?",
         requires_escalation=False,
         allowed_to_answer=True,
         source_confidence=None,
         risk_category="standard",
+        vertical_subcategory=None,
         anonymised_insight_topic=None,
     )
 

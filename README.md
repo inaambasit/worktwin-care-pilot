@@ -2,6 +2,18 @@
 
 A privacy-first AI onboarding, policy and learning assistant for regulated SMEs, starting with care providers.
 
+## Platform and vertical strategy
+
+WorkTwin is the core platform: a privacy-first AI work, onboarding, policy, workflow and learning companion for employees in regulated SMEs.
+
+WorkTwin Care Pilot is the first vertical test of that platform. The care version adapts the core WorkTwin model to UK care provider workflows, language, escalation routes and training scenarios.
+
+Thumhara Centre and care providers are being used to test the first version because care teams have high policy load, high compliance pressure, repeated operational questions and a strong need for safe human escalation.
+
+Future verticals may include financial advice firms, property management companies, recruitment agencies, healthcare admin providers, training providers and other regulated service SMEs.
+
+The product boundary stays the same across verticals: private employee support, source-cited answers from approved documents, and anonymised employer insights only.
+
 ## First product promise
 
 Turn your staff handbook, policies, SOPs and onboarding documents into a private AI assistant that helps employees:

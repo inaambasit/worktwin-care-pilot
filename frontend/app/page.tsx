@@ -6,19 +6,19 @@ const features = [
     icon: MessageCircle,
     title: 'Ask questions safely',
     description:
-      'Employees get instant, policy-grounded answers to operational questions — without feeling embarrassed or interrupting managers.',
+      'Employees get instant, policy-grounded answers to work, policy and workflow questions without feeling embarrassed or interrupting managers.',
   },
   {
     icon: BookOpen,
-    title: 'Onboarding that actually works',
+    title: 'Onboarding and learning support',
     description:
-      'New starters follow a structured, AI-guided onboarding journey with documents, checklists and check-ins built in.',
+      'New starters follow structured, AI-guided journeys with documents, checklists, knowledge checks and role-specific learning built in.',
   },
   {
     icon: PlayCircle,
-    title: 'Practise real scenarios',
+    title: 'Vertical scenario templates',
     description:
-      'Staff build confidence by working through realistic care scenarios — medication refusal, safeguarding, end-of-life — in a safe space.',
+      'Teams can practise realistic scenarios for their sector. In the Care Pilot, this includes medication refusal, safeguarding and incident reporting.',
   },
   {
     icon: Shield,
@@ -30,7 +30,7 @@ const features = [
     icon: BarChart2,
     title: 'Anonymous insights for leaders',
     description:
-      'Identify training gaps, policy confusion and document improvement opportunities — without breaching staff trust.',
+      'Identify training gaps, workflow confusion and document improvement opportunities without breaching staff trust.',
   },
   {
     icon: CheckCircle,
@@ -51,18 +51,18 @@ const trustItems = [
 const steps = [
   {
     step: '1',
-    title: 'Upload your policies',
-    description: 'Upload your existing handbooks, SOPs, policies and training documents. WorkTwin indexes them securely.',
+    title: 'Upload approved documents',
+    description: 'Upload existing handbooks, SOPs, policies, workflows and training documents. WorkTwin indexes them securely.',
   },
   {
     step: '2',
     title: 'Employees ask questions',
-    description: 'Staff ask questions in plain English. WorkTwin answers from your documents and cites the source.',
+    description: 'Staff ask questions in plain English. WorkTwin answers from approved documents and cites the source.',
   },
   {
     step: '3',
     title: 'Leaders see trends, not transcripts',
-    description: 'Managers view anonymised insights — training gaps, repeated questions, documents needing improvement — never private chats.',
+    description: 'Managers view anonymised trends: training gaps, repeated questions and documents needing improvement. Never private chats.',
   },
 ]
 
@@ -96,16 +96,19 @@ export default function LandingPage() {
       <section className="pt-24 pb-20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         <div className="max-w-5xl mx-auto px-6 text-center">
           <div className="inline-block mb-5 text-xs font-semibold text-teal-400 border border-teal-800 bg-teal-900/40 px-3 py-1.5 rounded-full uppercase tracking-wider">
-            WorkTwin Care Pilot · UK Care Providers
+            WorkTwin · Care Pilot
           </div>
+          <p className="mb-4 text-sm font-medium text-teal-200">
+            The first vertical of the WorkTwin platform for regulated SMEs.
+          </p>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-            Give every employee a private AI{' '}
-            <span className="text-teal-400">work and learning companion.</span>
+            Give regulated teams a private AI{' '}
+            <span className="text-teal-400">work companion.</span>
           </h1>
           <p className="text-lg text-slate-300 leading-relaxed max-w-3xl mx-auto mb-10">
-            WorkTwin helps care providers turn policies, procedures and onboarding documents into a
-            trusted AI staff assistant — helping employees settle in faster, understand company
-            processes, practise real scenarios and ask questions safely.
+            WorkTwin is a privacy-first AI work, onboarding, policy, workflow and learning companion
+            for employees in regulated SMEs. WorkTwin Care Pilot is the first vertical demo, showing
+            how the platform can support UK care providers with care-specific policies and scenarios.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
@@ -122,7 +125,7 @@ export default function LandingPage() {
             </Link>
           </div>
           <p className="mt-6 text-xs text-slate-500">
-            First pilot: Thumhara Centre · Sample documents only · No real staff data
+            First internal test: Thumhara Centre · Sample documents only · No real staff, service-user or client data
           </p>
         </div>
       </section>
@@ -144,10 +147,11 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold text-slate-900 mb-3">
-              Everything your team needs to work with confidence
+              One platform, focused vertical pilots
             </h2>
             <p className="text-slate-500 max-w-xl mx-auto">
-              Built specifically for the realities of UK care provision — compliance, consistency and compassion.
+              Built for regulated SMEs that need consistent onboarding, trusted policy guidance,
+              workflow support and safe learning without employee surveillance.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -198,8 +202,8 @@ export default function LandingPage() {
                 Private for the employee.<br />Useful for the employer.<br />Safe for both.
               </h2>
               <p className="text-slate-400 text-sm leading-relaxed">
-                WorkTwin is built on a simple principle: employees should be able to ask any question
-                without fear. That means their conversations are private by default.
+                WorkTwin is built on a simple principle: employees in regulated workplaces should be
+                able to ask questions without fear. That means private conversations stay private by default.
               </p>
             </div>
             <div className="md:w-1/2 space-y-3">
@@ -218,11 +222,11 @@ export default function LandingPage() {
       <section className="py-20 bg-teal-700">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to run a pilot with your team?
+            Ready to test a focused WorkTwin vertical?
           </h2>
           <p className="text-teal-100 mb-8 leading-relaxed">
-            We start small — uploading your existing documents and testing with a small group of
-            staff. No surveillance, no disruption, no lock-in.
+            We start small with approved documents, a narrow employee group and anonymised insight
+            reporting. No surveillance, no performance scoring, no productivity tracking.
           </p>
           <Link
             href="/dashboard"
@@ -243,8 +247,8 @@ export default function LandingPage() {
             <span className="text-white text-sm font-semibold">WorkTwin</span>
           </div>
           <p className="text-slate-500 text-xs text-center">
-            This is a demo build using sample data only. No real staff or service-user data is used.<br />
-            Built for Thumhara Centre internal pilot. &copy; {new Date().getFullYear()} WorkTwin.
+            This is a demo build using sample data only. No real staff, service-user, client or private care data is used.<br />
+            WorkTwin Care Pilot is the first vertical test of the broader WorkTwin platform. &copy; {new Date().getFullYear()} WorkTwin.
           </p>
           <div className="flex gap-4 text-xs text-slate-500">
             <Link href="/admin/insights" className="hover:text-slate-300">Privacy model</Link>

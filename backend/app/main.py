@@ -29,15 +29,25 @@ app.add_middleware(
 _SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 _SUPABASE_STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "worktwin-documents")
 _supabase = None
+_SUPABASE_HTTP_KEY: str = ""   # used only for HTTP fallback; never logged or returned
+_STORAGE_METHOD: str = "none"  # "supabase_client" | "http_fallback" | "none"
 
-_supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
-if _SUPABASE_URL and _supabase_key:
+_raw_service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+if _SUPABASE_URL and _raw_service_key:
     try:
         from supabase import create_client as _create_supabase_client
-        _supabase = _create_supabase_client(_SUPABASE_URL, _supabase_key)
+        _supabase = _create_supabase_client(_SUPABASE_URL, _raw_service_key)
+        _STORAGE_METHOD = "supabase_client"
     except Exception:
-        pass  # Supabase unavailable — upload endpoints will return 503
-del _supabase_key  # never leave the key in module scope
+        pass  # fall through to HTTP fallback below
+
+    if _supabase is None:
+        # Python client could not initialise (e.g. sb_secret_ key format).
+        # Use the Supabase Storage REST API directly instead.
+        _SUPABASE_HTTP_KEY = _raw_service_key
+        _STORAGE_METHOD = "http_fallback"
+
+del _raw_service_key  # remove temp; _SUPABASE_HTTP_KEY holds the value when needed
 
 try:
     from pypdf import PdfReader as _PdfReader
@@ -45,6 +55,26 @@ try:
 except ImportError:
     _PYPDF_OK = False
     _PdfReader = None  # type: ignore
+
+
+def _http_upload_to_supabase(storage_path: str, file_bytes: bytes) -> None:
+    """
+    Upload to Supabase Storage via REST API (HTTP fallback path).
+    Used when the Python supabase client cannot initialise (e.g. sb_secret_ keys).
+    _SUPABASE_HTTP_KEY is backend-only and is never logged or returned here.
+    """
+    import httpx
+    url = f"{_SUPABASE_URL}/storage/v1/object/{_SUPABASE_STORAGE_BUCKET}/{storage_path}"
+    headers = {
+        "apikey": _SUPABASE_HTTP_KEY,
+        "Authorization": f"Bearer {_SUPABASE_HTTP_KEY}",
+        "Content-Type": "application/pdf",
+    }
+    resp = httpx.post(url, content=file_bytes, headers=headers, timeout=30)
+    if resp.status_code == 409:
+        resp = httpx.put(url, content=file_bytes, headers=headers, timeout=30)
+    if resp.status_code not in (200, 201):
+        raise RuntimeError(f"Supabase Storage HTTP upload failed: status {resp.status_code}")
 
 # ---------------------------------------------------------------------------
 # Privacy and safety contract (enforced in the real build, documented here)
@@ -657,6 +687,7 @@ def debug_storage_config():
         "supabase_client_initialised": _supabase is not None,
         "environment": "production" if os.getenv("RENDER") else os.getenv("ENVIRONMENT", "development"),
         "key_prefix_detected": key_prefix_detected,
+        "storage_upload_method": _STORAGE_METHOD,
     }
 
 
@@ -941,7 +972,7 @@ async def upload_document_pdf(
     )
 
     # ---- 7. Storage: not configured → 503 ----
-    if _supabase is None:
+    if _STORAGE_METHOD == "none":
         return JSONResponse(
             status_code=503,
             content={
@@ -969,11 +1000,14 @@ async def upload_document_pdf(
     storage_path = f"{organisation_id}/documents/{document_id}/{safe_name}"
 
     try:
-        _supabase.storage.from_(_SUPABASE_STORAGE_BUCKET).upload(
-            path=storage_path,
-            file=file_bytes,
-            file_options={"content-type": "application/pdf"},
-        )
+        if _STORAGE_METHOD == "supabase_client":
+            _supabase.storage.from_(_SUPABASE_STORAGE_BUCKET).upload(
+                path=storage_path,
+                file=file_bytes,
+                file_options={"content-type": "application/pdf"},
+            )
+        else:
+            _http_upload_to_supabase(storage_path, file_bytes)
     except Exception as exc:
         raise HTTPException(
             status_code=500,

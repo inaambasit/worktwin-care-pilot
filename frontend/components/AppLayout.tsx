@@ -4,12 +4,13 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, MessageCircle, ClipboardList, PlayCircle,
   Lock, FileText, BarChart2, Shield, Phone, ChevronRight,
-  Users, AlertTriangle,
+  Users, AlertTriangle, BookOpen,
 } from 'lucide-react'
 
 const employeeNav = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/ask', label: 'Ask WorkTwin', icon: MessageCircle },
+  { href: '/policies', label: 'Policy Library', icon: BookOpen },
   { href: '/onboarding', label: 'My Onboarding', icon: ClipboardList },
   { href: '/scenarios', label: 'Practice Scenarios', icon: PlayCircle },
   { href: '/notes', label: 'Private Notes', icon: Lock },
@@ -17,7 +18,7 @@ const employeeNav = [
 
 const adminNav = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard },
-  { href: '/admin/documents', label: 'Company Documents', icon: FileText },
+  { href: '/admin/documents', label: 'Document Registry', icon: FileText },
   { href: '/admin/insights', label: 'Anonymous Insights', icon: BarChart2 },
   { href: '/admin/roles', label: 'Roles & Permissions', icon: Shield },
   { href: '/admin/escalation', label: 'Escalation Contacts', icon: Phone },

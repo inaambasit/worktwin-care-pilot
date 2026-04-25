@@ -68,3 +68,60 @@ Then build a real MVP using:
 - OpenAI or Claude API
 - Role-based access control
 - Source-cited RAG answers
+
+---
+
+## Milestone 4A: Document Registry
+
+### What was built
+
+**Policy Library (`/policies`)** — Staff-facing page showing only approved documents. Staff can search, filter by category, open a policy detail card, and see a "Ask WorkTwin about this policy" CTA. Only approved documents appear here.
+
+**Document Registry (`/admin/documents`)** — Admin power-user view of all documents across all statuses. Shows the full metadata schema including vertical, category, status, role access, sensitive flag, escalation flag, AI-approved flag, primary and available languages, review due date, and embedding status. Admins can approve draft/under-review documents or archive any document.
+
+**Backend document registry (`GET|POST /documents`, `GET|PATCH /documents/{id}`, `POST /documents/{id}/approve|archive`)** — FastAPI endpoints backed by an in-memory registry with 12 sample documents. No real storage yet — that comes in Milestone 4B.
+
+### Document Registry schema fields
+
+| Field | Purpose |
+|---|---|
+| `vertical` | `care \| finance \| property \| recruitment \| healthcare_admin \| training_provider \| general \| custom` |
+| `category` | Safeguarding, Medication, HR, Health and Safety, Complaints, Onboarding, Training |
+| `status` | `draft \| approved \| under_review \| archived` |
+| `access_roles` | Which roles can see this document |
+| `is_sensitive` | True for HR, safeguarding, disciplinary content |
+| `escalation_required` | True when AI must not answer and staff must speak to a human |
+| `approved_for_ai_answers` | Only approved docs are used in RAG retrieval |
+| `contains_personal_data_warning` | Document contains identifiable data (should not be uploaded) |
+| `primary_language` | ISO 639-1 code (e.g. `en`) |
+| `available_languages` | Languages this policy is available in: en, ur, pa, ar, bn, gu |
+| `translation_status` | `not_required \| pending \| in_progress \| complete` |
+| `embedding_status` | `not_started \| pending \| processing \| indexed \| failed` |
+| `review_due_date` | ISO date — when the document next needs human review |
+| `version` | Semantic version string |
+| `metadata` | Extensible dict for future fields |
+
+### What does NOT happen here
+
+- No real file storage (S3/Supabase — Milestone 4B)
+- No text extraction or chunking (Milestone 4B)
+- No embeddings or pgvector indexing (Milestone 4B)
+- No RAG retrieval (Milestone 4C)
+- No OpenAI/Claude API calls (Milestone 4C)
+- No real Thumhara documents — all sample demo data only
+- No real personal data
+
+### Privacy guarantees preserved
+
+- Approved English policies are the source of truth until a translation is formally approved
+- Sensitive documents (`is_sensitive: true`) are not approved for AI answers
+- Safeguarding and similar topics (`escalation_required: true`) always route to human escalation
+- No service-user records, care plans, MAR charts, HR files, payroll records or named case notes should ever be uploaded
+
+### What comes in Milestone 4B
+
+- Real file upload (S3 / Supabase Storage)
+- Text extraction (PyMuPDF for PDF, python-docx for DOCX)
+- Chunking with metadata (organisation_id, document_id, role access, section)
+- Embedding generation and pgvector storage
+- Update `embedding_status` on completion

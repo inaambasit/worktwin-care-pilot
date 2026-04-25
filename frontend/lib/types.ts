@@ -130,6 +130,9 @@ export interface UploadDocumentResult {
   chunking_error?: string
   chunk_count?: number
   chunking_note?: string
+  embedding_preparation_status?: 'prepared' | 'already_prepared' | 'failed' | 'not_configured' | 'skipped'
+  embedding_record_count?: number
+  embedding_note?: string
   ai_answers_note?: string
   document?: DocumentRecord
   // 503 not-configured fields

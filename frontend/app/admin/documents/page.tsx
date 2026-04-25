@@ -752,6 +752,25 @@ export default function DocumentRegistryPage() {
                         </p>
                       </div>
                     )}
+                    {uploadResult.embedding_preparation_status && (
+                      <div className={`bg-white/60 rounded-lg p-2 ${uploadResult.embedding_preparation_status === 'failed' ? 'ring-1 ring-red-300' : ''}`}>
+                        <p className="text-slate-400 font-medium">Embedding records</p>
+                        <p className={`font-medium ${
+                          uploadResult.embedding_preparation_status === 'prepared' ? 'text-teal-700' :
+                          uploadResult.embedding_preparation_status === 'already_prepared' ? 'text-teal-700' :
+                          uploadResult.embedding_preparation_status === 'failed' ? 'text-red-600' :
+                          'text-amber-700'
+                        }`}>
+                          {uploadResult.embedding_preparation_status === 'prepared'
+                            ? `${uploadResult.embedding_record_count ?? 0} prepared ✓`
+                            : uploadResult.embedding_preparation_status === 'already_prepared'
+                            ? `${uploadResult.embedding_record_count ?? 0} already prepared`
+                            : uploadResult.embedding_preparation_status === 'failed' ? 'Failed'
+                            : uploadResult.embedding_preparation_status === 'skipped' ? 'Skipped'
+                            : 'Not configured'}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Registry error */}
@@ -808,6 +827,25 @@ export default function DocumentRegistryPage() {
                     <div className="flex items-start gap-2 bg-teal-100/60 border border-teal-200 rounded-lg px-3 py-2">
                       <CheckCircle2 size={12} className="text-teal-600 shrink-0 mt-0.5" />
                       <p className="text-xs text-teal-800">{uploadResult.chunking_note}</p>
+                    </div>
+                  )}
+
+                  {/* Embedding note */}
+                  {uploadResult.embedding_note && (
+                    <div className="flex items-start gap-2 bg-teal-100/60 border border-teal-200 rounded-lg px-3 py-2">
+                      <CheckCircle2 size={12} className="text-teal-600 shrink-0 mt-0.5" />
+                      <p className="text-xs text-teal-800">{uploadResult.embedding_note}</p>
+                    </div>
+                  )}
+
+                  {/* Embedding table missing warning */}
+                  {uploadResult.embedding_preparation_status === 'failed' && (
+                    <div className="bg-amber-100 border border-amber-200 rounded-lg px-3 py-2">
+                      <p className="text-xs font-semibold text-amber-900">Embedding records table not configured</p>
+                      <p className="text-xs text-amber-800 mt-0.5">
+                        Run <code className="font-mono">backend/sql/005_document_embeddings.sql</code> in Supabase SQL Editor to enable embedding preparation.
+                        AI answers remain disabled.
+                      </p>
                     </div>
                   )}
 
@@ -1127,7 +1165,7 @@ export default function DocumentRegistryPage() {
             <strong>Platform flexibility:</strong> The <em>Vertical</em> field means this registry is not limited to care.
             It can hold policies for finance, property management, recruitment, healthcare admin, training providers
             and other regulated SMEs — all managed in one place.
-            Document indexing (RAG pipeline) is coming in <strong>Milestone 4D/4E</strong>.
+            Embedding records are prepared per chunk (Milestone 4E). Embedding generation and the RAG pipeline are coming in <strong>Milestone 4F</strong>.
           </p>
         </div>
 

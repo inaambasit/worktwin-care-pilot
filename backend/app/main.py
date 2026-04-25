@@ -256,6 +256,160 @@ def _list_document_chunks(document_id: str) -> List[Dict[str, Any]]:
 
 
 # ---------------------------------------------------------------------------
+# Milestone 4E — embedding record preparation helpers
+# No embeddings are generated. No external API is called.
+# Backend / service role only — never exposed to staff UI.
+# ---------------------------------------------------------------------------
+
+def _prepare_embedding_records_for_document(document_id: str) -> Dict[str, Any]:
+    """
+    Create one document_embeddings row per chunk for a document.
+    Copies organisation_id, access_roles, vertical, category and safety flags
+    from document_chunks. Sets embedding_status = 'not_started'.
+    Uses upsert-ignore so re-runs are safe.
+    No vectors are generated or stored.
+    """
+    import httpx as _httpx
+
+    if not _DB_CONFIGURED:
+        return {"status": "not_configured", "embedding_record_count": 0}
+
+    # Fetch chunks with all fields needed for embedding records
+    url = f"{_SUPABASE_URL}/rest/v1/document_chunks"
+    params = {
+        "document_id": f"eq.{document_id}",
+        "order": "chunk_index.asc",
+        "limit": "1000",
+        "select": "id,organisation_id,document_id,access_roles,vertical,category,approved_for_ai_answers,escalation_required,is_sensitive",
+    }
+    resp = _httpx.get(url, params=params, headers=_db_headers(), timeout=15)
+    if resp.status_code != 200:
+        return {
+            "status": "failed",
+            "embedding_record_count": 0,
+            "error": f"Chunk fetch failed: HTTP {resp.status_code}",
+        }
+
+    chunks = resp.json()
+    if not chunks:
+        return {"status": "prepared", "embedding_record_count": 0}
+
+    # Check how many embedding records already exist for this document
+    existing = _list_embedding_records(document_id)
+    if len(existing) >= len(chunks):
+        return {"status": "already_prepared", "embedding_record_count": len(existing)}
+
+    now_ts = _now()
+    records = [
+        {
+            "organisation_id": c.get("organisation_id"),
+            "document_id": document_id,
+            "chunk_id": c["id"],
+            "embedding_status": "not_started",
+            "approved_for_ai_answers": c.get("approved_for_ai_answers", False),
+            "escalation_required": c.get("escalation_required", False),
+            "is_sensitive": c.get("is_sensitive", False),
+            "access_roles": c.get("access_roles") or [],
+            "vertical": c.get("vertical"),
+            "category": c.get("category"),
+            "created_at": now_ts,
+            "updated_at": now_ts,
+            "metadata": {"milestone": "4E"},
+        }
+        for c in chunks
+    ]
+
+    emb_url = f"{_SUPABASE_URL}/rest/v1/document_embeddings"
+    headers = {**_db_headers(), "Prefer": "resolution=ignore-duplicates,return=minimal"}
+
+    try:
+        resp2 = _httpx.post(
+            emb_url + "?on_conflict=chunk_id",
+            json=records,
+            headers=headers,
+            timeout=60,
+        )
+        if resp2.status_code not in (200, 201, 204):
+            error_msg = f"HTTP {resp2.status_code}"
+            if _is_table_missing_error(resp2.status_code, resp2.text):
+                error_msg = (
+                    "Embedding table not configured. "
+                    "Run backend/sql/005_document_embeddings.sql in Supabase SQL Editor."
+                )
+            return {"status": "failed", "embedding_record_count": 0, "error": error_msg}
+    except Exception as exc:
+        return {"status": "failed", "embedding_record_count": 0, "error": str(exc)}
+
+    return {"status": "prepared", "embedding_record_count": len(records)}
+
+
+def _list_embedding_records(document_id: str) -> List[Dict[str, Any]]:
+    """
+    Fetch embedding record metadata (no vector data) for a document.
+    Admin/debug use only — never returned in staff-facing endpoints.
+    """
+    import httpx as _httpx
+    url = f"{_SUPABASE_URL}/rest/v1/document_embeddings"
+    params = {
+        "document_id": f"eq.{document_id}",
+        "order": "created_at.asc",
+        "limit": "1000",
+        # Explicitly exclude the embedding column to avoid transmitting vector data.
+        "select": (
+            "id,organisation_id,document_id,chunk_id,embedding_model,"
+            "embedding_dimensions,embedding_status,embedding_error,"
+            "approved_for_ai_answers,escalation_required,is_sensitive,"
+            "access_roles,vertical,category,created_at,updated_at,metadata"
+        ),
+    }
+    resp = _httpx.get(url, params=params, headers=_db_headers(), timeout=15)
+    if resp.status_code == 200:
+        return resp.json()
+    return []
+
+
+def _get_embedding_readiness(document_id: str) -> Dict[str, Any]:
+    """
+    Aggregate embedding readiness for a document.
+    Returns counts and flags only — no vectors, no secrets, no extracted text.
+    """
+    records = _list_embedding_records(document_id)
+    chunks = _list_document_chunks(document_id)
+
+    not_started_count = sum(1 for r in records if r.get("embedding_status") == "not_started")
+    embedded_count = sum(1 for r in records if r.get("embedding_status") == "indexed")
+    failed_count = sum(1 for r in records if r.get("embedding_status") == "failed")
+
+    # All chunks must have embedding records before generation can start.
+    is_ready_for_embedding = (
+        len(chunks) > 0
+        and len(records) == len(chunks)
+        and failed_count == 0
+    )
+
+    # approved_for_ai_answers is true only when every record carries the flag.
+    approved = (
+        all(r.get("approved_for_ai_answers", False) for r in records)
+        if records else False
+    )
+    escalation = any(r.get("escalation_required", False) for r in records)
+
+    return {
+        "document_id": document_id,
+        "chunk_count": len(chunks),
+        "embedding_record_count": len(records),
+        "not_started_count": not_started_count,
+        "embedded_count": embedded_count,
+        "failed_count": failed_count,
+        "approved_for_ai_answers": approved,
+        "escalation_required": escalation,
+        "is_ready_for_embedding": is_ready_for_embedding,
+        "is_ready_for_ai_answers": False,
+        "note": "Embeddings and AI answers are not enabled yet.",
+    }
+
+
+# ---------------------------------------------------------------------------
 # Privacy and safety contract (enforced in the real build, documented here)
 #
 # - Private employee chat transcripts are NEVER exposed to managers or admins.
@@ -1104,6 +1258,23 @@ def list_document_chunks_admin(doc_id: str):
 
 
 # ---------------------------------------------------------------------------
+# Embedding readiness endpoint (Milestone 4E)
+# ---------------------------------------------------------------------------
+
+@app.get("/documents/{doc_id}/embedding-readiness")
+def get_document_embedding_readiness(doc_id: str):
+    """
+    Admin-safe embedding readiness metadata — Milestone 4E.
+    Returns counts and readiness flags only.
+    No vectors, no secrets, no extracted text, no full chunk content returned.
+    """
+    if not _DB_CONFIGURED:
+        raise HTTPException(status_code=503, detail="Database not configured.")
+
+    return _get_embedding_readiness(doc_id)
+
+
+# ---------------------------------------------------------------------------
 # Staff-safe policy library endpoint (Milestone 4A.1)
 # Returns only approved documents visible to the supplied user_role.
 # This endpoint is intentionally narrower than /documents (admin).
@@ -1463,6 +1634,22 @@ async def upload_document_pdf(
         else:
             chunking_status = "no_text"
 
+    # ---- 10c. Prepare embedding records for future generation (Milestone 4E) ----
+    # No vectors are generated. No external API is called.
+    embedding_preparation_status = "not_configured"
+    embedding_record_count = 0
+
+    if _DB_CONFIGURED:
+        if chunking_status == "prepared" and chunk_count > 0:
+            try:
+                emb_result = _prepare_embedding_records_for_document(document_id)
+                embedding_preparation_status = emb_result.get("status", "failed")
+                embedding_record_count = emb_result.get("embedding_record_count", 0)
+            except Exception:
+                embedding_preparation_status = "failed"
+        else:
+            embedding_preparation_status = "skipped"
+
     # ---- 11. Return result ----
     result: Dict[str, Any] = {
         "upload_status": "success",
@@ -1472,6 +1659,8 @@ async def upload_document_pdf(
         "extraction_storage_status": extraction_storage_status,
         "chunking_status": chunking_status,
         "chunk_count": chunk_count,
+        "embedding_preparation_status": embedding_preparation_status,
+        "embedding_record_count": embedding_record_count,
         "embedding_status": "pending",
         "document_id": document_id,
         "file_name": safe_name,
@@ -1487,10 +1676,14 @@ async def upload_document_pdf(
             "Chunks prepared. Embeddings and AI answers are not enabled yet."
             if chunk_count > 0 else None
         ),
+        "embedding_note": (
+            "Embedding records prepared. No embeddings have been generated yet."
+            if embedding_preparation_status in ("prepared", "already_prepared") else None
+        ),
         "ai_answers_note": (
             "Uploaded document is not yet available for AI answers. "
-            "Chunks have been prepared for future embedding in a later milestone."
-            if chunk_count > 0 else
+            "Embedding records have been prepared for future generation."
+            if embedding_preparation_status in ("prepared", "already_prepared") else
             "Uploaded document is not yet available for AI answers. "
             "Chunking, embeddings and source-citation checks will be enabled in a later milestone."
         ),

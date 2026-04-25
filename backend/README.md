@@ -375,9 +375,118 @@ Run both in Supabase SQL Editor **after** `001_document_registry.sql`.
 7. Call `GET /documents/{id}/chunks` and confirm 250-char previews are returned
 8. Confirm no AI answers, no embeddings, no RAG are enabled
 
-## Next steps (Milestone 4E)
+## Milestone 4E: pgvector and embedding storage preparation
 
-- Embedding generation and pgvector storage
+### What Milestone 4E adds
+
+- Enables the `vector` Postgres extension (pgvector) via SQL migration — safe no-op if already installed
+- New `document_embeddings` table: one row per chunk, created at upload time
+- Each embedding record carries `organisation_id`, `document_id`, `chunk_id`, `access_roles`, `vertical`, `category`, and all safety flags copied from `document_chunks`
+- `embedding_status = not_started` on every record — no embeddings are generated
+- `embedding` column is nullable `vector(1536)` — stays NULL until a future milestone
+- Upload flow now runs a step 10c after chunking: `_prepare_embedding_records_for_document`
+- Upload response includes `embedding_preparation_status`, `embedding_record_count`, and `embedding_note`
+- New admin endpoint: `GET /documents/{id}/embedding-readiness` — returns counts and readiness flags only
+- New backend-only helpers: `_prepare_embedding_records_for_document`, `_list_embedding_records`, `_get_embedding_readiness`
+
+### What Milestone 4E does NOT do
+
+- No embeddings are generated — no embedding model is called
+- No pgvector index (IVFFlat / HNSW) — not needed until embeddings exist
+- No RAG pipeline
+- No LLM API calls of any kind
+- No staff-facing retrieval
+- No AI answers
+- No real Thumhara/QCS policy documents yet — dummy/sample PDFs only until governance review passes
+
+### SQL migration
+
+File: `backend/sql/005_document_embeddings.sql`
+
+Run **after** `001_document_registry.sql`, `003_document_chunks.sql`, and `004_document_extractions.sql`:
+
+1. Open your Supabase project
+2. Go to **SQL Editor**
+3. Paste the contents of `backend/sql/005_document_embeddings.sql`
+4. Click **Run**
+
+Vector dimensions: `vector(1536)` — matches OpenAI `text-embedding-ada-002` and `text-embedding-3-small`. Change to `vector(3072)` for `text-embedding-3-large` or `vector(768)` for smaller open-source models before generating any embeddings.
+
+### Embedding readiness endpoint
+
+`GET /documents/{id}/embedding-readiness` — returns:
+
+```json
+{
+  "document_id": "...",
+  "chunk_count": 2,
+  "embedding_record_count": 2,
+  "not_started_count": 2,
+  "embedded_count": 0,
+  "failed_count": 0,
+  "approved_for_ai_answers": false,
+  "escalation_required": false,
+  "is_ready_for_embedding": true,
+  "is_ready_for_ai_answers": false,
+  "note": "Embeddings and AI answers are not enabled yet."
+}
+```
+
+No vectors are returned. No secrets are returned. No extracted text is returned.
+
+### Milestone 4E upload response shape
+
+```json
+{
+  "upload_status": "success",
+  "storage_status": "uploaded",
+  "registry_status": "saved",
+  "extraction_status": "success",
+  "extraction_storage_status": "saved",
+  "chunking_status": "prepared",
+  "chunk_count": 2,
+  "embedding_preparation_status": "prepared",
+  "embedding_record_count": 2,
+  "embedding_status": "pending",
+  "embedding_note": "Embedding records prepared. No embeddings have been generated yet.",
+  "document_id": "...",
+  ...
+}
+```
+
+`embedding_preparation_status` values:
+- `prepared` — new embedding records created for all chunks
+- `already_prepared` — records already existed (safe to re-run)
+- `failed` — insert failed (usually means `005_document_embeddings.sql` has not been run)
+- `skipped` — no chunks available (chunking failed or produced no text)
+- `not_configured` — DB not configured
+
+### Manual test steps (Milestone 4E)
+
+1. Run `005_document_embeddings.sql` in Supabase SQL Editor (after 003 and 004)
+2. Upload a dummy PDF via `/admin/documents`
+3. Confirm the upload result shows:
+   - `chunking_status: prepared`
+   - `embedding_preparation_status: prepared`
+   - `embedding_record_count > 0`
+   - `embedding_status: pending`
+   - `embedding_note: "Embedding records prepared. No embeddings have been generated yet."`
+4. Check Supabase Table Editor → `document_embeddings` for rows with `embedding_status = not_started`
+5. Confirm the `embedding` column is NULL on all rows
+6. Call `GET /documents/{id}/embedding-readiness` and confirm safe metadata is returned
+7. Confirm no AI answers, no embeddings, no vectors, no RAG are active
+
+### Important constraints (still apply through Milestone 4E)
+
+- Only dummy or sample PDFs should be uploaded — no real Thumhara/QCS policy documents until governance review is passed
+- `approved_for_ai_answers` remains `false` for all uploaded documents
+- No RAG retrieval, no LLM calls
+- All embedding records are inert placeholders — they cannot be searched or served to staff
+
+## Next steps (Milestone 4F)
+
+- Controlled embedding generation (requires governance sign-off)
+- pgvector IVFFlat/HNSW index creation
 - RAG retrieval pipeline
 - LLM response generation with strict source-grounding prompt
 - Authentication and organisation membership verification

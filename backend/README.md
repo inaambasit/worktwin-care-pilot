@@ -7,15 +7,44 @@ FastAPI backend for WorkTwin MVP.
 ```bash
 cd backend
 python -m venv .venv
-.venv\Scripts\activate
+.venv\Scripts\activate        # Windows
+# source .venv/bin/activate   # macOS / Linux
 pip install -r requirements.txt
 uvicorn app.main:app --reload
+```
+
+The server starts at `http://localhost:8000`.
+
+To match the Render start command exactly (no auto-reload):
+
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+## Test endpoints locally
+
+```bash
+# Health check
+curl http://localhost:8000/health
+
+# Root
+curl http://localhost:8000/
+
+# Staff-safe policy library (all approved policies)
+curl "http://localhost:8000/policies"
+
+# Filter by role
+curl "http://localhost:8000/policies?user_role=Care+Worker"
+
+# Filter by category
+curl "http://localhost:8000/policies?category=Medication"
 ```
 
 ## Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
+| GET | / | Root — service identity and status |
 | GET | /health | Health check |
 | POST | /ask | Placeholder answer endpoint |
 | GET | /policies | Staff-safe policy library (Milestone 4A.1) |
@@ -27,29 +56,48 @@ uvicorn app.main:app --reload
 | POST | /documents/{id}/archive | Archive a document |
 | POST | /documents/upload | Upload placeholder (disabled — Milestone 4B) |
 
-## Before Milestone 4B safety gates
+## CORS
 
-The following guarantees are enforced in the current build (Milestone 4A.1):
+CORS origins are controlled by the `ALLOWED_ORIGINS` environment variable.
 
-- **Staff-safe retrieval only** — `/policies` returns only approved documents. Staff
-  never see draft, under-review or archived documents.
-- **Role-based document visibility** — the `user_role` query parameter on `/policies`
-  filters documents to those the caller's role is permitted to see (via `access_roles`).
-- **No AI answers from unapproved documents** — `approved_for_ai_answers=False`
-  documents are visible in the policy library but the frontend blocks the
-  "Ask WorkTwin" CTA. No RAG pipeline is active yet.
-- **No embeddings from human-only or unapproved docs** — embedding status is tracked
-  per document but no embedding pipeline runs. Documents flagged `escalation_required`
-  or `approved_for_ai_answers=False` will be excluded from the embedding queue in 4B.
-- **No real file upload** — the `/documents/upload` endpoint returns a placeholder
-  response. Secure storage, file validation, metadata stripping and safety checks
-  will be implemented in Milestone 4B before upload is enabled.
-- **Per-language approval required for multilingual outputs** — `translation_status`
-  and per-language approval status are tracked per document. A translation must be
-  explicitly approved (human review) before it can be used. The approved English
-  version remains the source of truth until then.
-- **No personal data in demo files** — all documents in the in-memory store are
-  sample policy metadata only. No real staff, service-user, client or care data.
+```
+ALLOWED_ORIGINS=https://your-frontend.vercel.app
+```
+
+Defaults to `http://localhost:3000,http://localhost:3001` when the variable is not set.
+Multiple origins are comma-separated. No wildcard `*` is used in production.
+
+## Render deployment settings
+
+| Setting | Value |
+|---------|-------|
+| Root Directory | `backend` |
+| Build Command | `pip install -r requirements.txt` |
+| Start Command | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
+
+### Environment variables to set in Render
+
+| Variable | Value |
+|----------|-------|
+| `ENVIRONMENT` | `production` |
+| `ALLOWED_ORIGINS` | `https://worktwin-care-pilot.vercel.app` |
+
+### Environment variable to set in Vercel (frontend)
+
+| Variable | Value |
+|----------|-------|
+| `NEXT_PUBLIC_API_URL` | `https://<your-render-service-name>.onrender.com` |
+
+Replace `<your-render-service-name>` with the subdomain Render assigns when you create the service.
+
+## Safety guarantees (Milestone 4A.1)
+
+- **Staff-safe retrieval only** — `/policies` returns only approved documents.
+- **Role-based visibility** — `user_role` query param filters by `access_roles`.
+- **No AI answers from unapproved documents** — `approved_for_ai_answers=False` documents are listed but the frontend blocks the "Ask WorkTwin" CTA.
+- **No embeddings or RAG pipeline active** — embedding status is tracked per document but no pipeline runs yet.
+- **No real file upload** — `/documents/upload` returns a placeholder response.
+- **No personal data in demo store** — all in-memory documents are sample policy metadata only.
 
 ## Next steps (Milestone 4B)
 

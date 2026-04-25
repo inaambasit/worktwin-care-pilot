@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -7,9 +8,12 @@ import uuid
 
 app = FastAPI(title="WorkTwin API", version="0.1.0")
 
+_default_origins = "http://localhost:3000,http://localhost:3001"
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", _default_origins).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -536,8 +540,17 @@ def _find_doc(doc_id: str) -> Optional[Dict[str, Any]]:
 
 
 # ---------------------------------------------------------------------------
-# Health check
+# Root and health check
 # ---------------------------------------------------------------------------
+
+@app.get("/")
+def root():
+    return {
+        "service": "worktwin-api",
+        "status": "ok",
+        "message": "WorkTwin backend is running",
+    }
+
 
 @app.get("/health")
 def health_check():

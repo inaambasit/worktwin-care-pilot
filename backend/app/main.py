@@ -628,6 +628,39 @@ def health_check():
 
 
 # ---------------------------------------------------------------------------
+# Diagnostic endpoint — storage config check (no secrets returned)
+# ---------------------------------------------------------------------------
+
+@app.get("/debug/storage-config")
+def debug_storage_config():
+    """Returns booleans and safe metadata only. Never logs or returns secret values."""
+    _raw_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+
+    if not _raw_key:
+        key_prefix_detected = None
+    elif _raw_key.startswith("sb_secret"):
+        key_prefix_detected = "sb_secret"
+    elif _raw_key.startswith("eyJ"):  # legacy Supabase JWT anon/service keys
+        key_prefix_detected = "jwt"
+    else:
+        key_prefix_detected = "unknown"
+
+    bucket_env = os.getenv("SUPABASE_STORAGE_BUCKET", "")
+    bucket_name = bucket_env or "worktwin-documents"  # mirrors _SUPABASE_STORAGE_BUCKET default
+
+    return {
+        "supabase_url_configured": bool(os.getenv("SUPABASE_URL", "")),
+        "supabase_service_role_key_configured": bool(_raw_key),
+        "supabase_storage_bucket_configured": bool(bucket_env),
+        "supabase_bucket_name_configured": bool(bucket_name),
+        "supabase_bucket_name": bucket_name,
+        "supabase_client_initialised": _supabase is not None,
+        "environment": "production" if os.getenv("RENDER") else os.getenv("ENVIRONMENT", "development"),
+        "key_prefix_detected": key_prefix_detected,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Ask endpoint
 # ---------------------------------------------------------------------------
 

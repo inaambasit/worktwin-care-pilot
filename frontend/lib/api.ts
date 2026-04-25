@@ -1,6 +1,6 @@
 // WorkTwin API helper — calls the FastAPI backend at NEXT_PUBLIC_API_URL.
 
-import type { AskRequest, AskResponse, DocumentRecord } from './types'
+import type { AskRequest, AskResponse, DocumentRecord, UploadDocumentResult } from './types'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
@@ -102,4 +102,68 @@ export async function archiveDocument(id: string): Promise<DocumentRecord> {
   })
   if (!response.ok) throw new Error(`API error: ${response.status}`)
   return response.json() as Promise<DocumentRecord>
+}
+
+// ---------------------------------------------------------------------------
+// Milestone 4B — Safe PDF upload
+// Sends multipart form data to POST /documents/upload.
+// Supabase keys are never exposed here — only the backend uses them.
+// ---------------------------------------------------------------------------
+
+export interface UploadDocumentParams {
+  file: File
+  organisation_id: string
+  title: string
+  vertical: string
+  category: string
+  access_roles: string[]
+  status: string
+  is_sensitive: boolean
+  escalation_required: boolean
+  approved_for_ai_answers: boolean
+  primary_language: string
+  available_languages: string[]
+  review_due_date?: string
+  description?: string
+  version?: string
+}
+
+export async function uploadDocumentPdf(params: UploadDocumentParams): Promise<UploadDocumentResult> {
+  const form = new FormData()
+  form.append('file', params.file)
+  form.append('organisation_id', params.organisation_id)
+  form.append('title', params.title)
+  form.append('vertical', params.vertical)
+  form.append('category', params.category)
+  form.append('access_roles', params.access_roles.join(','))
+  form.append('status', params.status)
+  form.append('is_sensitive', String(params.is_sensitive))
+  form.append('escalation_required', String(params.escalation_required))
+  form.append('approved_for_ai_answers', String(params.approved_for_ai_answers))
+  form.append('primary_language', params.primary_language)
+  form.append('available_languages', params.available_languages.join(','))
+  if (params.review_due_date) form.append('review_due_date', params.review_due_date)
+  if (params.description) form.append('description', params.description)
+  if (params.version) form.append('version', params.version)
+
+  const response = await fetch(`${API_BASE_URL}/documents/upload`, {
+    method: 'POST',
+    body: form,
+    signal: AbortSignal.timeout(30_000),
+  })
+
+  const data = await response.json()
+
+  // 503 = storage not configured — return structured data so the UI can explain it
+  if (response.status === 503) {
+    return data as UploadDocumentResult
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      (data as { detail?: string }).detail ?? `Upload failed: ${response.status}`
+    )
+  }
+
+  return data as UploadDocumentResult
 }

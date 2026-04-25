@@ -1,8 +1,11 @@
 import os
-from fastapi import FastAPI, UploadFile, File, HTTPException
+import re
+import io
+from fastapi import FastAPI, Form, UploadFile, File, HTTPException
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Literal, Optional, List, Dict, Any
+from typing import Literal, Optional, List, Dict, Any, Tuple
 from datetime import datetime
 import uuid
 
@@ -18,6 +21,30 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ---------------------------------------------------------------------------
+# Supabase storage (Milestone 4B)
+# SUPABASE_SERVICE_ROLE_KEY is backend-only. Never log, expose or return it.
+# ---------------------------------------------------------------------------
+_SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+_SUPABASE_STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "worktwin-documents")
+_supabase = None
+
+_supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+if _SUPABASE_URL and _supabase_key:
+    try:
+        from supabase import create_client as _create_supabase_client
+        _supabase = _create_supabase_client(_SUPABASE_URL, _supabase_key)
+    except Exception:
+        pass  # Supabase unavailable — upload endpoints will return 503
+del _supabase_key  # never leave the key in module scope
+
+try:
+    from pypdf import PdfReader as _PdfReader
+    _PYPDF_OK = True
+except ImportError:
+    _PYPDF_OK = False
+    _PdfReader = None  # type: ignore
 
 # ---------------------------------------------------------------------------
 # Privacy and safety contract (enforced in the real build, documented here)
@@ -163,6 +190,49 @@ class DocumentUpdate(BaseModel):
 # In-memory document registry (placeholder — Milestone 4B will add real storage)
 # All documents here are sample demo data only. No real personal data.
 # ---------------------------------------------------------------------------
+
+def _safe_filename(name: str) -> str:
+    basename = name.rsplit("/", 1)[-1].rsplit("\\", 1)[-1]
+    basename = re.sub(r"[^a-zA-Z0-9_.\-]", "_", basename)
+    if not basename or basename.lstrip(".") == "":
+        basename = "document.pdf"
+    return basename[:120]
+
+
+def _parse_bool(val: str) -> bool:
+    return str(val).strip().lower() in ("true", "1", "yes", "on")
+
+
+def _check_personal_data_risk(text: str) -> Tuple[str, List[str]]:
+    """
+    Early-warning personal-data pattern scanner.
+
+    Checks only simple surface patterns — email, UK phone, postcode, NHS number,
+    date-of-birth labels. Does NOT reliably detect names or organisations.
+    This is NOT full DLP and does not replace human review. All uploaded documents
+    must be reviewed by a human before use in any live system.
+    """
+    warnings: List[str] = []
+    t = (text or "").upper()
+
+    if re.search(r"[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}", t):
+        warnings.append("Possible email address detected.")
+
+    if re.search(r"(\+44|0)[0-9\s\-\(\)]{9,14}[0-9]", t):
+        warnings.append("Possible UK phone number detected.")
+
+    if re.search(r"\b[A-Z]{1,2}[0-9][0-9A-Z]?\s*[0-9][A-Z]{2}\b", t):
+        warnings.append("Possible UK postcode detected.")
+
+    if re.search(r"\b\d{3}\s*\d{3}\s*\d{4}\b", t):
+        warnings.append("Possible NHS number pattern detected (10-digit group).")
+
+    if re.search(r"\b(DATE\s+OF\s+BIRTH|D\.?O\.?B\.?)\s*:?\s*\d", t):
+        warnings.append("Possible date of birth label detected.")
+
+    risk = "possible" if warnings else "low"
+    return risk, warnings
+
 
 def _ts(d: str) -> str:
     return f"{d}T00:00:00Z"
@@ -719,22 +789,221 @@ def list_policies(
 
 
 # ---------------------------------------------------------------------------
-# Legacy document upload placeholder (kept for backward compatibility)
+# Safe PDF upload endpoint (Milestone 4B)
 # ---------------------------------------------------------------------------
 
-@app.post("/documents/upload")
-async def upload_document(file: UploadFile = File(...)):
-    """
-    Placeholder for file upload.
+_PROHIBITED_PATTERNS = [
+    "care_plan", "care plan", "mar chart", "mar_chart",
+    "payroll", "staff_hr", "staff hr", "safeguarding_case",
+    "named_complaint", "hr_case", "disciplinary_case",
+]
 
-    Next build steps (Milestone 4B):
-    1. Store file securely (S3 / Supabase).
-    2. Extract text (PyMuPDF / python-docx).
-    3. Chunk text with metadata (organisation_id, document_id, role access).
-    4. Create embeddings and store in pgvector.
+
+@app.post("/documents/upload")
+async def upload_document_pdf(
+    file: UploadFile = File(...),
+    organisation_id: str = Form(...),
+    title: str = Form(...),
+    vertical: str = Form("care"),
+    category: str = Form(...),
+    access_roles: str = Form("All Staff"),
+    status: str = Form("draft"),
+    is_sensitive: str = Form("false"),
+    escalation_required: str = Form("false"),
+    approved_for_ai_answers: str = Form("false"),
+    primary_language: str = Form("en"),
+    available_languages: str = Form("en"),
+    review_due_date: Optional[str] = Form(None),
+    description: Optional[str] = Form(None),
+    version: str = Form("1.0"),
+):
     """
+    Milestone 4B: safe PDF upload.
+
+    Validates type and size, stores in a private Supabase bucket, extracts a
+    short text preview, and runs a basic personal-data risk check.
+
+    No embeddings are created. No AI answers are generated.
+    embedding_status is always set to 'pending' after upload.
+    """
+    # ---- 1. File type validation ----
+    filename = file.filename or "upload.pdf"
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+
+    if ext != "pdf":
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "PDF upload is supported first. "
+                "DOCX and TXT will be added later after tracked-changes and metadata safety checks."
+            ),
+        )
+
+    # ---- 2. Read bytes and size check ----
+    file_bytes = await file.read()
+    file_size = len(file_bytes)
+    MAX_BYTES = 10 * 1024 * 1024
+
+    if file_size == 0:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+    if file_size > MAX_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"File exceeds 10 MB limit ({file_size / (1024 * 1024):.1f} MB uploaded).",
+        )
+
+    # ---- 3. PDF magic bytes check ----
+    if file_bytes[:4] != b"%PDF":
+        raise HTTPException(
+            status_code=400,
+            detail="File does not appear to be a valid PDF (missing %PDF header).",
+        )
+
+    # ---- 4. Prohibited filename / title patterns ----
+    lower_check = (title + " " + filename).lower()
+    for pattern in _PROHIBITED_PATTERNS:
+        if pattern in lower_check:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Upload rejected: filename or title suggests a prohibited document type. "
+                    "Do not upload care plans, MAR charts with names, HR case files, payroll records, "
+                    "safeguarding case notes or named complaints. "
+                    "Only approved policies, SOPs, onboarding documents and training materials are allowed."
+                ),
+            )
+
+    # ---- 5. Text extraction preview ----
+    extraction_status = "skipped"
+    extracted_text_preview: Optional[str] = None
+    extracted_char_count: Optional[int] = None
+    extracted_page_count: Optional[int] = None
+    extraction_warnings: List[str] = []
+
+    if _PYPDF_OK and _PdfReader is not None:
+        try:
+            reader = _PdfReader(io.BytesIO(file_bytes))
+            extracted_page_count = len(reader.pages)
+            full_text = ""
+            for page in reader.pages:
+                full_text += page.extract_text() or ""
+                if len(full_text) >= 2000:
+                    break
+            extracted_text_preview = full_text[:2000].strip()
+            extracted_char_count = len(extracted_text_preview)
+            extraction_status = "success"
+            if extracted_char_count == 0:
+                extraction_warnings.append(
+                    "No text extracted. The PDF may be a scanned image or encrypted."
+                )
+        except Exception as exc:
+            extraction_status = "failed"
+            extraction_warnings.append(f"Text extraction error: {exc}")
+    else:
+        extraction_warnings.append("pypdf not installed — text extraction skipped.")
+
+    # ---- 6. Personal-data risk check ----
+    personal_data_risk, personal_data_warnings = _check_personal_data_risk(
+        extracted_text_preview or ""
+    )
+
+    # ---- 7. Storage: not configured → 503 ----
+    if _supabase is None:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "storage_status": "not_configured",
+                "message": (
+                    "Storage is not configured for this environment. "
+                    "Set SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY and "
+                    "SUPABASE_STORAGE_BUCKET on the backend service."
+                ),
+                "validation_passed": True,
+                "file_name": filename,
+                "file_size_bytes": file_size,
+                "extraction_status": extraction_status,
+                "extracted_character_count": extracted_char_count,
+                "extracted_page_count": extracted_page_count,
+                "extraction_warnings": extraction_warnings,
+                "personal_data_risk": personal_data_risk,
+                "personal_data_warnings": personal_data_warnings,
+            },
+        )
+
+    # ---- 8. Upload to Supabase private bucket ----
+    document_id = str(uuid.uuid4())
+    safe_name = _safe_filename(filename)
+    storage_path = f"{organisation_id}/documents/{document_id}/{safe_name}"
+
+    try:
+        _supabase.storage.from_(_SUPABASE_STORAGE_BUCKET).upload(
+            path=storage_path,
+            file=file_bytes,
+            file_options={"content-type": "application/pdf"},
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Supabase storage upload failed: {exc}",
+        )
+
+    # ---- 9. Build in-memory registry record ----
+    now = _now()
+    access_roles_list = [r.strip() for r in access_roles.split(",") if r.strip()]
+    available_languages_list = [la.strip() for la in available_languages.split(",") if la.strip()]
+
+    doc: Dict[str, Any] = {
+        "id": document_id,
+        "organisation_id": organisation_id,
+        "title": title,
+        "description": description,
+        "file_name": safe_name,
+        "file_type": "pdf",
+        "file_size_bytes": file_size,
+        "storage_key": storage_path,
+        "vertical": vertical,
+        "category": category,
+        "tags": [],
+        "status": status,
+        "access_roles": access_roles_list,
+        "is_sensitive": _parse_bool(is_sensitive),
+        "escalation_required": _parse_bool(escalation_required),
+        "approved_for_ai_answers": _parse_bool(approved_for_ai_answers),
+        "contains_personal_data_warning": personal_data_risk == "possible",
+        "primary_language": primary_language,
+        "available_languages": available_languages_list,
+        "translation_status": "not_required",
+        "human_review_required": True,
+        "version": version,
+        "review_due_date": review_due_date,
+        "embedding_status": "pending",
+        "created_by": "admin",
+        "created_at": now,
+        "updated_at": now,
+        "metadata": {"upload_source": "admin_upload", "milestone": "4B"},
+    }
+    _documents.append(doc)
+
+    # ---- 10. Return result ----
     return {
-        "filename": file.filename,
-        "status": "received",
-        "next_step": "Add secure storage, text extraction and embedding pipeline (Milestone 4B).",
+        "upload_status": "success",
+        "storage_status": "uploaded",
+        "document_id": document_id,
+        "file_name": safe_name,
+        "file_size_bytes": file_size,
+        "storage_key": storage_path,
+        "extraction_status": extraction_status,
+        "extracted_text_preview": extracted_text_preview,
+        "extracted_character_count": extracted_char_count,
+        "extracted_page_count": extracted_page_count,
+        "extraction_warnings": extraction_warnings,
+        "personal_data_risk": personal_data_risk,
+        "personal_data_warnings": personal_data_warnings,
+        "embedding_status": "pending",
+        "ai_answers_note": (
+            "Uploaded document is not yet available for AI answers. "
+            "This will be enabled in a later milestone after chunking, "
+            "embeddings and source-citation checks."
+        ),
+        "document": doc,
     }

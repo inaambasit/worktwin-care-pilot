@@ -1,13 +1,14 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import AppLayout from '@/components/AppLayout'
-import { fetchDocuments, approveDocument, archiveDocument } from '@/lib/api'
-import type { DocumentRecord, DocumentStatus, EmbeddingStatus } from '@/lib/types'
+import { fetchDocuments, approveDocument, archiveDocument, uploadDocumentPdf } from '@/lib/api'
+import type { DocumentRecord, DocumentStatus, EmbeddingStatus, UploadDocumentResult } from '@/lib/types'
 import { LANGUAGE_NAMES } from '@/lib/types'
 import {
   FileText, Upload, CheckCircle, Clock, AlertCircle, Users,
   AlertTriangle, Shield, Globe, Brain, Archive, RefreshCw,
-  ShieldAlert, XCircle, Filter,
+  ShieldAlert, XCircle, Filter, ChevronDown, ChevronUp,
+  Loader2, X, Info, CheckCircle2,
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -173,6 +174,13 @@ const VERTICAL_LABELS: Record<string, string> = {
   training_provider: 'Training', general: 'General', custom: 'Custom',
 }
 
+function formatBytes(bytes?: number): string {
+  if (!bytes) return '—'
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
 function formatDate(iso?: string): string {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' })
@@ -187,6 +195,44 @@ function Flag({ active, title, icon }: { active: boolean; title: string; icon: R
 }
 
 // ---------------------------------------------------------------------------
+// Upload form state
+// ---------------------------------------------------------------------------
+
+interface UploadFormState {
+  organisation_id: string
+  title: string
+  description: string
+  vertical: string
+  category: string
+  access_roles: string
+  status: string
+  is_sensitive: boolean
+  escalation_required: boolean
+  approved_for_ai_answers: boolean
+  primary_language: string
+  available_languages: string
+  review_due_date: string
+  version: string
+}
+
+const EMPTY_FORM: UploadFormState = {
+  organisation_id: 'demo-org',
+  title: '',
+  description: '',
+  vertical: 'care',
+  category: '',
+  access_roles: 'All Staff',
+  status: 'draft',
+  is_sensitive: false,
+  escalation_required: false,
+  approved_for_ai_answers: false,
+  primary_language: 'en',
+  available_languages: 'en',
+  review_due_date: '',
+  version: '1.0',
+}
+
+// ---------------------------------------------------------------------------
 // Admin Document Registry page
 // ---------------------------------------------------------------------------
 
@@ -197,6 +243,15 @@ export default function DocumentRegistryPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('All')
   const [actioning, setActioning] = useState<string | null>(null)
+
+  // Upload form
+  const [showUpload, setShowUpload] = useState(false)
+  const [uploadFile, setUploadFile] = useState<File | null>(null)
+  const [form, setForm] = useState<UploadFormState>(EMPTY_FORM)
+  const [uploading, setUploading] = useState(false)
+  const [uploadResult, setUploadResult] = useState<UploadDocumentResult | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const loadDocs = useCallback(() => {
     setLoading(true)
@@ -238,6 +293,53 @@ export default function DocumentRegistryPage() {
     } finally {
       setActioning(null)
     }
+  }
+
+  async function handleUpload() {
+    if (!uploadFile) { setUploadError('Please select a PDF file.'); return }
+    if (!form.title.trim()) { setUploadError('Title is required.'); return }
+    if (!form.category.trim()) { setUploadError('Category is required.'); return }
+
+    setUploading(true)
+    setUploadResult(null)
+    setUploadError(null)
+
+    try {
+      const result = await uploadDocumentPdf({
+        file: uploadFile,
+        organisation_id: form.organisation_id,
+        title: form.title.trim(),
+        description: form.description.trim() || undefined,
+        vertical: form.vertical,
+        category: form.category.trim(),
+        access_roles: form.access_roles.split(',').map(r => r.trim()).filter(Boolean),
+        status: form.status,
+        is_sensitive: form.is_sensitive,
+        escalation_required: form.escalation_required,
+        approved_for_ai_answers: form.approved_for_ai_answers,
+        primary_language: form.primary_language,
+        available_languages: form.available_languages.split(',').map(l => l.trim()).filter(Boolean),
+        review_due_date: form.review_due_date || undefined,
+        version: form.version,
+      })
+      setUploadResult(result)
+      // If upload was fully successful, reload the doc list
+      if (result.storage_status === 'uploaded') {
+        loadDocs()
+      }
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Upload failed.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  function resetUploadForm() {
+    setUploadFile(null)
+    setForm(EMPTY_FORM)
+    setUploadResult(null)
+    setUploadError(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const counts = {
@@ -282,24 +384,339 @@ export default function DocumentRegistryPage() {
                 Do <strong>not</strong> upload: service-user records, care plans, MAR charts with names, staff HR files, payroll records,
                 safeguarding case notes, complaints involving named people, or any other private personal data.
               </p>
+              <p className="text-xs text-amber-700 mt-1">
+                <strong>PDF only in Milestone 4B.</strong> DOCX and TXT will be added later after tracked-changes and metadata safety checks.
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Upload area — disabled until Milestone 4B safety gates are built */}
-        <div className="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center bg-slate-50 opacity-70 select-none">
-          <Upload size={22} className="mx-auto text-slate-300 mb-2" />
-          <p className="text-sm font-semibold text-slate-500">Document upload is disabled</p>
-          <p className="text-xs text-slate-400 mt-1 max-w-lg mx-auto leading-relaxed">
-            Upload will be enabled in Milestone 4B after secure storage, file validation,
-            metadata stripping and safety checks are implemented.
-          </p>
+        {/* Upload Panel */}
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
           <button
-            disabled
-            className="mt-3 text-sm bg-slate-200 text-slate-400 font-medium px-4 py-2 rounded-lg cursor-not-allowed"
+            onClick={() => { setShowUpload(s => !s); setUploadResult(null); setUploadError(null) }}
+            className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-slate-50 transition-colors"
           >
-            Browse files — available in Milestone 4B
+            <span className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+              <Upload size={15} className="text-teal-600" />
+              Upload PDF Document
+            </span>
+            {showUpload ? <ChevronUp size={15} className="text-slate-400" /> : <ChevronDown size={15} className="text-slate-400" />}
           </button>
+
+          {showUpload && (
+            <div className="border-t border-slate-100 p-5 space-y-5">
+
+              {/* File picker */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  PDF file <span className="text-red-500">*</span>
+                </label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={e => {
+                    const f = e.target.files?.[0] ?? null
+                    setUploadFile(f)
+                    setUploadResult(null)
+                    setUploadError(null)
+                  }}
+                  className="block w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-slate-200 file:text-xs file:font-medium file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 file:cursor-pointer cursor-pointer"
+                />
+                {uploadFile && (
+                  <p className="mt-1 text-[11px] text-slate-400">{uploadFile.name} · {formatBytes(uploadFile.size)}</p>
+                )}
+              </div>
+
+              {/* Core fields — 2-column on wider screens */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Title */}
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Title <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    value={form.title}
+                    onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                    placeholder="e.g. Medication Administration Policy"
+                    className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  />
+                </div>
+
+                {/* Description */}
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Description</label>
+                  <input
+                    type="text"
+                    value={form.description}
+                    onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                    placeholder="Brief summary of document contents"
+                    className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  />
+                </div>
+
+                {/* Vertical */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Vertical</label>
+                  <select
+                    value={form.vertical}
+                    onChange={e => setForm(f => ({ ...f, vertical: e.target.value }))}
+                    className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white"
+                  >
+                    {Object.entries(VERTICAL_LABELS).map(([k, v]) => (
+                      <option key={k} value={k}>{v}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Category */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Category <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    value={form.category}
+                    onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
+                    placeholder="e.g. Medication, Safeguarding, HR"
+                    className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  />
+                </div>
+
+                {/* Access roles */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Access roles</label>
+                  <input
+                    type="text"
+                    value={form.access_roles}
+                    onChange={e => setForm(f => ({ ...f, access_roles: e.target.value }))}
+                    placeholder="All Staff, Care Worker, Manager"
+                    className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  />
+                  <p className="text-[11px] text-slate-400 mt-0.5">Comma-separated roles</p>
+                </div>
+
+                {/* Status */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Status</label>
+                  <select
+                    value={form.status}
+                    onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
+                    className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white"
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="under_review">Under Review</option>
+                    <option value="approved">Approved</option>
+                  </select>
+                </div>
+
+                {/* Primary language */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Primary language</label>
+                  <select
+                    value={form.primary_language}
+                    onChange={e => setForm(f => ({ ...f, primary_language: e.target.value }))}
+                    className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white"
+                  >
+                    {Object.entries(LANGUAGE_NAMES).map(([k, v]) => (
+                      <option key={k} value={k}>{v}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Available languages */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Available languages</label>
+                  <input
+                    type="text"
+                    value={form.available_languages}
+                    onChange={e => setForm(f => ({ ...f, available_languages: e.target.value }))}
+                    placeholder="en, ur, pa"
+                    className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  />
+                  <p className="text-[11px] text-slate-400 mt-0.5">Comma-separated language codes</p>
+                </div>
+
+                {/* Review due date */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Review due date</label>
+                  <input
+                    type="date"
+                    value={form.review_due_date}
+                    onChange={e => setForm(f => ({ ...f, review_due_date: e.target.value }))}
+                    className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  />
+                </div>
+
+                {/* Version */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Version</label>
+                  <input
+                    type="text"
+                    value={form.version}
+                    onChange={e => setForm(f => ({ ...f, version: e.target.value }))}
+                    placeholder="1.0"
+                    className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  />
+                </div>
+              </div>
+
+              {/* Boolean flags */}
+              <div className="flex flex-wrap gap-4">
+                {[
+                  { key: 'is_sensitive' as const, label: 'Sensitive document', icon: <Shield size={13} /> },
+                  { key: 'escalation_required' as const, label: 'Escalation required', icon: <AlertTriangle size={13} /> },
+                  { key: 'approved_for_ai_answers' as const, label: 'Approved for AI answers', icon: <Brain size={13} /> },
+                ].map(({ key, label, icon }) => (
+                  <label key={key} className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={form[key]}
+                      onChange={e => setForm(f => ({ ...f, [key]: e.target.checked }))}
+                      className="rounded border-slate-300 text-teal-600 focus:ring-teal-400"
+                    />
+                    <span className="flex items-center gap-1 text-xs text-slate-600">
+                      {icon}
+                      {label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+
+              {/* Submit / reset */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleUpload}
+                  disabled={uploading || !uploadFile}
+                  className="flex items-center gap-2 text-sm font-semibold bg-teal-700 hover:bg-teal-800 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {uploading ? (
+                    <><Loader2 size={14} className="animate-spin" /> Uploading…</>
+                  ) : (
+                    <><Upload size={14} /> Upload PDF</>
+                  )}
+                </button>
+                <button
+                  onClick={resetUploadForm}
+                  className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 border border-slate-200 rounded-lg px-3 py-2 hover:bg-slate-50 transition-colors"
+                >
+                  <X size={12} /> Reset
+                </button>
+              </div>
+
+              {/* Upload error */}
+              {uploadError && (
+                <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-xs text-red-700">
+                  <XCircle size={14} className="shrink-0 mt-0.5" />
+                  <span>{uploadError}</span>
+                </div>
+              )}
+
+              {/* Upload result */}
+              {uploadResult && (
+                <div className={`rounded-2xl border p-4 space-y-3 ${uploadResult.storage_status === 'uploaded' ? 'bg-teal-50 border-teal-200' : 'bg-amber-50 border-amber-200'}`}>
+                  {/* Status header */}
+                  <div className="flex items-center gap-2">
+                    {uploadResult.storage_status === 'uploaded' ? (
+                      <CheckCircle2 size={16} className="text-teal-600 shrink-0" />
+                    ) : (
+                      <Info size={16} className="text-amber-600 shrink-0" />
+                    )}
+                    <p className={`text-sm font-semibold ${uploadResult.storage_status === 'uploaded' ? 'text-teal-900' : 'text-amber-900'}`}>
+                      {uploadResult.storage_status === 'uploaded' ? 'Upload successful' : 'Storage not configured'}
+                    </p>
+                  </div>
+
+                  {uploadResult.message && (
+                    <p className="text-xs text-amber-800">{uploadResult.message}</p>
+                  )}
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                    {uploadResult.file_name && (
+                      <div className="bg-white/60 rounded-lg p-2">
+                        <p className="text-slate-400 font-medium">File</p>
+                        <p className="text-slate-700 font-mono truncate">{uploadResult.file_name}</p>
+                      </div>
+                    )}
+                    {uploadResult.file_size_bytes !== undefined && (
+                      <div className="bg-white/60 rounded-lg p-2">
+                        <p className="text-slate-400 font-medium">Size</p>
+                        <p className="text-slate-700">{formatBytes(uploadResult.file_size_bytes)}</p>
+                      </div>
+                    )}
+                    <div className="bg-white/60 rounded-lg p-2">
+                      <p className="text-slate-400 font-medium">Storage</p>
+                      <p className={`font-medium ${uploadResult.storage_status === 'uploaded' ? 'text-teal-700' : 'text-amber-700'}`}>
+                        {uploadResult.storage_status === 'uploaded' ? 'Uploaded ✓' : 'Not configured'}
+                      </p>
+                    </div>
+                    {uploadResult.extraction_status && (
+                      <div className="bg-white/60 rounded-lg p-2">
+                        <p className="text-slate-400 font-medium">Extraction</p>
+                        <p className="text-slate-700 capitalize">{uploadResult.extraction_status}</p>
+                      </div>
+                    )}
+                    {uploadResult.extracted_character_count !== undefined && uploadResult.extracted_character_count !== null && (
+                      <div className="bg-white/60 rounded-lg p-2">
+                        <p className="text-slate-400 font-medium">Characters</p>
+                        <p className="text-slate-700">{uploadResult.extracted_character_count.toLocaleString()}</p>
+                      </div>
+                    )}
+                    {uploadResult.extracted_page_count !== undefined && uploadResult.extracted_page_count !== null && (
+                      <div className="bg-white/60 rounded-lg p-2">
+                        <p className="text-slate-400 font-medium">Pages</p>
+                        <p className="text-slate-700">{uploadResult.extracted_page_count}</p>
+                      </div>
+                    )}
+                    {uploadResult.personal_data_risk && (
+                      <div className={`bg-white/60 rounded-lg p-2 ${uploadResult.personal_data_risk === 'possible' ? 'ring-1 ring-amber-300' : ''}`}>
+                        <p className="text-slate-400 font-medium">Personal data risk</p>
+                        <p className={`font-medium ${uploadResult.personal_data_risk === 'possible' ? 'text-amber-700' : 'text-teal-700'}`}>
+                          {uploadResult.personal_data_risk === 'possible' ? 'Possible — review required' : 'Low'}
+                        </p>
+                      </div>
+                    )}
+                    <div className="bg-white/60 rounded-lg p-2">
+                      <p className="text-slate-400 font-medium">Embedding</p>
+                      <p className="text-amber-700 font-medium">{uploadResult.embedding_status ?? 'pending'}</p>
+                    </div>
+                  </div>
+
+                  {/* Personal data warnings */}
+                  {uploadResult.personal_data_warnings && uploadResult.personal_data_warnings.length > 0 && (
+                    <div className="bg-amber-100 border border-amber-200 rounded-lg px-3 py-2 space-y-1">
+                      <p className="text-xs font-semibold text-amber-900 flex items-center gap-1">
+                        <AlertTriangle size={12} /> Personal data warnings
+                      </p>
+                      {uploadResult.personal_data_warnings.map((w, i) => (
+                        <p key={i} className="text-xs text-amber-800">{w}</p>
+                      ))}
+                      <p className="text-[11px] text-amber-600 mt-1">
+                        These are early warnings only and do not replace human review.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Extraction warnings */}
+                  {uploadResult.extraction_warnings && uploadResult.extraction_warnings.length > 0 && (
+                    <div className="space-y-1">
+                      {uploadResult.extraction_warnings.map((w, i) => (
+                        <p key={i} className="text-[11px] text-slate-500 flex items-center gap-1">
+                          <Info size={10} className="shrink-0" />{w}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* AI answers note */}
+                  {uploadResult.ai_answers_note && (
+                    <p className="text-[11px] text-slate-500 flex items-start gap-1">
+                      <Info size={10} className="shrink-0 mt-0.5" />
+                      {uploadResult.ai_answers_note}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {usingFallback && (
@@ -389,7 +806,7 @@ export default function DocumentRegistryPage() {
               <XCircle size={13} className="text-red-400 mt-0.5 shrink-0" />
               <div>
                 <p className="font-semibold text-slate-700">Human-only (AI answer disabled)</p>
-                <p className="text-slate-400 mt-0.5">approved_for_ai_answers is false. This document will never be used to generate AI answers, and will not be embedded even in Milestone 4B. Applies to safeguarding, disciplinary, HR and other sensitive policy types.</p>
+                <p className="text-slate-400 mt-0.5">approved_for_ai_answers is false. This document will never be used to generate AI answers and will not be embedded. Applies to safeguarding, disciplinary, HR and other sensitive policy types.</p>
               </div>
             </div>
           </div>
@@ -565,7 +982,7 @@ export default function DocumentRegistryPage() {
             <strong>Platform flexibility:</strong> The <em>Vertical</em> field means this registry is not limited to care.
             It can hold policies for finance, property management, recruitment, healthcare admin, training providers
             and other regulated SMEs — all managed in one place.
-            Document indexing (RAG) is coming in <strong>Milestone 4B</strong>.
+            Document indexing (RAG pipeline) is coming in <strong>Milestone 4C/4D</strong>.
           </p>
         </div>
 

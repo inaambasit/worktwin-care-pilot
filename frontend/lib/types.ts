@@ -86,6 +86,32 @@ export interface DocumentRecord {
   metadata: Record<string, unknown>
 }
 
+// ---------------------------------------------------------------------------
+// Milestone 4B — PDF upload result
+// ---------------------------------------------------------------------------
+
+export interface UploadDocumentResult {
+  upload_status?: 'success' | 'failed'
+  storage_status: 'uploaded' | 'not_configured' | 'failed'
+  document_id?: string
+  file_name?: string
+  file_size_bytes?: number
+  storage_key?: string | null
+  extraction_status?: 'success' | 'failed' | 'skipped'
+  extracted_text_preview?: string | null
+  extracted_character_count?: number | null
+  extracted_page_count?: number | null
+  extraction_warnings?: string[]
+  personal_data_risk?: 'low' | 'possible'
+  personal_data_warnings?: string[]
+  embedding_status?: string
+  ai_answers_note?: string
+  document?: DocumentRecord
+  // 503 not-configured fields
+  validation_passed?: boolean
+  message?: string
+}
+
 export const LANGUAGE_NAMES: Record<string, string> = {
   en: 'English',
   ur: 'Urdu',

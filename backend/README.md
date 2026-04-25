@@ -54,7 +54,7 @@ curl "http://localhost:8000/policies?category=Medication"
 | PATCH | /documents/{id} | Update document record |
 | POST | /documents/{id}/approve | Approve a document |
 | POST | /documents/{id}/archive | Archive a document |
-| POST | /documents/upload | Upload placeholder (disabled — Milestone 4B) |
+| POST | /documents/upload | Safe PDF upload with validation, Supabase storage, text extraction and personal-data risk check (Milestone 4B) |
 
 ## CORS
 
@@ -89,6 +89,57 @@ Multiple origins are comma-separated. No wildcard `*` is used in production.
 | `NEXT_PUBLIC_API_URL` | `https://<your-render-service-name>.onrender.com` |
 
 Replace `<your-render-service-name>` with the subdomain Render assigns when you create the service.
+
+## Milestone 4B: Safe PDF upload
+
+### Supabase project required
+
+| Setting | Value |
+|---------|-------|
+| Storage bucket | `worktwin-documents` |
+| Bucket visibility | Private (not public) |
+| Allowed MIME types | `application/pdf` only |
+| Max file size | 10 MB |
+
+### Additional environment variables (Render)
+
+| Variable | Description |
+|----------|-------------|
+| `SUPABASE_URL` | Your Supabase project URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | **Backend only.** Never expose in frontend code, logs or API responses. |
+| `SUPABASE_STORAGE_BUCKET` | Defaults to `worktwin-documents` if unset |
+
+### Upload endpoint
+
+`POST /documents/upload` — multipart form data. Required fields: `file`, `organisation_id`, `title`, `category`. All other fields have safe defaults.
+
+Storage path: `{organisation_id}/documents/{document_id}/{safe_filename}`
+
+### What Milestone 4B does
+
+- PDF validation (extension, `%PDF` magic bytes, 10 MB limit)
+- Rejects prohibited document types (care plans, MAR charts, payroll, HR cases, named complaints)
+- Stores PDF in the private Supabase bucket — no public URL created
+- Extracts a short text preview (≤ 2,000 characters) using `pypdf` — full text is not stored
+- Runs a basic personal-data risk scan (email, UK phone, postcode, NHS number patterns, DOB labels)
+- Creates an in-memory document registry record with `embedding_status = pending`
+- Returns extraction and risk results to the admin UI
+
+### What Milestone 4B does NOT do
+
+- No public storage URLs
+- No signed URLs (preview access to be added later)
+- No full text storage
+- No chunking
+- No embeddings
+- No RAG pipeline
+- No LLM API calls
+- No real Thumhara/QCS documents (use dummy/sample PDFs for testing only)
+- No service-user records, care plans, MAR charts with names, staff HR files, payroll records or private personal data
+
+### If Supabase is not configured
+
+The backend will return HTTP 503 with a JSON body including `storage_status: "not_configured"`. Validation and text extraction still run so you can verify those gates work locally without Supabase credentials.
 
 ## Safety guarantees (Milestone 4A.1)
 

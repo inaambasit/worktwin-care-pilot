@@ -58,6 +58,8 @@ curl "http://localhost:8000/policies?category=Medication"
 | GET | /documents/{id}/chunks | Admin/debug — chunk metadata and 250-char previews (Milestone 4D) |
 | GET | /documents/{id}/embedding-readiness | Admin — embedding readiness counts and flags (Milestones 4E–4F) |
 | POST | /documents/{id}/generate-embeddings | **Admin-only** — controlled embedding generation for dummy/sample docs (Milestone 4F) |
+| POST | /documents/search-vector | **Admin/debug** — vector similarity search, no AI answer (Milestone 4G) |
+| POST | /documents/answer-debug | **Admin/debug** — source-grounded answer test from retrieved chunks only (Milestone 4H) |
 
 ## CORS
 
@@ -761,10 +763,155 @@ Location: `/admin/documents` — collapsible purple card labelled "Vector Search
 - No staff-facing RAG pipeline
 - No LLM calls of any kind
 
-## Next steps (Milestone 4H)
+## Milestone 4H: Admin-only source-grounded answer generation test
+
+### What Milestone 4H adds
+
+- New backend-only helpers:
+  - `_build_source_context(chunks)` — builds a labelled source context string (max 5 chunks, max 4,000 characters)
+  - `_format_source_citations(sources)` — formats a citation list for the prompt
+  - `_generate_source_grounded_answer(query, context, citations)` — calls ANSWER_MODEL with a strict source-only prompt
+  - `_validate_grounded_answer_result(answer, sources)` — derives confidence label
+  - `_detect_escalation_topic(query)` — pattern matches sensitive care/HR/safeguarding keywords
+- New endpoint: `POST /documents/answer-debug` — admin/debug only
+- Frontend admin panel: "Source-Grounded Answer Test" (collapsible, indigo card) at `/admin/documents`
+- New `AnswerDebugRequest` Pydantic model
+- New `ANSWER_MODEL` env var (default: `gpt-4o-mini`)
+- Staff `/ask` endpoint is unchanged — AI answers remain disabled for staff
+
+### What Milestone 4H does NOT do
+
+- No staff-facing AI answers
+- No changes to `/ask`
+- No real Thumhara/QCS policy documents — dummy/sample only
+- No authentication enforcement
+- No rate limiting
+
+### Answer model safety rules
+
+The model is instructed to:
+- Answer only from the supplied sources — no outside knowledge
+- Cite sources using `[Source 1]`, `[Source 2]`, etc.
+- If sources are insufficient, say exactly: "I can't answer that from the available approved sources."
+- Not mention policies or documents not in the sources
+- Include escalation guidance for safeguarding, medication, HR, legal, wellbeing, or named-individual queries
+- Use UK English
+
+Confidence values:
+- `source_grounded` — answer generated from retrieved sources
+- `insufficient_sources` — no matching chunks, or model said it cannot answer
+- `blocked_safety` — chunks matched but all excluded by safety rules (escalation_required or is_sensitive)
+
+### Environment variables (Render — backend only)
+
+| Variable | Description |
+|----------|-------------|
+| `OPENAI_API_KEY` | **Backend only.** Never in frontend code, logs, or API responses. |
+| `ANSWER_MODEL` | Optional. Defaults to `gpt-4o-mini`. Set in Render env vars if you want to use a different model. |
+
+### Answer debug endpoint
+
+`POST /documents/answer-debug`
+
+Request body:
+
+```json
+{
+  "query": "What should this test document not contain?",
+  "organisation_id": "demo-org",
+  "match_count": 5,
+  "allow_dummy_override": true
+}
+```
+
+Response shape:
+
+```json
+{
+  "query": "What should this test document not contain?",
+  "organisation_id": "demo-org",
+  "answer": "According to [Source 1], the test document should not contain...",
+  "confidence": "source_grounded",
+  "result_count": 3,
+  "sources": [
+    {
+      "source_label": "[Source 1]",
+      "document_id": "...",
+      "chunk_id": "...",
+      "document_title": "Sample Test Document",
+      "chunk_index": 0,
+      "similarity": 0.8734,
+      "category": "Onboarding",
+      "vertical": "care",
+      "source_preview": "First 350 characters of the chunk..."
+    }
+  ],
+  "safety_note": null,
+  "model": "gpt-4o-mini",
+  "estimated_cost_note": "<$0.01 (~312 tokens, model: gpt-4o-mini)",
+  "note": "Admin-only source-grounded answer test. Staff AI answers are still disabled."
+}
+```
+
+If `OPENAI_API_KEY` is not set: `{ "status": "not_configured", "note": "..." }`
+
+### Manual curl test
+
+```bash
+curl -X POST https://worktwin-care-pilot-api.onrender.com/documents/answer-debug \
+  -H "Content-Type: application/json" \
+  -d '{"query":"What should this test document not contain?","organisation_id":"demo-org","match_count":5,"allow_dummy_override":true}'
+```
+
+Expected response:
+- Concise answer citing `[Source 1]`, `[Source 2]`, etc.
+- `confidence: "source_grounded"`
+- `sources` array with `source_label`, `document_title`, `similarity`, `source_preview`
+- `note` confirming staff AI answers are still disabled
+
+### Frontend Source-Grounded Answer Test panel
+
+Location: `/admin/documents` — collapsible indigo card labelled "Source-Grounded Answer Test (Admin/debug only)"
+
+- Clearly labelled admin/debug only
+- Warning: "This tests answer generation from retrieved chunks only. It is not enabled for staff."
+- Inputs: query text, match count (1–5), "Allow dummy/sample documents" checkbox
+- Button: "Generate source-grounded test answer"
+- Output: confidence badge, answer text, safety note (if applicable), sources used (with previews), model name, estimated cost note
+- Vectors never displayed. Full extracted text never displayed.
+- Not wired to the staff `/ask` page in any way.
+
+### Manual test steps (Milestone 4H)
+
+1. Ensure Milestones 4E–4G are complete: SQL migrations run, dummy PDF uploaded, embeddings generated
+2. Set `OPENAI_API_KEY` in Render env vars (backend service only)
+3. Optionally set `ANSWER_MODEL` (defaults to `gpt-4o-mini`)
+4. Use the **Source-Grounded Answer Test** panel at `/admin/documents`
+   — or test via the curl command above
+5. Confirm:
+   - Answer cites `[Source 1]` etc.
+   - `confidence: "source_grounded"`
+   - `sources` array is populated
+   - `note` says "Staff AI answers are still disabled"
+   - `/ask` still returns a placeholder response
+
+### Governance warning before staff release
+
+Before enabling AI answers for staff (Milestone 4I+), ALL of the following must be completed:
+
+- Governance sign-off and safety review of answer quality
+- Real Thumhara/QCS policy documents reviewed, approved, and embedded
+- Authentication and organisation membership verification wired
+- Rate limiting and anonymised query logging enabled
+- Staff-facing UI changes reviewed by a safeguarding lead
+- End-to-end test with representative real queries
+
+Do not expose `/documents/answer-debug` to staff or make it publicly accessible.
+
+## Next steps (Milestone 4I)
 
 - Governance sign-off and safety review before embedding real Thumhara/QCS policy documents
 - Staff-facing RAG pipeline (retrieve then generate answer from approved documents only)
-- LLM response generation with strict source-grounding prompt and citation
 - Authentication and organisation membership verification
-- Rate limiting and query logging (anonymised — no user-level data)
+- Rate limiting and anonymised query logging (no user-level data)
+- Upgrade `/ask` endpoint to use source-grounded answer pipeline

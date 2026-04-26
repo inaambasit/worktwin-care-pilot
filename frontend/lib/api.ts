@@ -1,6 +1,6 @@
 // WorkTwin API helper — calls the FastAPI backend at NEXT_PUBLIC_API_URL.
 
-import type { AskRequest, AskResponse, DocumentRecord, DocumentListResponse, UploadDocumentResult, GenerateEmbeddingsResult, VectorSearchResponse } from './types'
+import type { AskRequest, AskResponse, DocumentRecord, DocumentListResponse, UploadDocumentResult, GenerateEmbeddingsResult, VectorSearchResponse, AnswerDebugResponse } from './types'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
@@ -222,4 +222,35 @@ export async function vectorSearchDocuments(params: {
     throw new Error((data as { detail?: string }).detail ?? `Vector search failed: ${response.status}`)
   }
   return data as VectorSearchResponse
+}
+
+// ---------------------------------------------------------------------------
+// Milestone 4H — Admin/debug source-grounded answer test
+// OPENAI_API_KEY is never used or referenced in this file.
+// This endpoint is admin/debug only — not wired to the staff /ask page.
+// ---------------------------------------------------------------------------
+
+export async function answerDebug(params: {
+  query: string
+  organisation_id: string
+  match_count?: number
+  allow_dummy_override?: boolean
+}): Promise<AnswerDebugResponse> {
+  const body = {
+    query: params.query,
+    organisation_id: params.organisation_id,
+    match_count: params.match_count ?? 5,
+    allow_dummy_override: params.allow_dummy_override ?? false,
+  }
+  const response = await fetch(`${API_BASE_URL}/documents/answer-debug`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(60_000),
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error((data as { detail?: string }).detail ?? `Answer debug failed: ${response.status}`)
+  }
+  return data as AnswerDebugResponse
 }

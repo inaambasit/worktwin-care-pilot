@@ -1,14 +1,14 @@
 'use client'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import AppLayout from '@/components/AppLayout'
-import { fetchDocuments, approveDocument, archiveDocument, uploadDocumentPdf, generateEmbeddings, vectorSearchDocuments } from '@/lib/api'
-import type { DocumentRecord, DocumentStatus, EmbeddingStatus, UploadDocumentResult, GenerateEmbeddingsResult, VectorSearchResponse } from '@/lib/types'
+import { fetchDocuments, approveDocument, archiveDocument, uploadDocumentPdf, generateEmbeddings, vectorSearchDocuments, answerDebug } from '@/lib/api'
+import type { DocumentRecord, DocumentStatus, EmbeddingStatus, UploadDocumentResult, GenerateEmbeddingsResult, VectorSearchResponse, AnswerDebugResponse } from '@/lib/types'
 import { LANGUAGE_NAMES } from '@/lib/types'
 import {
   FileText, Upload, CheckCircle, Clock, AlertCircle, Users,
   AlertTriangle, Shield, Globe, Brain, Archive, RefreshCw,
   ShieldAlert, XCircle, Filter, ChevronDown, ChevronUp,
-  Loader2, X, Info, CheckCircle2, Zap, Search,
+  Loader2, X, Info, CheckCircle2, Zap, Search, MessageSquare,
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -273,6 +273,15 @@ export default function DocumentRegistryPage() {
   const [vsResult, setVsResult] = useState<VectorSearchResponse | null>(null)
   const [vsError, setVsError] = useState<string | null>(null)
 
+  // Source-Grounded Answer Test state (admin/debug — Milestone 4H)
+  const [showAnswerTest, setShowAnswerTest] = useState(false)
+  const [atQuery, setAtQuery] = useState('')
+  const [atMatchCount, setAtMatchCount] = useState(5)
+  const [atAllowDummy, setAtAllowDummy] = useState(true)
+  const [atLoading, setAtLoading] = useState(false)
+  const [atResult, setAtResult] = useState<AnswerDebugResponse | null>(null)
+  const [atError, setAtError] = useState<string | null>(null)
+
   const loadDocs = useCallback(() => {
     setLoading(true)
     fetchDocuments()
@@ -415,6 +424,27 @@ export default function DocumentRegistryPage() {
       setVsError(err instanceof Error ? err.message : 'Vector search failed.')
     } finally {
       setVsLoading(false)
+    }
+  }
+
+  async function handleAnswerTest() {
+    const q = atQuery.trim()
+    if (!q) { setAtError('Enter a query to test.'); return }
+    setAtLoading(true)
+    setAtResult(null)
+    setAtError(null)
+    try {
+      const result = await answerDebug({
+        query: q,
+        organisation_id: 'demo-org',
+        match_count: atMatchCount,
+        allow_dummy_override: atAllowDummy,
+      })
+      setAtResult(result)
+    } catch (err) {
+      setAtError(err instanceof Error ? err.message : 'Answer generation failed.')
+    } finally {
+      setAtLoading(false)
     }
   }
 
@@ -1447,6 +1477,203 @@ export default function DocumentRegistryPage() {
                         <p className="text-[11px] text-purple-600 flex items-center gap-1">
                           <Info size={10} className="shrink-0" />
                           {vsResult.note}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Source-Grounded Answer Test — Admin/debug only (Milestone 4H) */}
+        <div className="bg-white border border-indigo-200 rounded-2xl overflow-hidden shadow-sm">
+          <button
+            onClick={() => { setShowAnswerTest(s => !s); setAtResult(null); setAtError(null) }}
+            className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-indigo-50/30 transition-colors"
+          >
+            <span className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+              <MessageSquare size={15} className="text-indigo-600" />
+              Source-Grounded Answer Test
+              <span className="text-[10px] font-medium bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full border border-indigo-200">
+                Admin/debug only
+              </span>
+            </span>
+            {showAnswerTest ? <ChevronUp size={15} className="text-slate-400" /> : <ChevronDown size={15} className="text-slate-400" />}
+          </button>
+
+          {showAnswerTest && (
+            <div className="border-t border-indigo-100 p-5 space-y-4">
+
+              {/* Warning */}
+              <div className="flex items-start gap-3 bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3">
+                <AlertCircle size={15} className="text-indigo-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-indigo-900">This tests answer generation from retrieved chunks only. It is not enabled for staff.</p>
+                  <p className="text-xs text-indigo-700 mt-0.5 leading-relaxed">
+                    Retrieves relevant chunks using pgvector, then sends <em>only those chunks</em> to the answer model.
+                    The model is instructed to answer from sources only — no general knowledge, no invented policy detail.
+                    The <code className="font-mono">/ask</code> endpoint is unchanged. Test with dummy/sample documents only.
+                  </p>
+                </div>
+              </div>
+
+              {/* Query */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Query</label>
+                <textarea
+                  value={atQuery}
+                  onChange={e => setAtQuery(e.target.value)}
+                  placeholder="e.g. What should this test document not contain?"
+                  rows={2}
+                  maxLength={500}
+                  className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+                />
+                <p className="text-[11px] text-slate-400 mt-0.5">{atQuery.length}/500 characters</p>
+              </div>
+
+              {/* Match count + allow dummy */}
+              <div className="flex items-end gap-6 flex-wrap">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Match count (max 5)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={5}
+                    value={atMatchCount}
+                    onChange={e => setAtMatchCount(Math.max(1, Math.min(5, Number(e.target.value))))}
+                    className="w-20 text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  />
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer select-none pb-2">
+                  <input
+                    type="checkbox"
+                    checked={atAllowDummy}
+                    onChange={e => setAtAllowDummy(e.target.checked)}
+                    className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-400"
+                  />
+                  <span className="text-xs text-slate-600">Allow dummy/sample documents</span>
+                </label>
+              </div>
+
+              {/* Submit */}
+              <div>
+                <button
+                  onClick={handleAnswerTest}
+                  disabled={atLoading || !atQuery.trim()}
+                  className="flex items-center gap-2 text-sm font-semibold bg-indigo-700 hover:bg-indigo-800 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {atLoading ? (
+                    <><Loader2 size={14} className="animate-spin" /> Generating…</>
+                  ) : (
+                    <><MessageSquare size={14} /> Generate source-grounded test answer</>
+                  )}
+                </button>
+              </div>
+
+              {/* Error */}
+              {atError && (
+                <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-xs text-red-700">
+                  <XCircle size={14} className="shrink-0 mt-0.5" />
+                  <div>
+                    <p>{atError}</p>
+                    {atError.includes('006_vector_search.sql') && (
+                      <p className="mt-1 font-medium">
+                        Run <code className="font-mono">backend/sql/006_vector_search.sql</code> in Supabase SQL Editor first.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Result */}
+              {atResult && (
+                <div className="space-y-3">
+                  {atResult.status === 'not_configured' ? (
+                    <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-700">
+                      <Info size={14} className="shrink-0 mt-0.5" />
+                      <p>OPENAI_API_KEY is not configured on the backend. Set it in Render environment variables (backend service only).</p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Confidence badge */}
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full border ${
+                          atResult.confidence === 'source_grounded'
+                            ? 'bg-teal-50 text-teal-700 border-teal-200'
+                            : atResult.confidence === 'blocked_safety'
+                            ? 'bg-amber-50 text-amber-700 border-amber-200'
+                            : 'bg-slate-100 text-slate-500 border-slate-200'
+                        }`}>
+                          {atResult.confidence === 'source_grounded' && <CheckCircle2 size={12} />}
+                          {atResult.confidence === 'blocked_safety' && <AlertTriangle size={12} />}
+                          {atResult.confidence === 'insufficient_sources' && <Info size={12} />}
+                          {atResult.confidence === 'source_grounded' ? 'Source grounded'
+                            : atResult.confidence === 'blocked_safety' ? 'Blocked — safety escalation'
+                            : 'Insufficient sources'}
+                        </span>
+                        {atResult.result_count !== undefined && (
+                          <span className="text-xs text-slate-400">{atResult.result_count} chunk{atResult.result_count !== 1 ? 's' : ''} used</span>
+                        )}
+                        {atResult.model && (
+                          <span className="text-xs text-slate-400 font-mono">{atResult.model}</span>
+                        )}
+                      </div>
+
+                      {/* Answer */}
+                      {atResult.answer && (
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Answer</p>
+                          <p className="text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">{atResult.answer}</p>
+                        </div>
+                      )}
+
+                      {/* Safety note */}
+                      {atResult.safety_note && (
+                        <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-800">
+                          <AlertTriangle size={13} className="shrink-0 mt-0.5" />
+                          <p>{atResult.safety_note}</p>
+                        </div>
+                      )}
+
+                      {/* Sources */}
+                      {(atResult.sources ?? []).length > 0 && (
+                        <div className="space-y-2">
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Sources used</p>
+                          {(atResult.sources ?? []).map(src => (
+                            <div key={src.chunk_id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1.5">
+                              <div className="flex items-start justify-between gap-2 flex-wrap">
+                                <div>
+                                  <span className="text-xs font-bold text-indigo-700">{src.source_label}</span>
+                                  <span className="text-xs text-slate-600 ml-1.5">{src.document_title}</span>
+                                  <p className="text-[11px] text-slate-400">Chunk {src.chunk_index} · {src.category} · {src.vertical}</p>
+                                </div>
+                                <span className={`text-sm font-bold shrink-0 ${src.similarity >= 0.7 ? 'text-teal-700' : src.similarity >= 0.4 ? 'text-amber-600' : 'text-slate-400'}`}>
+                                  {(src.similarity * 100).toFixed(1)}%
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-600 leading-relaxed font-mono bg-white border border-slate-100 rounded-lg px-3 py-2 whitespace-pre-wrap line-clamp-4">
+                                {src.source_preview || '(no preview)'}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Cost note */}
+                      {atResult.estimated_cost_note && (
+                        <p className="text-[11px] text-slate-400 flex items-center gap-1">
+                          <Info size={10} className="shrink-0" />
+                          {atResult.estimated_cost_note}
+                        </p>
+                      )}
+
+                      {/* Admin note */}
+                      {atResult.note && (
+                        <p className="text-[11px] text-indigo-600 flex items-center gap-1">
+                          <Info size={10} className="shrink-0" />
+                          {atResult.note}
                         </p>
                       )}
                     </>

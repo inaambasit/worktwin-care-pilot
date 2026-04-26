@@ -71,6 +71,14 @@ MAX_SEARCH_RESULTS = 10     # cap match_count on the search endpoint
 _OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
 _OPENAI_CONFIGURED: bool = bool(_OPENAI_API_KEY)
 
+# ---------------------------------------------------------------------------
+# Milestone 4H — answer model configuration (backend-only)
+# ANSWER_MODEL and OPENAI_API_KEY are never logged, returned, or exposed.
+# ---------------------------------------------------------------------------
+ANSWER_MODEL: str = os.getenv("ANSWER_MODEL", "gpt-4o-mini")
+MAX_ANSWER_CHUNKS: int = 5          # max source chunks fed to answer model
+MAX_SOURCE_CONTEXT_CHARS: int = 4000  # total character cap for source context
+
 try:
     from pypdf import PdfReader as _PdfReader
     _PYPDF_OK = True
@@ -594,6 +602,184 @@ def _normalise_search_result(row: Dict[str, Any]) -> Dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# Milestone 4H — source-grounded answer generation helpers
+# All answer model calls are backend-only.
+# OPENAI_API_KEY and ANSWER_MODEL are never logged, returned, or transmitted.
+# ---------------------------------------------------------------------------
+
+_ESCALATION_TOPICS_RE = re.compile(
+    r'\b(safeguard(?:ing)?|medication|complaint|disciplinary|grievance|'
+    r'\bhr\b|payroll|legal|solicitor|tribunal|health\s+and\s+safety|'
+    r'incident|accident|wellbeing|mental\s+health|redundancy|dismissal|'
+    r'named\s+individual|personal\s+data|gdpr)\b',
+    re.IGNORECASE,
+)
+
+
+def _detect_escalation_topic(query: str) -> bool:
+    return bool(_ESCALATION_TOPICS_RE.search(query))
+
+
+def _build_source_context(
+    chunks: List[Dict[str, Any]],
+) -> Tuple[str, List[Dict[str, Any]]]:
+    """
+    Build a labelled source context string and a safe citation list.
+    Caps context at MAX_SOURCE_CONTEXT_CHARS and uses at most MAX_ANSWER_CHUNKS chunks.
+    Never returns vectors, secrets, or full extracted text.
+    chunk_preview (from normalised rows) or chunk_text (from raw rows) are both accepted.
+    """
+    limited = chunks[:MAX_ANSWER_CHUNKS]
+    sources: List[Dict[str, Any]] = []
+    parts: List[str] = []
+    total_chars = 0
+
+    for i, chunk in enumerate(limited):
+        label = f"[Source {i + 1}]"
+        preview = (chunk.get("chunk_preview") or chunk.get("chunk_text") or "")[:350]
+        if not preview:
+            continue
+        remaining = MAX_SOURCE_CONTEXT_CHARS - total_chars
+        if remaining <= 0:
+            break
+        text = preview[:remaining]
+        block = f"{label}\nDocument: {chunk.get('document_title', 'Unknown')}\n{text}"
+        parts.append(block)
+        total_chars += len(text)
+        sources.append({
+            "source_label": label,
+            "document_id": str(chunk.get("document_id") or ""),
+            "chunk_id": str(chunk.get("chunk_id") or ""),
+            "document_title": chunk.get("document_title") or "",
+            "chunk_index": int(chunk.get("chunk_index") or 0),
+            "similarity": round(float(chunk.get("similarity") or 0), 4),
+            "category": chunk.get("category") or "",
+            "vertical": chunk.get("vertical") or "",
+            "source_preview": preview,
+        })
+
+    context_str = "\n\n---\n\n".join(parts)
+    return context_str, sources
+
+
+def _format_source_citations(sources: List[Dict[str, Any]]) -> str:
+    """Format a brief citation list for inclusion in the answer prompt."""
+    return "\n".join(
+        f"{s['source_label']} — {s['document_title']} (chunk {s['chunk_index']})"
+        for s in sources
+    )
+
+
+def _generate_source_grounded_answer(
+    query: str,
+    context: str,
+    citations: str,
+) -> Dict[str, Any]:
+    """
+    Call ANSWER_MODEL with a strict source-grounding prompt.
+    Returns {"answer": str, "model": str, "estimated_cost_note": str}.
+    Tries the OpenAI Responses API first; falls back to Chat Completions if unavailable.
+    OPENAI_API_KEY and ANSWER_MODEL are backend-only — never logged or returned.
+    """
+    from openai import OpenAI as _OpenAI
+    client = _OpenAI(api_key=_OPENAI_API_KEY)
+
+    system_prompt = (
+        "You are a workplace policy assistant for a UK care provider. "
+        "Answer questions exclusively from the supplied source documents. Rules:\n"
+        "- Answer only from the provided sources. Do not use outside knowledge.\n"
+        "- Cite sources using [Source 1], [Source 2], etc.\n"
+        "- If sources are insufficient, say exactly: "
+        "\"I can't answer that from the available approved sources.\"\n"
+        "- Do not mention policies or procedures not present in the sources.\n"
+        "- Keep answers concise and factual.\n"
+        "- Do not give legal, clinical, safeguarding, or HR advice beyond the source wording.\n"
+        "- If the query touches safeguarding, medication, complaints, disciplinary, HR, "
+        "payroll, legal, health and safety, wellbeing, or named individuals, include: "
+        "\"Please escalate this to your line manager or designated lead.\"\n"
+        "- Use UK English."
+    )
+
+    user_message = (
+        f"Question: {query}\n\n"
+        f"Sources:\n{context}\n\n"
+        f"Source index:\n{citations}"
+    )
+
+    input_tokens = 0
+    output_tokens = 0
+
+    if hasattr(client, "responses"):
+        try:
+            resp = client.responses.create(
+                model=ANSWER_MODEL,
+                instructions=system_prompt,
+                input=user_message,
+                max_output_tokens=400,
+            )
+            answer_text = (resp.output_text or "").strip()
+            input_tokens = getattr(resp.usage, "input_tokens", 0)
+            output_tokens = getattr(resp.usage, "output_tokens", 0)
+        except Exception:
+            resp_cc = client.chat.completions.create(
+                model=ANSWER_MODEL,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_message},
+                ],
+                max_tokens=400,
+                temperature=0,
+            )
+            answer_text = (resp_cc.choices[0].message.content or "").strip()
+            input_tokens = getattr(resp_cc.usage, "prompt_tokens", 0)
+            output_tokens = getattr(resp_cc.usage, "completion_tokens", 0)
+    else:
+        resp_cc = client.chat.completions.create(
+            model=ANSWER_MODEL,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message},
+            ],
+            max_tokens=400,
+            temperature=0,
+        )
+        answer_text = (resp_cc.choices[0].message.content or "").strip()
+        input_tokens = getattr(resp_cc.usage, "prompt_tokens", 0)
+        output_tokens = getattr(resp_cc.usage, "completion_tokens", 0)
+
+    total_tokens = input_tokens + output_tokens
+    if total_tokens > 0:
+        # gpt-4o-mini approximate pricing: $0.15/1M input, $0.60/1M output
+        cost_usd = (input_tokens * 0.15 + output_tokens * 0.60) / 1_000_000
+        cost_note = (
+            f"<$0.01 (~{total_tokens} tokens, model: {ANSWER_MODEL})"
+            if cost_usd < 0.01
+            else f"~${cost_usd:.4f} USD (~{total_tokens} tokens, model: {ANSWER_MODEL})"
+        )
+    else:
+        cost_note = f"Model: {ANSWER_MODEL}."
+
+    return {"answer": answer_text, "model": ANSWER_MODEL, "estimated_cost_note": cost_note}
+
+
+def _validate_grounded_answer_result(
+    answer: str,
+    sources: List[Dict[str, Any]],
+) -> str:
+    """
+    Derive confidence label from the answer and retrieved sources.
+    Returns: "source_grounded" | "insufficient_sources"
+    "blocked_safety" is determined upstream (before answer generation) when all
+    raw RPC matches were excluded by safety rules.
+    """
+    if not sources:
+        return "insufficient_sources"
+    if "can't answer that from the available approved sources" in answer.lower():
+        return "insufficient_sources"
+    return "source_grounded"
+
+
+# ---------------------------------------------------------------------------
 # Privacy and safety contract (enforced in the real build, documented here)
 #
 # - Private employee chat transcripts are NEVER exposed to managers or admins.
@@ -759,6 +945,19 @@ class VectorSearchRequest(BaseModel):
     Request body for POST /documents/search-vector (Milestone 4G).
     Admin/debug-only — do not expose to staff or public routes.
     No AI answer is generated. No LLM is called.
+    """
+    query: str
+    organisation_id: str = "demo-org"
+    match_count: int = 5
+    allow_dummy_override: bool = False
+
+
+class AnswerDebugRequest(BaseModel):
+    """
+    Request body for POST /documents/answer-debug (Milestone 4H).
+    Admin/debug-only — do not expose to staff or public routes.
+    Generates a source-grounded answer from retrieved chunks only.
+    Staff AI answers remain disabled. No real Thumhara/QCS docs yet.
     """
     query: str
     organisation_id: str = "demo-org"
@@ -1789,6 +1988,173 @@ def search_vector(payload: VectorSearchRequest):
         "result_count": len(results),
         "results": results,
         "note": "Vector retrieval only. AI answers are still disabled.",
+    }
+
+
+# ---------------------------------------------------------------------------
+# Milestone 4H — Admin/debug source-grounded answer test endpoint
+# POST /documents/answer-debug
+# Admin/debug only. Staff AI answers remain disabled. /ask is unchanged.
+# Uses retrieved chunks only — no general knowledge, no invented policy detail.
+# ---------------------------------------------------------------------------
+
+@app.post("/documents/answer-debug")
+def answer_debug(payload: AnswerDebugRequest):
+    """
+    Admin/debug-only source-grounded answer test — Milestone 4H.
+
+    Embeds the query, retrieves chunks via pgvector, sends only those chunks to
+    ANSWER_MODEL, and returns a source-grounded answer with citations.
+
+    Safety rules enforced:
+    - OPENAI_API_KEY must be configured on the backend. Never frontend.
+    - escalation_required=True chunks always excluded from context.
+    - is_sensitive=True chunks always excluded from context.
+    - approved_for_ai_answers=False chunks excluded unless allow_dummy_override=True.
+    - Query capped at 500 characters. match_count capped at 5.
+    - Model answers only from supplied sources — never from general knowledge.
+    - If no relevant chunks: returns insufficient_sources without calling the model.
+    - If all matches safety-blocked: returns blocked_safety without calling the model.
+    - Vectors never returned. Full extracted text never returned.
+    - Staff /ask endpoint is unchanged.
+    - No real Thumhara/QCS documents yet — dummy/sample only.
+    """
+    import httpx as _httpx
+
+    if not _OPENAI_CONFIGURED:
+        return {
+            "status": "not_configured",
+            "note": (
+                "OPENAI_API_KEY is not set in the backend environment. "
+                "Add it to Render environment variables (backend only). "
+                "Never put it in frontend code or return it from any endpoint."
+            ),
+        }
+
+    if not _DB_CONFIGURED:
+        raise HTTPException(status_code=503, detail="Database not configured.")
+
+    query_clean = payload.query.strip()[:MAX_QUERY_CHARS]
+    if not query_clean:
+        raise HTTPException(status_code=400, detail="Query must not be empty.")
+
+    safe_count = max(1, min(payload.match_count, MAX_ANSWER_CHUNKS))
+    is_escalation_topic = _detect_escalation_topic(query_clean)
+    safety_note: Optional[str] = (
+        "This query involves a sensitive topic. Please escalate to your line manager or designated lead."
+        if is_escalation_topic else None
+    )
+
+    # Embed query once — key never logged or returned
+    try:
+        query_vector = _embed_query_text(query_clean)
+    except Exception as exc:
+        safe_err = _safe_embedding_error(exc)
+        raise HTTPException(status_code=500, detail=f"Query embedding failed: {safe_err}")
+
+    vector_str = _format_vector_for_pgvector(query_vector)
+
+    # Call RPC to get raw matches (before safety filter)
+    rpc_url = f"{_SUPABASE_URL}/rest/v1/rpc/match_document_chunks"
+    rpc_payload = {
+        "query_embedding": vector_str,
+        "match_organisation_id": payload.organisation_id,
+        "match_threshold": 0.0,
+        "match_count": safe_count,
+    }
+    rpc_resp = _httpx.post(rpc_url, json=rpc_payload, headers=_db_headers(), timeout=30)
+    if rpc_resp.status_code != 200:
+        body = rpc_resp.text[:300]
+        if rpc_resp.status_code == 404 or "Could not find" in body or "match_document_chunks" in body:
+            raise HTTPException(
+                status_code=503,
+                detail=(
+                    "match_document_chunks function not found. "
+                    "Run backend/sql/006_vector_search.sql in Supabase SQL Editor."
+                ),
+            )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Vector search RPC failed: HTTP {rpc_resp.status_code}",
+        )
+
+    raw_rows = rpc_resp.json()
+    if not isinstance(raw_rows, list):
+        raise HTTPException(status_code=500, detail="Unexpected response from match_document_chunks.")
+
+    # Apply safety filter — always enforce regardless of allow_dummy_override
+    filtered_rows: List[Dict[str, Any]] = []
+    for row in raw_rows:
+        if row.get("escalation_required", False):
+            continue
+        if row.get("is_sensitive", False):
+            continue
+        if not payload.allow_dummy_override and not row.get("approved_for_ai_answers", False):
+            continue
+        filtered_rows.append(row)
+
+    _no_source_answer = "I can't answer that from the available approved sources."
+    _admin_note = "Admin-only source-grounded answer test. Staff AI answers are still disabled."
+
+    # Case 1: nothing matched the query at all
+    if not raw_rows:
+        return {
+            "query": query_clean,
+            "organisation_id": payload.organisation_id,
+            "answer": _no_source_answer,
+            "confidence": "insufficient_sources",
+            "result_count": 0,
+            "sources": [],
+            "safety_note": safety_note,
+            "model": ANSWER_MODEL,
+            "estimated_cost_note": None,
+            "note": _admin_note,
+        }
+
+    # Case 2: matches found but all excluded by safety rules
+    if not filtered_rows:
+        return {
+            "query": query_clean,
+            "organisation_id": payload.organisation_id,
+            "answer": "This question needs to be escalated to a human lead.",
+            "confidence": "blocked_safety",
+            "result_count": len(raw_rows),
+            "sources": [],
+            "safety_note": safety_note or "All matching sources were excluded by safety rules.",
+            "model": ANSWER_MODEL,
+            "estimated_cost_note": None,
+            "note": _admin_note,
+        }
+
+    # Case 3: usable chunks available — build context and generate answer
+    normalised = [_normalise_search_result(r) for r in filtered_rows]
+    context_str, sources = _build_source_context(normalised)
+    citations_str = _format_source_citations(sources)
+
+    try:
+        answer_result = _generate_source_grounded_answer(
+            query=query_clean,
+            context=context_str,
+            citations=citations_str,
+        )
+    except Exception as exc:
+        safe_err = _safe_embedding_error(exc)
+        raise HTTPException(status_code=500, detail=f"Answer generation failed: {safe_err}")
+
+    answer_text = answer_result["answer"]
+    confidence = _validate_grounded_answer_result(answer_text, sources)
+
+    return {
+        "query": query_clean,
+        "organisation_id": payload.organisation_id,
+        "answer": answer_text,
+        "confidence": confidence,
+        "result_count": len(filtered_rows),
+        "sources": sources,
+        "safety_note": safety_note,
+        "model": answer_result["model"],
+        "estimated_cost_note": answer_result["estimated_cost_note"],
+        "note": _admin_note,
     }
 
 

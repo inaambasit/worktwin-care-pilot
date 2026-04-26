@@ -191,6 +191,39 @@ export interface VectorSearchResponse {
   error?: string
 }
 
+// ---------------------------------------------------------------------------
+// Milestone 4H — Source-grounded answer debug (admin/debug only)
+// ---------------------------------------------------------------------------
+
+export interface AnswerDebugSourceItem {
+  source_label: string
+  document_id: string
+  chunk_id: string
+  document_title: string
+  chunk_index: number
+  similarity: number
+  category: string
+  vertical: string
+  source_preview: string
+}
+
+export type AnswerDebugConfidence = 'source_grounded' | 'insufficient_sources' | 'blocked_safety'
+
+export interface AnswerDebugResponse {
+  query?: string
+  organisation_id?: string
+  answer?: string
+  confidence?: AnswerDebugConfidence
+  result_count?: number
+  sources?: AnswerDebugSourceItem[]
+  safety_note?: string | null
+  model?: string
+  estimated_cost_note?: string | null
+  note?: string
+  // present when OPENAI_API_KEY is not configured
+  status?: string
+}
+
 export const LANGUAGE_NAMES: Record<string, string> = {
   en: 'English',
   ur: 'Urdu',

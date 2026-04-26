@@ -1,6 +1,6 @@
 // WorkTwin API helper — calls the FastAPI backend at NEXT_PUBLIC_API_URL.
 
-import type { AskRequest, AskResponse, DocumentRecord, DocumentListResponse, UploadDocumentResult, GenerateEmbeddingsResult, VectorSearchResponse, AnswerDebugResponse } from './types'
+import type { AskRequest, AskResponse, DocumentRecord, DocumentListResponse, UploadDocumentResult, GenerateEmbeddingsResult, VectorSearchResponse, AnswerDebugResponse, GovernanceUpdateRequest } from './types'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
@@ -229,6 +229,28 @@ export async function vectorSearchDocuments(params: {
 // OPENAI_API_KEY is never used or referenced in this file.
 // This endpoint is admin/debug only — not wired to the staff /ask page.
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Milestone 4I — Document governance update (admin-only)
+// Calls PATCH /documents/{id}/governance — never enables /ask or staff features.
+// ---------------------------------------------------------------------------
+
+export async function updateDocumentGovernance(
+  id: string,
+  updates: GovernanceUpdateRequest,
+): Promise<DocumentRecord> {
+  const response = await fetch(`${API_BASE_URL}/documents/${id}/governance`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updates),
+    signal: AbortSignal.timeout(15_000),
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error((data as { detail?: string }).detail ?? `Governance update failed: ${response.status}`)
+  }
+  return data as DocumentRecord
+}
 
 export async function answerDebug(params: {
   query: string

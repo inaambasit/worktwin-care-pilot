@@ -1,14 +1,15 @@
 'use client'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import AppLayout from '@/components/AppLayout'
-import { fetchDocuments, approveDocument, archiveDocument, uploadDocumentPdf, generateEmbeddings, vectorSearchDocuments, answerDebug } from '@/lib/api'
-import type { DocumentRecord, DocumentStatus, EmbeddingStatus, UploadDocumentResult, GenerateEmbeddingsResult, VectorSearchResponse, AnswerDebugResponse } from '@/lib/types'
+import { fetchDocuments, approveDocument, archiveDocument, uploadDocumentPdf, generateEmbeddings, vectorSearchDocuments, answerDebug, updateDocumentGovernance } from '@/lib/api'
+import type { DocumentRecord, DocumentStatus, EmbeddingStatus, UploadDocumentResult, GenerateEmbeddingsResult, VectorSearchResponse, AnswerDebugResponse, GovernanceUpdateRequest } from '@/lib/types'
 import { LANGUAGE_NAMES } from '@/lib/types'
 import {
   FileText, Upload, CheckCircle, Clock, AlertCircle, Users,
   AlertTriangle, Shield, Globe, Brain, Archive, RefreshCw,
   ShieldAlert, XCircle, Filter, ChevronDown, ChevronUp,
   Loader2, X, Info, CheckCircle2, Zap, Search, MessageSquare,
+  ShieldCheck, ClipboardList, Lock,
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -282,6 +283,12 @@ export default function DocumentRegistryPage() {
   const [atResult, setAtResult] = useState<AnswerDebugResponse | null>(null)
   const [atError, setAtError] = useState<string | null>(null)
 
+  // Document Governance state (Milestone 4I)
+  const [showGovernance, setShowGovernance] = useState(false)
+  const [govLoading, setGovLoading] = useState<string | null>(null)
+  const [govError, setGovError] = useState<string | null>(null)
+  const [govSuccess, setGovSuccess] = useState<string | null>(null)
+
   const loadDocs = useCallback(() => {
     setLoading(true)
     fetchDocuments()
@@ -445,6 +452,21 @@ export default function DocumentRegistryPage() {
       setAtError(err instanceof Error ? err.message : 'Answer generation failed.')
     } finally {
       setAtLoading(false)
+    }
+  }
+
+  async function handleGovernanceAction(docId: string, updates: GovernanceUpdateRequest) {
+    setGovLoading(docId)
+    setGovError(null)
+    setGovSuccess(null)
+    try {
+      const updated = await updateDocumentGovernance(docId, updates)
+      setDocs(prev => prev.map(d => d.id === docId ? { ...d, ...updated } : d))
+      setGovSuccess(`Governance updated for "${updated.title}".`)
+    } catch (err) {
+      setGovError(err instanceof Error ? err.message : 'Governance update failed.')
+    } finally {
+      setGovLoading(null)
     }
   }
 
@@ -1133,6 +1155,22 @@ export default function DocumentRegistryPage() {
                           <div>
                             <p className="font-medium text-slate-800 whitespace-nowrap max-w-[220px] truncate" title={doc.title}>{doc.title}</p>
                             <p className="text-slate-400 text-[11px]">v{doc.version}</p>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full border ${doc.real_document ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
+                                {doc.real_document ? 'Real' : 'Dummy'}
+                              </span>
+                              {doc.governance_status && doc.governance_status !== 'not_reviewed' && (
+                                <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full border ${
+                                  doc.governance_status === 'approved_for_ai' ? 'bg-teal-50 text-teal-600 border-teal-200' :
+                                  doc.governance_status === 'approved_for_staff' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
+                                  doc.governance_status === 'pilot_approved' ? 'bg-blue-50 text-blue-600 border-blue-200' :
+                                  doc.governance_status === 'rejected' ? 'bg-red-50 text-red-500 border-red-200' :
+                                  'bg-slate-100 text-slate-400 border-slate-200'
+                                }`}>
+                                  {doc.governance_status.replace(/_/g, ' ')}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </td>
@@ -1481,6 +1519,195 @@ export default function DocumentRegistryPage() {
                       )}
                     </>
                   )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Document Governance — Admin only (Milestone 4I) */}
+        <div className="bg-white border border-emerald-200 rounded-2xl overflow-hidden shadow-sm">
+          <button
+            onClick={() => { setShowGovernance(s => !s); setGovError(null); setGovSuccess(null) }}
+            className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-emerald-50/30 transition-colors"
+          >
+            <span className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+              <ClipboardList size={15} className="text-emerald-600" />
+              Document Governance
+              <span className="text-[10px] font-medium bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">
+                Admin only
+              </span>
+            </span>
+            {showGovernance ? <ChevronUp size={15} className="text-slate-400" /> : <ChevronDown size={15} className="text-slate-400" />}
+          </button>
+
+          {showGovernance && (
+            <div className="border-t border-emerald-100 p-5 space-y-4">
+
+              {/* Info notice */}
+              <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+                <ShieldCheck size={15} className="text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-emerald-900">Governance gate — Milestone 4I</p>
+                  <p className="text-xs text-emerald-700 mt-0.5 leading-relaxed">
+                    Real documents must be explicitly approved before embedding or AI answer testing.
+                    Sensitive and escalation-required documents cannot be approved for AI use.
+                    Dummy/sample documents can be tested with <code className="font-mono">allow_dummy_override=true</code>.
+                    Staff-facing <code className="font-mono">/ask</code> remains disabled.
+                    No real Thumhara/QCS documents should be embedded until governance review is confirmed.
+                  </p>
+                </div>
+              </div>
+
+              {/* Success / Error */}
+              {govSuccess && (
+                <div className="flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-xl px-4 py-2.5 text-xs text-teal-700">
+                  <CheckCircle2 size={13} className="shrink-0" />
+                  {govSuccess}
+                </div>
+              )}
+              {govError && (
+                <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-xs text-red-700">
+                  <XCircle size={14} className="shrink-0 mt-0.5" />
+                  <span>{govError}</span>
+                </div>
+              )}
+
+              {/* Document governance list */}
+              {docs.length === 0 ? (
+                <p className="text-xs text-slate-400">No documents in registry. Upload a dummy PDF first.</p>
+              ) : (
+                <div className="space-y-3">
+                  {docs.map(doc => {
+                    const isSensOrEsc = doc.is_sensitive || doc.escalation_required
+                    const isReal = doc.real_document === true
+                    const isDummy = !isReal
+                    const busy = govLoading === doc.id
+
+                    const govStatusConfig: Record<string, { label: string; colour: string }> = {
+                      not_reviewed: { label: 'Not reviewed', colour: 'bg-slate-100 text-slate-500 border-slate-200' },
+                      pilot_approved: { label: 'Pilot approved', colour: 'bg-blue-50 text-blue-700 border-blue-200' },
+                      approved_for_staff: { label: 'Approved for staff', colour: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+                      approved_for_ai: { label: 'Approved for AI', colour: 'bg-teal-50 text-teal-700 border-teal-200' },
+                      rejected: { label: 'Rejected', colour: 'bg-red-50 text-red-700 border-red-200' },
+                      archived: { label: 'Archived', colour: 'bg-slate-100 text-slate-400 border-slate-200' },
+                    }
+                    const govSt = govStatusConfig[doc.governance_status ?? 'not_reviewed'] ?? govStatusConfig.not_reviewed
+
+                    return (
+                      <div key={doc.id} className="border border-slate-200 rounded-xl p-4 space-y-3">
+                        {/* Document header */}
+                        <div className="flex items-start justify-between gap-3 flex-wrap">
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="text-sm font-semibold text-slate-800">{doc.title}</p>
+                              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${isReal ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+                                {isReal ? 'Real document' : 'Dummy/sample'}
+                              </span>
+                              <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${govSt.colour}`}>
+                                {govSt.label}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-400 mt-0.5">{doc.file_name ?? '—'} · {doc.category}</p>
+                          </div>
+                          {isSensOrEsc && (
+                            <span className="flex items-center gap-1 text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1 shrink-0">
+                              <AlertTriangle size={10} />
+                              {doc.is_sensitive ? 'Sensitive' : ''}{doc.is_sensitive && doc.escalation_required ? ' · ' : ''}{doc.escalation_required ? 'Escalation required' : ''}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Approval flags */}
+                        <div className="flex flex-wrap gap-1.5 text-[10px]">
+                          {[
+                            { label: 'Embedding approved', value: doc.approved_for_embedding },
+                            { label: 'AI test approved', value: doc.approved_for_source_grounded_answers },
+                            { label: 'Staff visible', value: doc.approved_for_staff_visibility },
+                          ].map(({ label, value }) => (
+                            <span key={label} className={`flex items-center gap-1 px-2 py-0.5 rounded-full border ${value ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
+                              {value ? <CheckCircle2 size={9} /> : <XCircle size={9} />}
+                              {label}: {value ? 'Yes' : 'No'}
+                            </span>
+                          ))}
+                          <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full border ${doc.requires_human_review_before_embedding !== false ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
+                            <AlertTriangle size={9} />
+                            Human review before embedding: {doc.requires_human_review_before_embedding !== false ? 'Required' : 'Not required'}
+                          </span>
+                          <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full border ${doc.requires_human_review_before_staff_visibility !== false ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
+                            <AlertTriangle size={9} />
+                            Human review before staff visibility: {doc.requires_human_review_before_staff_visibility !== false ? 'Required' : 'Not required'}
+                          </span>
+                        </div>
+
+                        {/* Action buttons */}
+                        <div className="flex flex-wrap gap-1.5">
+                          {isReal && (
+                            <button
+                              onClick={() => handleGovernanceAction(doc.id, { dummy_document: true })}
+                              disabled={busy}
+                              className="flex items-center gap-1 text-[10px] font-medium text-slate-600 hover:text-slate-800 border border-slate-200 hover:border-slate-400 px-2 py-1 rounded-lg transition-colors disabled:opacity-40"
+                            >
+                              {busy ? <Loader2 size={9} className="animate-spin" /> : null}
+                              Mark as dummy test document
+                            </button>
+                          )}
+                          {isDummy && (
+                            <button
+                              onClick={() => handleGovernanceAction(doc.id, { real_document: true })}
+                              disabled={busy}
+                              className="flex items-center gap-1 text-[10px] font-medium text-blue-700 hover:text-blue-900 border border-blue-200 hover:border-blue-400 px-2 py-1 rounded-lg transition-colors disabled:opacity-40"
+                            >
+                              {busy ? <Loader2 size={9} className="animate-spin" /> : null}
+                              Mark as real pilot document
+                            </button>
+                          )}
+                          {!doc.approved_for_embedding && (
+                            <button
+                              onClick={() => { if (!isSensOrEsc) handleGovernanceAction(doc.id, { approved_for_embedding: true }) }}
+                              disabled={busy || isSensOrEsc}
+                              title={isSensOrEsc ? 'Blocked: document is sensitive or requires escalation. Cannot approve for embedding.' : 'Approve for embedding'}
+                              className={`flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-lg border transition-colors disabled:opacity-40 ${isSensOrEsc ? 'text-slate-400 border-slate-200 cursor-not-allowed' : 'text-emerald-700 hover:text-emerald-900 border-emerald-200 hover:border-emerald-400'}`}
+                            >
+                              {busy ? <Loader2 size={9} className="animate-spin" /> : isSensOrEsc ? <Lock size={9} /> : <CheckCircle size={9} />}
+                              Approve for embedding
+                            </button>
+                          )}
+                          {!doc.approved_for_source_grounded_answers && (
+                            <button
+                              onClick={() => { if (!isSensOrEsc) handleGovernanceAction(doc.id, { approved_for_source_grounded_answers: true }) }}
+                              disabled={busy || isSensOrEsc}
+                              title={isSensOrEsc ? 'Blocked: document is sensitive or requires escalation. Cannot approve for AI answer testing.' : 'Approve for source-grounded answer testing'}
+                              className={`flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-lg border transition-colors disabled:opacity-40 ${isSensOrEsc ? 'text-slate-400 border-slate-200 cursor-not-allowed' : 'text-teal-700 hover:text-teal-900 border-teal-200 hover:border-teal-400'}`}
+                            >
+                              {busy ? <Loader2 size={9} className="animate-spin" /> : isSensOrEsc ? <Lock size={9} /> : <Brain size={9} />}
+                              Approve for AI test
+                            </button>
+                          )}
+                          {!doc.approved_for_staff_visibility && (
+                            <button
+                              onClick={() => handleGovernanceAction(doc.id, { approved_for_staff_visibility: true })}
+                              disabled={busy}
+                              className="flex items-center gap-1 text-[10px] font-medium text-blue-700 hover:text-blue-900 border border-blue-200 hover:border-blue-400 px-2 py-1 rounded-lg transition-colors disabled:opacity-40"
+                            >
+                              {busy ? <Loader2 size={9} className="animate-spin" /> : <Users size={9} />}
+                              Approve for staff visibility
+                            </button>
+                          )}
+                          {doc.governance_status !== 'rejected' && (
+                            <button
+                              onClick={() => handleGovernanceAction(doc.id, { governance_status: 'rejected' })}
+                              disabled={busy}
+                              className="flex items-center gap-1 text-[10px] font-medium text-red-600 hover:text-red-800 border border-red-200 hover:border-red-400 px-2 py-1 rounded-lg transition-colors disabled:opacity-40"
+                            >
+                              {busy ? <Loader2 size={9} className="animate-spin" /> : <XCircle size={9} />}
+                              Reject
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </div>

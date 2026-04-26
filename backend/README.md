@@ -908,6 +908,146 @@ Before enabling AI answers for staff (Milestone 4I+), ALL of the following must 
 
 Do not expose `/documents/answer-debug` to staff or make it publicly accessible.
 
+## Milestone 4I: Document governance gate
+
+### What Milestone 4I adds
+
+- SQL migration `007_document_governance.sql`:
+  - 14 new governance columns on `document_registry` (all added with `ADD COLUMN IF NOT EXISTS` — safe to re-run on existing tables)
+  - New `document_audit_events` table with RLS enabled — backend service role only, no frontend access
+- Governance helper functions (backend-only, never exposed to frontend):
+  - `_create_audit_event(...)` — fire-and-forget audit logging; errors are swallowed so audit failure never blocks core operations
+  - `_get_document_governance_summary(document_id)` — fetches governance fields for one document
+  - `_get_document_governance_batch(document_ids)` — single PostgREST `in.(...)` query for multiple document IDs (used by answer-debug filter)
+  - `_can_embed_document(document, allow_dummy_override)` — governance gate for embedding generation
+  - `_can_use_document_for_answer_debug(document, allow_dummy_override)` — governance gate for source-grounded answer testing
+  - `_can_show_document_to_staff(document)` — governance gate for staff-facing policy library
+- Upload flow now sets governance defaults on every new document:
+  `governance_status="not_reviewed"`, `real_document=False`, `dummy_document=True`, `approved_for_embedding=False`, `approved_for_staff_visibility=False`, `approved_for_source_grounded_answers=False`
+- Upload flow emits four audit events: `document_uploaded`, `extraction_saved`, `chunks_prepared`, `embedding_records_prepared`
+- Embedding generation (`POST /documents/{id}/generate-embeddings`) now checks document-level governance gate before processing any chunks
+- Answer-debug (`POST /documents/answer-debug`) now filters retrieved chunks by document-level governance gate before passing to the LLM
+- New admin endpoint: `PATCH /documents/{id}/governance` — updates governance fields with safety enforcement
+- Admin UI at `/admin/documents` now shows a **Document Governance** panel (emerald, collapsible) with per-document governance cards and action buttons
+
+### Governance fields added to `document_registry`
+
+| Column | Type | Default | Purpose |
+|--------|------|---------|---------|
+| `governance_status` | `text` | `not_reviewed` | Overall governance state |
+| `real_document` | `boolean` | `false` | True = real policy content from an authoritative source |
+| `dummy_document` | `boolean` | `true` | True = sample/test document only |
+| `approved_for_embedding` | `boolean` | `false` | Admin must explicitly approve before embeddings can be generated |
+| `approved_for_staff_visibility` | `boolean` | `false` | Admin must explicitly approve before document appears in staff policy library |
+| `approved_for_source_grounded_answers` | `boolean` | `false` | Admin must explicitly approve before document is used for AI answer generation |
+| `requires_human_review_before_embedding` | `boolean` | `true` | Reminder flag — human review required before embedding |
+| `requires_human_review_before_staff_visibility` | `boolean` | `true` | Reminder flag — human review required before staff visibility |
+| `governance_reviewed_by` | `text` | `null` | Who performed the governance review |
+| `governance_reviewed_at` | `timestamptz` | `null` | When the governance review was completed |
+| `governance_notes` | `text` | `null` | Free-text governance notes |
+| `source_owner` | `text` | `null` | Organisation or person who authored the document |
+| `source_licence_notes` | `text` | `null` | Licence or permission notes for third-party content |
+| `contains_qcs_or_third_party_content` | `boolean` | `false` | True = content sourced from QCS or another third party |
+
+Allowed `governance_status` values (enforced by backend, not DB constraint):
+`not_reviewed` | `pilot_approved` | `approved_for_staff` | `approved_for_ai` | `rejected` | `archived`
+
+### Governance rules (enforced at all times)
+
+1. **Sensitive documents (`is_sensitive=true`) are always blocked** — they cannot be approved for embedding or AI answers regardless of governance status
+2. **Escalation-required documents (`escalation_required=true`) are always blocked** — same as sensitive
+3. **Real documents require explicit `approved_for_embedding=true`** before embedding generation runs
+4. **Real documents require explicit `approved_for_source_grounded_answers=true`** before they are used in answer-debug
+5. **Dummy/sample documents** can still be tested with `allow_dummy_override=true` — governance gate allows through
+6. **Pre-migration records** (before `007_document_governance.sql` is run) are treated permissively in the answer-debug filter to avoid breaking existing test workflows
+
+### Governance gate behaviour in each endpoint
+
+| Endpoint | Gate function | Block condition |
+|----------|--------------|-----------------|
+| `POST /documents/{id}/generate-embeddings` | `_can_embed_document` | sensitive or escalation; real doc without `approved_for_embedding`; dummy doc without `allow_dummy_override` |
+| `POST /documents/answer-debug` | `_can_use_document_for_answer_debug` | sensitive or escalation; real doc without `approved_for_source_grounded_answers`; dummy doc without `allow_dummy_override` |
+| `GET /policies` (staff) | `_can_show_document_to_staff` | sensitive; escalation; real doc without `approved_for_staff_visibility` |
+
+### Audit events
+
+All governance events and pipeline operations are recorded in `document_audit_events`. The table is backend service role only — no frontend access.
+
+| `event_type` | When it fires |
+|-------------|--------------|
+| `document_uploaded` | Document registry record saved after upload |
+| `extraction_saved` | Extracted text saved to `document_extractions` |
+| `chunks_prepared` | Chunks saved to `document_chunks` |
+| `embedding_records_prepared` | Embedding records saved to `document_embeddings` |
+| `embeddings_generated` | Embedding vectors generated successfully |
+| `embedding_generation_blocked` | Governance gate blocked embedding generation |
+| `answer_debug_tested` | Source-grounded answer debug test completed |
+| `governance_status_changed` | `PATCH /documents/{id}/governance` updated governance fields |
+
+Audit failures are swallowed silently — a failed audit write never causes an HTTP 4xx/5xx response.
+
+### SQL migration
+
+File: `backend/sql/007_document_governance.sql`
+
+Run **after** `001_document_registry.sql` through `006_vector_search.sql`:
+
+1. Open your Supabase project
+2. Go to **SQL Editor**
+3. Paste the contents of `backend/sql/007_document_governance.sql`
+4. Click **Run**
+
+The migration is idempotent — `ADD COLUMN IF NOT EXISTS` and `CREATE TABLE IF NOT EXISTS` mean it is safe to re-run.
+
+### Governance admin endpoint
+
+`PATCH /documents/{id}/governance`
+
+Request body (all fields optional):
+
+```json
+{
+  "governance_status": "pilot_approved",
+  "real_document": true,
+  "dummy_document": false,
+  "governance_notes": "Reviewed by admin — cleared for embedding test",
+  "source_owner": "Thumhara Centre",
+  "source_licence_notes": "Internal document — no third-party licence",
+  "contains_qcs_or_third_party_content": false,
+  "approved_for_embedding": true,
+  "approved_for_staff_visibility": false,
+  "approved_for_source_grounded_answers": false
+}
+```
+
+Safety rules enforced by the endpoint:
+- `governance_status` must be one of the allowed values (HTTP 400 if not)
+- `real_document` and `dummy_document` cannot both be `true` (HTTP 400)
+- `approved_for_embedding=true` is blocked if the document is `is_sensitive` or `escalation_required` (HTTP 400)
+- `approved_for_source_grounded_answers=true` is blocked for the same reasons
+
+Returns: the updated `DocumentRecord`.
+
+### What Milestone 4I does NOT do
+
+- Staff-facing `/ask` remains a placeholder — AI answers are NOT enabled for staff
+- No real Thumhara/QCS documents should be embedded until governance fields are confirmed and `approved_for_embedding=true`
+- No changes to the staff policy library UI or the `/ask` endpoint
+- No authentication or role-based access control on admin endpoints (planned for a later milestone)
+
+### Manual test steps (Milestone 4I)
+
+1. Run `007_document_governance.sql` in Supabase SQL Editor
+2. Upload a dummy PDF — confirm the upload result includes governance defaults in the returned `document` object
+3. Check Supabase Table Editor → `document_registry` — confirm the new governance columns exist and are populated with defaults
+4. Open `/admin/documents` → **Document Governance** panel (emerald card)
+5. Click **Approve for Embedding** on a dummy document — confirm the API response shows `approved_for_embedding: true`
+6. Generate embeddings with `allow_dummy_override=true` — confirm they succeed
+7. Try clicking **Approve for Embedding** on a sensitive or escalation-required document — confirm it is disabled (lock icon)
+8. Use the `PATCH /documents/{id}/governance` endpoint directly to mark a document as `real_document=true`
+9. Confirm that generating embeddings for that real document now returns `status: "blocked"` without `approved_for_embedding=true`
+10. Check Supabase Table Editor → `document_audit_events` for logged events
+
 ## Current milestone status
 
 - PDF upload works (Milestone 4B)
@@ -917,13 +1057,14 @@ Do not expose `/documents/answer-debug` to staff or make it publicly accessible.
 - Embeddings can be generated for dummy/sample documents (Milestone 4F)
 - Admin-only vector search works (Milestone 4G)
 - Admin-only source-grounded answer testing works (Milestone 4H)
+- **Governance gate active — real documents cannot be embedded without explicit approval (Milestone 4I)**
 - Staff-facing `/ask` remains a placeholder — RAG is governed-disabled
-- No real Thumhara/QCS documents should be embedded until governance sign-off
+- No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a governance review
 
-## Next steps (Milestone 4I)
+## Next steps (Milestone 4J+)
 
-- Governance sign-off and safety review before embedding real Thumhara/QCS policy documents
-- Staff-facing RAG pipeline (retrieve then generate answer from approved documents only)
+- Governance sign-off and safety review of real Thumhara/QCS policy documents, then set `real_document=true`, `approved_for_embedding=true`, `approved_for_source_grounded_answers=true` for approved documents
+- Staff-facing RAG pipeline (retrieve then generate answer from approved documents only) — upgrade `/ask` endpoint
 - Authentication and organisation membership verification
 - Rate limiting and anonymised query logging (no user-level data)
-- Upgrade `/ask` endpoint to use source-grounded answer pipeline
+- Role-based access control on admin endpoints

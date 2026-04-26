@@ -200,6 +200,189 @@ def _update_registry_record(document_id: str, updates: Dict[str, Any]) -> Option
 
 
 # ---------------------------------------------------------------------------
+# Milestone 4I — Governance helpers
+# Audit events, governance gate checks, document-level governance queries.
+# Backend/service role only. Never expose audit events or governance decisions
+# to the frontend beyond what is already included in DocumentRecord fields.
+# ---------------------------------------------------------------------------
+
+def _create_audit_event(
+    organisation_id: str,
+    event_type: str,
+    document_id: Optional[str] = None,
+    event_summary: Optional[str] = None,
+    actor: str = "admin",
+    actor_role: str = "admin",
+    metadata: Optional[Dict[str, Any]] = None,
+) -> None:
+    """
+    Insert a row into document_audit_events.
+    Non-critical: errors are swallowed — audit failure must never block core operations.
+    If the audit table does not yet exist (007 migration not run), this is a silent no-op.
+    """
+    if not _DB_CONFIGURED:
+        return
+    import httpx as _httpx
+    url = f"{_SUPABASE_URL}/rest/v1/document_audit_events"
+    headers = {**_db_headers(), "Prefer": "return=minimal"}
+    payload: Dict[str, Any] = {
+        "organisation_id": organisation_id,
+        "event_type": event_type,
+        "actor": actor,
+        "actor_role": actor_role,
+        "metadata": metadata or {},
+        "created_at": _now(),
+    }
+    if document_id:
+        payload["document_id"] = document_id
+    if event_summary:
+        payload["event_summary"] = event_summary
+    try:
+        _httpx.post(url, json=payload, headers=headers, timeout=10)
+    except Exception:
+        pass  # audit events are non-critical
+
+
+def _get_document_governance_summary(document_id: str) -> Optional[Dict[str, Any]]:
+    """Return governance fields for a single document. None if not found or DB not configured."""
+    if not _DB_CONFIGURED:
+        return None
+    import httpx as _httpx
+    url = f"{_SUPABASE_URL}/rest/v1/document_registry"
+    params = {
+        "id": f"eq.{document_id}",
+        "limit": "1",
+        "select": (
+            "id,governance_status,real_document,dummy_document,"
+            "approved_for_embedding,approved_for_staff_visibility,"
+            "approved_for_source_grounded_answers,"
+            "requires_human_review_before_embedding,"
+            "requires_human_review_before_staff_visibility,"
+            "is_sensitive,escalation_required"
+        ),
+    }
+    resp = _httpx.get(url, params=params, headers=_db_headers(), timeout=15)
+    if resp.status_code == 200:
+        data = resp.json()
+        return data[0] if data else None
+    return None
+
+
+def _get_document_governance_batch(document_ids: List[str]) -> Dict[str, Dict[str, Any]]:
+    """Fetch governance fields for multiple documents. Returns dict keyed by id string."""
+    if not _DB_CONFIGURED or not document_ids:
+        return {}
+    import httpx as _httpx
+    ids_str = ",".join(document_ids)
+    url = f"{_SUPABASE_URL}/rest/v1/document_registry"
+    params = {
+        "id": f"in.({ids_str})",
+        "limit": "100",
+        "select": (
+            "id,governance_status,real_document,dummy_document,"
+            "approved_for_embedding,approved_for_staff_visibility,"
+            "approved_for_source_grounded_answers,"
+            "is_sensitive,escalation_required"
+        ),
+    }
+    try:
+        resp = _httpx.get(url, params=params, headers=_db_headers(), timeout=15)
+        if resp.status_code == 200:
+            return {row["id"]: row for row in resp.json()}
+    except Exception:
+        pass
+    return {}
+
+
+def _can_embed_document(
+    document: Dict[str, Any],
+    allow_dummy_override: bool = False,
+) -> Tuple[bool, Optional[str]]:
+    """
+    Governance gate for embedding generation.
+    Returns (allowed, blocked_reason).
+
+    Rules (in priority order):
+    1. Always block if is_sensitive=True or escalation_required=True.
+    2. Real documents (real_document=True) block unless approved_for_embedding=True.
+    3. Dummy/legacy documents block unless allow_dummy_override=True.
+    """
+    if document.get("is_sensitive", False):
+        return False, "Document is marked sensitive — embedding is permanently blocked."
+    if document.get("escalation_required", False):
+        return False, "Document requires escalation — embedding is permanently blocked."
+
+    is_real = document.get("real_document", False)
+
+    if is_real:
+        if not document.get("approved_for_embedding", False):
+            return False, (
+                "Real document requires governance approval before embedding. "
+                "Set approved_for_embedding=true via PATCH /documents/{id}/governance."
+            )
+        return True, None
+
+    # Dummy or legacy record (real_document missing / False)
+    if not allow_dummy_override:
+        return False, (
+            "Dummy/sample document requires allow_dummy_override=true to embed."
+        )
+    return True, None
+
+
+def _can_use_document_for_answer_debug(
+    document: Dict[str, Any],
+    allow_dummy_override: bool = False,
+) -> Tuple[bool, Optional[str]]:
+    """
+    Governance gate for source-grounded answer debug.
+    Returns (allowed, blocked_reason).
+
+    Rules:
+    1. Always block if is_sensitive=True or escalation_required=True.
+    2. Real documents block unless approved_for_source_grounded_answers=True.
+    3. Dummy/legacy documents block unless allow_dummy_override=True.
+    """
+    if document.get("is_sensitive", False):
+        return False, "Document is marked sensitive — answer debug is permanently blocked."
+    if document.get("escalation_required", False):
+        return False, "Document requires escalation — answer debug is permanently blocked."
+
+    is_real = document.get("real_document", False)
+
+    if is_real:
+        if not document.get("approved_for_source_grounded_answers", False):
+            return False, (
+                "Real document requires governance approval before source-grounded answer testing. "
+                "Set approved_for_source_grounded_answers=true via PATCH /documents/{id}/governance."
+            )
+        return True, None
+
+    # Dummy or legacy
+    if not allow_dummy_override:
+        return False, (
+            "Dummy/sample document requires allow_dummy_override=true for answer debug testing."
+        )
+    return True, None
+
+
+def _can_show_document_to_staff(document: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
+    """
+    Governance gate for staff visibility.
+    Returns (allowed, blocked_reason).
+    Requires status=approved and approved_for_staff_visibility=True.
+    """
+    if document.get("status") != "approved":
+        return False, "Document must have status=approved before it is visible to staff."
+    if not document.get("approved_for_staff_visibility", False):
+        return False, (
+            "Document requires approved_for_staff_visibility=true before staff visibility. "
+            "Set via PATCH /documents/{id}/governance."
+        )
+    return True, None
+
+
+# ---------------------------------------------------------------------------
 # Milestone 4D — text chunking and extraction storage helpers
 # No AI, no embeddings, no external LLM calls.
 # Backend / service role only — never exposed to staff UI.
@@ -876,6 +1059,21 @@ class DocumentRecord(BaseModel):
     created_at: str
     updated_at: str
     metadata: Dict[str, Any] = {}
+    # Milestone 4I — governance fields (all optional; absent on pre-migration records)
+    governance_status: Optional[str] = "not_reviewed"
+    governance_reviewed_by: Optional[str] = None
+    governance_reviewed_at: Optional[str] = None
+    governance_notes: Optional[str] = None
+    real_document: Optional[bool] = False
+    dummy_document: Optional[bool] = True
+    source_owner: Optional[str] = None
+    source_licence_notes: Optional[str] = None
+    contains_qcs_or_third_party_content: Optional[bool] = False
+    requires_human_review_before_embedding: Optional[bool] = True
+    requires_human_review_before_staff_visibility: Optional[bool] = True
+    approved_for_embedding: Optional[bool] = False
+    approved_for_staff_visibility: Optional[bool] = False
+    approved_for_source_grounded_answers: Optional[bool] = False
 
 
 class DocumentCreate(BaseModel):
@@ -963,6 +1161,30 @@ class AnswerDebugRequest(BaseModel):
     organisation_id: str = "demo-org"
     match_count: int = 5
     allow_dummy_override: bool = False
+
+
+class GovernanceUpdateRequest(BaseModel):
+    """
+    Request body for PATCH /documents/{id}/governance (Milestone 4I).
+    Admin-only. All fields are optional — only provided fields are updated.
+
+    Safety rules enforced by the endpoint:
+    - approved_for_embedding and approved_for_source_grounded_answers cannot be
+      set True for is_sensitive=True or escalation_required=True documents.
+    - real_document=True automatically sets dummy_document=False and vice versa.
+    - governance_status must be one of: not_reviewed, pilot_approved,
+      approved_for_staff, approved_for_ai, rejected, archived.
+    """
+    governance_status: Optional[str] = None
+    real_document: Optional[bool] = None
+    dummy_document: Optional[bool] = None
+    governance_notes: Optional[str] = None
+    source_owner: Optional[str] = None
+    source_licence_notes: Optional[str] = None
+    contains_qcs_or_third_party_content: Optional[bool] = None
+    approved_for_embedding: Optional[bool] = None
+    approved_for_staff_visibility: Optional[bool] = None
+    approved_for_source_grounded_answers: Optional[bool] = None
 
 
 # ---------------------------------------------------------------------------
@@ -1722,6 +1944,39 @@ def generate_document_embeddings(doc_id: str, payload: GenerateEmbeddingsRequest
     if not doc_record:
         raise HTTPException(status_code=404, detail="Document not found.")
 
+    # --- Milestone 4I: Document-level governance gate ---
+    # Check before any per-chunk processing. Returns blocked_reason if not permitted.
+    can_embed, blocked_reason = _can_embed_document(doc_record, payload.allow_dummy_override)
+    if not can_embed:
+        _create_audit_event(
+            organisation_id=doc_record.get("organisation_id", "unknown"),
+            event_type="embedding_generation_blocked",
+            document_id=doc_id,
+            event_summary=blocked_reason,
+            metadata={
+                "allow_dummy_override": payload.allow_dummy_override,
+                "blocked_reason": blocked_reason,
+                "real_document": doc_record.get("real_document", False),
+                "dummy_document": doc_record.get("dummy_document", True),
+                "governance_status": doc_record.get("governance_status", "not_reviewed"),
+            },
+        )
+        return {
+            "document_id": doc_id,
+            "status": "blocked",
+            "blocked_reason": blocked_reason,
+            "embedding_model": EMBEDDING_MODEL,
+            "embedding_dimensions": EMBEDDING_DIMENSIONS,
+            "attempted_count": 0,
+            "embedded_count": 0,
+            "skipped_count": 0,
+            "failed_count": 0,
+            "total_tokens": 0,
+            "estimated_cost_note": f"Model: {EMBEDDING_MODEL}. Blocked — no embeddings generated.",
+            "embedding_status": doc_record.get("embedding_status", "not_started"),
+            "note": "Governance gate: embedding blocked for this document. See blocked_reason.",
+        }
+
     # Fetch all embedding records for this document
     all_records = _list_embedding_records(doc_id)
     if not all_records:
@@ -1874,6 +2129,23 @@ def generate_document_embeddings(doc_id: str, payload: GenerateEmbeddingsRequest
         })
     except Exception:
         pass
+
+    # Audit event for successful embedding generation
+    if embedded_count > 0:
+        _create_audit_event(
+            organisation_id=doc_record.get("organisation_id", "unknown"),
+            event_type="embeddings_generated",
+            document_id=doc_id,
+            event_summary=f"{embedded_count} chunks embedded, {skipped_count} skipped, {failed_count} failed",
+            metadata={
+                "embedded_count": embedded_count,
+                "skipped_count": skipped_count,
+                "failed_count": failed_count,
+                "total_tokens": total_tokens,
+                "embedding_model": EMBEDDING_MODEL,
+                "allow_dummy_override": payload.allow_dummy_override,
+            },
+        )
 
     # --- Estimated cost note ---
     if total_tokens > 0:
@@ -2082,7 +2354,7 @@ def answer_debug(payload: AnswerDebugRequest):
     if not isinstance(raw_rows, list):
         raise HTTPException(status_code=500, detail="Unexpected response from match_document_chunks.")
 
-    # Apply safety filter — always enforce regardless of allow_dummy_override
+    # Apply chunk-level safety filter — always enforce regardless of allow_dummy_override
     filtered_rows: List[Dict[str, Any]] = []
     for row in raw_rows:
         if row.get("escalation_required", False):
@@ -2092,6 +2364,24 @@ def answer_debug(payload: AnswerDebugRequest):
         if not payload.allow_dummy_override and not row.get("approved_for_ai_answers", False):
             continue
         filtered_rows.append(row)
+
+    # Milestone 4I: Document-level governance filter applied on top of chunk-level filter.
+    # Fetches governance for each unique document_id in the filtered results.
+    # Non-critical: if fetch fails, falls back to chunk-level rules only.
+    if filtered_rows and _DB_CONFIGURED:
+        unique_doc_ids = list({str(r.get("document_id", "")) for r in filtered_rows if r.get("document_id")})
+        doc_gov_map = _get_document_governance_batch(unique_doc_ids)
+        gov_filtered: List[Dict[str, Any]] = []
+        for row in filtered_rows:
+            doc_id_str = str(row.get("document_id", ""))
+            gov = doc_gov_map.get(doc_id_str)
+            if gov is None:
+                gov_filtered.append(row)  # no governance record → allow (legacy/pre-migration)
+                continue
+            ok, _ = _can_use_document_for_answer_debug(gov, payload.allow_dummy_override)
+            if ok:
+                gov_filtered.append(row)
+        filtered_rows = gov_filtered
 
     _no_source_answer = "I can't answer that from the available approved sources."
     _admin_note = "Admin-only source-grounded answer test. Staff AI answers are still disabled."
@@ -2143,6 +2433,21 @@ def answer_debug(payload: AnswerDebugRequest):
 
     answer_text = answer_result["answer"]
     confidence = _validate_grounded_answer_result(answer_text, sources)
+
+    # Audit event for answer debug (regardless of confidence)
+    _create_audit_event(
+        organisation_id=payload.organisation_id,
+        event_type="answer_debug_tested",
+        document_id=None,
+        event_summary=f"Answer debug: confidence={confidence}, result_count={len(filtered_rows)}",
+        metadata={
+            "query_length": len(query_clean),
+            "confidence": confidence,
+            "result_count": len(filtered_rows),
+            "allow_dummy_override": payload.allow_dummy_override,
+            "is_escalation_topic": is_escalation_topic,
+        },
+    )
 
     return {
         "query": query_clean,
@@ -2424,7 +2729,16 @@ async def upload_document_pdf(
         "created_by": "admin",
         "created_at": now,
         "updated_at": now,
-        "metadata": {"upload_source": "admin_upload", "milestone": "4D"},
+        "metadata": {"upload_source": "admin_upload", "milestone": "4I"},
+        # Milestone 4I — governance defaults: all uploads start as not-reviewed dummy docs
+        "governance_status": "not_reviewed",
+        "real_document": False,
+        "dummy_document": True,
+        "approved_for_embedding": False,
+        "approved_for_staff_visibility": False,
+        "approved_for_source_grounded_answers": False,
+        "requires_human_review_before_embedding": True,
+        "requires_human_review_before_staff_visibility": True,
     }
 
     # ---- 10. Persist to Supabase document_registry DB ----
@@ -2439,6 +2753,21 @@ async def upload_document_pdf(
         except RuntimeError as exc:
             registry_status = "failed"
             registry_error = str(exc)
+
+    if registry_status == "saved":
+        _create_audit_event(
+            organisation_id=organisation_id,
+            event_type="document_uploaded",
+            document_id=document_id,
+            event_summary=f"Document uploaded: {safe_name} ({file_size} bytes)",
+            metadata={
+                "file_name": safe_name,
+                "file_size_bytes": file_size,
+                "extraction_status": extraction_status,
+                "personal_data_risk": personal_data_risk,
+                "milestone": "4I",
+            },
+        )
 
     # ---- 10a. Store full extracted text in document_extractions ----
     extraction_storage_status = "not_configured"
@@ -2457,9 +2786,16 @@ async def upload_document_pdf(
                     "extraction_warnings": extraction_warnings,
                     "personal_data_risk": personal_data_risk,
                     "personal_data_warnings": personal_data_warnings,
-                    "metadata": {"milestone": "4D"},
+                    "metadata": {"milestone": "4I"},
                 })
                 extraction_storage_status = "saved"
+                _create_audit_event(
+                    organisation_id=organisation_id,
+                    event_type="extraction_saved",
+                    document_id=document_id,
+                    event_summary=f"Extraction saved: {extracted_char_count} chars, {extracted_page_count} pages",
+                    metadata={"extraction_status": extraction_status, "char_count": extracted_char_count},
+                )
             except Exception as exc:
                 extraction_storage_status = "failed"
                 extraction_storage_error = str(exc)
@@ -2509,6 +2845,14 @@ async def upload_document_pdf(
                     except Exception:
                         pass
                 chunking_status = "prepared" if chunk_count > 0 else "no_text"
+                if chunking_status == "prepared":
+                    _create_audit_event(
+                        organisation_id=organisation_id,
+                        event_type="chunks_prepared",
+                        document_id=document_id,
+                        event_summary=f"{chunk_count} chunks prepared for document",
+                        metadata={"chunk_count": chunk_count},
+                    )
             except Exception as exc:
                 chunk_count = 0
                 chunking_status = "failed"
@@ -2529,6 +2873,14 @@ async def upload_document_pdf(
                 emb_result = _prepare_embedding_records_for_document(document_id)
                 embedding_preparation_status = emb_result.get("status", "failed")
                 embedding_record_count = emb_result.get("embedding_record_count", 0)
+                if embedding_preparation_status in ("prepared", "already_prepared"):
+                    _create_audit_event(
+                        organisation_id=organisation_id,
+                        event_type="embedding_records_prepared",
+                        document_id=document_id,
+                        event_summary=f"{embedding_record_count} embedding records prepared (not yet generated)",
+                        metadata={"embedding_record_count": embedding_record_count, "status": embedding_preparation_status},
+                    )
             except Exception:
                 embedding_preparation_status = "failed"
         else:
@@ -2580,3 +2932,140 @@ async def upload_document_pdf(
     if chunking_error:
         result["chunking_error"] = chunking_error
     return result
+
+
+# ---------------------------------------------------------------------------
+# Milestone 4I — Governance update endpoint
+# PATCH /documents/{id}/governance
+# Admin-only. Updates governance fields. Enforces safety rules.
+# Never enables staff-facing /ask. Never exposes secrets.
+# ---------------------------------------------------------------------------
+
+_ALLOWED_GOVERNANCE_STATUSES = frozenset({
+    "not_reviewed", "pilot_approved", "approved_for_staff",
+    "approved_for_ai", "rejected", "archived",
+})
+
+
+@app.patch("/documents/{doc_id}/governance", response_model=DocumentRecord)
+def update_document_governance(doc_id: str, payload: GovernanceUpdateRequest):
+    """
+    Admin-only governance update endpoint — Milestone 4I.
+
+    Updates governance fields for a document. Enforces safety rules:
+    - approved_for_embedding and approved_for_source_grounded_answers cannot be
+      set True for documents with is_sensitive=True or escalation_required=True.
+    - real_document=True automatically sets dummy_document=False and vice versa.
+    - governance_status must be a recognised value.
+
+    Writes an audit event on success.
+    Staff AI answers and /ask endpoint remain disabled regardless.
+    """
+    if not _DB_CONFIGURED:
+        raise HTTPException(status_code=503, detail="Database not configured.")
+
+    doc_record = _get_registry_record(doc_id)
+    if not doc_record:
+        raise HTTPException(status_code=404, detail="Document not found.")
+
+    is_sensitive = doc_record.get("is_sensitive", False)
+    escalation_required = doc_record.get("escalation_required", False)
+    organisation_id = doc_record.get("organisation_id", "unknown")
+
+    updates: Dict[str, Any] = {}
+
+    # governance_status validation
+    if payload.governance_status is not None:
+        if payload.governance_status not in _ALLOWED_GOVERNANCE_STATUSES:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"governance_status must be one of: "
+                    f"{', '.join(sorted(_ALLOWED_GOVERNANCE_STATUSES))}"
+                ),
+            )
+        updates["governance_status"] = payload.governance_status
+
+    # real_document / dummy_document — mutually exclusive
+    if payload.real_document is True:
+        updates["real_document"] = True
+        updates["dummy_document"] = False
+    elif payload.dummy_document is True:
+        updates["dummy_document"] = True
+        updates["real_document"] = False
+    elif payload.real_document is False:
+        updates["real_document"] = False
+    elif payload.dummy_document is False:
+        updates["dummy_document"] = False
+
+    # approved_for_embedding — blocked for sensitive / escalation documents
+    if payload.approved_for_embedding is not None:
+        if payload.approved_for_embedding and (is_sensitive or escalation_required):
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Cannot approve for embedding: document is marked sensitive or requires "
+                    "escalation. Human review and an explicit future governance override are "
+                    "required before this block can be lifted."
+                ),
+            )
+        updates["approved_for_embedding"] = payload.approved_for_embedding
+
+    # approved_for_source_grounded_answers — blocked for sensitive / escalation documents
+    if payload.approved_for_source_grounded_answers is not None:
+        if payload.approved_for_source_grounded_answers and (is_sensitive or escalation_required):
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Cannot approve for source-grounded answers: document is marked sensitive or "
+                    "requires escalation. Human review and an explicit future governance override "
+                    "are required before this block can be lifted."
+                ),
+            )
+        updates["approved_for_source_grounded_answers"] = payload.approved_for_source_grounded_answers
+
+    # approved_for_staff_visibility — no additional block (document-level only)
+    if payload.approved_for_staff_visibility is not None:
+        updates["approved_for_staff_visibility"] = payload.approved_for_staff_visibility
+
+    # Other optional governance fields
+    if payload.governance_notes is not None:
+        updates["governance_notes"] = payload.governance_notes
+    if payload.source_owner is not None:
+        updates["source_owner"] = payload.source_owner
+    if payload.source_licence_notes is not None:
+        updates["source_licence_notes"] = payload.source_licence_notes
+    if payload.contains_qcs_or_third_party_content is not None:
+        updates["contains_qcs_or_third_party_content"] = payload.contains_qcs_or_third_party_content
+
+    if not updates:
+        return doc_record
+
+    updates["updated_at"] = _now()
+
+    updated = _update_registry_record(doc_id, updates)
+    if not updated:
+        raise HTTPException(status_code=500, detail="Governance update failed — DB write error.")
+
+    # Determine the most specific audit event type
+    event_type = "governance_status_changed"
+    if payload.approved_for_embedding is True:
+        event_type = "document_approved_for_embedding"
+    elif payload.approved_for_source_grounded_answers is True:
+        event_type = "document_approved_for_source_grounded_answers"
+    elif payload.approved_for_staff_visibility is True:
+        event_type = "document_approved_for_staff_visibility"
+    elif payload.governance_status == "rejected":
+        event_type = "document_rejected"
+    elif payload.governance_status == "archived":
+        event_type = "document_archived"
+
+    _create_audit_event(
+        organisation_id=organisation_id,
+        event_type=event_type,
+        document_id=doc_id,
+        event_summary=f"Governance updated: {', '.join(k for k in updates if k != 'updated_at')}",
+        metadata={"updates": {k: v for k, v in updates.items() if k != "updated_at"}},
+    )
+
+    return updated

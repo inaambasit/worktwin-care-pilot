@@ -89,6 +89,21 @@ export interface DocumentRecord {
   created_at: string
   updated_at: string
   metadata: Record<string, unknown>
+  // Milestone 4I — governance fields (optional; absent on pre-migration records)
+  governance_status?: string
+  governance_reviewed_by?: string | null
+  governance_reviewed_at?: string | null
+  governance_notes?: string | null
+  real_document?: boolean
+  dummy_document?: boolean
+  source_owner?: string | null
+  source_licence_notes?: string | null
+  contains_qcs_or_third_party_content?: boolean
+  requires_human_review_before_embedding?: boolean
+  requires_human_review_before_staff_visibility?: boolean
+  approved_for_embedding?: boolean
+  approved_for_staff_visibility?: boolean
+  approved_for_source_grounded_answers?: boolean
 }
 
 // ---------------------------------------------------------------------------
@@ -222,6 +237,23 @@ export interface AnswerDebugResponse {
   note?: string
   // present when OPENAI_API_KEY is not configured
   status?: string
+}
+
+// ---------------------------------------------------------------------------
+// Milestone 4I — Document governance update request
+// ---------------------------------------------------------------------------
+
+export interface GovernanceUpdateRequest {
+  governance_status?: string
+  real_document?: boolean
+  dummy_document?: boolean
+  governance_notes?: string
+  source_owner?: string
+  source_licence_notes?: string
+  contains_qcs_or_third_party_content?: boolean
+  approved_for_embedding?: boolean
+  approved_for_staff_visibility?: boolean
+  approved_for_source_grounded_answers?: boolean
 }
 
 export const LANGUAGE_NAMES: Record<string, string> = {

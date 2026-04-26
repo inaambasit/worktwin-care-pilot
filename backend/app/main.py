@@ -308,25 +308,20 @@ def _can_embed_document(
     3. Dummy/legacy documents block unless allow_dummy_override=True.
     """
     if document.get("is_sensitive", False):
-        return False, "Document is marked sensitive — embedding is permanently blocked."
+        return False, "Document is marked sensitive and cannot be embedded."
     if document.get("escalation_required", False):
-        return False, "Document requires escalation — embedding is permanently blocked."
+        return False, "Document requires escalation and cannot be embedded."
 
     is_real = document.get("real_document", False)
 
     if is_real:
         if not document.get("approved_for_embedding", False):
-            return False, (
-                "Real document requires governance approval before embedding. "
-                "Set approved_for_embedding=true via PATCH /documents/{id}/governance."
-            )
+            return False, "Real document requires governance approval before embedding."
         return True, None
 
     # Dummy or legacy record (real_document missing / False)
     if not allow_dummy_override:
-        return False, (
-            "Dummy/sample document requires allow_dummy_override=true to embed."
-        )
+        return False, "Dummy document requires allow_dummy_override=true for test embedding."
     return True, None
 
 
@@ -344,25 +339,20 @@ def _can_use_document_for_answer_debug(
     3. Dummy/legacy documents block unless allow_dummy_override=True.
     """
     if document.get("is_sensitive", False):
-        return False, "Document is marked sensitive — answer debug is permanently blocked."
+        return False, "Document is marked sensitive and cannot be used for AI answers."
     if document.get("escalation_required", False):
-        return False, "Document requires escalation — answer debug is permanently blocked."
+        return False, "Document requires escalation and cannot be used for AI answers."
 
     is_real = document.get("real_document", False)
 
     if is_real:
         if not document.get("approved_for_source_grounded_answers", False):
-            return False, (
-                "Real document requires governance approval before source-grounded answer testing. "
-                "Set approved_for_source_grounded_answers=true via PATCH /documents/{id}/governance."
-            )
+            return False, "Real document requires governance approval before source-grounded answer testing."
         return True, None
 
     # Dummy or legacy
     if not allow_dummy_override:
-        return False, (
-            "Dummy/sample document requires allow_dummy_override=true for answer debug testing."
-        )
+        return False, "Dummy document requires allow_dummy_override=true for answer debug testing."
     return True, None
 
 
@@ -2410,7 +2400,7 @@ def answer_debug(payload: AnswerDebugRequest):
             "confidence": "blocked_safety",
             "result_count": len(raw_rows),
             "sources": [],
-            "safety_note": safety_note or "All matching sources were excluded by safety rules.",
+            "safety_note": safety_note or "No safe approved chunks available for answer generation.",
             "model": ANSWER_MODEL,
             "estimated_cost_note": None,
             "note": _admin_note,
@@ -3047,25 +3037,177 @@ def update_document_governance(doc_id: str, payload: GovernanceUpdateRequest):
     if not updated:
         raise HTTPException(status_code=500, detail="Governance update failed — DB write error.")
 
-    # Determine the most specific audit event type
+    # Determine the most specific audit event type and human-readable summary
     event_type = "governance_status_changed"
     if payload.approved_for_embedding is True:
         event_type = "document_approved_for_embedding"
+        event_summary = "Document approved for embedding."
     elif payload.approved_for_source_grounded_answers is True:
         event_type = "document_approved_for_source_grounded_answers"
+        event_summary = "Document approved for source-grounded answer testing."
     elif payload.approved_for_staff_visibility is True:
         event_type = "document_approved_for_staff_visibility"
+        event_summary = "Document approved for staff visibility."
     elif payload.governance_status == "rejected":
         event_type = "document_rejected"
+        event_summary = "Document rejected during governance review."
     elif payload.governance_status == "archived":
         event_type = "document_archived"
+        event_summary = "Document archived."
+    elif payload.real_document is True:
+        event_summary = "Document marked as real pilot document."
+    elif payload.dummy_document is True:
+        event_summary = "Document marked as dummy test document."
+    elif payload.approved_for_embedding is False:
+        event_summary = "Embedding approval removed from document."
+    elif payload.approved_for_source_grounded_answers is False:
+        event_summary = "AI answer approval removed from document."
+    elif payload.approved_for_staff_visibility is False:
+        event_summary = "Staff visibility approval removed from document."
+    else:
+        event_summary = f"Governance fields updated: {', '.join(k for k in updates if k != 'updated_at')}."
 
     _create_audit_event(
         organisation_id=organisation_id,
         event_type=event_type,
         document_id=doc_id,
-        event_summary=f"Governance updated: {', '.join(k for k in updates if k != 'updated_at')}",
+        event_summary=event_summary,
         metadata={"updates": {k: v for k, v in updates.items() if k != "updated_at"}},
     )
 
     return updated
+
+
+# ---------------------------------------------------------------------------
+# Milestone 4I.1 — Governance readiness summary endpoint
+# GET /documents/{id}/governance-readiness
+# Admin/debug only. No extracted text, no embeddings, no secrets returned.
+# ---------------------------------------------------------------------------
+
+@app.get("/documents/{doc_id}/governance-readiness")
+def get_document_governance_readiness(doc_id: str):
+    """
+    Admin/debug-only governance readiness summary — Milestone 4I.1.
+
+    Returns whether the document can be embedded, used for AI answer testing,
+    and shown to staff, along with human-readable blocked reasons and next actions.
+
+    Safety guarantees:
+    - Full extracted text is never returned.
+    - Embedding vectors are never returned.
+    - Secrets are never returned or logged.
+    - Staff-facing AI answers remain disabled regardless of readiness status.
+    """
+    if not _DB_CONFIGURED:
+        raise HTTPException(status_code=503, detail="Database not configured.")
+
+    doc = _get_registry_record(doc_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found.")
+
+    is_sensitive = bool(doc.get("is_sensitive", False))
+    escalation_required = bool(doc.get("escalation_required", False))
+    real_document = bool(doc.get("real_document", False))
+    dummy_document = bool(doc.get("dummy_document", True))
+    approved_for_embedding = bool(doc.get("approved_for_embedding", False))
+    approved_for_source_grounded_answers = bool(doc.get("approved_for_source_grounded_answers", False))
+    approved_for_staff_visibility = bool(doc.get("approved_for_staff_visibility", False))
+    governance_status = doc.get("governance_status") or "not_reviewed"
+    doc_status = doc.get("status", "draft")
+
+    blocked_reasons: List[str] = []
+    next_required_actions: List[str] = []
+
+    # --- can_embed_now ---
+    if is_sensitive:
+        can_embed_now = False
+        blocked_reasons.append("Document is marked sensitive and cannot be embedded.")
+        next_required_actions.append(
+            "Sensitive documents are permanently blocked from embedding — no action available."
+        )
+    elif escalation_required:
+        can_embed_now = False
+        blocked_reasons.append("Document requires escalation and cannot be embedded.")
+        next_required_actions.append(
+            "Escalation-required documents are permanently blocked from embedding — no action available."
+        )
+    elif real_document and not approved_for_embedding:
+        can_embed_now = False
+        blocked_reasons.append("Real document requires governance approval before embedding.")
+        next_required_actions.append(
+            f"Approve for embedding via PATCH /documents/{doc_id}/governance "
+            "(approved_for_embedding=true) after completing human review."
+        )
+    else:
+        can_embed_now = True
+        if not real_document:
+            next_required_actions.append(
+                f"Dummy/sample document — pass allow_dummy_override=true when calling "
+                f"POST /documents/{doc_id}/generate-embeddings."
+            )
+
+    # --- can_use_for_answer_debug_now ---
+    if is_sensitive:
+        can_use_for_answer_debug_now = False
+        if "Document is marked sensitive and cannot be used for AI answers." not in blocked_reasons:
+            blocked_reasons.append("Document is marked sensitive and cannot be used for AI answers.")
+    elif escalation_required:
+        can_use_for_answer_debug_now = False
+        if "Document requires escalation and cannot be used for AI answers." not in blocked_reasons:
+            blocked_reasons.append("Document requires escalation and cannot be used for AI answers.")
+    elif real_document and not approved_for_source_grounded_answers:
+        can_use_for_answer_debug_now = False
+        blocked_reasons.append(
+            "Real document requires governance approval before source-grounded answer testing."
+        )
+        next_required_actions.append(
+            f"Approve for AI answer testing via PATCH /documents/{doc_id}/governance "
+            "(approved_for_source_grounded_answers=true) after completing human review."
+        )
+    else:
+        can_use_for_answer_debug_now = True
+        if not real_document and not any("allow_dummy_override" in a for a in next_required_actions):
+            next_required_actions.append(
+                "Dummy/sample document — pass allow_dummy_override=true when calling "
+                "POST /documents/answer-debug."
+            )
+
+    # --- can_show_to_staff_now ---
+    if doc_status != "approved":
+        can_show_to_staff_now = False
+        blocked_reasons.append(
+            f"Document status is '{doc_status}' — must be 'approved' before staff visibility."
+        )
+        next_required_actions.append(
+            f"Change document status to 'approved' via POST /documents/{doc_id}/approve."
+        )
+    elif not approved_for_staff_visibility:
+        can_show_to_staff_now = False
+        blocked_reasons.append(
+            "Document requires approved_for_staff_visibility=true before staff visibility."
+        )
+        next_required_actions.append(
+            f"Approve for staff visibility via PATCH /documents/{doc_id}/governance "
+            "(approved_for_staff_visibility=true)."
+        )
+    else:
+        can_show_to_staff_now = True
+
+    return {
+        "document_id": doc_id,
+        "title": doc.get("title", ""),
+        "dummy_document": dummy_document,
+        "real_document": real_document,
+        "governance_status": governance_status,
+        "is_sensitive": is_sensitive,
+        "escalation_required": escalation_required,
+        "approved_for_embedding": approved_for_embedding,
+        "approved_for_staff_visibility": approved_for_staff_visibility,
+        "approved_for_source_grounded_answers": approved_for_source_grounded_answers,
+        "can_embed_now": can_embed_now,
+        "can_use_for_answer_debug_now": can_use_for_answer_debug_now,
+        "can_show_to_staff_now": can_show_to_staff_now,
+        "blocked_reasons": blocked_reasons,
+        "next_required_actions": next_required_actions,
+        "note": "Governance readiness only. Staff-facing AI answers remain disabled.",
+    }

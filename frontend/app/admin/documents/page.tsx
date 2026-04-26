@@ -197,6 +197,65 @@ function Flag({ active, title, icon }: { active: boolean; title: string; icon: R
   )
 }
 
+function computeGovernanceReadiness(doc: DocumentRecord): {
+  canEmbed: boolean
+  canAiTest: boolean
+  canShowToStaff: boolean
+  mainBlockedReason: string | null
+} {
+  const isReal = doc.real_document === true
+
+  let canEmbed = false
+  if (doc.is_sensitive) {
+    canEmbed = false
+  } else if (doc.escalation_required) {
+    canEmbed = false
+  } else if (isReal && !doc.approved_for_embedding) {
+    canEmbed = false
+  } else {
+    canEmbed = true
+  }
+
+  let canAiTest = false
+  if (doc.is_sensitive) {
+    canAiTest = false
+  } else if (doc.escalation_required) {
+    canAiTest = false
+  } else if (isReal && !doc.approved_for_source_grounded_answers) {
+    canAiTest = false
+  } else {
+    canAiTest = true
+  }
+
+  let canShowToStaff = false
+  if (doc.status !== 'approved') {
+    canShowToStaff = false
+  } else if (!doc.approved_for_staff_visibility) {
+    canShowToStaff = false
+  } else {
+    canShowToStaff = true
+  }
+
+  let mainBlockedReason: string | null = null
+  if (doc.is_sensitive) {
+    mainBlockedReason = 'Document is marked sensitive and cannot be embedded or used for AI answers.'
+  } else if (doc.escalation_required) {
+    mainBlockedReason = 'Document requires escalation — embedding and AI answer use are permanently blocked.'
+  } else if (isReal && !doc.approved_for_embedding && !doc.approved_for_source_grounded_answers) {
+    mainBlockedReason = 'Real document requires governance approval before embedding or AI answer testing.'
+  } else if (isReal && !doc.approved_for_embedding) {
+    mainBlockedReason = 'Real document requires governance approval before embedding.'
+  } else if (isReal && !doc.approved_for_source_grounded_answers) {
+    mainBlockedReason = 'Real document requires governance approval before AI answer testing.'
+  } else if (!canShowToStaff && doc.status !== 'approved') {
+    mainBlockedReason = `Document status is '${doc.status}' — must be approved before staff visibility.`
+  } else if (!canShowToStaff) {
+    mainBlockedReason = 'Approval for staff visibility required.'
+  }
+
+  return { canEmbed, canAiTest, canShowToStaff, mainBlockedReason }
+}
+
 // ---------------------------------------------------------------------------
 // Upload form state
 // ---------------------------------------------------------------------------
@@ -1559,6 +1618,35 @@ export default function DocumentRegistryPage() {
                 </div>
               </div>
 
+              {/* Real document readiness checklist */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+                <p className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                  <ClipboardList size={13} className="text-slate-500" />
+                  Real document readiness checklist
+                </p>
+                <p className="text-[11px] text-slate-400">Guidance only — confirm all points before approving a real document for embedding or staff visibility.</p>
+                <ul className="space-y-1">
+                  {[
+                    'Approved non-sensitive policy, SOP or training document only',
+                    'No service-user records',
+                    'No care plans',
+                    'No MAR charts with names',
+                    'No staff HR or payroll records',
+                    'No safeguarding case notes',
+                    'No named complaints',
+                    'No confidential third-party/QCS content unless licence and use is confirmed',
+                    'Human review completed before embedding',
+                    'Human review completed before staff visibility',
+                    'Document owner and source confirmed',
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-[11px] text-slate-600">
+                      <span className="mt-0.5 shrink-0 text-slate-300">☐</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
               {/* Success / Error */}
               {govSuccess && (
                 <div className="flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-xl px-4 py-2.5 text-xs text-teal-700">
@@ -1639,6 +1727,33 @@ export default function DocumentRegistryPage() {
                             Human review before staff visibility: {doc.requires_human_review_before_staff_visibility !== false ? 'Required' : 'Not required'}
                           </span>
                         </div>
+
+                        {/* Governance readiness summary */}
+                        {(() => {
+                          const r = computeGovernanceReadiness(doc)
+                          return (
+                            <div className="flex flex-wrap items-center gap-2 text-[10px]">
+                              <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full border ${r.canEmbed ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-red-50 text-red-600 border-red-200'}`}>
+                                {r.canEmbed ? <CheckCircle2 size={9} /> : <XCircle size={9} />}
+                                Embed: {r.canEmbed ? 'Yes' : 'No'}
+                              </span>
+                              <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full border ${r.canAiTest ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-red-50 text-red-600 border-red-200'}`}>
+                                {r.canAiTest ? <CheckCircle2 size={9} /> : <XCircle size={9} />}
+                                AI test: {r.canAiTest ? 'Yes' : 'No'}
+                              </span>
+                              <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full border ${r.canShowToStaff ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
+                                {r.canShowToStaff ? <CheckCircle2 size={9} /> : <XCircle size={9} />}
+                                Staff: {r.canShowToStaff ? 'Yes' : 'No'}
+                              </span>
+                              {r.mainBlockedReason && (
+                                <span className="text-amber-600 flex items-center gap-1">
+                                  <AlertTriangle size={9} className="shrink-0" />
+                                  {r.mainBlockedReason}
+                                </span>
+                              )}
+                            </div>
+                          )
+                        })()}
 
                         {/* Action buttons */}
                         <div className="flex flex-wrap gap-1.5">

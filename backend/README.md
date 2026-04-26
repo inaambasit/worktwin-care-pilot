@@ -60,6 +60,8 @@ curl "http://localhost:8000/policies?category=Medication"
 | POST | /documents/{id}/generate-embeddings | **Admin-only** — controlled embedding generation for dummy/sample docs (Milestone 4F) |
 | POST | /documents/search-vector | **Admin/debug** — vector similarity search, no AI answer (Milestone 4G) |
 | POST | /documents/answer-debug | **Admin/debug** — source-grounded answer test from retrieved chunks only (Milestone 4H) |
+| PATCH | /documents/{id}/governance | **Admin-only** — update governance fields with safety enforcement (Milestone 4I) |
+| GET | /documents/{id}/governance-readiness | **Admin/debug** — governance readiness summary with blocked reasons (Milestone 4I.1) |
 
 ## CORS
 
@@ -1048,6 +1050,112 @@ Returns: the updated `DocumentRecord`.
 9. Confirm that generating embeddings for that real document now returns `status: "blocked"` without `approved_for_embedding=true`
 10. Check Supabase Table Editor → `document_audit_events` for logged events
 
+## Milestone 4I.1: Governance hardening and real-document readiness checklist
+
+### What Milestone 4I.1 adds
+
+- **Clearer blocked reason messages** — governance gate functions now return plain English explanations:
+  - "Document is marked sensitive and cannot be embedded."
+  - "Document requires escalation and cannot be used for AI answers."
+  - "Real document requires governance approval before embedding."
+  - "Dummy document requires allow_dummy_override=true for test embedding."
+  - `answer-debug` blocked safety case now returns: "No safe approved chunks available for answer generation."
+- **Human-readable audit event summaries** — `PATCH /documents/{id}/governance` now writes specific summaries:
+  - "Document approved for embedding."
+  - "Document approved for source-grounded answer testing."
+  - "Document approved for staff visibility."
+  - "Document marked as real pilot document."
+  - "Document rejected during governance review."
+  - "Document archived."
+- **New governance readiness endpoint** — `GET /documents/{id}/governance-readiness` (see below)
+- **Frontend: real-document readiness checklist** — guidance checklist visible in the Document Governance panel before approving any document for embedding or staff visibility
+- **Frontend: per-document readiness display** — each document card in the governance panel now shows "Embed: Yes/No", "AI test: Yes/No", "Staff: Yes/No" and the main blocked reason (if any)
+
+### What Milestone 4I.1 does NOT change
+
+- Staff-facing `/ask` remains disabled — RAG is still governed-off
+- Real Thumhara/QCS documents must not be embedded until human review and governance approval
+- No SQL migration required — all changes are code-only
+- No change to the audit events table schema
+
+### Governance readiness endpoint
+
+`GET /documents/{id}/governance-readiness`
+
+Admin/debug only. Returns a full readiness summary for a single document. Does **not** expose extracted text, embedding vectors, or secrets.
+
+Example response:
+
+```json
+{
+  "document_id": "...",
+  "title": "Staff Handbook",
+  "dummy_document": false,
+  "real_document": true,
+  "governance_status": "not_reviewed",
+  "is_sensitive": false,
+  "escalation_required": false,
+  "approved_for_embedding": false,
+  "approved_for_staff_visibility": false,
+  "approved_for_source_grounded_answers": false,
+  "can_embed_now": false,
+  "can_use_for_answer_debug_now": false,
+  "can_show_to_staff_now": false,
+  "blocked_reasons": [
+    "Real document requires governance approval before embedding.",
+    "Real document requires governance approval before source-grounded answer testing.",
+    "Document requires approved_for_staff_visibility=true before staff visibility."
+  ],
+  "next_required_actions": [
+    "Approve for embedding via PATCH /documents/{id}/governance (approved_for_embedding=true) after completing human review.",
+    "Approve for AI answer testing via PATCH /documents/{id}/governance (approved_for_source_grounded_answers=true) after completing human review.",
+    "Approve for staff visibility via PATCH /documents/{id}/governance (approved_for_staff_visibility=true)."
+  ],
+  "note": "Governance readiness only. Staff-facing AI answers remain disabled."
+}
+```
+
+```bash
+curl "http://localhost:8000/documents/{id}/governance-readiness"
+```
+
+### Real document readiness checklist (guidance only)
+
+Before approving any document for embedding or staff visibility, confirm all of the following:
+
+- Approved non-sensitive policy, SOP or training document only
+- No service-user records
+- No care plans
+- No MAR charts with names
+- No staff HR or payroll records
+- No safeguarding case notes
+- No named complaints
+- No confidential third-party/QCS content unless licence and use is confirmed
+- Human review completed before embedding
+- Human review completed before staff visibility
+- Document owner and source confirmed
+
+This checklist is shown in the Document Governance panel at `/admin/documents` as a visual reminder.
+
+### Governance rules confirmed (no change to logic)
+
+The following rules were audited in Milestone 4I.1 and confirmed as correctly implemented:
+
+- `is_sensitive=true` permanently blocks: `approved_for_embedding=true`, `approved_for_source_grounded_answers=true`, embedding generation, and answer-debug source use
+- `escalation_required=true` permanently blocks the same four operations
+- `real_document=true` blocks embedding unless `approved_for_embedding=true`
+- `real_document=true` blocks answer-debug source use unless `approved_for_source_grounded_answers=true`
+- `dummy_document=true` allows dummy testing only when `allow_dummy_override=true`
+- `approved_for_staff_visibility` does NOT automatically approve embedding or AI answer use
+- Approving embedding does NOT automatically approve source-grounded answers
+- Approving source-grounded answers does NOT automatically approve staff visibility
+
+### Endpoint table update
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /documents/{id}/governance-readiness | **Admin/debug** — governance readiness summary with blocked reasons and next actions (Milestone 4I.1) |
+
 ## Current milestone status
 
 - PDF upload works (Milestone 4B)
@@ -1058,8 +1166,9 @@ Returns: the updated `DocumentRecord`.
 - Admin-only vector search works (Milestone 4G)
 - Admin-only source-grounded answer testing works (Milestone 4H)
 - **Governance gate active — real documents cannot be embedded without explicit approval (Milestone 4I)**
+- **Governance hardened — clearer blocked reasons, human-readable audit summaries, readiness endpoint, readiness checklist (Milestone 4I.1)**
 - Staff-facing `/ask` remains a placeholder — RAG is governed-disabled
-- No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a governance review
+- No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a human reviewer
 
 ## Next steps (Milestone 4J+)
 

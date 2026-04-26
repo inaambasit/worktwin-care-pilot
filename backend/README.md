@@ -627,11 +627,144 @@ curl -X POST "http://localhost:8000/documents/{id}/generate-embeddings" \
 - No pgvector index created yet — search queries will be O(n) full-table scans until the index is added in 4G
 - No RAG pipeline, no LLM calls
 
-## Next steps (Milestone 4G)
+## Milestone 4G: Admin-only vector search / retrieval test
 
-- pgvector IVFFlat/HNSW index on `document_embeddings.embedding`
-- Vector similarity search endpoint (admin/debug only first)
-- RAG retrieval pipeline
-- LLM response generation with strict source-grounding prompt
+### What Milestone 4G adds
+
+- SQL migration `006_vector_search.sql`:
+  - Optional HNSW vector index on `document_embeddings.embedding` (cosine distance, pgvector ≥ 0.5.0)
+  - Postgres function `match_document_chunks` — cosine similarity search with joins to `document_chunks` and `document_registry`
+  - `REVOKE EXECUTE ... FROM PUBLIC` — no anon or authenticated (frontend) access
+- Backend helpers (backend-only, never exposed to frontend):
+  - `_embed_query_text(query)` — calls OpenAI text-embedding-3-small for a single query string
+  - `_vector_search_chunks(...)` — calls `match_document_chunks` via Supabase RPC, applies post-fetch safety filter
+  - `_normalise_search_result(row)` — converts RPC rows into safe, truncated API output (350-char chunk preview only)
+- New endpoint: `POST /documents/search-vector` — admin/debug only, no AI answer, no LLM
+- Frontend admin panel: "Vector Search Test" (collapsible, clearly labelled Admin/debug only) at `/admin/documents`
+- Safety filters enforced throughout:
+  - `escalation_required=True` chunks always excluded
+  - `is_sensitive=True` chunks always excluded
+  - `approved_for_ai_answers=False` chunks excluded unless `allow_dummy_override=True`
+  - Vectors never returned in API responses
+  - Query capped at 500 characters
+  - `match_count` capped at 10
+
+### What Milestone 4G does NOT do
+
+- No AI answer generation — no LLM, no chat, no completion endpoint
+- No staff-facing RAG — `/ask` is unchanged and still returns a placeholder
+- No real Thumhara/QCS documents — dummy/sample PDFs only
+- No authentication or authorisation enforcement yet
+
+### Cost: one tiny query embedding only
+
+`text-embedding-3-small` costs $0.020 per 1 million tokens. A single query of ~50 words ≈ ~70 tokens ≈ **$0.0000014** — effectively zero. Each test search costs less than $0.01.
+
+### SQL migration
+
+File: `backend/sql/006_vector_search.sql`
+
+Run **after** `005_document_embeddings.sql`:
+
+1. Open your Supabase project
+2. Go to **SQL Editor**
+3. Paste the contents of `backend/sql/006_vector_search.sql`
+4. Click **Run**
+
+**HNSW index fallback:** If your Supabase project uses pgvector < 0.5.0, comment out the `CREATE INDEX ... USING hnsw ...` block and the search will fall back to a full-table scan (fine for the pilot dataset size).
+
+### Vector search endpoint
+
+`POST /documents/search-vector`
+
+Request body:
+
+```json
+{
+  "query": "What should staff do when a service user refuses medication?",
+  "organisation_id": "demo-org",
+  "match_count": 5,
+  "allow_dummy_override": true
+}
+```
+
+Response shape:
+
+```json
+{
+  "query": "What should staff do when a service user refuses medication?",
+  "organisation_id": "demo-org",
+  "match_count": 5,
+  "result_count": 2,
+  "results": [
+    {
+      "document_id": "...",
+      "chunk_id": "...",
+      "document_title": "Sample Test Document",
+      "chunk_index": 0,
+      "similarity": 0.8734,
+      "category": "Medication",
+      "vertical": "care",
+      "access_roles": ["All Staff"],
+      "approved_for_ai_answers": false,
+      "escalation_required": false,
+      "is_sensitive": false,
+      "chunk_preview": "First 350 characters of the chunk text..."
+    }
+  ],
+  "note": "Vector retrieval only. AI answers are still disabled."
+}
+```
+
+If `OPENAI_API_KEY` is not set: `{ "status": "not_configured", "note": "..." }`
+
+If `006_vector_search.sql` has not been run: `{ ..., "error": "match_document_chunks function not found. Run backend/sql/006_vector_search.sql..." }`
+
+### Manual test steps (Milestone 4G)
+
+1. Run `006_vector_search.sql` in Supabase SQL Editor
+2. Ensure at least one dummy PDF has been uploaded and embeddings generated (`embedding_status = indexed`)
+3. Test via curl:
+
+```bash
+curl -X POST "http://localhost:8000/documents/search-vector" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "What should this test document not contain?",
+    "organisation_id": "demo-org",
+    "match_count": 5,
+    "allow_dummy_override": true
+  }'
+```
+
+4. Or use the **Vector Search Test** panel at `/admin/documents` (purple collapsible card at the bottom of the page)
+5. Confirm `result_count > 0` and `similarity` scores are returned
+6. Confirm `chunk_preview` shows only the first 350 characters — full text not returned
+7. Confirm no AI answer is generated — the response contains only `note: "Vector retrieval only. AI answers are still disabled."`
+8. Confirm `/ask` still returns a placeholder response
+
+### Frontend Vector Search Test panel
+
+Location: `/admin/documents` — collapsible purple card labelled "Vector Search Test (Admin/debug only)"
+
+- Clearly labelled admin/debug only
+- Warning: "This tests retrieval only. It does not generate staff answers."
+- Inputs: query text, match count (1–10), "Allow dummy/sample documents" checkbox
+- Button: "Test vector search"
+- Output: result count, per-chunk cards showing document title, chunk index, similarity %, chunk preview, safety flags
+- Full extracted text and embeddings never displayed
+
+### Important constraints (still apply through Milestone 4G)
+
+- Only dummy or sample PDFs — no real Thumhara/QCS policy documents
+- AI answers remain fully disabled — embeddings cannot be served to staff
+- No staff-facing RAG pipeline
+- No LLM calls of any kind
+
+## Next steps (Milestone 4H)
+
+- Governance sign-off and safety review before embedding real Thumhara/QCS policy documents
+- Staff-facing RAG pipeline (retrieve then generate answer from approved documents only)
+- LLM response generation with strict source-grounding prompt and citation
 - Authentication and organisation membership verification
-- Governance sign-off before indexing real Thumhara/QCS documents
+- Rate limiting and query logging (anonymised — no user-level data)

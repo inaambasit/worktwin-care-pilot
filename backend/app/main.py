@@ -62,6 +62,12 @@ EMBEDDING_DIMENSIONS = 1536
 MAX_EMBEDDING_CHUNKS_PER_REQUEST = 20
 MAX_EMBEDDING_CHARACTERS_PER_CHUNK = 2000
 
+# ---------------------------------------------------------------------------
+# Milestone 4G — vector search / query embedding constants
+# ---------------------------------------------------------------------------
+MAX_QUERY_CHARS = 500       # cap query length before embedding
+MAX_SEARCH_RESULTS = 10     # cap match_count on the search endpoint
+
 _OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
 _OPENAI_CONFIGURED: bool = bool(_OPENAI_API_KEY)
 
@@ -491,6 +497,103 @@ def _format_vector_for_pgvector(vector: List[float]) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Milestone 4G — vector search helpers
+# Query embedding and retrieval — backend-only, no AI answers, no LLM calls.
+# _OPENAI_API_KEY is never logged, returned, or transmitted outside this module.
+# ---------------------------------------------------------------------------
+
+def _embed_query_text(query: str) -> List[float]:
+    """
+    Embed a single query string using text-embedding-3-small.
+    _OPENAI_API_KEY is backend-only and never returned or logged.
+    Raises on any API error.
+    """
+    from openai import OpenAI as _OpenAI
+    client = _OpenAI(api_key=_OPENAI_API_KEY)
+    response = client.embeddings.create(
+        model=EMBEDDING_MODEL,
+        input=[query[:MAX_QUERY_CHARS]],
+        dimensions=EMBEDDING_DIMENSIONS,
+    )
+    return response.data[0].embedding
+
+
+def _vector_search_chunks(
+    organisation_id: str,
+    query: str,
+    match_count: int = 5,
+    threshold: float = 0.0,
+    allow_dummy_override: bool = False,
+) -> List[Dict[str, Any]]:
+    """
+    Embeds the query and calls match_document_chunks via Supabase RPC.
+    Returns filtered rows (escalation_required and is_sensitive always excluded).
+    Vectors are never returned.
+    Raises RuntimeError on embedding or RPC failure.
+    """
+    import httpx as _httpx
+
+    vector = _embed_query_text(query)
+    vector_str = _format_vector_for_pgvector(vector)
+
+    url = f"{_SUPABASE_URL}/rest/v1/rpc/match_document_chunks"
+    payload = {
+        "query_embedding": vector_str,
+        "match_organisation_id": organisation_id,
+        "match_threshold": threshold,
+        "match_count": match_count,
+    }
+    resp = _httpx.post(url, json=payload, headers=_db_headers(), timeout=30)
+    if resp.status_code != 200:
+        body = resp.text[:300]
+        if resp.status_code == 404 or "Could not find" in body or "match_document_chunks" in body:
+            raise RuntimeError(
+                "match_document_chunks function not found. "
+                "Run backend/sql/006_vector_search.sql in Supabase SQL Editor."
+            )
+        raise RuntimeError(f"Vector search RPC failed: HTTP {resp.status_code}")
+
+    rows = resp.json()
+    if not isinstance(rows, list):
+        raise RuntimeError("Unexpected response format from match_document_chunks.")
+
+    # Post-fetch safety filter — always enforced regardless of allow_dummy_override
+    filtered = []
+    for row in rows:
+        if row.get("escalation_required", False):
+            continue
+        if row.get("is_sensitive", False):
+            continue
+        if not allow_dummy_override and not row.get("approved_for_ai_answers", False):
+            continue
+        filtered.append(row)
+
+    return filtered
+
+
+def _normalise_search_result(row: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Converts a raw RPC row into the safe, API-returnable result shape.
+    chunk_text is truncated to a 350-character preview — full text never returned.
+    Vectors are never included.
+    """
+    return {
+        "document_id": str(row.get("document_id") or ""),
+        "chunk_id": str(row.get("chunk_id") or ""),
+        "document_title": row.get("document_title") or "",
+        "chunk_index": int(row.get("chunk_index") or 0),
+        "similarity": round(float(row.get("similarity") or 0), 4),
+        "category": row.get("category") or "",
+        "vertical": row.get("vertical") or "",
+        "access_roles": list(row.get("access_roles") or []),
+        "approved_for_ai_answers": bool(row.get("approved_for_ai_answers", False)),
+        "escalation_required": bool(row.get("escalation_required", False)),
+        "is_sensitive": bool(row.get("is_sensitive", False)),
+        "chunk_preview": (row.get("chunk_text") or "")[:350],
+    }
+
+
+# ---------------------------------------------------------------------------
 # Privacy and safety contract (enforced in the real build, documented here)
 #
 # - Private employee chat transcripts are NEVER exposed to managers or admins.
@@ -649,6 +752,18 @@ class GenerateEmbeddingsRequest(BaseModel):
     """
     allow_dummy_override: bool = False
     max_chunks: int = 20
+
+
+class VectorSearchRequest(BaseModel):
+    """
+    Request body for POST /documents/search-vector (Milestone 4G).
+    Admin/debug-only — do not expose to staff or public routes.
+    No AI answer is generated. No LLM is called.
+    """
+    query: str
+    organisation_id: str = "demo-org"
+    match_count: int = 5
+    allow_dummy_override: bool = False
 
 
 # ---------------------------------------------------------------------------
@@ -1596,6 +1711,85 @@ def generate_document_embeddings(doc_id: str, payload: GenerateEmbeddingsRequest
     if api_error_note:
         result["api_error"] = api_error_note
     return result
+
+
+# ---------------------------------------------------------------------------
+# Milestone 4G — Admin/debug vector retrieval endpoint
+# POST /documents/search-vector
+# No AI answer is generated. No LLM is called. No /ask endpoint is changed.
+# ---------------------------------------------------------------------------
+
+@app.post("/documents/search-vector")
+def search_vector(payload: VectorSearchRequest):
+    """
+    Admin/debug-only vector retrieval endpoint — Milestone 4G.
+
+    Embeds the query with text-embedding-3-small and searches document_embeddings
+    using pgvector cosine similarity via the match_document_chunks Postgres function.
+    Returns retrieved chunk metadata and previews only — no AI answer, no LLM.
+
+    Safety rules enforced:
+    - OPENAI_API_KEY must be configured on the backend (Render env var). Never frontend.
+    - Chunks with escalation_required=True are always excluded.
+    - Chunks with is_sensitive=True are always excluded.
+    - Chunks with approved_for_ai_answers=False are excluded unless allow_dummy_override=True.
+    - Query is capped at 500 characters before embedding.
+    - match_count is capped at 10.
+    - Vectors are never returned in API responses.
+    - No LLM, no chat, no completion endpoint is called.
+    - /ask endpoint behaviour is unchanged.
+
+    Requires backend/sql/006_vector_search.sql to have been run in Supabase SQL Editor.
+    """
+    if not _OPENAI_CONFIGURED:
+        return {
+            "status": "not_configured",
+            "note": (
+                "OPENAI_API_KEY is not set in the backend environment. "
+                "Add it to Render environment variables (backend only). "
+                "Never put it in frontend code or return it from any endpoint."
+            ),
+        }
+
+    if not _DB_CONFIGURED:
+        raise HTTPException(status_code=503, detail="Database not configured.")
+
+    query_clean = payload.query.strip()[:MAX_QUERY_CHARS]
+    if not query_clean:
+        raise HTTPException(status_code=400, detail="Query must not be empty.")
+
+    safe_count = max(1, min(payload.match_count, MAX_SEARCH_RESULTS))
+
+    try:
+        rows = _vector_search_chunks(
+            organisation_id=payload.organisation_id,
+            query=query_clean,
+            match_count=safe_count,
+            threshold=0.0,
+            allow_dummy_override=payload.allow_dummy_override,
+        )
+    except Exception as exc:
+        safe_err = _safe_embedding_error(exc)
+        return {
+            "query": query_clean,
+            "organisation_id": payload.organisation_id,
+            "match_count": safe_count,
+            "result_count": 0,
+            "results": [],
+            "note": "Vector retrieval only. AI answers are still disabled.",
+            "error": safe_err,
+        }
+
+    results = [_normalise_search_result(r) for r in rows]
+
+    return {
+        "query": query_clean,
+        "organisation_id": payload.organisation_id,
+        "match_count": safe_count,
+        "result_count": len(results),
+        "results": results,
+        "note": "Vector retrieval only. AI answers are still disabled.",
+    }
 
 
 # ---------------------------------------------------------------------------

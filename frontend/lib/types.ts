@@ -160,6 +160,37 @@ export interface GenerateEmbeddingsResult {
   api_error?: string
 }
 
+// ---------------------------------------------------------------------------
+// Milestone 4G — Vector search (admin/debug only, no AI answers)
+// ---------------------------------------------------------------------------
+
+export interface VectorSearchResultItem {
+  document_id: string
+  chunk_id: string
+  document_title: string
+  chunk_index: number
+  similarity: number
+  category: string
+  vertical: string
+  access_roles: string[]
+  approved_for_ai_answers: boolean
+  escalation_required: boolean
+  is_sensitive: boolean
+  chunk_preview: string
+}
+
+export interface VectorSearchResponse {
+  query?: string
+  organisation_id?: string
+  match_count?: number
+  result_count?: number
+  results?: VectorSearchResultItem[]
+  note?: string
+  // present when OPENAI_API_KEY is not configured or on error
+  status?: string
+  error?: string
+}
+
 export const LANGUAGE_NAMES: Record<string, string> = {
   en: 'English',
   ur: 'Urdu',

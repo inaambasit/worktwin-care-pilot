@@ -1,6 +1,6 @@
 // WorkTwin API helper — calls the FastAPI backend at NEXT_PUBLIC_API_URL.
 
-import type { AskRequest, AskResponse, DocumentRecord, DocumentListResponse, UploadDocumentResult, GenerateEmbeddingsResult } from './types'
+import type { AskRequest, AskResponse, DocumentRecord, DocumentListResponse, UploadDocumentResult, GenerateEmbeddingsResult, VectorSearchResponse } from './types'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
@@ -192,4 +192,34 @@ export async function generateEmbeddings(
     throw new Error((data as { detail?: string }).detail ?? `Embedding generation failed: ${response.status}`)
   }
   return data as GenerateEmbeddingsResult
+}
+
+// ---------------------------------------------------------------------------
+// Milestone 4G — Admin/debug vector search (no AI answers, no LLM calls)
+// OPENAI_API_KEY is never used or referenced in this file.
+// ---------------------------------------------------------------------------
+
+export async function vectorSearchDocuments(params: {
+  query: string
+  organisation_id: string
+  match_count?: number
+  allow_dummy_override?: boolean
+}): Promise<VectorSearchResponse> {
+  const body = {
+    query: params.query,
+    organisation_id: params.organisation_id,
+    match_count: params.match_count ?? 5,
+    allow_dummy_override: params.allow_dummy_override ?? false,
+  }
+  const response = await fetch(`${API_BASE_URL}/documents/search-vector`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(30_000),
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error((data as { detail?: string }).detail ?? `Vector search failed: ${response.status}`)
+  }
+  return data as VectorSearchResponse
 }

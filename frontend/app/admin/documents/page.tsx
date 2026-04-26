@@ -1,14 +1,14 @@
 'use client'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import AppLayout from '@/components/AppLayout'
-import { fetchDocuments, approveDocument, archiveDocument, uploadDocumentPdf, generateEmbeddings } from '@/lib/api'
-import type { DocumentRecord, DocumentStatus, EmbeddingStatus, UploadDocumentResult, GenerateEmbeddingsResult } from '@/lib/types'
+import { fetchDocuments, approveDocument, archiveDocument, uploadDocumentPdf, generateEmbeddings, vectorSearchDocuments } from '@/lib/api'
+import type { DocumentRecord, DocumentStatus, EmbeddingStatus, UploadDocumentResult, GenerateEmbeddingsResult, VectorSearchResponse } from '@/lib/types'
 import { LANGUAGE_NAMES } from '@/lib/types'
 import {
   FileText, Upload, CheckCircle, Clock, AlertCircle, Users,
   AlertTriangle, Shield, Globe, Brain, Archive, RefreshCw,
   ShieldAlert, XCircle, Filter, ChevronDown, ChevronUp,
-  Loader2, X, Info, CheckCircle2, Zap,
+  Loader2, X, Info, CheckCircle2, Zap, Search,
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -264,6 +264,15 @@ export default function DocumentRegistryPage() {
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Vector Search Test state (admin/debug — Milestone 4G)
+  const [showVectorSearch, setShowVectorSearch] = useState(false)
+  const [vsQuery, setVsQuery] = useState('')
+  const [vsMatchCount, setVsMatchCount] = useState(5)
+  const [vsAllowDummy, setVsAllowDummy] = useState(true)
+  const [vsLoading, setVsLoading] = useState(false)
+  const [vsResult, setVsResult] = useState<VectorSearchResponse | null>(null)
+  const [vsError, setVsError] = useState<string | null>(null)
+
   const loadDocs = useCallback(() => {
     setLoading(true)
     fetchDocuments()
@@ -386,6 +395,27 @@ export default function DocumentRegistryPage() {
     setUploadResult(null)
     setUploadError(null)
     if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  async function handleVectorSearch() {
+    const q = vsQuery.trim()
+    if (!q) { setVsError('Enter a query to test.'); return }
+    setVsLoading(true)
+    setVsResult(null)
+    setVsError(null)
+    try {
+      const result = await vectorSearchDocuments({
+        query: q,
+        organisation_id: 'demo-org',
+        match_count: vsMatchCount,
+        allow_dummy_override: vsAllowDummy,
+      })
+      setVsResult(result)
+    } catch (err) {
+      setVsError(err instanceof Error ? err.message : 'Vector search failed.')
+    } finally {
+      setVsLoading(false)
+    }
   }
 
   const counts = {
@@ -1229,6 +1259,202 @@ export default function DocumentRegistryPage() {
               </tbody>
             </table>
           </div>
+        </div>
+
+        {/* Vector Search Test — Admin/debug only (Milestone 4G) */}
+        <div className="bg-white border border-purple-200 rounded-2xl overflow-hidden shadow-sm">
+          <button
+            onClick={() => { setShowVectorSearch(s => !s); setVsResult(null); setVsError(null) }}
+            className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-purple-50/30 transition-colors"
+          >
+            <span className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+              <Search size={15} className="text-purple-600" />
+              Vector Search Test
+              <span className="text-[10px] font-medium bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full border border-purple-200">
+                Admin/debug only
+              </span>
+            </span>
+            {showVectorSearch ? <ChevronUp size={15} className="text-slate-400" /> : <ChevronDown size={15} className="text-slate-400" />}
+          </button>
+
+          {showVectorSearch && (
+            <div className="border-t border-purple-100 p-5 space-y-4">
+
+              {/* Warning */}
+              <div className="flex items-start gap-3 bg-purple-50 border border-purple-200 rounded-xl px-4 py-3">
+                <AlertCircle size={15} className="text-purple-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-purple-900">This tests retrieval only. It does not generate staff answers.</p>
+                  <p className="text-xs text-purple-700 mt-0.5 leading-relaxed">
+                    Embeds the query and searches existing embedded chunks using pgvector cosine similarity.
+                    No LLM is called. No answer is generated. The <code className="font-mono">/ask</code> endpoint is unchanged.
+                    Test with dummy/sample documents only — no real Thumhara/QCS policies yet.
+                  </p>
+                </div>
+              </div>
+
+              {/* Query */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Query</label>
+                <textarea
+                  value={vsQuery}
+                  onChange={e => setVsQuery(e.target.value)}
+                  placeholder="e.g. What should staff do when administering medication?"
+                  rows={2}
+                  maxLength={500}
+                  className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none"
+                />
+                <p className="text-[11px] text-slate-400 mt-0.5">{vsQuery.length}/500 characters</p>
+              </div>
+
+              {/* Match count + allow dummy */}
+              <div className="flex items-end gap-6 flex-wrap">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Match count</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={vsMatchCount}
+                    onChange={e => setVsMatchCount(Math.max(1, Math.min(10, Number(e.target.value))))}
+                    className="w-20 text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  />
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer select-none pb-2">
+                  <input
+                    type="checkbox"
+                    checked={vsAllowDummy}
+                    onChange={e => setVsAllowDummy(e.target.checked)}
+                    className="rounded border-slate-300 text-purple-600 focus:ring-purple-400"
+                  />
+                  <span className="text-xs text-slate-600">Allow dummy/sample documents</span>
+                </label>
+              </div>
+
+              {/* Submit */}
+              <div>
+                <button
+                  onClick={handleVectorSearch}
+                  disabled={vsLoading || !vsQuery.trim()}
+                  className="flex items-center gap-2 text-sm font-semibold bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {vsLoading ? (
+                    <><Loader2 size={14} className="animate-spin" /> Searching…</>
+                  ) : (
+                    <><Search size={14} /> Test vector search</>
+                  )}
+                </button>
+              </div>
+
+              {/* Error */}
+              {vsError && (
+                <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-xs text-red-700">
+                  <XCircle size={14} className="shrink-0 mt-0.5" />
+                  <div>
+                    <p>{vsError}</p>
+                    {vsError.includes('006_vector_search.sql') && (
+                      <p className="mt-1 font-medium">
+                        Run <code className="font-mono">backend/sql/006_vector_search.sql</code> in Supabase SQL Editor first.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Result */}
+              {vsResult && (
+                <div className="space-y-3">
+                  {vsResult.status === 'not_configured' ? (
+                    <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-700">
+                      <Info size={14} className="shrink-0 mt-0.5" />
+                      <p>OPENAI_API_KEY is not configured on the backend. Set it in Render environment variables (backend service only).</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span className={`text-sm font-semibold ${(vsResult.result_count ?? 0) > 0 ? 'text-teal-700' : 'text-slate-500'}`}>
+                          {vsResult.result_count ?? 0} result{(vsResult.result_count ?? 0) !== 1 ? 's' : ''} retrieved
+                        </span>
+                        {vsResult.query && (
+                          <span className="text-xs text-slate-400">for &ldquo;{vsResult.query}&rdquo;</span>
+                        )}
+                      </div>
+
+                      {vsResult.error && (
+                        <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-2 text-xs text-red-700">
+                          <XCircle size={12} className="shrink-0 mt-0.5" />
+                          <div>
+                            <p>{vsResult.error}</p>
+                            {vsResult.error.includes('006_vector_search.sql') && (
+                              <p className="mt-1 font-medium">Run <code className="font-mono">backend/sql/006_vector_search.sql</code> in Supabase SQL Editor.</p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {(vsResult.results ?? []).length === 0 && !vsResult.error && (
+                        <p className="text-xs text-slate-400">
+                          No matching chunks found. Make sure documents have been uploaded and embeddings generated
+                          (use the <Zap size={11} className="inline text-indigo-500" /> Generate embeddings button in the table above), then try again.
+                        </p>
+                      )}
+
+                      {(vsResult.results ?? []).map(item => (
+                        <div key={item.chunk_id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+                          <div className="flex items-start justify-between gap-2 flex-wrap">
+                            <div>
+                              <p className="text-sm font-semibold text-slate-800">{item.document_title}</p>
+                              <p className="text-[11px] text-slate-400">
+                                Chunk {item.chunk_index} · {item.category} · {item.vertical}
+                              </p>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <span className={`text-base font-bold ${item.similarity >= 0.7 ? 'text-teal-700' : item.similarity >= 0.4 ? 'text-amber-600' : 'text-slate-400'}`}>
+                                {(item.similarity * 100).toFixed(1)}%
+                              </span>
+                              <p className="text-[10px] text-slate-400">similarity</p>
+                            </div>
+                          </div>
+
+                          <p className="text-xs text-slate-600 leading-relaxed font-mono bg-white border border-slate-100 rounded-lg px-3 py-2 whitespace-pre-wrap line-clamp-5">
+                            {item.chunk_preview || '(no preview)'}
+                          </p>
+
+                          <div className="flex flex-wrap gap-1.5 text-[10px]">
+                            <span className={`px-2 py-0.5 rounded-full border ${item.approved_for_ai_answers ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
+                              {item.approved_for_ai_answers ? 'Approved for AI' : 'Not approved for AI'}
+                            </span>
+                            {item.escalation_required && (
+                              <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                                Escalation required
+                              </span>
+                            )}
+                            {item.is_sensitive && (
+                              <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                                Sensitive
+                              </span>
+                            )}
+                            {item.access_roles.length > 0 && (
+                              <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
+                                {item.access_roles.join(', ')}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+
+                      {vsResult.note && (
+                        <p className="text-[11px] text-purple-600 flex items-center gap-1">
+                          <Info size={10} className="shrink-0" />
+                          {vsResult.note}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Legend */}

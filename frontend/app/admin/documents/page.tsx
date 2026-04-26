@@ -1702,7 +1702,8 @@ export default function DocumentRegistryPage() {
             and other regulated SMEs — all managed in one place.
             Embedding records are prepared per chunk (Milestone 4E). Controlled embedding generation is available for dummy/sample documents
             (Milestone 4F — <Zap size={11} className="inline text-indigo-500" /> button in the Embedding column).{' '}
-            <strong>Embeddings prepare vector search only. AI answers remain disabled until Milestone 4G.</strong>
+            Admin-only vector search (Milestone 4G) and source-grounded answer testing (Milestone 4H) are available above.{' '}
+            <strong>Staff-facing Ask WorkTwin remains disabled from using RAG. Real Thumhara/QCS documents must not be embedded until governance sign-off.</strong>
           </p>
         </div>
 

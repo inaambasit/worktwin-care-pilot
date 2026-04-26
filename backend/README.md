@@ -593,7 +593,7 @@ Safety rules:
 - `text-embedding-3-small` costs $0.020 per 1 million input tokens
 - A 1,200-character chunk ≈ ~300 tokens ≈ $0.000006 per chunk
 - 20 chunks ≈ $0.0001 — negligible for testing
-- **Do not run this on large batches of real documents until Milestone 4G governance review passes**
+- **Do not run this on large batches of real documents — governance sign-off is required before embedding real policy documents**
 - Do not embed real Thumhara/QCS policy documents yet
 
 ### Manual test steps (Milestone 4F)
@@ -626,7 +626,7 @@ curl -X POST "http://localhost:8000/documents/{id}/generate-embeddings" \
 
 - Only dummy or sample PDFs — no real Thumhara/QCS policy documents
 - AI answers remain disabled — embeddings cannot be searched or served to staff
-- No pgvector index created yet — search queries will be O(n) full-table scans until the index is added in 4G
+- No pgvector index in this milestone — the optional HNSW index was added in Milestone 4G
 - No RAG pipeline, no LLM calls
 
 ## Milestone 4G: Admin-only vector search / retrieval test
@@ -907,6 +907,18 @@ Before enabling AI answers for staff (Milestone 4I+), ALL of the following must 
 - End-to-end test with representative real queries
 
 Do not expose `/documents/answer-debug` to staff or make it publicly accessible.
+
+## Current milestone status
+
+- PDF upload works (Milestone 4B)
+- Document registry persists (Milestone 4C)
+- Extracted text and document chunks persist (Milestone 4D)
+- Embedding records are prepared per chunk (Milestone 4E)
+- Embeddings can be generated for dummy/sample documents (Milestone 4F)
+- Admin-only vector search works (Milestone 4G)
+- Admin-only source-grounded answer testing works (Milestone 4H)
+- Staff-facing `/ask` remains a placeholder — RAG is governed-disabled
+- No real Thumhara/QCS documents should be embedded until governance sign-off
 
 ## Next steps (Milestone 4I)
 

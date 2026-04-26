@@ -52,6 +52,19 @@ if _SUPABASE_URL and _raw_service_key:
 del _raw_service_key  # remove temp; _SUPABASE_HTTP_KEY / _SUPABASE_DB_KEY hold the values when needed
 _DB_CONFIGURED: bool = bool(_SUPABASE_URL and _SUPABASE_DB_KEY)
 
+# ---------------------------------------------------------------------------
+# Milestone 4F — OpenAI embedding configuration (backend-only)
+# OPENAI_API_KEY is never logged, returned in API responses, or exposed to
+# the frontend under any circumstances.
+# ---------------------------------------------------------------------------
+EMBEDDING_MODEL = "text-embedding-3-small"
+EMBEDDING_DIMENSIONS = 1536
+MAX_EMBEDDING_CHUNKS_PER_REQUEST = 20
+MAX_EMBEDDING_CHARACTERS_PER_CHUNK = 2000
+
+_OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+_OPENAI_CONFIGURED: bool = bool(_OPENAI_API_KEY)
+
 try:
     from pypdf import PdfReader as _PdfReader
     _PYPDF_OK = True
@@ -372,27 +385,22 @@ def _get_embedding_readiness(document_id: str) -> Dict[str, Any]:
     """
     Aggregate embedding readiness for a document.
     Returns counts and flags only — no vectors, no secrets, no extracted text.
+    Updated in Milestone 4F: uses embedded status, adds is_ready_for_vector_search.
     """
     records = _list_embedding_records(document_id)
     chunks = _list_document_chunks(document_id)
 
     not_started_count = sum(1 for r in records if r.get("embedding_status") == "not_started")
-    embedded_count = sum(1 for r in records if r.get("embedding_status") == "indexed")
+    embedded_count = sum(1 for r in records if r.get("embedding_status") == "embedded")
     failed_count = sum(1 for r in records if r.get("embedding_status") == "failed")
 
-    # All chunks must have embedding records before generation can start.
-    is_ready_for_embedding = (
+    # Ready for vector search when all chunks have been embedded successfully.
+    is_ready_for_vector_search = (
         len(chunks) > 0
         and len(records) == len(chunks)
+        and embedded_count == len(records)
         and failed_count == 0
     )
-
-    # approved_for_ai_answers is true only when every record carries the flag.
-    approved = (
-        all(r.get("approved_for_ai_answers", False) for r in records)
-        if records else False
-    )
-    escalation = any(r.get("escalation_required", False) for r in records)
 
     return {
         "document_id": document_id,
@@ -401,12 +409,85 @@ def _get_embedding_readiness(document_id: str) -> Dict[str, Any]:
         "not_started_count": not_started_count,
         "embedded_count": embedded_count,
         "failed_count": failed_count,
-        "approved_for_ai_answers": approved,
-        "escalation_required": escalation,
-        "is_ready_for_embedding": is_ready_for_embedding,
+        "is_ready_for_vector_search": is_ready_for_vector_search,
         "is_ready_for_ai_answers": False,
-        "note": "Embeddings and AI answers are not enabled yet.",
+        "note": "Vector search and AI answers are not enabled yet.",
     }
+
+
+# ---------------------------------------------------------------------------
+# Milestone 4F — embedding generation helpers
+# All OpenAI API calls are backend-only.
+# _OPENAI_API_KEY is never logged, returned, or transmitted outside this module.
+# ---------------------------------------------------------------------------
+
+def _safe_embedding_error(exc: Exception) -> str:
+    """Return a short, safe error string that cannot leak API keys."""
+    msg = str(exc)[:300]
+    msg = re.sub(r'sk-[A-Za-z0-9_\-]{10,}', '[key-redacted]', msg)
+    return msg
+
+
+def _fetch_chunk_texts(chunk_ids: List[str]) -> Dict[str, str]:
+    """Fetch chunk_text for the given chunk IDs from document_chunks (backend-only)."""
+    import httpx as _httpx
+    if not chunk_ids:
+        return {}
+    ids_str = ",".join(chunk_ids)
+    url = f"{_SUPABASE_URL}/rest/v1/document_chunks"
+    params = {"id": f"in.({ids_str})", "select": "id,chunk_text", "limit": "1000"}
+    resp = _httpx.get(url, params=params, headers=_db_headers(), timeout=30)
+    if resp.status_code != 200:
+        return {}
+    return {row["id"]: (row.get("chunk_text") or "") for row in resp.json()}
+
+
+def _update_embedding_record_by_id(record_id: str, updates: Dict[str, Any]) -> None:
+    """Patch a single document_embeddings row. Used during embedding generation."""
+    import httpx as _httpx
+    url = f"{_SUPABASE_URL}/rest/v1/document_embeddings"
+    params = {"id": f"eq.{record_id}"}
+    headers = {**_db_headers(), "Prefer": "return=minimal"}
+    _httpx.patch(url, json={**updates, "updated_at": _now()}, params=params, headers=headers, timeout=15)
+
+
+def _update_chunk_embedding_status_by_id(chunk_id: str, status: str) -> None:
+    """Patch document_chunks.embedding_status for a single chunk."""
+    import httpx as _httpx
+    url = f"{_SUPABASE_URL}/rest/v1/document_chunks"
+    params = {"id": f"eq.{chunk_id}"}
+    headers = {**_db_headers(), "Prefer": "return=minimal"}
+    _httpx.patch(
+        url,
+        json={"embedding_status": status, "updated_at": _now()},
+        params=params,
+        headers=headers,
+        timeout=15,
+    )
+
+
+def _call_openai_embeddings(texts: List[str]) -> Tuple[List[List[float]], int]:
+    """
+    Call the OpenAI Embeddings API with a batch of texts.
+    Returns (list_of_vectors, total_tokens_used).
+    _OPENAI_API_KEY is backend-only and is never logged or returned.
+    Raises on any API error.
+    """
+    from openai import OpenAI as _OpenAI
+    client = _OpenAI(api_key=_OPENAI_API_KEY)
+    response = client.embeddings.create(
+        model=EMBEDDING_MODEL,
+        input=texts,
+        dimensions=EMBEDDING_DIMENSIONS,
+    )
+    vectors = [item.embedding for item in response.data]
+    total_tokens = response.usage.total_tokens
+    return vectors, total_tokens
+
+
+def _format_vector_for_pgvector(vector: List[float]) -> str:
+    """Format a float list as a pgvector-compatible text literal: [v1,v2,...]"""
+    return f"[{','.join(str(round(v, 8)) for v in vector)}]"
 
 
 # ---------------------------------------------------------------------------
@@ -559,6 +640,15 @@ class DocumentListResponse(BaseModel):
     documents: List[DocumentRecord]
     registry_source: Literal["database", "demo_fallback"]
     registry_warning: Optional[str] = None
+
+
+class GenerateEmbeddingsRequest(BaseModel):
+    """
+    Request body for POST /documents/{id}/generate-embeddings (Milestone 4F).
+    Admin-only — do not expose this endpoint to staff or public routes.
+    """
+    allow_dummy_override: bool = False
+    max_chunks: int = 20
 
 
 # ---------------------------------------------------------------------------
@@ -1264,7 +1354,7 @@ def list_document_chunks_admin(doc_id: str):
 @app.get("/documents/{doc_id}/embedding-readiness")
 def get_document_embedding_readiness(doc_id: str):
     """
-    Admin-safe embedding readiness metadata — Milestone 4E.
+    Admin-safe embedding readiness metadata — updated in Milestone 4F.
     Returns counts and readiness flags only.
     No vectors, no secrets, no extracted text, no full chunk content returned.
     """
@@ -1272,6 +1362,240 @@ def get_document_embedding_readiness(doc_id: str):
         raise HTTPException(status_code=503, detail="Database not configured.")
 
     return _get_embedding_readiness(doc_id)
+
+
+# ---------------------------------------------------------------------------
+# Milestone 4F — Controlled embedding generation endpoint
+# ADMIN-ONLY. No auth enforced yet — do not expose to staff or public routes.
+# Generates OpenAI text-embedding-3-small vectors for dummy/sample documents.
+# Does NOT enable AI answers, RAG, or vector search.
+# ---------------------------------------------------------------------------
+
+@app.post("/documents/{doc_id}/generate-embeddings")
+def generate_document_embeddings(doc_id: str, payload: GenerateEmbeddingsRequest):
+    """
+    Admin-only endpoint — Milestone 4F.
+
+    Generates OpenAI text-embedding-3-small embeddings for document chunks and
+    stores the resulting vectors in document_embeddings. Prepares for future
+    vector search only. AI answers remain fully disabled.
+
+    Safety rules enforced by this endpoint:
+    - OPENAI_API_KEY must be configured on the backend (Render env var). Never frontend.
+    - Chunks with escalation_required=True are always skipped.
+    - Chunks with is_sensitive=True are always skipped.
+    - Chunks with approved_for_ai_answers=False are skipped unless
+      allow_dummy_override=True (for testing with dummy/sample PDFs only).
+    - Only not_started or failed embedding records are eligible.
+    - max_chunks caps how many chunks are processed in a single request.
+    - No LLM, no chat, no completion endpoint is called — embeddings only.
+    """
+    if not _OPENAI_CONFIGURED:
+        return {
+            "status": "not_configured",
+            "note": (
+                "OPENAI_API_KEY is not set in the backend environment. "
+                "Add it to Render environment variables (backend only). "
+                "Never put it in frontend code or return it from any endpoint."
+            ),
+        }
+
+    if not _DB_CONFIGURED:
+        raise HTTPException(status_code=503, detail="Database not configured.")
+
+    # Verify the document exists
+    doc_record = _get_registry_record(doc_id)
+    if not doc_record:
+        raise HTTPException(status_code=404, detail="Document not found.")
+
+    # Fetch all embedding records for this document
+    all_records = _list_embedding_records(doc_id)
+    if not all_records:
+        return {
+            "document_id": doc_id,
+            "status": "no_records",
+            "embedding_model": EMBEDDING_MODEL,
+            "embedding_dimensions": EMBEDDING_DIMENSIONS,
+            "attempted_count": 0,
+            "embedded_count": 0,
+            "skipped_count": 0,
+            "failed_count": 0,
+            "total_tokens": 0,
+            "estimated_cost_note": f"Model: {EMBEDDING_MODEL}. No embedding records found.",
+            "embedding_status": doc_record.get("embedding_status", "not_started"),
+            "note": "No embedding records found. Upload a document first to prepare embedding records.",
+        }
+
+    # --- Safety filter and eligibility check ---
+    max_to_process = min(max(1, payload.max_chunks), MAX_EMBEDDING_CHUNKS_PER_REQUEST)
+
+    eligible: List[Dict[str, Any]] = []
+    filtered_out = 0
+
+    for rec in all_records:
+        rec_status = rec.get("embedding_status", "not_started")
+        if rec_status not in ("not_started", "failed"):
+            filtered_out += 1
+            continue
+        if rec.get("escalation_required", False):
+            filtered_out += 1
+            continue
+        if rec.get("is_sensitive", False):
+            filtered_out += 1
+            continue
+        if not rec.get("approved_for_ai_answers", False) and not payload.allow_dummy_override:
+            filtered_out += 1
+            continue
+        eligible.append(rec)
+
+    # Cap at max_chunks — deferred records count as skipped for this request
+    to_process = eligible[:max_to_process]
+    capped_out = len(eligible) - len(to_process)
+
+    if not to_process:
+        return {
+            "document_id": doc_id,
+            "embedding_model": EMBEDDING_MODEL,
+            "embedding_dimensions": EMBEDDING_DIMENSIONS,
+            "attempted_count": 0,
+            "embedded_count": 0,
+            "skipped_count": filtered_out + capped_out,
+            "failed_count": 0,
+            "total_tokens": 0,
+            "estimated_cost_note": f"Model: {EMBEDDING_MODEL}. No eligible chunks to embed.",
+            "embedding_status": doc_record.get("embedding_status", "not_started"),
+            "note": (
+                "No eligible chunks found. Chunks with escalation_required=True, "
+                "is_sensitive=True, or approved_for_ai_answers=False (when "
+                "allow_dummy_override=False) are always skipped. "
+                "Use allow_dummy_override=true for dummy/sample documents."
+            ),
+        }
+
+    # --- Fetch chunk texts ---
+    chunk_ids_to_fetch = [rec["chunk_id"] for rec in to_process]
+    chunk_texts = _fetch_chunk_texts(chunk_ids_to_fetch)
+
+    # Build ordered lists of texts and matching records, skipping empty chunks
+    texts_to_embed: List[str] = []
+    records_for_texts: List[Dict[str, Any]] = []
+    empty_text_skipped = 0
+
+    for rec in to_process:
+        raw_text = chunk_texts.get(rec["chunk_id"], "").strip()
+        if not raw_text:
+            empty_text_skipped += 1
+            continue
+        if len(raw_text) > MAX_EMBEDDING_CHARACTERS_PER_CHUNK:
+            raw_text = raw_text[:MAX_EMBEDDING_CHARACTERS_PER_CHUNK]
+        texts_to_embed.append(raw_text)
+        records_for_texts.append(rec)
+
+    skipped_count = filtered_out + capped_out + empty_text_skipped
+    attempted_count = len(texts_to_embed)
+    embedded_count = 0
+    failed_count = 0
+    total_tokens = 0
+    api_error_note: Optional[str] = None
+
+    # --- Call OpenAI and persist vectors ---
+    if texts_to_embed:
+        try:
+            vectors, total_tokens = _call_openai_embeddings(texts_to_embed)
+
+            for rec, vector in zip(records_for_texts, vectors):
+                try:
+                    vector_str = _format_vector_for_pgvector(vector)
+                    _update_embedding_record_by_id(rec["id"], {
+                        "embedding": vector_str,
+                        "embedding_model": EMBEDDING_MODEL,
+                        "embedding_dimensions": EMBEDDING_DIMENSIONS,
+                        "embedding_status": "embedded",
+                        "embedding_error": None,
+                    })
+                    _update_chunk_embedding_status_by_id(rec["chunk_id"], "embedded")
+                    embedded_count += 1
+                except Exception:
+                    try:
+                        _update_embedding_record_by_id(rec["id"], {
+                            "embedding_status": "failed",
+                            "embedding_error": "Failed to save embedding vector to database.",
+                        })
+                    except Exception:
+                        pass
+                    failed_count += 1
+
+        except Exception as exc:
+            safe_err = _safe_embedding_error(exc)
+            api_error_note = safe_err
+            for rec in records_for_texts:
+                try:
+                    _update_embedding_record_by_id(rec["id"], {
+                        "embedding_status": "failed",
+                        "embedding_error": safe_err,
+                    })
+                except Exception:
+                    pass
+            failed_count = attempted_count
+
+    # --- Derive new document_registry.embedding_status ---
+    refreshed = _list_embedding_records(doc_id)
+    total_rec = len(refreshed)
+    all_emb = sum(1 for r in refreshed if r.get("embedding_status") == "embedded")
+    all_fail = sum(1 for r in refreshed if r.get("embedding_status") == "failed")
+
+    if total_rec > 0 and all_emb == total_rec:
+        new_registry_status = "indexed"
+    elif all_emb > 0:
+        new_registry_status = "partial"
+    elif all_fail == total_rec and total_rec > 0:
+        new_registry_status = "failed"
+    else:
+        new_registry_status = doc_record.get("embedding_status", "pending")
+
+    try:
+        _update_registry_record(doc_id, {
+            "embedding_status": new_registry_status,
+            "updated_at": _now(),
+        })
+    except Exception:
+        pass
+
+    # --- Estimated cost note ---
+    if total_tokens > 0:
+        cost_usd = total_tokens * 0.020 / 1_000_000
+        if cost_usd < 0.01:
+            estimated_cost_note = (
+                f"Estimated cost: <$0.01 "
+                f"(model: {EMBEDDING_MODEL}, ~{total_tokens} tokens, ~${cost_usd:.6f} USD)"
+            )
+        else:
+            estimated_cost_note = (
+                f"Estimated cost: ~${cost_usd:.4f} USD "
+                f"({total_tokens} tokens, model: {EMBEDDING_MODEL})"
+            )
+    else:
+        estimated_cost_note = f"Model: {EMBEDDING_MODEL}. ~$0.020 per 1M tokens."
+
+    result: Dict[str, Any] = {
+        "document_id": doc_id,
+        "embedding_model": EMBEDDING_MODEL,
+        "embedding_dimensions": EMBEDDING_DIMENSIONS,
+        "attempted_count": attempted_count,
+        "embedded_count": embedded_count,
+        "skipped_count": skipped_count,
+        "failed_count": failed_count,
+        "total_tokens": total_tokens,
+        "estimated_cost_note": estimated_cost_note,
+        "embedding_status": new_registry_status,
+        "note": (
+            "Embeddings generated for retrieval preparation only. "
+            "AI answers are still disabled."
+        ),
+    }
+    if api_error_note:
+        result["api_error"] = api_error_note
+    return result
 
 
 # ---------------------------------------------------------------------------

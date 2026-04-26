@@ -52,7 +52,7 @@ export type DocumentVertical =
   | 'training_provider'
   | 'general'
   | 'custom'
-export type EmbeddingStatus = 'not_started' | 'pending' | 'processing' | 'indexed' | 'failed'
+export type EmbeddingStatus = 'not_started' | 'pending' | 'processing' | 'indexed' | 'partial' | 'embedded' | 'failed'
 export type TranslationStatus = 'not_required' | 'pending' | 'in_progress' | 'complete'
 
 export interface DocumentRecord {
@@ -138,6 +138,26 @@ export interface UploadDocumentResult {
   // 503 not-configured fields
   validation_passed?: boolean
   message?: string
+}
+
+// ---------------------------------------------------------------------------
+// Milestone 4F — Embedding generation result
+// ---------------------------------------------------------------------------
+
+export interface GenerateEmbeddingsResult {
+  document_id?: string
+  status?: string
+  embedding_model?: string
+  embedding_dimensions?: number
+  attempted_count?: number
+  embedded_count?: number
+  skipped_count?: number
+  failed_count?: number
+  total_tokens?: number
+  estimated_cost_note?: string
+  embedding_status?: string
+  note?: string
+  api_error?: string
 }
 
 export const LANGUAGE_NAMES: Record<string, string> = {

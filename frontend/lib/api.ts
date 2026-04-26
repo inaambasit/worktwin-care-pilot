@@ -1,6 +1,6 @@
 // WorkTwin API helper — calls the FastAPI backend at NEXT_PUBLIC_API_URL.
 
-import type { AskRequest, AskResponse, DocumentRecord, DocumentListResponse, UploadDocumentResult } from './types'
+import type { AskRequest, AskResponse, DocumentRecord, DocumentListResponse, UploadDocumentResult, GenerateEmbeddingsResult } from './types'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
@@ -166,4 +166,30 @@ export async function uploadDocumentPdf(params: UploadDocumentParams): Promise<U
   }
 
   return data as UploadDocumentResult
+}
+
+// ---------------------------------------------------------------------------
+// Milestone 4F — Controlled embedding generation (admin-only, backend calls OpenAI)
+// OPENAI_API_KEY is never used or referenced in this file.
+// ---------------------------------------------------------------------------
+
+export async function generateEmbeddings(
+  id: string,
+  params: { allow_dummy_override?: boolean; max_chunks?: number } = {},
+): Promise<GenerateEmbeddingsResult> {
+  const body = {
+    allow_dummy_override: params.allow_dummy_override ?? false,
+    max_chunks: params.max_chunks ?? 20,
+  }
+  const response = await fetch(`${API_BASE_URL}/documents/${id}/generate-embeddings`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(120_000),
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error((data as { detail?: string }).detail ?? `Embedding generation failed: ${response.status}`)
+  }
+  return data as GenerateEmbeddingsResult
 }

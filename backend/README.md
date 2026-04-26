@@ -55,6 +55,9 @@ curl "http://localhost:8000/policies?category=Medication"
 | POST | /documents/{id}/approve | Approve a document — updates DB when configured |
 | POST | /documents/{id}/archive | Archive a document — updates DB when configured |
 | POST | /documents/upload | Safe PDF upload — validates, stores in Supabase Storage, persists to DB registry (Milestone 4C) |
+| GET | /documents/{id}/chunks | Admin/debug — chunk metadata and 250-char previews (Milestone 4D) |
+| GET | /documents/{id}/embedding-readiness | Admin — embedding readiness counts and flags (Milestones 4E–4F) |
+| POST | /documents/{id}/generate-embeddings | **Admin-only** — controlled embedding generation for dummy/sample docs (Milestone 4F) |
 
 ## CORS
 
@@ -483,10 +486,152 @@ No vectors are returned. No secrets are returned. No extracted text is returned.
 - No RAG retrieval, no LLM calls
 - All embedding records are inert placeholders — they cannot be searched or served to staff
 
-## Next steps (Milestone 4F)
+## Milestone 4F: Controlled embedding generation
 
-- Controlled embedding generation (requires governance sign-off)
-- pgvector IVFFlat/HNSW index creation
+### What Milestone 4F adds
+
+- Controlled embedding generation using OpenAI `text-embedding-3-small` (1536 dimensions)
+- New endpoint: `POST /documents/{id}/generate-embeddings` — admin-only, backend-only
+- Embedding vectors are stored in `document_embeddings.embedding` (the nullable `vector(1536)` column)
+- `document_embeddings.embedding_status` updated to `embedded` per successful chunk
+- `document_chunks.embedding_status` updated to `embedded` per chunk
+- `document_registry.embedding_status` updated to `indexed` / `partial` / `failed` based on results
+- Updated `GET /documents/{id}/embedding-readiness` — now returns `is_ready_for_vector_search` and counts `embedded` status
+- Frontend admin control: `⚡ Generate embeddings` button for eligible (non-sensitive, non-escalation) documents
+- Frontend shows embedded_count, skipped_count, failed_count, estimated cost note inline
+
+### What Milestone 4F does NOT do
+
+- No RAG pipeline — no vector similarity search
+- No AI answers — the `/ask` endpoint still returns a placeholder
+- No pgvector IVFFlat/HNSW index — not needed until RAG is wired
+- No LLM/chat/completion API calls of any kind
+- No real Thumhara/QCS policy documents — dummy/sample PDFs only
+- No staff-facing retrieval
+
+### OPENAI_API_KEY — backend only
+
+| Variable | Description |
+|----------|-------------|
+| `OPENAI_API_KEY` | **Render/backend only.** Never put in frontend code, `.env.local`, or any client-side file. Never log or return in API responses. |
+
+- Model: `text-embedding-3-small`
+- Dimensions: 1536 (matches the `vector(1536)` column in `document_embeddings`)
+- Do **not** use `text-embedding-3-large` — the column is `vector(1536)`, not `vector(3072)`
+- If `OPENAI_API_KEY` is not set, the endpoint returns `status: not_configured` — it does not crash
+
+### Embedding generation endpoint
+
+`POST /documents/{id}/generate-embeddings`
+
+Request body (JSON):
+
+```json
+{
+  "allow_dummy_override": true,
+  "max_chunks": 20
+}
+```
+
+- `allow_dummy_override: true` — required to process chunks where `approved_for_ai_answers=false`
+  (all dummy/sample uploads will have this flag false by default)
+- `max_chunks` — capped at 20 per request (adjust as needed for testing)
+
+Safety rules:
+- Chunks with `escalation_required=true` are **always skipped**
+- Chunks with `is_sensitive=true` are **always skipped**
+- Chunks with `approved_for_ai_answers=false` are skipped unless `allow_dummy_override=true`
+- Only `not_started` or `failed` embedding records are eligible
+- No force-re-embed — already `embedded` records are skipped
+
+### Embedding generation response shape
+
+```json
+{
+  "document_id": "...",
+  "embedding_model": "text-embedding-3-small",
+  "embedding_dimensions": 1536,
+  "attempted_count": 3,
+  "embedded_count": 3,
+  "skipped_count": 0,
+  "failed_count": 0,
+  "total_tokens": 892,
+  "estimated_cost_note": "Estimated cost: <$0.01 (model: text-embedding-3-small, ~892 tokens, ~$0.000018 USD)",
+  "embedding_status": "indexed",
+  "note": "Embeddings generated for retrieval preparation only. AI answers are still disabled."
+}
+```
+
+`embedding_status` values in this response:
+- `indexed` — all eligible chunks embedded successfully
+- `partial` — some embedded, some not yet processed
+- `failed` — all attempted chunks failed
+- `not_configured` — OPENAI_API_KEY missing
+
+### Updated embedding-readiness endpoint
+
+`GET /documents/{id}/embedding-readiness` now returns:
+
+```json
+{
+  "document_id": "...",
+  "chunk_count": 3,
+  "embedding_record_count": 3,
+  "not_started_count": 0,
+  "embedded_count": 3,
+  "failed_count": 0,
+  "is_ready_for_vector_search": true,
+  "is_ready_for_ai_answers": false,
+  "note": "Vector search and AI answers are not enabled yet."
+}
+```
+
+### Cost caution
+
+- `text-embedding-3-small` costs $0.020 per 1 million input tokens
+- A 1,200-character chunk ≈ ~300 tokens ≈ $0.000006 per chunk
+- 20 chunks ≈ $0.0001 — negligible for testing
+- **Do not run this on large batches of real documents until Milestone 4G governance review passes**
+- Do not embed real Thumhara/QCS policy documents yet
+
+### Manual test steps (Milestone 4F)
+
+1. Set `OPENAI_API_KEY` in Render environment variables (backend service only)
+2. Upload a dummy PDF via the admin UI at `/admin/documents`
+3. Confirm `embedding_preparation_status: prepared` in the upload result
+4. Use the `⚡ Generate embeddings` button in the admin UI, or:
+
+```bash
+# Check readiness first
+curl "http://localhost:8000/documents/{id}/embedding-readiness"
+
+# Generate embeddings (allow_dummy_override=true for sample docs)
+curl -X POST "http://localhost:8000/documents/{id}/generate-embeddings" \
+  -H "Content-Type: application/json" \
+  -d '{"allow_dummy_override": true, "max_chunks": 20}'
+```
+
+5. Check Supabase Table Editor → `document_embeddings`:
+   - `embedding_status` = `embedded`
+   - `embedding` column is no longer NULL
+   - `embedding_model` = `text-embedding-3-small`
+   - `embedding_dimensions` = 1536
+6. Check `document_registry.embedding_status` = `indexed` (or `partial`)
+7. Confirm the admin UI shows "Indexed ✓" in the Embedding column
+8. Confirm AI answers are still disabled (the `/ask` endpoint still returns a placeholder)
+
+### Important constraints (still apply through Milestone 4F)
+
+- Only dummy or sample PDFs — no real Thumhara/QCS policy documents
+- AI answers remain disabled — embeddings cannot be searched or served to staff
+- No pgvector index created yet — search queries will be O(n) full-table scans until the index is added in 4G
+- No RAG pipeline, no LLM calls
+
+## Next steps (Milestone 4G)
+
+- pgvector IVFFlat/HNSW index on `document_embeddings.embedding`
+- Vector similarity search endpoint (admin/debug only first)
 - RAG retrieval pipeline
 - LLM response generation with strict source-grounding prompt
 - Authentication and organisation membership verification
+- Governance sign-off before indexing real Thumhara/QCS documents

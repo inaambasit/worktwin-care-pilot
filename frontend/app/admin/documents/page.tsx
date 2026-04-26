@@ -1,14 +1,14 @@
 'use client'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import AppLayout from '@/components/AppLayout'
-import { fetchDocuments, approveDocument, archiveDocument, uploadDocumentPdf } from '@/lib/api'
-import type { DocumentRecord, DocumentStatus, EmbeddingStatus, UploadDocumentResult } from '@/lib/types'
+import { fetchDocuments, approveDocument, archiveDocument, uploadDocumentPdf, generateEmbeddings } from '@/lib/api'
+import type { DocumentRecord, DocumentStatus, EmbeddingStatus, UploadDocumentResult, GenerateEmbeddingsResult } from '@/lib/types'
 import { LANGUAGE_NAMES } from '@/lib/types'
 import {
   FileText, Upload, CheckCircle, Clock, AlertCircle, Users,
   AlertTriangle, Shield, Globe, Brain, Archive, RefreshCw,
   ShieldAlert, XCircle, Filter, ChevronDown, ChevronUp,
-  Loader2, X, Info, CheckCircle2,
+  Loader2, X, Info, CheckCircle2, Zap,
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -161,11 +161,13 @@ const STATUS_CONFIG: Record<DocumentStatus, { label: string; icon: React.ReactNo
 }
 
 const EMBED_CONFIG: Record<EmbeddingStatus, { label: string; colour: string }> = {
-  not_started: { label: 'Not indexed', colour: 'bg-slate-100 text-slate-400' },
-  pending:     { label: 'Pending',     colour: 'bg-amber-50 text-amber-600' },
-  processing:  { label: 'Processing',  colour: 'bg-blue-50 text-blue-600' },
-  indexed:     { label: 'Indexed ✓',   colour: 'bg-teal-50 text-teal-700' },
-  failed:      { label: 'Failed',      colour: 'bg-red-50 text-red-600' },
+  not_started: { label: 'Not indexed',  colour: 'bg-slate-100 text-slate-400' },
+  pending:     { label: 'Pending',      colour: 'bg-amber-50 text-amber-600' },
+  processing:  { label: 'Processing',   colour: 'bg-blue-50 text-blue-600' },
+  indexed:     { label: 'Indexed ✓',    colour: 'bg-teal-50 text-teal-700' },
+  partial:     { label: 'Partial ⚡',   colour: 'bg-blue-50 text-blue-600' },
+  embedded:    { label: 'Embedded ✓',   colour: 'bg-teal-50 text-teal-700' },
+  failed:      { label: 'Failed',       colour: 'bg-red-50 text-red-600' },
 }
 
 const VERTICAL_LABELS: Record<string, string> = {
@@ -246,6 +248,13 @@ export default function DocumentRegistryPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>('All')
   const [actioning, setActioning] = useState<string | null>(null)
 
+  // Embedding generation state (keyed by doc id)
+  const [embeddingGenState, setEmbeddingGenState] = useState<Record<string, {
+    loading: boolean
+    result?: GenerateEmbeddingsResult
+    error?: string
+  }>>({})
+
   // Upload form
   const [showUpload, setShowUpload] = useState(false)
   const [uploadFile, setUploadFile] = useState<File | null>(null)
@@ -282,6 +291,31 @@ export default function DocumentRegistryPage() {
     const matchCat = categoryFilter === 'All' || d.category === categoryFilter
     return matchStatus && matchCat
   })
+
+  function canGenerateEmbeddings(doc: DocumentRecord): boolean {
+    return !doc.is_sensitive
+      && !doc.escalation_required
+      && doc.embedding_status !== 'indexed'
+      && doc.embedding_status !== 'embedded'
+  }
+
+  async function handleGenerateEmbeddings(id: string) {
+    setEmbeddingGenState(prev => ({ ...prev, [id]: { loading: true } }))
+    try {
+      const result = await generateEmbeddings(id, { allow_dummy_override: true, max_chunks: 20 })
+      setEmbeddingGenState(prev => ({ ...prev, [id]: { loading: false, result } }))
+      if (result.embedding_status) {
+        setDocs(prev => prev.map(d =>
+          d.id === id ? { ...d, embedding_status: result.embedding_status as EmbeddingStatus } : d
+        ))
+      }
+    } catch (err) {
+      setEmbeddingGenState(prev => ({
+        ...prev,
+        [id]: { loading: false, error: err instanceof Error ? err.message : 'Embedding generation failed.' },
+      }))
+    }
+  }
 
   async function handleApprove(id: string) {
     setActioning(id)
@@ -1106,12 +1140,60 @@ export default function DocumentRegistryPage() {
 
                       {/* Embedding / Chunks */}
                       <td className="px-4 py-3.5">
-                        <div className="space-y-0.5">
+                        <div className="space-y-1">
                           <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${ec.colour}`}>
                             {ec.label}
                           </span>
                           {typeof doc.metadata?.chunk_count === 'number' && (
                             <p className="text-[11px] text-slate-400 pl-1">{doc.metadata.chunk_count} chunks</p>
+                          )}
+
+                          {/* Generate embeddings — dummy/sample documents only */}
+                          {canGenerateEmbeddings(doc) && !embeddingGenState[doc.id]?.result && (
+                            <button
+                              onClick={() => handleGenerateEmbeddings(doc.id)}
+                              disabled={embeddingGenState[doc.id]?.loading || busy}
+                              title="Dummy/sample documents only — generates vector embeddings for retrieval preparation. Does not enable AI answers."
+                              className="flex items-center gap-1 text-[10px] font-medium text-indigo-600 hover:text-indigo-800 border border-indigo-200 hover:border-indigo-400 px-1.5 py-0.5 rounded-md transition-colors disabled:opacity-40 whitespace-nowrap"
+                            >
+                              {embeddingGenState[doc.id]?.loading ? (
+                                <><Loader2 size={9} className="animate-spin shrink-0" />Generating…</>
+                              ) : (
+                                <><Zap size={9} className="shrink-0" />Generate embeddings</>
+                              )}
+                            </button>
+                          )}
+
+                          {/* Embedding generation result */}
+                          {embeddingGenState[doc.id]?.result && (() => {
+                            const r = embeddingGenState[doc.id]!.result!
+                            const isNotConfigured = r.status === 'not_configured'
+                            return (
+                              <div className="text-[10px] space-y-0.5">
+                                {isNotConfigured ? (
+                                  <p className="text-amber-600 font-medium">OPENAI_API_KEY not set</p>
+                                ) : (
+                                  <>
+                                    <p className={`font-medium ${(r.embedded_count ?? 0) > 0 ? 'text-teal-700' : 'text-slate-500'}`}>
+                                      {(r.embedded_count ?? 0) > 0 ? `✓ ${r.embedded_count} embedded` : '0 embedded'}
+                                      {(r.skipped_count ?? 0) > 0 ? `, ${r.skipped_count} skipped` : ''}
+                                      {(r.failed_count ?? 0) > 0 ? `, ${r.failed_count} failed` : ''}
+                                    </p>
+                                    {r.api_error && (
+                                      <p className="text-red-600 truncate max-w-[160px]" title={r.api_error}>{r.api_error}</p>
+                                    )}
+                                  </>
+                                )}
+                                <p className="text-slate-400 italic">Vector search only. AI answers still off.</p>
+                              </div>
+                            )
+                          })()}
+
+                          {/* Embedding generation error */}
+                          {embeddingGenState[doc.id]?.error && (
+                            <p className="text-[10px] text-red-600 max-w-[160px]" title={embeddingGenState[doc.id]!.error}>
+                              {embeddingGenState[doc.id]!.error!.slice(0, 80)}
+                            </p>
                           )}
                         </div>
                       </td>
@@ -1165,7 +1247,9 @@ export default function DocumentRegistryPage() {
             <strong>Platform flexibility:</strong> The <em>Vertical</em> field means this registry is not limited to care.
             It can hold policies for finance, property management, recruitment, healthcare admin, training providers
             and other regulated SMEs — all managed in one place.
-            Embedding records are prepared per chunk (Milestone 4E). Embedding generation and the RAG pipeline are coming in <strong>Milestone 4F</strong>.
+            Embedding records are prepared per chunk (Milestone 4E). Controlled embedding generation is available for dummy/sample documents
+            (Milestone 4F — <Zap size={11} className="inline text-indigo-500" /> button in the Embedding column).{' '}
+            <strong>Embeddings prepare vector search only. AI answers remain disabled until Milestone 4G.</strong>
           </p>
         </div>
 

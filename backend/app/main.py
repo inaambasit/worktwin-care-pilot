@@ -2396,23 +2396,32 @@ def answer_debug(payload: AnswerDebugRequest):
     if not isinstance(raw_rows, list):
         raise HTTPException(status_code=500, detail="Unexpected response from match_document_chunks.")
 
-    # Apply chunk-level safety filter — always enforce regardless of allow_dummy_override
+    # Fetch document governance upfront so chunk-level filter can honour
+    # approved_for_source_grounded_answers on real documents (Milestone 4I.5).
+    doc_gov_map: Dict[str, Dict[str, Any]] = {}
+    if raw_rows and _DB_CONFIGURED:
+        unique_doc_ids = list({str(r.get("document_id", "")) for r in raw_rows if r.get("document_id")})
+        doc_gov_map = _get_document_governance_batch(unique_doc_ids)
+
+    # Apply chunk-level safety filter — always enforce regardless of allow_dummy_override.
+    # approved_for_source_grounded_answers=True at the document level supersedes the
+    # stale chunk-level approved_for_ai_answers flag for real documents.
     filtered_rows: List[Dict[str, Any]] = []
     for row in raw_rows:
         if row.get("escalation_required", False):
             continue
         if row.get("is_sensitive", False):
             continue
-        if not payload.allow_dummy_override and not row.get("approved_for_ai_answers", False):
+        doc_id_str = str(row.get("document_id", ""))
+        gov = doc_gov_map.get(doc_id_str)
+        doc_level_approved = gov is not None and gov.get("approved_for_source_grounded_answers", False)
+        if not doc_level_approved and not payload.allow_dummy_override and not row.get("approved_for_ai_answers", False):
             continue
         filtered_rows.append(row)
 
-    # Milestone 4I: Document-level governance filter applied on top of chunk-level filter.
-    # Fetches governance for each unique document_id in the filtered results.
-    # Non-critical: if fetch fails, falls back to chunk-level rules only.
-    if filtered_rows and _DB_CONFIGURED:
-        unique_doc_ids = list({str(r.get("document_id", "")) for r in filtered_rows if r.get("document_id")})
-        doc_gov_map = _get_document_governance_batch(unique_doc_ids)
+    # Document-level governance filter — applied on top of chunk-level filter.
+    # Reuses the already-fetched doc_gov_map; no second DB call needed.
+    if filtered_rows:
         gov_filtered: List[Dict[str, Any]] = []
         for row in filtered_rows:
             doc_id_str = str(row.get("document_id", ""))

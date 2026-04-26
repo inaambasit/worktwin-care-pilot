@@ -537,14 +537,13 @@ Request body (JSON):
 }
 ```
 
-- `allow_dummy_override: true` — required to process chunks where `approved_for_ai_answers=false`
-  (all dummy/sample uploads will have this flag false by default)
+- `allow_dummy_override: true` — required for dummy/sample documents that have not been through governance approval (i.e. `real_document=false` and `approved_for_embedding=false`)
 - `max_chunks` — capped at 20 per request (adjust as needed for testing)
 
-Safety rules:
-- Chunks with `escalation_required=true` are **always skipped**
-- Chunks with `is_sensitive=true` are **always skipped**
-- Chunks with `approved_for_ai_answers=false` are skipped unless `allow_dummy_override=true`
+Safety rules (Milestone 4I governance separation applies):
+- Chunks with `escalation_required=true` are **always skipped** regardless of governance flags
+- Chunks with `is_sensitive=true` are **always skipped** regardless of governance flags
+- `approved_for_ai_answers` (chunk-level flag) is **not** checked during embedding — embedding approval is governed by `document_registry.approved_for_embedding` at the document level
 - Only `not_started` or `failed` embedding records are eligible
 - No force-re-embed — already `embedded` records are skipped
 

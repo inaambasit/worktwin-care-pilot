@@ -2002,9 +2002,6 @@ def generate_document_embeddings(doc_id: str, payload: GenerateEmbeddingsRequest
         if rec.get("is_sensitive", False):
             filtered_out += 1
             continue
-        if not rec.get("approved_for_ai_answers", False) and not payload.allow_dummy_override:
-            filtered_out += 1
-            continue
         eligible.append(rec)
 
     # Cap at max_chunks — deferred records count as skipped for this request
@@ -2024,10 +2021,10 @@ def generate_document_embeddings(doc_id: str, payload: GenerateEmbeddingsRequest
             "estimated_cost_note": f"Model: {EMBEDDING_MODEL}. No eligible chunks to embed.",
             "embedding_status": doc_record.get("embedding_status", "not_started"),
             "note": (
-                "No eligible chunks found. Chunks with escalation_required=True, "
-                "is_sensitive=True, or approved_for_ai_answers=False (when "
-                "allow_dummy_override=False) are always skipped. "
-                "Use allow_dummy_override=true for dummy/sample documents."
+                "No eligible chunks found. Chunks with escalation_required=True or "
+                "is_sensitive=True are always skipped. "
+                "All other not_started or failed chunks are eligible once the document "
+                "passes the approved_for_embedding governance gate."
             ),
         }
 

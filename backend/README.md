@@ -1200,6 +1200,48 @@ No governance approvals were changed during the proof.
 - AC32 remains draft, staff-invisible, and answer-blocked.
 - Staff `/ask` is unchanged.
 
+## Milestone 4I.5: Answer-debug approval fix — AC32 source-grounded answer test passed
+
+### What Milestone 4I.5 proves
+
+AC32 Mobile Phone and Portable Device Use Policy (`approved_for_source_grounded_answers` set to `true`) is now confirmed working end-to-end for admin-only source-grounded answer-debug testing. Staff visibility remains off. This milestone documents the bug discovered during that test and its fix.
+
+### The bug and fix
+
+**Bug:** After AC32 governance was updated to `approved_for_source_grounded_answers=true`, `POST /documents/answer-debug` still returned `confidence: blocked_safety` with `sources: []` — even though `GET /documents/{id}/governance-readiness` correctly reported `can_use_for_answer_debug_now: true`.
+
+**Root cause:** The answer-debug route was filtering retrieved chunks using the stale chunk-level `approved_for_ai_answers` flag. For AC32, all chunks carried `approved_for_ai_answers=false` (inherited from the document's state at upload time, before governance approval was granted). The document-level `approved_for_source_grounded_answers=true` was never consulted.
+
+**Fix (commit `e07a30c`):** The answer-debug filter now checks `document_registry.approved_for_source_grounded_answers` at the document level for real documents instead of relying on the chunk-level `approved_for_ai_answers` flag. Chunks with `is_sensitive=true` or `escalation_required=true` remain unconditionally blocked regardless of any governance approval.
+
+### AC32 governance state at Milestone 4I.5
+
+| Field | Value |
+|-------|-------|
+| Document ID | `1cbbc192-1962-4cd3-be05-5e390e3173c9` |
+| `status` | `draft` |
+| `real_document` | `true` |
+| `dummy_document` | `false` |
+| `approved_for_embedding` | `true` |
+| `approved_for_source_grounded_answers` | `true` |
+| `approved_for_staff_visibility` | `false` |
+| `is_sensitive` | `false` |
+| `escalation_required` | `false` |
+
+### Live proof results
+
+- `POST /documents/answer-debug` returns `confidence: source_grounded` with AC32 sources.
+- `POST /ask` still returns a placeholder response only.
+- `GET /documents/{id}/governance-readiness` still shows `can_show_to_staff_now: false`.
+
+### What Milestone 4I.5 does NOT change
+
+- No SQL changes were made.
+- No frontend changes were made.
+- Staff-facing `/ask` is unchanged — staff cannot see AC32.
+- AC32 remains draft and staff-invisible.
+- Staff visibility was not approved.
+
 ## Current milestone status
 
 - PDF upload works (Milestone 4B)
@@ -1212,6 +1254,7 @@ No governance approvals were changed during the proof.
 - **Governance gate active — real documents cannot be embedded without explicit approval (Milestone 4I)**
 - **Governance hardened — clearer blocked reasons, human-readable audit summaries, readiness endpoint, readiness checklist (Milestone 4I.1)**
 - **Governance blocking proof passed — AC32 is the first controlled real document; embedding/answer/staff-visibility gates confirmed independent (Milestone 4I.4)**
+- **Answer-debug approval fix shipped — chunk-level flag no longer blocks document-level approved real documents; AC32 source-grounded answer test passed (Milestone 4I.5)**
 - Staff-facing `/ask` remains a placeholder — RAG is governed-disabled
 - No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a human reviewer
 

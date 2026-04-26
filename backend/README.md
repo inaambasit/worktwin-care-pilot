@@ -1155,6 +1155,51 @@ The following rules were audited in Milestone 4I.1 and confirmed as correctly im
 |--------|------|-------------|
 | GET | /documents/{id}/governance-readiness | **Admin/debug** — governance readiness summary with blocked reasons and next actions (Milestone 4I.1) |
 
+## Milestone 4I.4: Governance blocking proof — AC32 first controlled real document
+
+### What Milestone 4I.4 proves
+
+AC32 Mobile Phone and Portable Device Use Policy is the first controlled real document registered in the pilot system. Its governance state was used to confirm that embedding approval, answer approval, and staff visibility are fully independent gates.
+
+### AC32 document details
+
+| Field | Value |
+|-------|-------|
+| Document ID | `1cbbc192-1962-4cd3-be05-5e390e3173c9` |
+| Title | Mobile Phone and Portable Device Use Policy |
+| Policy reference | AC32 |
+
+### AC32 final governance state (unchanged throughout the proof)
+
+| Flag | Value |
+|------|-------|
+| `status` | `draft` |
+| `real_document` | `true` |
+| `dummy_document` | `false` |
+| `approved_for_embedding` | `true` |
+| `approved_for_source_grounded_answers` | `false` |
+| `approved_for_staff_visibility` | `false` |
+| `is_sensitive` | `false` |
+| `escalation_required` | `false` |
+| `embedding_status` | `indexed` |
+
+No governance approvals were changed during the proof.
+
+### What the proof confirmed
+
+- `POST /documents/search-vector` retrieves AC32 chunks — admin-only vector retrieval works for real embedded documents.
+- `POST /documents/answer-debug` is blocked for AC32 — `approved_for_source_grounded_answers=false` prevents source-grounded answer testing.
+- `GET /policies` (staff) does not include AC32 — `approved_for_staff_visibility=false` keeps it off the staff-facing policy library.
+- Staff-facing `/ask` remains a placeholder and does not use AC32 in any way.
+- The three approval gates operate independently: embedding approval, answer approval, and staff visibility each require a separate explicit decision.
+
+### What Milestone 4I.4 does NOT change
+
+- No governance flags were modified.
+- No code changes were made.
+- AC32 remains draft, staff-invisible, and answer-blocked.
+- Staff `/ask` is unchanged.
+
 ## Current milestone status
 
 - PDF upload works (Milestone 4B)
@@ -1166,6 +1211,7 @@ The following rules were audited in Milestone 4I.1 and confirmed as correctly im
 - Admin-only source-grounded answer testing works (Milestone 4H)
 - **Governance gate active — real documents cannot be embedded without explicit approval (Milestone 4I)**
 - **Governance hardened — clearer blocked reasons, human-readable audit summaries, readiness endpoint, readiness checklist (Milestone 4I.1)**
+- **Governance blocking proof passed — AC32 is the first controlled real document; embedding/answer/staff-visibility gates confirmed independent (Milestone 4I.4)**
 - Staff-facing `/ask` remains a placeholder — RAG is governed-disabled
 - No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a human reviewer
 

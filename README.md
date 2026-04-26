@@ -91,7 +91,10 @@ Then build a real MVP using:
 | `access_roles` | Which roles can see this document |
 | `is_sensitive` | True for HR, safeguarding, disciplinary content |
 | `escalation_required` | True when AI must not answer and staff must speak to a human |
-| `approved_for_ai_answers` | Only approved docs are used in RAG retrieval |
+| `approved_for_embedding` | Real documents require this before chunks can be embedded or retrieved via vector search |
+| `approved_for_source_grounded_answers` | Required for AI answer generation (answer-debug endpoint); not required for vector retrieval alone |
+| `approved_for_staff_visibility` | Required before documents appear to staff; independent of embedding and answer approval |
+| `approved_for_ai_answers` | Legacy chunk-level flag (no longer used as a vector search gate; superseded by document-level governance) |
 | `contains_personal_data_warning` | Document contains identifiable data (should not be uploaded) |
 | `primary_language` | ISO 639-1 code (e.g. `en`) |
 | `available_languages` | Languages this policy is available in: en, ur, pa, ar, bn, gu |

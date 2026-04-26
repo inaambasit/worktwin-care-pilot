@@ -372,6 +372,40 @@ def _can_show_document_to_staff(document: Dict[str, Any]) -> Tuple[bool, Optiona
     return True, None
 
 
+def _can_use_document_for_vector_search(
+    document: Dict[str, Any],
+    allow_dummy_override: bool = False,
+) -> Tuple[bool, Optional[str]]:
+    """
+    Governance gate for admin-only vector retrieval (search-vector endpoint).
+    Returns (allowed, blocked_reason).
+
+    Rules:
+    1. Always block if is_sensitive=True or escalation_required=True.
+    2. Real documents require approved_for_embedding=True (not approved_for_source_grounded_answers).
+    3. Dummy/legacy documents require allow_dummy_override=True.
+
+    This gate is intentionally weaker than answer-debug: embedding approval is sufficient
+    for retrieval testing; AI answer approval is a separate, higher governance step.
+    """
+    if document.get("is_sensitive", False):
+        return False, "Document is marked sensitive and cannot be used for vector search."
+    if document.get("escalation_required", False):
+        return False, "Document requires escalation and cannot be used for vector search."
+
+    is_real = document.get("real_document", False)
+
+    if is_real:
+        if not document.get("approved_for_embedding", False):
+            return False, "Real document requires approved_for_embedding=true before vector retrieval."
+        return True, None
+
+    # Dummy or legacy
+    if not allow_dummy_override:
+        return False, "Dummy document requires allow_dummy_override=true for vector search testing."
+    return True, None
+
+
 # ---------------------------------------------------------------------------
 # Milestone 4D — text chunking and extraction storage helpers
 # No AI, no embeddings, no external LLM calls.
@@ -738,14 +772,15 @@ def _vector_search_chunks(
     if not isinstance(rows, list):
         raise RuntimeError("Unexpected response format from match_document_chunks.")
 
-    # Post-fetch safety filter — always enforced regardless of allow_dummy_override
+    # Post-fetch safety filter — escalation and sensitivity always enforced.
+    # approved_for_ai_answers is NOT checked here: that is an AI-answer gate,
+    # not a vector retrieval gate. Document-level governance (approved_for_embedding)
+    # is applied by the caller (search-vector) after fetching governance records.
     filtered = []
     for row in rows:
         if row.get("escalation_required", False):
             continue
         if row.get("is_sensitive", False):
-            continue
-        if not allow_dummy_override and not row.get("approved_for_ai_answers", False):
             continue
         filtered.append(row)
 
@@ -2190,7 +2225,10 @@ def search_vector(payload: VectorSearchRequest):
     - OPENAI_API_KEY must be configured on the backend (Render env var). Never frontend.
     - Chunks with escalation_required=True are always excluded.
     - Chunks with is_sensitive=True are always excluded.
-    - Chunks with approved_for_ai_answers=False are excluded unless allow_dummy_override=True.
+    - Real documents require approved_for_embedding=True (document-level governance check).
+    - Dummy documents require allow_dummy_override=True.
+    - approved_for_source_grounded_answers is NOT required for vector retrieval.
+    - approved_for_staff_visibility is NOT required for vector retrieval.
     - Query is capped at 500 characters before embedding.
     - match_count is capped at 10.
     - Vectors are never returned in API responses.
@@ -2237,6 +2275,23 @@ def search_vector(payload: VectorSearchRequest):
             "note": "Vector retrieval only. AI answers are still disabled.",
             "error": safe_err,
         }
+
+    # Document-level governance filter: require approved_for_embedding=True for real documents.
+    # approved_for_source_grounded_answers and approved_for_staff_visibility are NOT required here.
+    if rows and _DB_CONFIGURED:
+        unique_doc_ids = list({str(r.get("document_id", "")) for r in rows if r.get("document_id")})
+        doc_gov_map = _get_document_governance_batch(unique_doc_ids)
+        gov_filtered: List[Dict[str, Any]] = []
+        for row in rows:
+            doc_id_str = str(row.get("document_id", ""))
+            gov = doc_gov_map.get(doc_id_str)
+            if gov is None:
+                gov_filtered.append(row)  # no governance record → allow (legacy/pre-migration)
+                continue
+            ok, _ = _can_use_document_for_vector_search(gov, payload.allow_dummy_override)
+            if ok:
+                gov_filtered.append(row)
+        rows = gov_filtered
 
     results = [_normalise_search_result(r) for r in rows]
 

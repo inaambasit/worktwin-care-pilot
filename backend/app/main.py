@@ -920,7 +920,12 @@ def _generate_source_grounded_answer(
         "- If the query touches safeguarding, medication, complaints, disciplinary, HR, "
         "payroll, legal, health and safety, wellbeing, or named individuals, include: "
         "\"Please escalate this to your line manager or designated lead.\"\n"
-        "- Use UK English."
+        "- Use UK English.\n"
+        "- If the answer would include a named individual from the source document, "
+        "replace their name with their role, title, or a neutral phrase such as "
+        "\"the nominated manager\", \"the responsible lead\", or "
+        "\"the appropriate senior staff member\", unless the name is purely "
+        "informational (e.g. document author, document title, or source citation)."
     )
 
     user_message = (

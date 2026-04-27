@@ -546,7 +546,7 @@ export default function DocumentRegistryPage() {
           <div>
             <h1 className="text-xl font-bold text-slate-900">Document Registry</h1>
             <p className="text-sm text-slate-500 mt-0.5">
-              All approved policies, SOPs and training materials. Only documents marked &ldquo;Approved for AI&rdquo; are used to answer staff questions.
+              All approved policies, SOPs and training materials. Governed documents are available for admin-only vector search and source-grounded answer testing. Staff-facing Ask WorkTwin does not use RAG.
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap justify-end">
@@ -1064,7 +1064,7 @@ export default function DocumentRegistryPage() {
         {!usingFallback && registrySource === 'database' && (
           <div className="flex items-center gap-2 bg-teal-50 border border-teal-100 rounded-xl px-4 py-2 text-xs text-teal-700">
             <CheckCircle2 size={12} className="shrink-0" />
-            <span>Live registry mode — showing documents saved in Supabase. Chunks prepared for future embedding. Embeddings and AI answers not enabled yet.</span>
+            <span>Live registry mode — showing documents saved in Supabase. Admin-only vector search and source-grounded answer testing available. Staff-facing Ask WorkTwin remains disabled from RAG.</span>
           </div>
         )}
 
@@ -1127,7 +1127,7 @@ export default function DocumentRegistryPage() {
               <Brain size={13} className="text-teal-600 mt-0.5 shrink-0" />
               <div>
                 <p className="font-semibold text-slate-700">Approved for AI answers</p>
-                <p className="text-slate-400 mt-0.5">WorkTwin may use this document in RAG to answer staff questions. Only documents with this flag enabled feed the AI.</p>
+                <p className="text-slate-400 mt-0.5">Enables this document for admin-only vector search and source-grounded answer testing. Staff-facing Ask WorkTwin remains disabled from RAG.</p>
               </div>
             </div>
             <div className="flex items-start gap-2 bg-slate-50 rounded-xl p-3">
@@ -1192,7 +1192,7 @@ export default function DocumentRegistryPage() {
                         <div className="space-y-2">
                           <p className="text-sm font-medium text-slate-600">No persistent documents yet.</p>
                           <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                            Upload a dummy or sample PDF first. Sample demo records are no longer shown once the database registry is active.
+                            Upload a document to get started. Real documents require governance approval before embedding or answer testing.
                           </p>
                         </div>
                       ) : (
@@ -1305,12 +1305,12 @@ export default function DocumentRegistryPage() {
                             <p className="text-[11px] text-slate-400 pl-1">{doc.metadata.chunk_count} chunks</p>
                           )}
 
-                          {/* Generate embeddings — dummy/sample documents only */}
+                          {/* Generate embeddings — governance-approved documents only */}
                           {canGenerateEmbeddings(doc) && !embeddingGenState[doc.id]?.result && (
                             <button
                               onClick={() => handleGenerateEmbeddings(doc.id)}
                               disabled={embeddingGenState[doc.id]?.loading || busy}
-                              title="Dummy/sample documents only — generates vector embeddings for retrieval preparation. Does not enable AI answers."
+                              title="Generates vector embeddings for admin-only retrieval. Real documents require governance approval. Does not enable staff-facing AI answers."
                               className="flex items-center gap-1 text-[10px] font-medium text-indigo-600 hover:text-indigo-800 border border-indigo-200 hover:border-indigo-400 px-1.5 py-0.5 rounded-md transition-colors disabled:opacity-40 whitespace-nowrap"
                             >
                               {embeddingGenState[doc.id]?.loading ? (
@@ -1415,7 +1415,7 @@ export default function DocumentRegistryPage() {
                   <p className="text-xs text-purple-700 mt-0.5 leading-relaxed">
                     Embeds the query and searches existing embedded chunks using pgvector cosine similarity.
                     No LLM is called. No answer is generated. The <code className="font-mono">/ask</code> endpoint is unchanged.
-                    Test with dummy/sample documents only — no real Thumhara/QCS policies yet.
+                    Real governed/approved documents may be used for admin-only testing. Sensitive and escalation documents remain blocked.
                   </p>
                 </div>
               </div>
@@ -1610,10 +1610,10 @@ export default function DocumentRegistryPage() {
                   <p className="text-sm font-semibold text-emerald-900">Governance gate — Milestone 4I</p>
                   <p className="text-xs text-emerald-700 mt-0.5 leading-relaxed">
                     Real documents must be explicitly approved before embedding or AI answer testing.
-                    Sensitive and escalation-required documents cannot be approved for AI use.
-                    Dummy/sample documents can be tested with <code className="font-mono">allow_dummy_override=true</code>.
-                    Staff-facing <code className="font-mono">/ask</code> remains disabled.
-                    No real Thumhara/QCS documents should be embedded until governance review is confirmed.
+                    Sensitive and escalation-required documents remain blocked from AI use.
+                    Governance-approved documents can be embedded and used for admin-only vector search and answer testing.
+                    Staff-facing <code className="font-mono">/ask</code> remains disabled from RAG.
+                    Staff policy visibility requires <code className="font-mono">approved_for_staff_visibility=true</code>.
                   </p>
                 </div>
               </div>
@@ -1663,7 +1663,7 @@ export default function DocumentRegistryPage() {
 
               {/* Document governance list */}
               {docs.length === 0 ? (
-                <p className="text-xs text-slate-400">No documents in registry. Upload a dummy PDF first.</p>
+                <p className="text-xs text-slate-400">No documents in registry. Upload a PDF to get started.</p>
               ) : (
                 <div className="space-y-3">
                   {docs.map(doc => {
@@ -1856,7 +1856,7 @@ export default function DocumentRegistryPage() {
                   <p className="text-xs text-indigo-700 mt-0.5 leading-relaxed">
                     Retrieves relevant chunks using pgvector, then sends <em>only those chunks</em> to the answer model.
                     The model is instructed to answer from sources only — no general knowledge, no invented policy detail.
-                    The <code className="font-mono">/ask</code> endpoint is unchanged. Test with dummy/sample documents only.
+                    The <code className="font-mono">/ask</code> endpoint is unchanged. Real governed/approved documents may be tested here — admin-only.
                   </p>
                 </div>
               </div>
@@ -2042,15 +2042,15 @@ export default function DocumentRegistryPage() {
             <strong>Platform flexibility:</strong> The <em>Vertical</em> field means this registry is not limited to care.
             It can hold policies for finance, property management, recruitment, healthcare admin, training providers
             and other regulated SMEs — all managed in one place.
-            Embedding records are prepared per chunk (Milestone 4E). Controlled embedding generation is available for dummy/sample documents
+            Embedding records are prepared per chunk (Milestone 4E). Governance-approved documents can be embedded for admin-only use
             (Milestone 4F — <Zap size={11} className="inline text-indigo-500" /> button in the Embedding column).{' '}
-            Admin-only vector search (Milestone 4G) and source-grounded answer testing (Milestone 4H) are available above.{' '}
-            <strong>Staff-facing Ask WorkTwin remains disabled from using RAG. Real Thumhara/QCS documents must not be embedded until governance sign-off.</strong>
+            Admin-only vector search (Milestone 4G/4I) and source-grounded answer testing (Milestone 4H/4J) are available above.{' '}
+            <strong>Staff-facing Ask WorkTwin remains disabled from using RAG. Sensitive and escalation-required documents remain blocked.</strong>
           </p>
         </div>
 
         <p className="text-xs text-slate-400 text-center">
-          Only documents listed here are used to answer staff questions. WorkTwin does not use the internet or external sources.
+          Admin-only answer testing uses only documents listed here. Staff-facing Ask WorkTwin does not use RAG. WorkTwin does not use the internet or external sources.
         </p>
       </div>
     </AppLayout>

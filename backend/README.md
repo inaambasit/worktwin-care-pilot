@@ -1437,6 +1437,61 @@ When staff-facing `/ask` is built, the same deterministic safety-note pattern sh
 |--------|-------------|
 | `9b7d831` | Append safety note to answer-debug responses |
 
+## Milestone 4O.1: Stale wording cleanup — admin-only RAG status
+
+### What Milestone 4O.1 changes
+
+Wording-only corrections in two files. No backend logic, no frontend logic, no SQL, no governance flags, and no `/ask` behaviour were changed.
+
+**`backend/app/main.py` — embedding-readiness note**
+
+Previous wording implied vector search and AI answers were not enabled at all.
+Updated to state: admin-only vector search is active; `answer-debug` is available for approved documents; staff-facing RAG is not enabled.
+
+**`backend/app/main.py` — chunk endpoint `embedding_note`**
+
+Previous wording: `"Embeddings and AI answers are not enabled yet."`
+Updated to state: embeddings are stored; admin-only vector search and `answer-debug` are available for approved documents; staff-facing RAG is not enabled.
+
+**`frontend/app/ask/page.tsx` — /ask connected notice**
+
+Updated to say explicitly that answers on that page are not sourced from organisation documents and that staff-facing document-grounded answers are not yet enabled.
+
+### Current reality after 4O.1
+
+- Admin-only vector search is active (`POST /documents/search-vector`).
+- Admin-only source-grounded answer testing is available via `POST /documents/answer-debug` for approved/governed documents.
+- Staff-facing `/ask` remains placeholder only — no RAG, no document-grounded answers.
+- AC32 remains draft and staff-invisible (`approved_for_staff_visibility=false`).
+
+### What was proved live
+
+- Render backend returned the updated `embedding_note` from `GET /documents/{AC32_ID}/chunks`.
+- Vercel `/ask` page showed the updated connected notice.
+- `/ask` still returned the placeholder response.
+- `/ask` did not use AC32 or RAG.
+
+### What Milestone 4O.1 does NOT do
+
+- No backend logic changes.
+- No frontend logic changes.
+- No SQL changes.
+- No `/ask` behaviour changes.
+- No governance flag changes.
+- No staff-facing RAG enabled.
+- AC32 is not approved for staff visibility.
+- No new endpoints.
+
+### Important note on existing chunk previews
+
+Existing AC32 chunk previews may still show old stored PDF extraction artefacts — Milestone 4L.1 cleaned returned previews and future extractions but did not rewrite existing Supabase rows.
+
+### Commit
+
+| Commit | Description |
+|--------|-------------|
+| `213a336` | Clarify admin-only document answer wording |
+
 ## Current milestone status
 
 - PDF upload works (Milestone 4B)
@@ -1455,6 +1510,7 @@ When staff-facing `/ask` is built, the same deterministic safety-note pattern sh
 - **Named-contact anonymisation added — source-grounded answers replace named individuals with role phrases; prompt-only change; AC32 answer-debug confirmed working (Milestone 4M)**
 - **Driving and safety-critical topic caution added — `driving` and `vehicle` added to escalation detection; prompt extended for road safety, statutory obligations, and potential criminal liability (Milestone 4N)**
 - **Safety note made deterministic — appended server-side to answer-debug answers when `safety_note` is present; two-run proof confirms caution appears on every driving query (Milestone 4N.1)**
+- **Stale wording corrected — embedding-readiness note, chunk `embedding_note`, and `/ask` connected notice now accurately reflect that admin-only vector search and answer-debug are active while staff-facing RAG remains disabled (Milestone 4O.1)**
 - Staff-facing `/ask` remains a placeholder — RAG is governed-disabled
 - No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a human reviewer
 

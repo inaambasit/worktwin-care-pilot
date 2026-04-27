@@ -2507,6 +2507,8 @@ def answer_debug(payload: AnswerDebugRequest):
         raise HTTPException(status_code=500, detail=f"Answer generation failed: {safe_err}")
 
     answer_text = answer_result["answer"]
+    if safety_note and safety_note not in answer_text:
+        answer_text = f"{answer_text}\n\n{safety_note}"
     confidence = _validate_grounded_answer_result(answer_text, sources)
 
     # Audit event for answer debug (regardless of confidence)

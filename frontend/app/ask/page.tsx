@@ -308,8 +308,7 @@ export default function AskPage() {
             {!currentAnswer.isDemo && !isDemoFallback && (
               <div className="flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-xl px-4 py-2.5 text-xs text-teal-800">
                 <Zap size={13} className="shrink-0 text-teal-600" />
-                WorkTwin is connected. Real, source-cited answers from your company documents will be
-                available once document upload is set up (coming in Milestone 4).
+                WorkTwin is connected. Answers on this page are not sourced from your organisation&apos;s documents. Staff-facing document-grounded answers are not yet enabled.
               </div>
             )}
 

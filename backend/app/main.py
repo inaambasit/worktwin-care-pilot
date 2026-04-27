@@ -647,7 +647,7 @@ def _get_embedding_readiness(document_id: str) -> Dict[str, Any]:
         "failed_count": failed_count,
         "is_ready_for_vector_search": is_ready_for_vector_search,
         "is_ready_for_ai_answers": False,
-        "note": "Vector search and AI answers are not enabled yet.",
+        "note": "Admin-only vector search is active. Source-grounded answer testing is available via /documents/answer-debug for approved documents. Staff-facing RAG is not enabled.",
     }
 
 
@@ -1928,7 +1928,7 @@ def list_document_chunks_admin(doc_id: str):
         "document_id": doc_id,
         "chunk_count": len(chunks_out),
         "chunks": chunks_out,
-        "embedding_note": "Embeddings and AI answers are not enabled yet.",
+        "embedding_note": "Embeddings stored. Admin-only vector search and source-grounded answer testing (/documents/answer-debug) are available for approved documents. Staff-facing RAG is not enabled.",
     }
 
 

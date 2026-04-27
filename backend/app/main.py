@@ -1242,6 +1242,8 @@ class GovernanceUpdateRequest(BaseModel):
     real_document: Optional[bool] = None
     dummy_document: Optional[bool] = None
     governance_notes: Optional[str] = None
+    governance_reviewed_by: Optional[str] = None
+    governance_reviewed_at: Optional[str] = None
     source_owner: Optional[str] = None
     source_licence_notes: Optional[str] = None
     contains_qcs_or_third_party_content: Optional[bool] = None
@@ -3124,6 +3126,12 @@ def update_document_governance(doc_id: str, payload: GovernanceUpdateRequest, _:
     # Other optional governance fields
     if payload.governance_notes is not None:
         updates["governance_notes"] = payload.governance_notes
+    if payload.governance_reviewed_by is not None:
+        if payload.governance_reviewed_by.strip() == "":
+            raise HTTPException(status_code=400, detail="governance_reviewed_by must not be empty.")
+        updates["governance_reviewed_by"] = payload.governance_reviewed_by.strip()
+    if payload.governance_reviewed_at is not None:
+        updates["governance_reviewed_at"] = payload.governance_reviewed_at
     if payload.source_owner is not None:
         updates["source_owner"] = payload.source_owner
     if payload.source_licence_notes is not None:

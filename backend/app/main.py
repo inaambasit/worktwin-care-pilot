@@ -87,6 +87,18 @@ except ImportError:
     _PdfReader = None  # type: ignore
 
 
+def _clean_extracted_text(text: str) -> str:
+    # Remove common PDF encoding artefacts without touching content.
+    # Â  is the UTF-8 NBSP (U+00A0) misread as Latin-1 — replace with space.
+    text = text.replace("Â ", " ")
+    text = text.replace(" ", " ")
+    # Stray U+00C2 before an ASCII word character (cp1252 artefact, e.g. "ÂWill")
+    text = re.sub(r"Â(?=\w)", "", text)
+    # Strip C0/C1 control characters (keep \t=0x09, \n=0x0a, \r=0x0d)
+    text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]", "", text)
+    return text
+
+
 def _http_upload_to_supabase(storage_path: str, file_bytes: bytes) -> None:
     """
     Upload to Supabase Storage via REST API (HTTP fallback path).
@@ -805,7 +817,7 @@ def _normalise_search_result(row: Dict[str, Any]) -> Dict[str, Any]:
         "approved_for_ai_answers": bool(row.get("approved_for_ai_answers", False)),
         "escalation_required": bool(row.get("escalation_required", False)),
         "is_sensitive": bool(row.get("is_sensitive", False)),
-        "chunk_preview": (row.get("chunk_text") or "")[:350],
+        "chunk_preview": _clean_extracted_text(row.get("chunk_text") or "")[:350],
     }
 
 
@@ -844,7 +856,7 @@ def _build_source_context(
 
     for i, chunk in enumerate(limited):
         label = f"[Source {i + 1}]"
-        preview = (chunk.get("chunk_preview") or chunk.get("chunk_text") or "")[:350]
+        preview = _clean_extracted_text(chunk.get("chunk_preview") or chunk.get("chunk_text") or "")[:350]
         if not preview:
             continue
         remaining = MAX_SOURCE_CONTEXT_CHARS - total_chars
@@ -1895,7 +1907,7 @@ def list_document_chunks_admin(doc_id: str):
             "embedding_status": c.get("embedding_status"),
             "approved_for_ai_answers": c.get("approved_for_ai_answers"),
             "escalation_required": c.get("escalation_required"),
-            "chunk_preview": (c.get("chunk_text") or "")[:250],
+            "chunk_preview": _clean_extracted_text(c.get("chunk_text") or "")[:250],
         }
         for c in raw
     ]
@@ -2675,7 +2687,7 @@ async def upload_document_pdf(
             extracted_page_count = len(reader.pages)
             page_parts: List[str] = []
             for page in reader.pages:
-                page_parts.append(page.extract_text() or "")
+                page_parts.append(_clean_extracted_text(page.extract_text() or ""))
             _full_extracted_text = "".join(page_parts)
             extracted_char_count = len(_full_extracted_text)
             extracted_text_preview = _full_extracted_text[:2000].strip()

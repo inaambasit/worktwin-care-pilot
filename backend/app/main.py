@@ -90,9 +90,9 @@ except ImportError:
 def _clean_extracted_text(text: str) -> str:
     # Remove common PDF encoding artefacts without touching content.
     # Â  is the UTF-8 NBSP (U+00A0) misread as Latin-1 — replace with space.
-    text = text.replace("Â©", "©")  # © copyright sign
-    text = text.replace("Â®", "®")  # ® registered sign
-    text = text.replace("Â£", "£")  # £ pound sign
+    text = text.replace("\u00C2\u00A9", "\u00A9")  # © copyright sign
+    text = text.replace("\u00C2\u00AE", "\u00AE")  # ® registered sign
+    text = text.replace("\u00C2\u00A3", "\u00A3")  # £ pound sign
     text = text.replace("Â ", " ")
     text = text.replace(" ", " ")
     # Stray U+00C2 before an ASCII word character (cp1252 artefact, e.g. "ÂWill")

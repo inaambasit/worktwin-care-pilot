@@ -88,12 +88,14 @@ Multiple origins are comma-separated. No wildcard `*` is used in production.
 |----------|-------|
 | `ENVIRONMENT` | `production` |
 | `ALLOWED_ORIGINS` | `https://worktwin-care-pilot.vercel.app` |
+| `ADMIN_TOKEN` | Secret bearer token — required to call admin/debug endpoints |
 
 ### Environment variable to set in Vercel (frontend)
 
 | Variable | Value |
 |----------|-------|
 | `NEXT_PUBLIC_API_URL` | `https://<your-render-service-name>.onrender.com` |
+| `NEXT_PUBLIC_ADMIN_TOKEN` | Must match `ADMIN_TOKEN` set in Render — used by the admin UI only |
 
 Replace `<your-render-service-name>` with the subdomain Render assigns when you create the service.
 
@@ -1492,6 +1494,52 @@ Existing AC32 chunk previews may still show old stored PDF extraction artefacts 
 |--------|-------------|
 | `213a336` | Clarify admin-only document answer wording |
 
+## Milestone 4P: Admin bearer-token protection
+
+**Commit:** `cfc1a3e` Protect admin endpoints with bearer token
+
+### What Milestone 4P adds
+
+All admin and debug endpoints now require an `Authorization: Bearer <token>` header. The token is set via the `ADMIN_TOKEN` environment variable on Render. The frontend admin UI reads the matching `NEXT_PUBLIC_ADMIN_TOKEN` variable and includes it in every admin request.
+
+### Protected endpoints (require Bearer token)
+
+All `/documents` routes except where noted below — including upload, registry, chunking, embeddings, vector search, answer-debug, governance, and governance-readiness.
+
+### Public endpoints (no token required)
+
+| Method | Path | Reason |
+|--------|------|--------|
+| GET | / | Service identity |
+| GET | /health | Uptime monitoring |
+| POST | /ask | Staff-facing placeholder |
+| GET | /policies | Staff-facing policy library |
+
+### Environment variables
+
+| Variable | Set in | Description |
+|----------|--------|-------------|
+| `ADMIN_TOKEN` | Render (backend) | Secret token. Never log or return in API responses. |
+| `NEXT_PUBLIC_ADMIN_TOKEN` | Vercel (frontend) | Must match `ADMIN_TOKEN`. Admin UI only. |
+
+### What Milestone 4P does NOT do
+
+- No SQL migration required.
+- No changes to `/ask` — staff-facing endpoint remains a placeholder.
+- No changes to governance flags.
+- AC32 remains draft and staff-invisible (`approved_for_staff_visibility=false`).
+- Staff-facing RAG is not enabled.
+
+### Live proofs passed
+
+| Test | Expected | Result |
+|------|----------|--------|
+| `GET /documents` without token | 401 Unauthorized | Passed |
+| `GET /health` without token | 200 OK | Passed |
+| `POST /ask` without token | 200 OK (placeholder) | Passed |
+| `GET /policies` without token | 200 OK | Passed |
+| Vercel admin documents page | Loads live registry | Passed |
+
 ## Current milestone status
 
 - PDF upload works (Milestone 4B)
@@ -1511,6 +1559,7 @@ Existing AC32 chunk previews may still show old stored PDF extraction artefacts 
 - **Driving and safety-critical topic caution added — `driving` and `vehicle` added to escalation detection; prompt extended for road safety, statutory obligations, and potential criminal liability (Milestone 4N)**
 - **Safety note made deterministic — appended server-side to answer-debug answers when `safety_note` is present; two-run proof confirms caution appears on every driving query (Milestone 4N.1)**
 - **Stale wording corrected — embedding-readiness note, chunk `embedding_note`, and `/ask` connected notice now accurately reflect that admin-only vector search and answer-debug are active while staff-facing RAG remains disabled (Milestone 4O.1)**
+- **Admin bearer-token protection added — all admin/debug endpoints require `Authorization: Bearer <token>`; public endpoints (`/`, `/health`, `/ask`, `/policies`) remain open; no SQL required (Milestone 4P)**
 - Staff-facing `/ask` remains a placeholder — RAG is governed-disabled
 - No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a human reviewer
 

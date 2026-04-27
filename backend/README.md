@@ -1378,6 +1378,65 @@ A later milestone should design proper DB-backed escalation contacts and role-ba
 |--------|-------------|
 | `a691d3f` | Generalise named contacts in answer-debug |
 
+## Milestone 4N: Driving and safety-critical topic caution
+
+### What Milestone 4N adds
+
+- `driving` and `vehicle` added to `_ESCALATION_TOPICS_RE` — queries involving driving or vehicle use are now detected as escalation topics.
+- `_generate_source_grounded_answer` prompt extended: driving and vehicle use are listed alongside safeguarding, medication, HR, legal, wellbeing, and named-individual queries as topics that require escalation guidance.
+- Prompt wording added covering statutory obligations, legal duties, road safety, driving, vehicle use, and potential criminal liability.
+
+### What Milestone 4N does NOT do
+
+- No SQL changes.
+- No frontend changes.
+- No `/ask` changes.
+- No governance flag changes.
+- Staff-facing RAG is not enabled.
+- AC32 is not approved for staff visibility.
+- No new endpoints.
+
+### Commit
+
+| Commit | Description |
+|--------|-------------|
+| `7937a57` | Add caution for driving and safety-critical answers |
+
+## Milestone 4N.1: Deterministic safety note appended server-side
+
+### What Milestone 4N.1 adds
+
+- In the `/documents/answer-debug` successful answer path: if `safety_note` is present and not already contained in `answer_text`, it is appended to `answer_text` with two newlines.
+- This makes the core escalation caution deterministic — it is no longer left to the LLM to include it.
+
+### What this proved
+
+- Live `answer-debug` for "Can staff use a mobile phone while driving for work?" returns `confidence: source_grounded`.
+- `safety_note` is present for the driving query.
+- Two-run proof confirmed the answer body always includes:
+  > "This query involves a sensitive topic. Please escalate to your line manager or designated lead."
+- The model may additionally include legal/safety-critical professional guidance wording, but the backend `safety_note` is now deterministic.
+
+### What Milestone 4N.1 does NOT do
+
+- No SQL changes.
+- No frontend changes.
+- No `/ask` changes.
+- No governance flag changes.
+- Staff-facing RAG is not enabled.
+- AC32 is not approved for staff visibility.
+- No new endpoints.
+
+### Future note
+
+When staff-facing `/ask` is built, the same deterministic safety-note pattern should be applied server-side from day one — not left to prompt-only behaviour.
+
+### Commits
+
+| Commit | Description |
+|--------|-------------|
+| `9b7d831` | Append safety note to answer-debug responses |
+
 ## Current milestone status
 
 - PDF upload works (Milestone 4B)
@@ -1394,12 +1453,14 @@ A later milestone should design proper DB-backed escalation contacts and role-ba
 - **AC32 answer quality and safety review completed in admin/debug mode — four test queries passed; pre-release issues identified (Milestone 4J)**
 - **Backend text-cleaning added — `_clean_extracted_text` applied before storage/chunking; search-vector, answer-debug, and chunks previews are cleaner; existing DB rows not rewritten (Milestone 4L.1)**
 - **Named-contact anonymisation added — source-grounded answers replace named individuals with role phrases; prompt-only change; AC32 answer-debug confirmed working (Milestone 4M)**
+- **Driving and safety-critical topic caution added — `driving` and `vehicle` added to escalation detection; prompt extended for road safety, statutory obligations, and potential criminal liability (Milestone 4N)**
+- **Safety note made deterministic — appended server-side to answer-debug answers when `safety_note` is present; two-run proof confirms caution appears on every driving query (Milestone 4N.1)**
 - Staff-facing `/ask` remains a placeholder — RAG is governed-disabled
 - No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a human reviewer
 
 ## Next steps (Milestone 4K+)
 
-- Address remaining pre-release issues from Milestone 4J: answer caution for legal/safety topics, stale embedding-readiness wording (encoding artefacts addressed in 4L.1; named-contact anonymisation addressed in 4M)
+- Address remaining pre-release issues from Milestone 4J: stale embedding-readiness wording (encoding artefacts addressed in 4L.1; named-contact anonymisation addressed in 4M; driving/safety-critical caution addressed in 4N/4N.1)
 - Governance sign-off and safety review of real Thumhara/QCS policy documents, then set `real_document=true`, `approved_for_embedding=true`, `approved_for_source_grounded_answers=true` for approved documents
 - Staff-facing RAG pipeline (retrieve then generate answer from approved documents only) — upgrade `/ask` endpoint
 - Authentication and organisation membership verification

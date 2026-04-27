@@ -1301,6 +1301,45 @@ Review answer quality and safety in admin/debug mode before any staff-facing rel
 - AC32 is not approved for staff visibility.
 - Staff-facing `/ask` is not changed.
 
+## Milestone 4L.1: Backend text-cleaning for PDF extraction artefacts
+
+### What Milestone 4L.1 adds
+
+- New backend helper `_clean_extracted_text(text)` — applied to all extracted page text before storage and chunking on future uploads
+- Common PDF mojibake artefacts are cleaned from all returned previews and context:
+  - `Â ` (non-breaking space misread as `Â `) → single space
+  - `ÂWill`-style prefix artefacts → stripped
+  - Copyright mojibake `Â©` → `©` (U+00A9)
+  - Other common Windows-1252-decoded-as-UTF-8 artefacts
+- `/documents/search-vector` returns cleaner `chunk_preview` output
+- `/documents/answer-debug` returns cleaner `source_preview` and `context` output
+- `/documents/{id}/chunks` returns cleaner `chunk_preview` output
+
+### What Milestone 4L.1 does NOT do
+
+- Existing `document_chunks`, `document_extractions`, and `document_registry` rows in Supabase are **not rewritten** — stored text in the DB may still contain original artefacts from before this milestone
+- The live API cleans returned previews and context; it does not modify stored rows in place
+- No SQL migration required
+- No frontend changes
+- No governance flag changes
+- No changes to `/ask`
+- AC32 is not approved for staff visibility
+
+### Verification
+
+The copyright symbol fix was verified using a Python UTF-8 check against the live API:
+
+- Live API returned `"Copyright © Quality"` with character code `0xa9` — correct UTF-8
+- PowerShell `Invoke-RestMethod` displayed `©` misleadingly, but Python UTF-8 decoding confirmed the API response was correct
+
+### Commits
+
+| Commit | Description |
+|--------|-------------|
+| `d60886c` | Clean PDF extraction preview artefacts |
+| `78e4a4f` | Clean common PDF mojibake symbols |
+| `f9793a0` | Use Unicode escapes for PDF symbol cleanup |
+
 ## Current milestone status
 
 - PDF upload works (Milestone 4B)
@@ -1315,12 +1354,13 @@ Review answer quality and safety in admin/debug mode before any staff-facing rel
 - **Governance blocking proof passed — AC32 is the first controlled real document; embedding/answer/staff-visibility gates confirmed independent (Milestone 4I.4)**
 - **Answer-debug approval fix shipped — chunk-level flag no longer blocks document-level approved real documents; AC32 source-grounded answer test passed (Milestone 4I.5)**
 - **AC32 answer quality and safety review completed in admin/debug mode — four test queries passed; pre-release issues identified (Milestone 4J)**
+- **Backend text-cleaning added — `_clean_extracted_text` applied before storage/chunking; search-vector, answer-debug, and chunks previews are cleaner; existing DB rows not rewritten (Milestone 4L.1)**
 - Staff-facing `/ask` remains a placeholder — RAG is governed-disabled
 - No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a human reviewer
 
 ## Next steps (Milestone 4K+)
 
-- Address pre-release issues identified in Milestone 4J: encoding artefacts, named contact policy, answer caution for legal/safety topics, stale embedding-readiness wording
+- Address remaining pre-release issues from Milestone 4J: named contact policy, answer caution for legal/safety topics, stale embedding-readiness wording (encoding artefacts addressed in Milestone 4L.1)
 - Governance sign-off and safety review of real Thumhara/QCS policy documents, then set `real_document=true`, `approved_for_embedding=true`, `approved_for_source_grounded_answers=true` for approved documents
 - Staff-facing RAG pipeline (retrieve then generate answer from approved documents only) — upgrade `/ask` endpoint
 - Authentication and organisation membership verification

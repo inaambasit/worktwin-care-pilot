@@ -4,6 +4,12 @@ import type { AskRequest, AskResponse, DocumentRecord, DocumentListResponse, Upl
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
+function adminHeaders(): Record<string, string> {
+  const token = process.env.NEXT_PUBLIC_ADMIN_TOKEN
+  if (!token) return {}
+  return { Authorization: `Bearer ${token}` }
+}
+
 export async function askWorktwin(question: string): Promise<AskResponse> {
   const payload: AskRequest = {
     organisation_id: 'demo-org',
@@ -51,13 +57,14 @@ export async function fetchDocuments(params?: {
   if (params?.category) qs.set('category', params.category)
   if (params?.vertical) qs.set('vertical', params.vertical)
   const url = `${API_BASE_URL}/documents${qs.toString() ? `?${qs}` : ''}`
-  const response = await fetch(url, { signal: AbortSignal.timeout(5_000) })
+  const response = await fetch(url, { headers: adminHeaders(), signal: AbortSignal.timeout(5_000) })
   if (!response.ok) throw new Error(`API error: ${response.status}`)
   return response.json() as Promise<DocumentListResponse>
 }
 
 export async function fetchDocument(id: string): Promise<DocumentRecord> {
   const response = await fetch(`${API_BASE_URL}/documents/${id}`, {
+    headers: adminHeaders(),
     signal: AbortSignal.timeout(5_000),
   })
   if (!response.ok) throw new Error(`API error: ${response.status}`)
@@ -89,6 +96,7 @@ export async function fetchPolicies(params?: {
 export async function approveDocument(id: string): Promise<DocumentRecord> {
   const response = await fetch(`${API_BASE_URL}/documents/${id}/approve`, {
     method: 'POST',
+    headers: adminHeaders(),
     signal: AbortSignal.timeout(5_000),
   })
   if (!response.ok) throw new Error(`API error: ${response.status}`)
@@ -98,6 +106,7 @@ export async function approveDocument(id: string): Promise<DocumentRecord> {
 export async function archiveDocument(id: string): Promise<DocumentRecord> {
   const response = await fetch(`${API_BASE_URL}/documents/${id}/archive`, {
     method: 'POST',
+    headers: adminHeaders(),
     signal: AbortSignal.timeout(5_000),
   })
   if (!response.ok) throw new Error(`API error: ${response.status}`)
@@ -148,6 +157,7 @@ export async function uploadDocumentPdf(params: UploadDocumentParams): Promise<U
 
   const response = await fetch(`${API_BASE_URL}/documents/upload`, {
     method: 'POST',
+    headers: adminHeaders(),
     body: form,
     signal: AbortSignal.timeout(30_000),
   })
@@ -183,7 +193,7 @@ export async function generateEmbeddings(
   }
   const response = await fetch(`${API_BASE_URL}/documents/${id}/generate-embeddings`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(120_000),
   })
@@ -213,7 +223,7 @@ export async function vectorSearchDocuments(params: {
   }
   const response = await fetch(`${API_BASE_URL}/documents/search-vector`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(30_000),
   })
@@ -241,7 +251,7 @@ export async function updateDocumentGovernance(
 ): Promise<DocumentRecord> {
   const response = await fetch(`${API_BASE_URL}/documents/${id}/governance`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
     body: JSON.stringify(updates),
     signal: AbortSignal.timeout(15_000),
   })
@@ -266,7 +276,7 @@ export async function answerDebug(params: {
   }
   const response = await fetch(`${API_BASE_URL}/documents/answer-debug`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(60_000),
   })

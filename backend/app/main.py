@@ -1,7 +1,7 @@
 import os
 import re
 import io
-from fastapi import FastAPI, Form, UploadFile, File, HTTPException
+from fastapi import FastAPI, Form, UploadFile, File, HTTPException, Depends, Header
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -78,6 +78,20 @@ _OPENAI_CONFIGURED: bool = bool(_OPENAI_API_KEY)
 ANSWER_MODEL: str = os.getenv("ANSWER_MODEL", "gpt-4o-mini")
 MAX_ANSWER_CHUNKS: int = 5          # max source chunks fed to answer model
 MAX_SOURCE_CONTEXT_CHARS: int = 4000  # total character cap for source context
+
+# ---------------------------------------------------------------------------
+# Milestone 4P.4 — Admin bearer-token guard
+# ADMIN_TOKEN is backend-only; never logged, returned, or exposed to clients.
+# ---------------------------------------------------------------------------
+_ADMIN_TOKEN: str = os.getenv("ADMIN_TOKEN", "")
+
+
+def _require_admin(authorization: Optional[str] = Header(default=None)) -> None:
+    if not _ADMIN_TOKEN:
+        raise HTTPException(status_code=503, detail="Admin auth not configured.")
+    scheme, _, token = (authorization or "").partition(" ")
+    if scheme.lower() != "bearer" or token != _ADMIN_TOKEN:
+        raise HTTPException(status_code=401, detail="Unauthorised.")
 
 try:
     from pypdf import PdfReader as _PdfReader
@@ -1771,6 +1785,7 @@ def list_documents(
     category: Optional[str] = None,
     vertical: Optional[str] = None,
     organisation_id: Optional[str] = None,
+    _: None = Depends(_require_admin),
 ):
     """
     Returns documents with registry source metadata.
@@ -1813,7 +1828,7 @@ def list_documents(
 
 
 @app.get("/documents/{doc_id}", response_model=DocumentRecord)
-def get_document(doc_id: str):
+def get_document(doc_id: str, _: None = Depends(_require_admin)):
     if _DB_CONFIGURED:
         try:
             record = _get_registry_record(doc_id)
@@ -1828,7 +1843,7 @@ def get_document(doc_id: str):
 
 
 @app.post("/documents", response_model=DocumentRecord, status_code=201)
-def create_document(payload: DocumentCreate):
+def create_document(payload: DocumentCreate, _: None = Depends(_require_admin)):
     now = _now()
     doc: Dict[str, Any] = {
         "id": str(uuid.uuid4()),
@@ -1841,7 +1856,7 @@ def create_document(payload: DocumentCreate):
 
 
 @app.patch("/documents/{doc_id}", response_model=DocumentRecord)
-def update_document(doc_id: str, payload: DocumentUpdate):
+def update_document(doc_id: str, payload: DocumentUpdate, _: None = Depends(_require_admin)):
     doc = _find_doc(doc_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -1852,7 +1867,7 @@ def update_document(doc_id: str, payload: DocumentUpdate):
 
 
 @app.post("/documents/{doc_id}/approve", response_model=DocumentRecord)
-def approve_document(doc_id: str):
+def approve_document(doc_id: str, _: None = Depends(_require_admin)):
     if _DB_CONFIGURED:
         try:
             updated = _update_registry_record(doc_id, {"status": "approved", "updated_at": _now()})
@@ -1869,7 +1884,7 @@ def approve_document(doc_id: str):
 
 
 @app.post("/documents/{doc_id}/archive", response_model=DocumentRecord)
-def archive_document(doc_id: str):
+def archive_document(doc_id: str, _: None = Depends(_require_admin)):
     if _DB_CONFIGURED:
         try:
             updated = _update_registry_record(doc_id, {"status": "archived", "updated_at": _now()})
@@ -1886,7 +1901,7 @@ def archive_document(doc_id: str):
 
 
 @app.get("/documents/{doc_id}/chunks")
-def list_document_chunks_admin(doc_id: str):
+def list_document_chunks_admin(doc_id: str, _: None = Depends(_require_admin)):
     """
     Admin/debug endpoint — Milestone 4D.
     Returns chunk metadata and 250-character previews only.
@@ -1937,7 +1952,7 @@ def list_document_chunks_admin(doc_id: str):
 # ---------------------------------------------------------------------------
 
 @app.get("/documents/{doc_id}/embedding-readiness")
-def get_document_embedding_readiness(doc_id: str):
+def get_document_embedding_readiness(doc_id: str, _: None = Depends(_require_admin)):
     """
     Admin-safe embedding readiness metadata — updated in Milestone 4F.
     Returns counts and readiness flags only.
@@ -1957,7 +1972,7 @@ def get_document_embedding_readiness(doc_id: str):
 # ---------------------------------------------------------------------------
 
 @app.post("/documents/{doc_id}/generate-embeddings")
-def generate_document_embeddings(doc_id: str, payload: GenerateEmbeddingsRequest):
+def generate_document_embeddings(doc_id: str, payload: GenerateEmbeddingsRequest, _: None = Depends(_require_admin)):
     """
     Admin-only endpoint — Milestone 4F.
 
@@ -2237,7 +2252,7 @@ def generate_document_embeddings(doc_id: str, payload: GenerateEmbeddingsRequest
 # ---------------------------------------------------------------------------
 
 @app.post("/documents/search-vector")
-def search_vector(payload: VectorSearchRequest):
+def search_vector(payload: VectorSearchRequest, _: None = Depends(_require_admin)):
     """
     Admin/debug-only vector retrieval endpoint — Milestone 4G.
 
@@ -2337,7 +2352,7 @@ def search_vector(payload: VectorSearchRequest):
 # ---------------------------------------------------------------------------
 
 @app.post("/documents/answer-debug")
-def answer_debug(payload: AnswerDebugRequest):
+def answer_debug(payload: AnswerDebugRequest, _: None = Depends(_require_admin)):
     """
     Admin/debug-only source-grounded answer test — Milestone 4H.
 
@@ -2630,6 +2645,7 @@ async def upload_document_pdf(
     review_due_date: Optional[str] = Form(None),
     description: Optional[str] = Form(None),
     version: str = Form("1.0"),
+    _: None = Depends(_require_admin),
 ):
     """
     Milestone 4B: safe PDF upload.
@@ -3025,7 +3041,7 @@ _ALLOWED_GOVERNANCE_STATUSES = frozenset({
 
 
 @app.patch("/documents/{doc_id}/governance", response_model=DocumentRecord)
-def update_document_governance(doc_id: str, payload: GovernanceUpdateRequest):
+def update_document_governance(doc_id: str, payload: GovernanceUpdateRequest, _: None = Depends(_require_admin)):
     """
     Admin-only governance update endpoint — Milestone 4I.
 
@@ -3172,7 +3188,7 @@ def update_document_governance(doc_id: str, payload: GovernanceUpdateRequest):
 # ---------------------------------------------------------------------------
 
 @app.get("/documents/{doc_id}/governance-readiness")
-def get_document_governance_readiness(doc_id: str):
+def get_document_governance_readiness(doc_id: str, _: None = Depends(_require_admin)):
     """
     Admin/debug-only governance readiness summary — Milestone 4I.1.
 

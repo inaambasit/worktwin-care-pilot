@@ -1573,6 +1573,63 @@ Investigate whether existing AC32 stored chunks could be reprocessed to remove o
 
 Defer AC32 rebuild until before staff-facing RAG or real pilot staff use. Do not manually delete or rebuild rows now.
 
+## Milestone 4R: Staff-facing /ask RAG safety design investigation
+
+### Status
+
+Design investigation only. No code, SQL, governance flags, or endpoints were changed.
+
+### Key decisions
+
+- `/ask` is currently a placeholder only. No RAG is active.
+- Staff-facing RAG must not be enabled until a real, clean, fully governed, staff-visible document exists in the system. No such document exists yet.
+- AC32 must not be used for staff `/ask` yet: it is staff-invisible (`approved_for_staff_visibility=false`) and its stored chunks contain pre-4L.1 extraction artefacts.
+- Dummy and sample documents must never be served to staff `/ask` — they may not be returned as citations or source previews under any circumstances.
+- Staff `/ask` must apply stricter gates than admin `answer-debug`. The `allow_dummy_override` bypass that is permitted for admin testing must not exist in the staff path.
+
+### Required document gates for staff /ask
+
+A document must pass **all** of the following before any of its chunks may be retrieved for a staff answer:
+
+| Gate | Required value |
+|------|---------------|
+| `status` | `approved` |
+| `real_document` | `true` |
+| `dummy_document` | `false` |
+| `is_sensitive` | `false` |
+| `escalation_required` | `false` |
+| `approved_for_staff_visibility` | `true` |
+| `approved_for_source_grounded_answers` | `true` |
+| `approved_for_embedding` | `true` |
+| `embedding_status` | `indexed` |
+| `governance_reviewed_by` | present (non-null) |
+| `governance_reviewed_at` | present (non-null) |
+| role match | staff user role must match `access_roles` or `access_roles` must include `"All Staff"` |
+
+All gates are AND conditions. Failing any single gate must exclude the document from retrieval.
+
+### Staff response privacy rules
+
+- Responses must return citations and source previews only — no raw chunk text beyond a short preview.
+- Must not return: `document_id`, `chunk_id`, similarity scores, storage keys, governance flags, embedding status, raw vectors, or full chunk text.
+- Audit logging must not store raw staff query text, `user_id`, staff name or email, or private transcript content.
+- Employer dashboard, if built, must show aggregated and anonymised trends only — never individual staff behaviour.
+
+### Recommended scope for Milestone 4S
+
+- Do not build full staff RAG pipeline until at least one safe staff-visible test document pathway exists.
+- Next step (4S-prep): prepare one safe staff-visible test policy or SOP document that passes all gates above. AC32 is not suitable; a new or updated document is required.
+- Once a qualifying document exists, build the `/ask` RAG path using the gate list above and the privacy rules above.
+
+### What Milestone 4R does NOT do
+
+- No code changes.
+- No SQL changes.
+- No governance flag changes.
+- No changes to `/ask`.
+- RAG not enabled.
+- AC32 not approved for staff visibility.
+
 ## Current milestone status
 
 - PDF upload works (Milestone 4B)
@@ -1594,14 +1651,16 @@ Defer AC32 rebuild until before staff-facing RAG or real pilot staff use. Do not
 - **Stale wording corrected — embedding-readiness note, chunk `embedding_note`, and `/ask` connected notice now accurately reflect that admin-only vector search and answer-debug are active while staff-facing RAG remains disabled (Milestone 4O.1)**
 - **Admin bearer-token protection added — all admin/debug endpoints require `Authorization: Bearer <token>`; public endpoints (`/`, `/health`, `/ask`, `/policies`) remain open; no SQL required (Milestone 4P)**
 - **AC32 stored chunk reprocess investigated — existing rows contain pre-4L.1 artefacts; no reprocess endpoint exists; re-upload rejected as cleanup method; rebuild deferred until before staff-facing RAG (Milestone 4Q)**
+- **Staff-facing /ask RAG safety design completed — document gates, response privacy rules, and 4S-prep scope defined; no document currently qualifies for staff RAG; AC32 excluded; no code or SQL changes (Milestone 4R)**
 - Staff-facing `/ask` remains a placeholder — RAG is governed-disabled
 - No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a human reviewer
 
-## Next steps (Milestone 4K+)
+## Next steps (Milestone 4S+)
 
-- Address remaining pre-release issues from Milestone 4J: stale embedding-readiness wording (encoding artefacts addressed in 4L.1; named-contact anonymisation addressed in 4M; driving/safety-critical caution addressed in 4N/4N.1)
-- Governance sign-off and safety review of real Thumhara/QCS policy documents, then set `real_document=true`, `approved_for_embedding=true`, `approved_for_source_grounded_answers=true` for approved documents
-- Staff-facing RAG pipeline (retrieve then generate answer from approved documents only) — upgrade `/ask` endpoint
-- Authentication and organisation membership verification
-- Rate limiting and anonymised query logging (no user-level data)
-- Role-based access control on admin endpoints
+- **4S-prep:** Prepare one safe, real, staff-visible test policy or SOP document that passes all Milestone 4R document gates. AC32 is not suitable; a new or updated document is required.
+- Once a qualifying document is indexed and all gates pass, build the staff `/ask` RAG path using the Milestone 4R gate list and privacy rules.
+- Governance sign-off and safety review of real Thumhara/QCS policy documents, then set `real_document=true`, `approved_for_embedding=true`, `approved_for_source_grounded_answers=true`, `approved_for_staff_visibility=true` for approved documents.
+- Authentication and organisation membership verification.
+- Rate limiting and anonymised query logging (no user-level data, no raw query text stored).
+- Role-based access control on admin endpoints.
+- AC32 rebuild (reprocess endpoint) before staff-facing RAG if AC32 is later approved for staff visibility.

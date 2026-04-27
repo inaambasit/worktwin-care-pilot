@@ -834,7 +834,7 @@ _ESCALATION_TOPICS_RE = re.compile(
     r'\b(safeguard(?:ing)?|medication|complaint|disciplinary|grievance|'
     r'\bhr\b|payroll|legal|solicitor|tribunal|health\s+and\s+safety|'
     r'incident|accident|wellbeing|mental\s+health|redundancy|dismissal|'
-    r'named\s+individual|personal\s+data|gdpr)\b',
+    r'named\s+individual|personal\s+data|gdpr|driving|vehicle)\b',
     re.IGNORECASE,
 )
 
@@ -918,8 +918,12 @@ def _generate_source_grounded_answer(
         "- Keep answers concise and factual.\n"
         "- Do not give legal, clinical, safeguarding, or HR advice beyond the source wording.\n"
         "- If the query touches safeguarding, medication, complaints, disciplinary, HR, "
-        "payroll, legal, health and safety, wellbeing, or named individuals, include: "
+        "payroll, legal, health and safety, wellbeing, driving or vehicle use, or named individuals, include: "
         "\"Please escalate this to your line manager or designated lead.\"\n"
+        "- If the answer includes statutory obligations, legal duties, road safety, driving, "
+        "vehicle use, or potential criminal liability, also include: "
+        "\"For legal or safety-critical matters, please also seek guidance from your line manager "
+        "or a qualified professional.\"\n"
         "- Use UK English.\n"
         "- If the answer would include a named individual from the source document, "
         "replace their name with their role, title, or a neutral phrase such as "

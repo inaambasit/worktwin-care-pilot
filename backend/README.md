@@ -1242,6 +1242,65 @@ AC32 Mobile Phone and Portable Device Use Policy (`approved_for_source_grounded_
 - AC32 remains draft and staff-invisible.
 - Staff visibility was not approved.
 
+## Milestone 4J: Admin-only AC32 answer quality and safety review
+
+### Context
+
+Milestone 4I governance is closed. AC32 (`approved_for_source_grounded_answers=true`) is confirmed working in admin/debug mode. AC32 remains draft and staff-invisible (`approved_for_staff_visibility=false`). Staff-facing `/ask` remains a placeholder only. No staff-facing RAG has been enabled.
+
+### Purpose
+
+Review answer quality and safety in admin/debug mode before any staff-facing release.
+
+### Admin-only answer-debug tests completed
+
+#### 1. Lost/stolen work phone
+- **Result:** passed
+- Answer correctly said staff must report the loss as soon as discovered to the named internal contact and that it may require reporting under Data Breach regulations.
+- **Note:** named internal contact appears because the policy source includes that name; decide before staff-facing release whether named contacts should be shown or generalised.
+
+#### 2. Mobile phone while driving for work
+- **Result:** passed
+- Answer correctly said use must only happen where legal and with Bluetooth/hands-free/safe-use technology.
+- **Note:** wording should be more cautious before staff-facing release to avoid sounding like broad legal advice.
+
+#### 3. Business mobile phone personal calls/texts
+- **Result:** passed
+- Answer correctly relied on the source saying the business mobile phone is strictly for business use only.
+- **Note:** another source mentions speech calls/text messages, but this appears to relate to business use, not personal use.
+
+#### 4. Personal mobile phone for work purposes
+- **Result:** passed
+- Answer correctly said personal phone use is only allowed where required for the role, where no business phone is issued, and where Thumhara Centre has approved it.
+- **Note:** wording can be polished before staff-facing use.
+
+### Milestone 4J findings
+
+- Source-grounded answering works in admin-only mode.
+- AC32 sources are returned.
+- Answers are mostly accurate and policy-grounded.
+- Staff-facing `/ask` remains placeholder.
+- AC32 remains staff-invisible.
+- No SQL changes.
+- No frontend changes.
+- No governance flags changed.
+
+### Issues to address before staff-facing release
+
+- Clean `Â` encoding artefacts from extracted/chunked text or previews.
+- Decide whether named internal contacts should appear in staff answers.
+- Make safety/legal-adjacent answers more cautious.
+- Review stale embedding-readiness wording that still says AI answers are not enabled, even though admin-only answer-debug is enabled.
+
+### What Milestone 4J does NOT do
+
+- No code changes.
+- No SQL changes.
+- No frontend changes.
+- No governance flag changes.
+- AC32 is not approved for staff visibility.
+- Staff-facing `/ask` is not changed.
+
 ## Current milestone status
 
 - PDF upload works (Milestone 4B)
@@ -1255,11 +1314,13 @@ AC32 Mobile Phone and Portable Device Use Policy (`approved_for_source_grounded_
 - **Governance hardened — clearer blocked reasons, human-readable audit summaries, readiness endpoint, readiness checklist (Milestone 4I.1)**
 - **Governance blocking proof passed — AC32 is the first controlled real document; embedding/answer/staff-visibility gates confirmed independent (Milestone 4I.4)**
 - **Answer-debug approval fix shipped — chunk-level flag no longer blocks document-level approved real documents; AC32 source-grounded answer test passed (Milestone 4I.5)**
+- **AC32 answer quality and safety review completed in admin/debug mode — four test queries passed; pre-release issues identified (Milestone 4J)**
 - Staff-facing `/ask` remains a placeholder — RAG is governed-disabled
 - No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a human reviewer
 
-## Next steps (Milestone 4J+)
+## Next steps (Milestone 4K+)
 
+- Address pre-release issues identified in Milestone 4J: encoding artefacts, named contact policy, answer caution for legal/safety topics, stale embedding-readiness wording
 - Governance sign-off and safety review of real Thumhara/QCS policy documents, then set `real_document=true`, `approved_for_embedding=true`, `approved_for_source_grounded_answers=true` for approved documents
 - Staff-facing RAG pipeline (retrieve then generate answer from approved documents only) — upgrade `/ask` endpoint
 - Authentication and organisation membership verification

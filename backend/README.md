@@ -1340,6 +1340,44 @@ The copyright symbol fix was verified using a Python UTF-8 check against the liv
 | `78e4a4f` | Clean common PDF mojibake symbols |
 | `f9793a0` | Use Unicode escapes for PDF symbol cleanup |
 
+## Milestone 4M: Named-contact anonymisation in source-grounded answers
+
+### What Milestone 4M adds
+
+- Prompt-only update to `_generate_source_grounded_answer` in the answer-debug pipeline.
+- If the generated answer would include a named individual from the source document, the model is instructed to replace their name with a role, title, or neutral phrase such as:
+  - "the nominated manager"
+  - "the responsible lead"
+  - "the appropriate senior staff member"
+- The exception is where the name is purely informational — for example a document author, document title, or source citation.
+
+### What Milestone 4M proved
+
+- Admin-only `POST /documents/answer-debug` still returns `confidence: source_grounded`.
+- The lost/stolen work phone answer no longer repeated the named internal contact ("Shagufta Akhtar" in AC32) — the answer used "the nominated manager" instead.
+- Admin `source_preview` still shows the raw source text for audit and review purposes.
+- Staff-facing `/ask` still returns the placeholder response and does not use AC32 or RAG in any way.
+
+### What Milestone 4M does NOT do
+
+- No changes to `/ask`.
+- No staff-facing RAG enabled.
+- AC32 is not approved for staff visibility.
+- No SQL changes.
+- No frontend changes.
+- No governance flag changes.
+- Escalation contacts are not a DB-backed feature in this milestone — the anonymisation is prompt-only.
+
+### Future note
+
+A later milestone should design proper DB-backed escalation contacts and role-based escalation routing rather than relying solely on prompt wording.
+
+### Commit
+
+| Commit | Description |
+|--------|-------------|
+| `a691d3f` | Generalise named contacts in answer-debug |
+
 ## Current milestone status
 
 - PDF upload works (Milestone 4B)
@@ -1355,12 +1393,13 @@ The copyright symbol fix was verified using a Python UTF-8 check against the liv
 - **Answer-debug approval fix shipped — chunk-level flag no longer blocks document-level approved real documents; AC32 source-grounded answer test passed (Milestone 4I.5)**
 - **AC32 answer quality and safety review completed in admin/debug mode — four test queries passed; pre-release issues identified (Milestone 4J)**
 - **Backend text-cleaning added — `_clean_extracted_text` applied before storage/chunking; search-vector, answer-debug, and chunks previews are cleaner; existing DB rows not rewritten (Milestone 4L.1)**
+- **Named-contact anonymisation added — source-grounded answers replace named individuals with role phrases; prompt-only change; AC32 answer-debug confirmed working (Milestone 4M)**
 - Staff-facing `/ask` remains a placeholder — RAG is governed-disabled
 - No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a human reviewer
 
 ## Next steps (Milestone 4K+)
 
-- Address remaining pre-release issues from Milestone 4J: named contact policy, answer caution for legal/safety topics, stale embedding-readiness wording (encoding artefacts addressed in Milestone 4L.1)
+- Address remaining pre-release issues from Milestone 4J: answer caution for legal/safety topics, stale embedding-readiness wording (encoding artefacts addressed in 4L.1; named-contact anonymisation addressed in 4M)
 - Governance sign-off and safety review of real Thumhara/QCS policy documents, then set `real_document=true`, `approved_for_embedding=true`, `approved_for_source_grounded_answers=true` for approved documents
 - Staff-facing RAG pipeline (retrieve then generate answer from approved documents only) — upgrade `/ask` endpoint
 - Authentication and organisation membership verification

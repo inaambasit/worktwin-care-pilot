@@ -1540,6 +1540,39 @@ All `/documents` routes except where noted below — including upload, registry,
 | `GET /policies` without token | 200 OK | Passed |
 | Vercel admin documents page | Loads live registry | Passed |
 
+## Milestone 4Q: AC32 stored chunk reprocess investigation
+
+### Purpose
+
+Investigate whether existing AC32 stored chunks could be reprocessed to remove old PDF extraction artefacts from Supabase rows created before the text-cleaning improvements in Milestone 4L.1.
+
+### Key findings
+
+- Live AC32 chunks still contain old PDF extraction artefacts, including examples like `â¢`, `Â©`, `youâre`, repeated `Page 1/8Page 1/8`, and repeated `Thumhara Centre` strings.
+- These artefacts are in existing stored Supabase rows created before Milestone 4L.1's cleaning improvements.
+- Milestone 4L.1 improved returned previews and future extraction cleaning but did not rewrite existing stored rows.
+- There is no current reprocess endpoint for an existing stored document.
+- Re-uploading AC32 would create a duplicate document with a new UUID and must not be used as the cleanup method.
+
+### What a proper future fix would require
+
+- Improved extraction/cleaning logic.
+- A protected admin-only `POST /documents/{id}/reprocess` endpoint.
+- Controlled cleanup and rebuild of `document_extractions`, `document_chunks`, and `document_embeddings`.
+- Regenerating embeddings.
+- Proving governance state remains unchanged throughout.
+
+### What Milestone 4Q does NOT do
+
+- No SQL was run during 4Q.
+- No code was changed during 4Q.
+- AC32 remains draft and staff-invisible (`approved_for_staff_visibility=false`).
+- Staff-facing `/ask` remains placeholder only and does not use RAG.
+
+### Decision
+
+Defer AC32 rebuild until before staff-facing RAG or real pilot staff use. Do not manually delete or rebuild rows now.
+
 ## Current milestone status
 
 - PDF upload works (Milestone 4B)
@@ -1560,6 +1593,7 @@ All `/documents` routes except where noted below — including upload, registry,
 - **Safety note made deterministic — appended server-side to answer-debug answers when `safety_note` is present; two-run proof confirms caution appears on every driving query (Milestone 4N.1)**
 - **Stale wording corrected — embedding-readiness note, chunk `embedding_note`, and `/ask` connected notice now accurately reflect that admin-only vector search and answer-debug are active while staff-facing RAG remains disabled (Milestone 4O.1)**
 - **Admin bearer-token protection added — all admin/debug endpoints require `Authorization: Bearer <token>`; public endpoints (`/`, `/health`, `/ask`, `/policies`) remain open; no SQL required (Milestone 4P)**
+- **AC32 stored chunk reprocess investigated — existing rows contain pre-4L.1 artefacts; no reprocess endpoint exists; re-upload rejected as cleanup method; rebuild deferred until before staff-facing RAG (Milestone 4Q)**
 - Staff-facing `/ask` remains a placeholder — RAG is governed-disabled
 - No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a human reviewer
 

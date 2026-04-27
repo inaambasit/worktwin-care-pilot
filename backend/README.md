@@ -1630,6 +1630,69 @@ All gates are AND conditions. Failing any single gate must exclude the document 
 - RAG not enabled.
 - AC32 not approved for staff visibility.
 
+## Milestone 4S-prep: Safe staff-visible test document pathway
+
+### Purpose
+
+Prepare and index one real, clean, fully governed, staff-visible test policy document so that the staff `/ask` RAG path can be built in Milestone 4S. AC32 is not suitable for this role (stored chunks contain pre-4L.1 artefacts; `approved_for_staff_visibility=false`).
+
+### Document uploaded
+
+| Field | Value |
+|-------|-------|
+| Title | Visitor Sign-In and Identification Procedure |
+| Document ID | `d74cf670-d383-43c3-adb5-7580cf511183` |
+| Category | Health and Safety |
+| Access roles | All Staff |
+| Personal data risk | low |
+| Chunks | 2 |
+| Embeddings generated | 2 (failed_count=0) |
+| Embedding status | indexed |
+
+### Final governance state
+
+| Flag | Value |
+|------|-------|
+| `status` | `approved` |
+| `real_document` | `true` |
+| `dummy_document` | `false` |
+| `is_sensitive` | `false` |
+| `escalation_required` | `false` |
+| `approved_for_embedding` | `true` |
+| `approved_for_source_grounded_answers` | `true` |
+| `approved_for_staff_visibility` | `true` |
+| `governance_status` | `approved_for_staff` |
+
+### Proofs passed
+
+- Upload successful
+- Extraction success
+- Registry saved
+- Chunks prepared (2)
+- Embedding records prepared (2)
+- Embeddings generated — `failed_count=0`, `embedding_status=indexed`
+- `GET /policies` returns Visitor Sign-In and Identification Procedure
+- AC32 does not appear in `GET /policies`
+- `POST /ask` still returns placeholder only and does not cite the visitor SOP
+
+### Known gap
+
+`governance_reviewed_by` and `governance_reviewed_at` are still `null` — the current API cannot set them via `PATCH /documents/{id}/governance`. These two fields are required by the Milestone 4R gate list before the document can be used in staff `/ask`. They must be set (manually or via a new API capability) in Milestone 4S before true staff-facing RAG goes live.
+
+### Decision
+
+- 4S-prep passed.
+- Next milestone is **4S: staff /ask RAG foundation** using the strict gate list from Milestone 4R.
+- AC32 remains excluded from staff `/ask`.
+
+### What Milestone 4S-prep does NOT do
+
+- No changes to `/ask`.
+- No RAG enabled.
+- No changes to AC32 governance flags.
+- No SQL migration required.
+- No frontend changes.
+
 ## Current milestone status
 
 - PDF upload works (Milestone 4B)
@@ -1652,13 +1715,14 @@ All gates are AND conditions. Failing any single gate must exclude the document 
 - **Admin bearer-token protection added — all admin/debug endpoints require `Authorization: Bearer <token>`; public endpoints (`/`, `/health`, `/ask`, `/policies`) remain open; no SQL required (Milestone 4P)**
 - **AC32 stored chunk reprocess investigated — existing rows contain pre-4L.1 artefacts; no reprocess endpoint exists; re-upload rejected as cleanup method; rebuild deferred until before staff-facing RAG (Milestone 4Q)**
 - **Staff-facing /ask RAG safety design completed — document gates, response privacy rules, and 4S-prep scope defined; no document currently qualifies for staff RAG; AC32 excluded; no code or SQL changes (Milestone 4R)**
+- **4S-prep passed — Visitor Sign-In and Identification Procedure uploaded, chunked, embedded (2 chunks, failed_count=0), governance set to approved_for_staff; appears in /policies; AC32 excluded; /ask still placeholder (Milestone 4S-prep)**
 - Staff-facing `/ask` remains a placeholder — RAG is governed-disabled
+- `governance_reviewed_by` and `governance_reviewed_at` are null on the visitor SOP — must be set in 4S before staff RAG goes live
 - No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a human reviewer
 
 ## Next steps (Milestone 4S+)
 
-- **4S-prep:** Prepare one safe, real, staff-visible test policy or SOP document that passes all Milestone 4R document gates. AC32 is not suitable; a new or updated document is required.
-- Once a qualifying document is indexed and all gates pass, build the staff `/ask` RAG path using the Milestone 4R gate list and privacy rules.
+- **4S:** Build the staff `/ask` RAG foundation using the Milestone 4R gate list and the Visitor Sign-In and Identification Procedure as the first qualifying staff-visible test document. Resolve the `governance_reviewed_by` / `governance_reviewed_at` null gap before enabling live staff answers.
 - Governance sign-off and safety review of real Thumhara/QCS policy documents, then set `real_document=true`, `approved_for_embedding=true`, `approved_for_source_grounded_answers=true`, `approved_for_staff_visibility=true` for approved documents.
 - Authentication and organisation membership verification.
 - Rate limiting and anonymised query logging (no user-level data, no raw query text stored).

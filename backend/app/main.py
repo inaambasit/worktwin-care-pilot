@@ -446,6 +446,129 @@ def _can_use_document_for_vector_search(
 
 
 # ---------------------------------------------------------------------------
+# Milestone 4S.5 — staff /ask governance gate and eligibility fetch
+# These functions are strictly staff-facing and enforce ALL eleven conditions.
+# Never return governance fields or internal flags to the staff response.
+# ---------------------------------------------------------------------------
+
+def _fetch_staff_ask_document_eligibility_batch(
+    document_ids: List[str],
+) -> Dict[str, Dict[str, Any]]:
+    """
+    Fetch all fields needed for the staff /ask gate in one DB call.
+    Separate from _get_document_governance_batch (answer-debug path) because
+    the staff gate requires embedding_status, governance_reviewed_by/at,
+    status, and access_roles which that function does not select.
+    Returns dict keyed by document id string. Returns {} on any failure — fail-safe.
+    Never returned to clients.
+    """
+    if not _DB_CONFIGURED or not document_ids:
+        return {}
+    import httpx as _httpx
+    ids_str = ",".join(document_ids)
+    url = f"{_SUPABASE_URL}/rest/v1/document_registry"
+    params = {
+        "id": f"in.({ids_str})",
+        "limit": "100",
+        "select": (
+            "id,status,real_document,dummy_document,is_sensitive,escalation_required,"
+            "approved_for_staff_visibility,approved_for_source_grounded_answers,"
+            "approved_for_embedding,governance_reviewed_by,governance_reviewed_at,"
+            "embedding_status,access_roles"
+        ),
+    }
+    try:
+        resp = _httpx.get(url, params=params, headers=_db_headers(), timeout=15)
+        if resp.status_code == 200:
+            return {row["id"]: row for row in resp.json()}
+    except Exception:
+        pass
+    return {}
+
+
+def _can_use_document_for_staff_ask(
+    document: Dict[str, Any],
+    user_role: str,
+) -> Tuple[bool, Optional[str]]:
+    """
+    Strictest governance gate — staff /ask RAG only.
+    Composes _can_show_document_to_staff (conditions 1–6) then adds five
+    RAG-specific conditions (7–11) plus an access_roles check.
+    All conditions must hold; returns (False, reason) on the first failure.
+    Never call this with None — caller must skip rows with no eligibility record.
+    """
+    # Conditions 1–6: reuse existing staff visibility gate
+    ok, reason = _can_show_document_to_staff(document)
+    if not ok:
+        return False, reason
+
+    # Condition 7: must be approved for source-grounded AI answers
+    if not document.get("approved_for_source_grounded_answers", False):
+        return False, "approved_for_source_grounded_answers must be True for staff /ask."
+
+    # Condition 8: must be approved for embedding
+    if not document.get("approved_for_embedding", False):
+        return False, "approved_for_embedding must be True for staff /ask."
+
+    # Condition 9: governance reviewer must be recorded
+    if not document.get("governance_reviewed_by"):
+        return False, "governance_reviewed_by must be set for staff /ask."
+
+    # Condition 10: governance review timestamp must be recorded
+    if not document.get("governance_reviewed_at"):
+        return False, "governance_reviewed_at must be set for staff /ask."
+
+    # Condition 11: embeddings must be fully indexed
+    if document.get("embedding_status") != "indexed":
+        return False, "embedding_status must be indexed for staff /ask."
+
+    # Access roles: document must be visible to this user's role or All Staff
+    access_roles = document.get("access_roles") or []
+    if "All Staff" not in access_roles and user_role not in access_roles:
+        return False, f"User role '{user_role}' not in document access_roles."
+
+    return True, None
+
+
+# Staff /ask safe fallback — returned when no usable approved source is found
+# or when an internal error prevents answer generation.
+_STAFF_FALLBACK_ANSWER = (
+    "I can't find an answer in our approved documents right now. "
+    "Please speak to your line manager or designated lead."
+)
+_STAFF_ESCALATION_ANSWER = (
+    "Please escalate this to your line manager or designated lead. "
+    "WorkTwin does not provide direct answers on safeguarding, medication, "
+    "HR, legal, or wellbeing topics."
+)
+_STANDARD_ESCALATE_IF = [
+    "The situation involves immediate risk.",
+    "The policy does not clearly answer the question.",
+    "A safeguarding, medication, HR, legal, compliance or wellbeing issue is involved.",
+]
+
+
+def _staff_fallback_response(
+    requires_escalation: bool = True,
+    risk_category: str = "standard",
+    answer: Optional[str] = None,
+) -> "AskResponse":
+    """Return a safe AskResponse with no source content."""
+    return AskResponse(
+        answer=answer or _STAFF_FALLBACK_ANSWER,
+        next_steps=["Please speak to your line manager or designated lead."],
+        sources=[],
+        escalate_if=_STANDARD_ESCALATE_IF,
+        requires_escalation=requires_escalation,
+        allowed_to_answer=False,
+        source_confidence=None,
+        risk_category=risk_category,
+        learning_option=None,
+        anonymised_insight_topic=None,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Milestone 4D — text chunking and extraction storage helpers
 # No AI, no embeddings, no external LLM calls.
 # Backend / service role only — never exposed to staff UI.
@@ -1065,6 +1188,8 @@ class Source(BaseModel):
     document_name: str
     section: Optional[str] = None
     page: Optional[int] = None
+    source_label: Optional[str] = None    # e.g. "[Source 1]" — citation label
+    source_preview: Optional[str] = None  # ≤200 chars of matched chunk text
 
 
 class AskResponse(BaseModel):
@@ -1747,42 +1872,187 @@ def debug_storage_config():
 @app.post("/ask", response_model=AskResponse)
 def ask_worktwin(payload: AskRequest):
     """
-    Starter placeholder.
+    Staff-facing RAG endpoint — Milestone 4S.5.
 
-    Next build steps:
-    1. Authenticate user and verify organisation membership.
-    2. Check role permissions and document access controls.
-    3. Classify question risk category — route sensitive topics to escalation.
-    4. Retrieve relevant approved document chunks via RAG pipeline.
-    5. Call LLM with strict system prompt: answer from approved documents only.
-    6. Return source-cited answer with confidence score.
-    7. Log anonymised topic insight (organisation-level only, never user-level).
+    Returns source-grounded answers from staff-visible, approved, governed documents only.
+    Escalation topics short-circuit without retrieval or LLM calls.
+    Safe fallback is returned when no qualifying source is found.
+
+    Safety guarantees:
+    - Only documents passing all eleven governance gates are used as sources.
+    - AC32 (draft, approved_for_staff_visibility=False) is structurally excluded.
+    - Dummy/sample documents are structurally excluded (real_document=False or dummy_document=True).
+    - Sensitive and escalation-required documents are always excluded.
+    - Raw query text is never stored in audit logs.
+    - document_id, chunk_id, similarity score, governance flags, embedding status
+      and full chunk text are never returned to the staff response.
+    - OpenAI key and admin token are never returned or logged.
     """
+    import httpx as _httpx
+
+    # ------------------------------------------------------------------
+    # Guard: infrastructure must be configured
+    # ------------------------------------------------------------------
+    if not _OPENAI_CONFIGURED or not _DB_CONFIGURED:
+        return _staff_fallback_response()
+
+    # ------------------------------------------------------------------
+    # Query prep
+    # ------------------------------------------------------------------
+    query_clean = payload.question.strip()[:MAX_QUERY_CHARS]
+    if not query_clean:
+        raise HTTPException(status_code=400, detail="Question must not be empty.")
+
+    # ------------------------------------------------------------------
+    # Escalation short-circuit — no retrieval, no LLM
+    # ------------------------------------------------------------------
+    if _detect_escalation_topic(query_clean):
+        _create_audit_event(
+            organisation_id=payload.organisation_id,
+            event_type="staff_ask_escalated",
+            metadata={
+                "query_length": len(query_clean),
+                "user_role": payload.user_role,
+            },
+        )
+        return _staff_fallback_response(
+            requires_escalation=True,
+            risk_category="hr",
+            answer=_STAFF_ESCALATION_ANSWER,
+        )
+
+    # ------------------------------------------------------------------
+    # Embed query
+    # ------------------------------------------------------------------
+    try:
+        query_vector = _embed_query_text(query_clean)
+    except Exception:
+        return _staff_fallback_response()
+
+    vector_str = _format_vector_for_pgvector(query_vector)
+
+    # ------------------------------------------------------------------
+    # Vector search via RPC
+    # ------------------------------------------------------------------
+    rpc_url = f"{_SUPABASE_URL}/rest/v1/rpc/match_document_chunks"
+    rpc_payload = {
+        "query_embedding": vector_str,
+        "match_organisation_id": payload.organisation_id,
+        "match_threshold": 0.0,
+        "match_count": MAX_ANSWER_CHUNKS,
+    }
+    try:
+        rpc_resp = _httpx.post(rpc_url, json=rpc_payload, headers=_db_headers(), timeout=30)
+    except Exception:
+        return _staff_fallback_response()
+
+    if rpc_resp.status_code != 200:
+        return _staff_fallback_response()
+
+    raw_rows = rpc_resp.json()
+    if not isinstance(raw_rows, list):
+        return _staff_fallback_response()
+
+    # ------------------------------------------------------------------
+    # Fetch staff eligibility for all document IDs returned by RPC
+    # ------------------------------------------------------------------
+    unique_doc_ids = list({str(r.get("document_id", "")) for r in raw_rows if r.get("document_id")})
+    elig_map = _fetch_staff_ask_document_eligibility_batch(unique_doc_ids)
+
+    # ------------------------------------------------------------------
+    # Apply strict staff gate — all eleven conditions must hold
+    # Rows with no eligibility record (unknown doc) are always excluded.
+    # ------------------------------------------------------------------
+    filtered_rows: List[Dict[str, Any]] = []
+    for row in raw_rows:
+        doc_id_str = str(row.get("document_id", ""))
+        elig = elig_map.get(doc_id_str)
+        if elig is None:
+            continue  # no governance record → exclude
+        ok, _ = _can_use_document_for_staff_ask(elig, payload.user_role)
+        if ok:
+            filtered_rows.append(row)
+
+    # ------------------------------------------------------------------
+    # No usable approved source found
+    # ------------------------------------------------------------------
+    if not filtered_rows:
+        _create_audit_event(
+            organisation_id=payload.organisation_id,
+            event_type="staff_ask_no_source",
+            metadata={
+                "query_length": len(query_clean),
+                "rpc_result_count": len(raw_rows),
+                "user_role": payload.user_role,
+            },
+        )
+        return _staff_fallback_response()
+
+    # ------------------------------------------------------------------
+    # Build source context and generate answer
+    # ------------------------------------------------------------------
+    normalised = [_normalise_search_result(r) for r in filtered_rows]
+    context_str, sources = _build_source_context(normalised)
+    citations_str = _format_source_citations(sources)
+
+    try:
+        answer_result = _generate_source_grounded_answer(
+            query=query_clean,
+            context=context_str,
+            citations=citations_str,
+        )
+    except Exception:
+        return _staff_fallback_response()
+
+    answer_text = answer_result["answer"]
+    confidence = _validate_grounded_answer_result(answer_text, sources)
+    is_grounded = confidence == "source_grounded"
+
+    # ------------------------------------------------------------------
+    # Audit event — no raw query text, no user_id
+    # ------------------------------------------------------------------
+    _create_audit_event(
+        organisation_id=payload.organisation_id,
+        event_type="staff_ask_answered",
+        metadata={
+            "query_length": len(query_clean),
+            "result_count": len(filtered_rows),
+            "confidence": confidence,
+            "user_role": payload.user_role,
+        },
+    )
+
+    # ------------------------------------------------------------------
+    # Map sources to safe staff shape.
+    # Strips: document_id, chunk_id, similarity, chunk_index,
+    #         category, vertical, governance flags.
+    # Exposes: document_name (title), source_label, source_preview ≤200 chars.
+    # ------------------------------------------------------------------
+    staff_sources = [
+        Source(
+            document_name=s["document_title"],
+            source_label=s["source_label"],
+            source_preview=(s.get("source_preview") or "")[:200],
+            section=None,
+            page=None,
+        )
+        for s in sources
+    ]
 
     return AskResponse(
-        answer=(
-            "This is a placeholder response. In the real MVP, WorkTwin will answer "
-            "from approved company documents only and cite the source used."
+        answer=answer_text,
+        next_steps=(
+            ["Review the cited policy for full details."]
+            if is_grounded
+            else ["Please speak to your line manager or designated lead."]
         ),
-        next_steps=[
-            "Upload approved company policies.",
-            "Connect document retrieval.",
-            "Add source-cited answer generation.",
-        ],
-        sources=[
-            Source(document_name="Demo Company Policy", section="See relevant policy section", page=None)
-        ],
-        escalate_if=[
-            "The situation involves immediate risk.",
-            "The policy does not clearly answer the question.",
-            "A safeguarding, medication, HR, legal, compliance or wellbeing issue is involved.",
-        ],
-        learning_option="Would you like to practise this with a short scenario?",
-        requires_escalation=False,
-        allowed_to_answer=True,
-        source_confidence=None,
+        sources=staff_sources,
+        escalate_if=_STANDARD_ESCALATE_IF,
+        requires_escalation=not is_grounded,
+        allowed_to_answer=is_grounded,
+        source_confidence=None,   # raw similarity score never exposed to staff
         risk_category="standard",
-        vertical_subcategory=None,
+        learning_option=None,
         anonymised_insight_topic=None,
     )
 

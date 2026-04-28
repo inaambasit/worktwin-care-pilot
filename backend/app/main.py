@@ -389,8 +389,18 @@ def _can_show_document_to_staff(document: Dict[str, Any]) -> Tuple[bool, Optiona
     """
     Governance gate for staff visibility.
     Returns (allowed, blocked_reason).
-    Requires status=approved and approved_for_staff_visibility=True.
+    All six conditions must hold:
+      is_sensitive=False, escalation_required=False, real_document=True,
+      dummy_document=False, status=approved, approved_for_staff_visibility=True.
     """
+    if document.get("is_sensitive", False):
+        return False, "Document is marked sensitive and cannot be shown to staff."
+    if document.get("escalation_required", False):
+        return False, "Document requires escalation and cannot be shown to staff."
+    if not document.get("real_document", False):
+        return False, "Document is not marked as a real document and cannot be shown to staff."
+    if document.get("dummy_document", True):
+        return False, "Dummy/sample documents cannot be shown to staff."
     if document.get("status") != "approved":
         return False, "Document must have status=approved before it is visible to staff."
     if not document.get("approved_for_staff_visibility", False):
@@ -2587,7 +2597,9 @@ def list_policies(
     if _DB_CONFIGURED:
         try:
             db_docs = _list_registry_records(status="approved")
-            docs: List[Dict[str, Any]] = db_docs
+            docs: List[Dict[str, Any]] = [
+                d for d in db_docs if _can_show_document_to_staff(d)[0]
+            ]
             if user_role:
                 docs = [
                     d for d in docs
@@ -2604,7 +2616,7 @@ def list_policies(
         except RuntimeError:
             pass  # fall through to in-memory demo data
 
-    docs_mem = [d for d in _documents if d["status"] == "approved"]
+    docs_mem = [d for d in _documents if _can_show_document_to_staff(d)[0]]
     if user_role:
         docs_mem = [
             d for d in docs_mem

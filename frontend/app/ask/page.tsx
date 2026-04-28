@@ -282,7 +282,7 @@ export default function AskPage() {
 
         {/* Answer area */}
         {showAnswer && currentAnswer && (
-          <div className="space-y-4">
+          <div className="space-y-4 pb-40">
             {/* Question bubble */}
             <div className="flex justify-end">
               <div className="bg-teal-700 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-sm text-sm">

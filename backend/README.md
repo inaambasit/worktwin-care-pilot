@@ -90,12 +90,14 @@ Multiple origins are comma-separated. No wildcard `*` is used in production.
 | `ALLOWED_ORIGINS` | `https://worktwin-care-pilot.vercel.app` |
 | `ADMIN_TOKEN` | Secret bearer token — required to call admin/debug endpoints |
 
-### Environment variable to set in Vercel (frontend)
+### Environment variables to set in Vercel (frontend)
 
-| Variable | Value |
-|----------|-------|
-| `NEXT_PUBLIC_API_URL` | `https://<your-render-service-name>.onrender.com` |
-| `NEXT_PUBLIC_ADMIN_TOKEN` | Must match `ADMIN_TOKEN` set in Render — used by the admin UI only |
+| Variable | Value | Notes |
+|----------|-------|-------|
+| `NEXT_PUBLIC_API_URL` | `https://<your-render-service-name>.onrender.com` | Public — used by `/ask`, `/policies`, `/health` |
+| `API_BASE_URL` | `https://<your-render-service-name>.onrender.com` | Server-side only — used by the `/api/admin/...` proxy (Milestone 4S.2A) |
+| `ADMIN_TOKEN` | Must match `ADMIN_TOKEN` set in Render | Server-side only — used by the proxy; never exposed to the browser (Milestone 4S.2A) |
+| ~~`NEXT_PUBLIC_ADMIN_TOKEN`~~ | ~~Removed~~ | Removed in Milestone 4S.2A — admin token is no longer sent from the browser |
 
 Replace `<your-render-service-name>` with the subdomain Render assigns when you create the service.
 
@@ -1520,7 +1522,7 @@ All `/documents` routes except where noted below — including upload, registry,
 | Variable | Set in | Description |
 |----------|--------|-------------|
 | `ADMIN_TOKEN` | Render (backend) | Secret token. Never log or return in API responses. |
-| `NEXT_PUBLIC_ADMIN_TOKEN` | Vercel (frontend) | Must match `ADMIN_TOKEN`. Admin UI only. |
+| ~~`NEXT_PUBLIC_ADMIN_TOKEN`~~ | ~~Vercel (frontend)~~ | Removed in Milestone 4S.2A — superseded by the server-side proxy. |
 
 ### What Milestone 4P does NOT do
 
@@ -1693,6 +1695,48 @@ Prepare and index one real, clean, fully governed, staff-visible test policy doc
 - No SQL migration required.
 - No frontend changes.
 
+## Milestone 4S.2A: Server-side admin API proxy
+
+### What changed
+
+- `frontend/lib/api.ts` no longer reads `NEXT_PUBLIC_ADMIN_TOKEN`. The admin bearer token is no longer present in browser JavaScript.
+- Admin and document API calls from the frontend now go through `/api/admin/...` on Vercel instead of calling Render directly.
+- New Next.js proxy route added: `frontend/app/api/admin/[...path]/route.ts`. This route runs server-side only.
+- The proxy reads `ADMIN_TOKEN` from server-side environment variables and adds `Authorization: Bearer <ADMIN_TOKEN>` when forwarding requests to Render.
+- The proxy reads `API_BASE_URL` from server-side environment variables to locate the Render backend.
+- The browser sends requests to the Vercel proxy, not directly to Render. The Render admin token never reaches browser JavaScript.
+
+### Public endpoints — unchanged
+
+`/ask`, `/policies`, and `/health` still use `NEXT_PUBLIC_API_URL` directly and do not use the admin token.
+
+### Production environment variable changes (Vercel)
+
+| Variable | Action | Value |
+|----------|--------|-------|
+| `ADMIN_TOKEN` | Added | Secret bearer token matching `ADMIN_TOKEN` on Render |
+| `API_BASE_URL` | Added | `https://worktwin-care-pilot-api.onrender.com` |
+| `NEXT_PUBLIC_ADMIN_TOKEN` | Removed | Removed after proxy proof passed |
+| `NEXT_PUBLIC_API_URL` | Unchanged | Public Render URL for staff-facing endpoints |
+
+### Proofs passed
+
+- Vercel deployed the latest proxy commit.
+- `/api/admin/documents` returned live database JSON via the proxy.
+- Admin documents page loaded the live registry after `NEXT_PUBLIC_ADMIN_TOKEN` was removed from Vercel.
+- Visitor Sign-In and Identification Procedure appeared in the admin registry.
+- AC32 appeared only in the admin registry as Draft.
+- Staff-facing Ask WorkTwin remains disabled from RAG — `/ask` returned placeholder only.
+
+### Important caveat
+
+This milestone hides the backend `ADMIN_TOKEN` from browser JavaScript. It does not add full admin user authentication (sessions, login, role-based access). A later milestone must add admin session or auth protection before real users or external care providers access the admin area.
+
+### Decision
+
+- 4S.2A passed.
+- Next milestone: **4S.3** — ensure `/policies` enforces `approved_for_staff_visibility`, then **4S.4** set governance reviewer metadata, then **4S.5** staff `/ask` RAG foundation.
+
 ## Current milestone status
 
 - PDF upload works (Milestone 4B)
@@ -1716,13 +1760,16 @@ Prepare and index one real, clean, fully governed, staff-visible test policy doc
 - **AC32 stored chunk reprocess investigated — existing rows contain pre-4L.1 artefacts; no reprocess endpoint exists; re-upload rejected as cleanup method; rebuild deferred until before staff-facing RAG (Milestone 4Q)**
 - **Staff-facing /ask RAG safety design completed — document gates, response privacy rules, and 4S-prep scope defined; no document currently qualifies for staff RAG; AC32 excluded; no code or SQL changes (Milestone 4R)**
 - **4S-prep passed — Visitor Sign-In and Identification Procedure uploaded, chunked, embedded (2 chunks, failed_count=0), governance set to approved_for_staff; appears in /policies; AC32 excluded; /ask still placeholder (Milestone 4S-prep)**
+- **Server-side admin API proxy shipped — NEXT_PUBLIC_ADMIN_TOKEN removed from Vercel; admin calls proxied through /api/admin/... on Vercel; browser never sees admin bearer token; public endpoints unchanged (Milestone 4S.2A)**
 - Staff-facing `/ask` remains a placeholder — RAG is governed-disabled
-- `governance_reviewed_by` and `governance_reviewed_at` are null on the visitor SOP — must be set in 4S before staff RAG goes live
+- `governance_reviewed_by` and `governance_reviewed_at` are null on the visitor SOP — must be set before staff RAG goes live
 - No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a human reviewer
 
 ## Next steps (Milestone 4S+)
 
-- **4S:** Build the staff `/ask` RAG foundation using the Milestone 4R gate list and the Visitor Sign-In and Identification Procedure as the first qualifying staff-visible test document. Resolve the `governance_reviewed_by` / `governance_reviewed_at` null gap before enabling live staff answers.
+- **4S.3:** Ensure `/policies` enforces `approved_for_staff_visibility` — no document reaches the staff policy library without explicit governance approval.
+- **4S.4:** Set `governance_reviewed_by` and `governance_reviewed_at` on the Visitor Sign-In and Identification Procedure (required by the Milestone 4R gate list before staff RAG can go live).
+- **4S.5:** Build the staff `/ask` RAG foundation using the Milestone 4R gate list and the Visitor Sign-In and Identification Procedure as the first qualifying staff-visible test document.
 - Governance sign-off and safety review of real Thumhara/QCS policy documents, then set `real_document=true`, `approved_for_embedding=true`, `approved_for_source_grounded_answers=true`, `approved_for_staff_visibility=true` for approved documents.
 - Authentication and organisation membership verification.
 - Rate limiting and anonymised query logging (no user-level data, no raw query text stored).

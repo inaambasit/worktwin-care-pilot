@@ -250,6 +250,8 @@ export interface GovernanceUpdateRequest {
   real_document?: boolean
   dummy_document?: boolean
   governance_notes?: string
+  governance_reviewed_by?: string
+  governance_reviewed_at?: string
   source_owner?: string
   source_licence_notes?: string
   contains_qcs_or_third_party_content?: boolean

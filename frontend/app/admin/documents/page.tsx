@@ -9,7 +9,7 @@ import {
   AlertTriangle, Shield, Globe, Brain, Archive, RefreshCw,
   ShieldAlert, XCircle, Filter, ChevronDown, ChevronUp,
   Loader2, X, Info, CheckCircle2, Zap, Search, MessageSquare,
-  ShieldCheck, ClipboardList, Lock,
+  ShieldCheck, ClipboardList, Lock, UserCheck,
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -347,6 +347,8 @@ export default function DocumentRegistryPage() {
   const [govLoading, setGovLoading] = useState<string | null>(null)
   const [govError, setGovError] = useState<string | null>(null)
   const [govSuccess, setGovSuccess] = useState<string | null>(null)
+  // Reviewer name input — keyed by doc id (Milestone 4S.10)
+  const [reviewerInput, setReviewerInput] = useState<Record<string, string>>({})
 
   const loadDocs = useCallback(() => {
     setLoading(true)
@@ -1726,6 +1728,16 @@ export default function DocumentRegistryPage() {
                             <AlertTriangle size={9} />
                             Human review before staff visibility: {doc.requires_human_review_before_staff_visibility !== false ? 'Required' : 'Not required'}
                           </span>
+                          <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full border ${doc.governance_reviewed_by ? 'bg-violet-50 text-violet-700 border-violet-200' : 'bg-amber-50 text-amber-600 border-amber-200'}`}>
+                            <UserCheck size={9} />
+                            Reviewer: {doc.governance_reviewed_by ?? 'Not set'}
+                          </span>
+                          {doc.governance_reviewed_at && (
+                            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full border bg-violet-50 text-violet-600 border-violet-200">
+                              <UserCheck size={9} />
+                              Reviewed: {formatDate(doc.governance_reviewed_at)}
+                            </span>
+                          )}
                         </div>
 
                         {/* Governance readiness summary */}
@@ -1820,6 +1832,53 @@ export default function DocumentRegistryPage() {
                             </button>
                           )}
                         </div>
+
+                        {/* Reviewer metadata — required for staff /ask RAG gate (Milestone 4S.10) */}
+                        <div className="border-t border-slate-100 pt-2.5 space-y-2">
+                          <p className="text-[10px] font-semibold text-slate-600 flex items-center gap-1">
+                            <UserCheck size={10} className="text-violet-500" />
+                            Governance reviewer
+                            <span className="font-normal text-slate-400">— required for staff /ask eligibility</span>
+                          </p>
+                          {doc.governance_reviewed_by ? (
+                            <p className="text-[10px] text-slate-500">
+                              Currently: <span className="font-medium text-slate-700">{doc.governance_reviewed_by}</span>
+                              {doc.governance_reviewed_at ? ` · ${formatDate(doc.governance_reviewed_at)}` : ''}
+                            </p>
+                          ) : (
+                            <p className="text-[10px] text-amber-600 flex items-center gap-1">
+                              <AlertTriangle size={9} className="shrink-0" />
+                              Not set — document cannot qualify for staff /ask until a reviewer is recorded.
+                            </p>
+                          )}
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              placeholder="Reviewer name (e.g. Shagufta Akram)"
+                              value={reviewerInput[doc.id] ?? ''}
+                              onChange={e => setReviewerInput(prev => ({ ...prev, [doc.id]: e.target.value }))}
+                              className="flex-1 min-w-0 text-[11px] border border-slate-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-100 placeholder:text-slate-300 disabled:opacity-50"
+                              disabled={busy}
+                            />
+                            <button
+                              onClick={() => {
+                                const name = (reviewerInput[doc.id] ?? '').trim()
+                                if (!name) return
+                                handleGovernanceAction(doc.id, {
+                                  governance_reviewed_by: name,
+                                  governance_reviewed_at: new Date().toISOString(),
+                                })
+                              }}
+                              disabled={busy || !(reviewerInput[doc.id] ?? '').trim()}
+                              title={!(reviewerInput[doc.id] ?? '').trim() ? 'Enter a reviewer name first' : 'Set governance reviewer and record timestamp'}
+                              className="flex items-center gap-1 text-[10px] font-medium text-violet-700 hover:text-violet-900 border border-violet-200 hover:border-violet-400 px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40 whitespace-nowrap shrink-0"
+                            >
+                              {busy ? <Loader2 size={9} className="animate-spin" /> : <UserCheck size={9} />}
+                              Set reviewer
+                            </button>
+                          </div>
+                        </div>
+
                       </div>
                     )
                   })}

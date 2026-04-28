@@ -1737,6 +1737,53 @@ This milestone hides the backend `ADMIN_TOKEN` from browser JavaScript. It does 
 - 4S.2A passed.
 - Next milestone: **4S.3** — ensure `/policies` enforces `approved_for_staff_visibility`, then **4S.4** set governance reviewer metadata, then **4S.5** staff `/ask` RAG foundation.
 
+## Milestone 4S.3: Staff policy visibility filter
+
+### What changed
+
+- `backend/app/main.py` — `_can_show_document_to_staff` tightened to require all six flags: `is_sensitive=false`, `escalation_required=false`, `real_document=true`, `dummy_document=false`, `status=approved`, and `approved_for_staff_visibility=true`.
+- `GET /policies` now filters every result — both the Supabase DB path and the in-memory fallback — through `_can_show_document_to_staff`. Role access still applies after this gate.
+
+### Required gate for /policies (all conditions AND)
+
+| Flag | Required value |
+|------|---------------|
+| `is_sensitive` | `false` |
+| `escalation_required` | `false` |
+| `real_document` | `true` |
+| `dummy_document` | `false` |
+| `status` | `approved` |
+| `approved_for_staff_visibility` | `true` |
+
+Role filtering (`access_roles`) applies after the above gate.
+
+### Proofs passed
+
+| Test | Result |
+|------|--------|
+| `GET /policies` returns Visitor Sign-In and Identification Procedure | Passed |
+| `GET /policies` returns Identification Procedure | Passed |
+| Result count was 1 | Passed |
+| AC32 did not appear in `GET /policies` | Passed |
+| Dummy / sample documents did not appear | Passed |
+| `POST /ask` still returned placeholder only and did not cite the Visitor SOP | Passed |
+| `GET /documents` without token returned 401 | Passed |
+
+### Decision
+
+- 4S.3 passed.
+- Public `/policies` is now aligned with the staff visibility governance model.
+- Next milestone: **4S.4** — set `governance_reviewed_by` and `governance_reviewed_at` on the Visitor SOP. After 4S.4, the Visitor SOP will pass the full Milestone 4R gate list and the staff `/ask` RAG build can proceed.
+
+### What Milestone 4S.3 does NOT do
+
+- No changes to `/ask`.
+- No RAG enabled.
+- No SQL migration required.
+- No frontend changes.
+- No governance flag changes.
+- AC32 is not approved for staff visibility.
+
 ## Current milestone status
 
 - PDF upload works (Milestone 4B)
@@ -1761,14 +1808,14 @@ This milestone hides the backend `ADMIN_TOKEN` from browser JavaScript. It does 
 - **Staff-facing /ask RAG safety design completed — document gates, response privacy rules, and 4S-prep scope defined; no document currently qualifies for staff RAG; AC32 excluded; no code or SQL changes (Milestone 4R)**
 - **4S-prep passed — Visitor Sign-In and Identification Procedure uploaded, chunked, embedded (2 chunks, failed_count=0), governance set to approved_for_staff; appears in /policies; AC32 excluded; /ask still placeholder (Milestone 4S-prep)**
 - **Server-side admin API proxy shipped — NEXT_PUBLIC_ADMIN_TOKEN removed from Vercel; admin calls proxied through /api/admin/... on Vercel; browser never sees admin bearer token; public endpoints unchanged (Milestone 4S.2A)**
+- **Staff policy visibility filter enforced — `_can_show_document_to_staff` requires is_sensitive=false, escalation_required=false, real_document=true, dummy_document=false, status=approved, approved_for_staff_visibility=true; both DB and in-memory fallback paths use the same gate; /policies returned only Visitor Sign-In and Identification Procedure; AC32 and dummy documents excluded (Milestone 4S.3)**
 - Staff-facing `/ask` remains a placeholder — RAG is governed-disabled
 - `governance_reviewed_by` and `governance_reviewed_at` are null on the visitor SOP — must be set before staff RAG goes live
 - No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a human reviewer
 
 ## Next steps (Milestone 4S+)
 
-- **4S.3:** Ensure `/policies` enforces `approved_for_staff_visibility` — no document reaches the staff policy library without explicit governance approval.
-- **4S.4:** Set `governance_reviewed_by` and `governance_reviewed_at` on the Visitor Sign-In and Identification Procedure (required by the Milestone 4R gate list before staff RAG can go live).
+- **4S.4:** Set `governance_reviewed_by` and `governance_reviewed_at` on the Visitor Sign-In and Identification Procedure — required by the Milestone 4R gate list before staff RAG can go live. After this the Visitor SOP passes all 4R gates.
 - **4S.5:** Build the staff `/ask` RAG foundation using the Milestone 4R gate list and the Visitor Sign-In and Identification Procedure as the first qualifying staff-visible test document.
 - Governance sign-off and safety review of real Thumhara/QCS policy documents, then set `real_document=true`, `approved_for_embedding=true`, `approved_for_source_grounded_answers=true`, `approved_for_staff_visibility=true` for approved documents.
 - Authentication and organisation membership verification.

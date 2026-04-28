@@ -26,9 +26,11 @@ const suggestedPrompts = [
 // ---------------------------------------------------------------------------
 
 interface DisplaySource {
+  source_label: string
   title: string
-  section: string
-  reviewed: string
+  section?: string
+  page?: number
+  source_preview?: string
 }
 
 interface DisplayAnswer {
@@ -36,7 +38,7 @@ interface DisplayAnswer {
   answer: string
   disclaimer: string | null
   nextSteps: string[]
-  source: DisplaySource
+  sources: DisplaySource[]
   escalateIf: string[]
   learningOption: string
   requiresEscalation: boolean
@@ -45,10 +47,7 @@ interface DisplayAnswer {
   isDemo: boolean
 }
 
-// ---------------------------------------------------------------------------
 // Demo fallback answers — shown when the backend is unreachable.
-// TODO (Milestone 4): Remove these once the RAG pipeline returns real source-cited answers.
-// ---------------------------------------------------------------------------
 
 const medicationAnswer: DisplayAnswer = {
   question: MEDICATION_Q,
@@ -64,11 +63,11 @@ const medicationAnswer: DisplayAnswer = {
     'Contact the prescribing GP or clinician if there is clinical risk',
     'Never leave medication unattended or unsecured',
   ],
-  source: {
+  sources: [{
+    source_label: '[Source 1]',
     title: 'Medication Administration Policy',
     section: 'Section 4.2 — Refusal of Medication',
-    reviewed: 'Last reviewed: January 2025',
-  },
+  }],
   escalateIf: [
     'The service user appears distressed, in pain, or frightened',
     'You believe the service user may lack mental capacity',
@@ -98,11 +97,11 @@ const safeguardingAnswer: DisplayAnswer = {
     'Do not discuss the concern with colleagues or the person alleged to have caused harm',
     'Follow the Safeguarding Policy — do not wait to seek guidance before reporting',
   ],
-  source: {
+  sources: [{
+    source_label: '[Source 1]',
     title: 'Safeguarding Policy',
     section: 'Section 3.1 — Reporting a Concern',
-    reviewed: 'Last reviewed: March 2025',
-  },
+  }],
   escalateIf: [
     'There is immediate risk to the safety of a service user or staff member',
     'The concern involves a child or vulnerable adult',
@@ -136,23 +135,19 @@ const quizQuestion = {
   correct: 1,
 }
 
-// ---------------------------------------------------------------------------
-// Maps an AskResponse from the live backend into the page's display format.
-// TODO (Milestone 4): Once RAG is connected, source.title and source.section will
-// reflect real document names and section references returned by the retrieval pipeline.
-// ---------------------------------------------------------------------------
-
 function mapApiResponse(question: string, res: AskResponse): DisplayAnswer {
   return {
     question,
     answer: res.answer,
     disclaimer: null,
     nextSteps: res.next_steps,
-    source: {
-      title: res.sources[0]?.document_name ?? 'Company Policy',
-      section: res.sources[0]?.section ?? 'See full policy',
-      reviewed: res.sources[0]?.page != null ? `Page ${res.sources[0].page}` : '',
-    },
+    sources: res.sources.map((s, i) => ({
+      source_label: s.source_label ?? `[Source ${i + 1}]`,
+      title: s.document_name,
+      section: s.section,
+      page: s.page,
+      source_preview: s.source_preview,
+    })),
     escalateIf: res.escalate_if,
     learningOption: res.learning_option ?? '',
     requiresEscalation: res.requires_escalation,
@@ -303,12 +298,11 @@ export default function AskPage() {
               </div>
             )}
 
-            {/* Live backend notice — connected but RAG not yet wired up */}
-            {/* TODO (Milestone 4): Remove this notice once document upload and RAG pipeline are live */}
+            {/* Live answer notice */}
             {!currentAnswer.isDemo && !isDemoFallback && (
               <div className="flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-xl px-4 py-2.5 text-xs text-teal-800">
                 <Zap size={13} className="shrink-0 text-teal-600" />
-                WorkTwin is connected. Answers on this page are not sourced from your organisation&apos;s documents. Staff-facing document-grounded answers are not yet enabled.
+                Ask WorkTwin answers from approved staff-visible documents only and shows the source used.
               </div>
             )}
 
@@ -391,16 +385,28 @@ export default function AskPage() {
                   </ol>
                 </div>
 
-                {/* Source */}
-                <div className="px-5 py-4 border-b border-slate-100 flex items-start gap-3">
-                  <BookOpen size={16} className="text-teal-600 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-0.5">Source</p>
-                    <p className="text-sm font-semibold text-slate-800">{currentAnswer.source.title}</p>
-                    <p className="text-xs text-slate-500">{currentAnswer.source.section}</p>
-                    {currentAnswer.source.reviewed && (
-                      <p className="text-xs text-slate-400">{currentAnswer.source.reviewed}</p>
-                    )}
+                {/* Sources */}
+                <div className="px-5 py-4 border-b border-slate-100">
+                  <div className="flex items-center gap-2 mb-3">
+                    <BookOpen size={16} className="text-teal-600 shrink-0" />
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                      {currentAnswer.sources.length === 1 ? 'Source' : 'Sources'}
+                    </p>
+                  </div>
+                  <div className="space-y-2.5">
+                    {currentAnswer.sources.map((src, i) => (
+                      <div key={i} className="rounded-lg border border-slate-100 bg-slate-50 px-4 py-3">
+                        <p className="text-xs font-semibold text-teal-700 mb-0.5">{src.source_label}</p>
+                        <p className="text-sm font-semibold text-slate-800">{src.title}</p>
+                        {src.section && <p className="text-xs text-slate-500">{src.section}</p>}
+                        {src.page != null && <p className="text-xs text-slate-400">Page {src.page}</p>}
+                        {src.source_preview && (
+                          <p className="mt-1.5 text-xs text-slate-600 italic border-l-2 border-teal-200 pl-2">
+                            {src.source_preview}
+                          </p>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
 

@@ -8,6 +8,8 @@ export interface AskSource {
   document_name: string
   section?: string
   page?: number
+  source_label?: string
+  source_preview?: string
 }
 
 export type RiskCategory =

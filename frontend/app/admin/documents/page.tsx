@@ -487,6 +487,9 @@ export default function DocumentRegistryPage() {
   function canGenerateEmbeddings(doc: DocumentRecord): boolean {
     return !doc.is_sensitive
       && !doc.escalation_required
+      && doc.status !== 'archived'
+      && doc.real_document === true
+      && doc.dummy_document !== true
       && doc.embedding_status !== 'indexed'
       && doc.embedding_status !== 'embedded'
   }
@@ -1315,6 +1318,8 @@ export default function DocumentRegistryPage() {
                   const ragBadge = computeRagBadge(doc)
                   const isLast = i === filtered.length - 1
                   const busy = actioning === doc.id
+                  const isArchived = doc.status === 'archived'
+                  const isDummyOrNotReal = doc.dummy_document === true || doc.real_document !== true
                   return (
                     <tr key={doc.id} className={`${isLast ? '' : 'border-b border-slate-50'} hover:bg-slate-50/40 transition-colors ${doc.status === 'archived' ? 'opacity-60' : ''}`}>
                       {/* Document */}
@@ -1480,18 +1485,22 @@ export default function DocumentRegistryPage() {
 
                       {/* Actions */}
                       <td className="px-4 py-3.5">
-                        <div className="flex items-center gap-1.5">
-                          {(doc.status === 'draft' || doc.status === 'under_review') && (
-                            <button
-                              onClick={() => handleApprove(doc.id)}
-                              disabled={busy}
-                              className="flex items-center gap-1 text-[11px] font-medium text-teal-700 hover:text-teal-900 border border-teal-200 hover:border-teal-400 px-2 py-1 rounded-lg transition-colors disabled:opacity-40"
-                            >
-                              <CheckCircle size={11} />
-                              Approve
-                            </button>
-                          )}
-                          {doc.status !== 'archived' && (
+                        {isArchived ? (
+                          <span className="text-[11px] text-slate-400 font-medium italic">Archived</span>
+                        ) : isDummyOrNotReal ? (
+                          <span className="text-[11px] text-slate-400 font-medium italic">Dummy / no live actions</span>
+                        ) : (
+                          <div className="flex items-center gap-1.5">
+                            {(doc.status === 'draft' || doc.status === 'under_review') && (
+                              <button
+                                onClick={() => handleApprove(doc.id)}
+                                disabled={busy}
+                                className="flex items-center gap-1 text-[11px] font-medium text-teal-700 hover:text-teal-900 border border-teal-200 hover:border-teal-400 px-2 py-1 rounded-lg transition-colors disabled:opacity-40"
+                              >
+                                <CheckCircle size={11} />
+                                Approve
+                              </button>
+                            )}
                             <button
                               onClick={() => handleArchive(doc.id)}
                               disabled={busy}
@@ -1500,8 +1509,8 @@ export default function DocumentRegistryPage() {
                               <Archive size={11} />
                               Archive
                             </button>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   )

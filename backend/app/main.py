@@ -1368,8 +1368,11 @@ class GovernanceUpdateRequest(BaseModel):
     Admin-only. All fields are optional — only provided fields are updated.
 
     Safety rules enforced by the endpoint:
+    - Setting is_sensitive=True or escalation_required=True forces
+      approved_for_embedding and approved_for_source_grounded_answers to False.
     - approved_for_embedding and approved_for_source_grounded_answers cannot be
-      set True for is_sensitive=True or escalation_required=True documents.
+      set True when the effective is_sensitive or escalation_required is True
+      (effective values include changes made in the same request).
     - real_document=True automatically sets dummy_document=False and vice versa.
     - governance_status must be one of: not_reviewed, pilot_approved,
       approved_for_staff, approved_for_ai, rejected, archived.
@@ -1383,6 +1386,8 @@ class GovernanceUpdateRequest(BaseModel):
     source_owner: Optional[str] = None
     source_licence_notes: Optional[str] = None
     contains_qcs_or_third_party_content: Optional[bool] = None
+    is_sensitive: Optional[bool] = None
+    escalation_required: Optional[bool] = None
     approved_for_embedding: Optional[bool] = None
     approved_for_staff_visibility: Optional[bool] = None
     approved_for_source_grounded_answers: Optional[bool] = None
@@ -3331,8 +3336,11 @@ def update_document_governance(doc_id: str, payload: GovernanceUpdateRequest, _:
     Admin-only governance update endpoint — Milestone 4I.
 
     Updates governance fields for a document. Enforces safety rules:
+    - Setting is_sensitive=True or escalation_required=True forces
+      approved_for_embedding and approved_for_source_grounded_answers to False.
     - approved_for_embedding and approved_for_source_grounded_answers cannot be
-      set True for documents with is_sensitive=True or escalation_required=True.
+      set True when effective is_sensitive or escalation_required is True
+      (effective values include changes made in the same request).
     - real_document=True automatically sets dummy_document=False and vice versa.
     - governance_status must be a recognised value.
 
@@ -3350,6 +3358,10 @@ def update_document_governance(doc_id: str, payload: GovernanceUpdateRequest, _:
     escalation_required = doc_record.get("escalation_required", False)
     organisation_id = doc_record.get("organisation_id", "unknown")
 
+    # Effective values account for is_sensitive/escalation_required changes in this request.
+    effective_sensitive = payload.is_sensitive if payload.is_sensitive is not None else is_sensitive
+    effective_escalation = payload.escalation_required if payload.escalation_required is not None else escalation_required
+
     updates: Dict[str, Any] = {}
 
     # governance_status validation
@@ -3364,6 +3376,18 @@ def update_document_governance(doc_id: str, payload: GovernanceUpdateRequest, _:
             )
         updates["governance_status"] = payload.governance_status
 
+    # is_sensitive / escalation_required
+    if payload.is_sensitive is not None:
+        updates["is_sensitive"] = payload.is_sensitive
+    if payload.escalation_required is not None:
+        updates["escalation_required"] = payload.escalation_required
+
+    # Safety: marking sensitive or escalation-required in this request forces embedding flags off.
+    setting_sensitive_true = payload.is_sensitive is True or payload.escalation_required is True
+    if setting_sensitive_true:
+        updates["approved_for_embedding"] = False
+        updates["approved_for_source_grounded_answers"] = False
+
     # real_document / dummy_document — mutually exclusive
     if payload.real_document is True:
         updates["real_document"] = True
@@ -3376,9 +3400,9 @@ def update_document_governance(doc_id: str, payload: GovernanceUpdateRequest, _:
     elif payload.dummy_document is False:
         updates["dummy_document"] = False
 
-    # approved_for_embedding — blocked for sensitive / escalation documents
-    if payload.approved_for_embedding is not None:
-        if payload.approved_for_embedding and (is_sensitive or escalation_required):
+    # approved_for_embedding — blocked when effective sensitive/escalation is True
+    if payload.approved_for_embedding is not None and not setting_sensitive_true:
+        if payload.approved_for_embedding and (effective_sensitive or effective_escalation):
             raise HTTPException(
                 status_code=400,
                 detail=(
@@ -3389,9 +3413,9 @@ def update_document_governance(doc_id: str, payload: GovernanceUpdateRequest, _:
             )
         updates["approved_for_embedding"] = payload.approved_for_embedding
 
-    # approved_for_source_grounded_answers — blocked for sensitive / escalation documents
-    if payload.approved_for_source_grounded_answers is not None:
-        if payload.approved_for_source_grounded_answers and (is_sensitive or escalation_required):
+    # approved_for_source_grounded_answers — blocked when effective sensitive/escalation is True
+    if payload.approved_for_source_grounded_answers is not None and not setting_sensitive_true:
+        if payload.approved_for_source_grounded_answers and (effective_sensitive or effective_escalation):
             raise HTTPException(
                 status_code=400,
                 detail=(

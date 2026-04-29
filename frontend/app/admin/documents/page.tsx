@@ -257,6 +257,112 @@ function computeGovernanceReadiness(doc: DocumentRecord): {
 }
 
 // ---------------------------------------------------------------------------
+// RAG readiness badge — derived from governance + embedding fields
+// ---------------------------------------------------------------------------
+
+type RagBadgeResult = { label: string; colour: string; reason: string }
+
+function computeRagBadge(doc: DocumentRecord): RagBadgeResult {
+  const isReal = doc.real_document === true
+  const isDummy = doc.dummy_document === true
+  const isIndexed = doc.embedding_status === 'indexed'
+
+  // Not a real document or explicitly marked dummy
+  if (!isReal || isDummy) {
+    return {
+      label: isDummy ? 'Dummy' : 'Not real',
+      colour: 'bg-slate-100 text-slate-500 border-slate-200',
+      reason: isDummy
+        ? 'Sample/test document — never eligible for staff RAG'
+        : 'Not marked as a real document',
+    }
+  }
+
+  // Sensitive or escalation-required — permanently human-only
+  if (doc.is_sensitive || doc.escalation_required) {
+    return {
+      label: 'Human-only',
+      colour: 'bg-orange-50 text-orange-700 border-orange-200',
+      reason: doc.escalation_required
+        ? 'Escalation required — AI answers permanently blocked'
+        : 'Sensitive — human review required for all queries',
+    }
+  }
+
+  // Staff RAG ready — all conditions must be met
+  if (
+    doc.status === 'approved' &&
+    doc.approved_for_embedding === true &&
+    doc.approved_for_source_grounded_answers === true &&
+    doc.approved_for_staff_visibility === true &&
+    isIndexed &&
+    !!doc.governance_reviewed_by &&
+    !!doc.governance_reviewed_at
+  ) {
+    return {
+      label: 'Staff RAG ready',
+      colour: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      reason: `Reviewed by ${doc.governance_reviewed_by}`,
+    }
+  }
+
+  // Admin-test only — AI-approved and indexed, but not staff-visible
+  if (
+    doc.approved_for_embedding === true &&
+    doc.approved_for_source_grounded_answers === true &&
+    doc.approved_for_staff_visibility !== true &&
+    isIndexed
+  ) {
+    const reason =
+      doc.status !== 'approved'
+        ? `Status: ${doc.status} — must be approved for staff visibility`
+        : !doc.governance_reviewed_by
+        ? 'No reviewer recorded — required for staff /ask'
+        : 'Staff visibility not yet approved'
+    return {
+      label: 'Admin-test only',
+      colour: 'bg-amber-50 text-amber-700 border-amber-200',
+      reason,
+    }
+  }
+
+  // Embedded only — indexed but AI answer testing not yet approved
+  if (doc.approved_for_embedding === true && isIndexed) {
+    return {
+      label: 'Embedded only',
+      colour: 'bg-blue-50 text-blue-700 border-blue-200',
+      reason: 'Indexed but not yet approved for AI answer testing',
+    }
+  }
+
+  // Ready to embed — approved for embedding but not yet indexed
+  if (doc.approved_for_embedding === true && !isIndexed) {
+    const embState = doc.embedding_status ?? 'not_started'
+    return {
+      label: 'Ready to embed',
+      colour: 'bg-violet-50 text-violet-700 border-violet-200',
+      reason: `Approved for embedding · status: ${embState}`,
+    }
+  }
+
+  // Policy library — staff can read it but AI answers are disabled
+  if (doc.approved_for_staff_visibility === true) {
+    return {
+      label: 'Policy library',
+      colour: 'bg-slate-100 text-slate-600 border-slate-300',
+      reason: 'Visible to staff — AI answers not enabled',
+    }
+  }
+
+  // Catch-all — real doc, no governance approvals yet
+  return {
+    label: 'Needs governance',
+    colour: 'bg-slate-100 text-slate-400 border-slate-200',
+    reason: 'Awaiting governance review before any RAG use',
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Upload form state
 // ---------------------------------------------------------------------------
 
@@ -1159,13 +1265,14 @@ export default function DocumentRegistryPage() {
         {/* Registry table */}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full text-xs min-w-[1100px]">
+            <table className="w-full text-xs min-w-[1200px]">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50">
                   <th className="text-left px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Document</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Vertical</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Category</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Status</th>
+                  <th className="text-left px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">RAG Status</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Access</th>
                   <th className="px-3 py-3 font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center" title="Sensitive">
                     <ShieldAlert size={13} className="mx-auto" />
@@ -1185,11 +1292,11 @@ export default function DocumentRegistryPage() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={12} className="px-4 py-10 text-center text-slate-400">Loading registry…</td>
+                    <td colSpan={13} className="px-4 py-10 text-center text-slate-400">Loading registry…</td>
                   </tr>
                 ) : filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={12} className="px-4 py-10 text-center">
+                    <td colSpan={13} className="px-4 py-10 text-center">
                       {!usingFallback && registrySource === 'database' && docs.length === 0 ? (
                         <div className="space-y-2">
                           <p className="text-sm font-medium text-slate-600">No persistent documents yet.</p>
@@ -1205,6 +1312,7 @@ export default function DocumentRegistryPage() {
                 ) : filtered.map((doc, i) => {
                   const sc = STATUS_CONFIG[doc.status]
                   const ec = EMBED_CONFIG[doc.embedding_status]
+                  const ragBadge = computeRagBadge(doc)
                   const isLast = i === filtered.length - 1
                   const busy = actioning === doc.id
                   return (
@@ -1254,6 +1362,19 @@ export default function DocumentRegistryPage() {
                           {sc.icon}
                           {sc.label}
                         </span>
+                      </td>
+
+                      {/* RAG Status */}
+                      <td className="px-4 py-3.5">
+                        <div className="space-y-0.5">
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] font-semibold whitespace-nowrap ${ragBadge.colour}`}
+                            title={ragBadge.reason}
+                          >
+                            {ragBadge.label}
+                          </span>
+                          <p className="text-[10px] text-slate-400 leading-tight max-w-[160px]">{ragBadge.reason}</p>
+                        </div>
                       </td>
 
                       {/* Access */}
@@ -1683,6 +1804,7 @@ export default function DocumentRegistryPage() {
                       archived: { label: 'Archived', colour: 'bg-slate-100 text-slate-400 border-slate-200' },
                     }
                     const govSt = govStatusConfig[doc.governance_status ?? 'not_reviewed'] ?? govStatusConfig.not_reviewed
+                    const ragBadge = computeRagBadge(doc)
 
                     return (
                       <div key={doc.id} className="border border-slate-200 rounded-xl p-4 space-y-3">
@@ -1697,8 +1819,15 @@ export default function DocumentRegistryPage() {
                               <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${govSt.colour}`}>
                                 {govSt.label}
                               </span>
+                              <span
+                                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border whitespace-nowrap ${ragBadge.colour}`}
+                                title={ragBadge.reason}
+                              >
+                                {ragBadge.label}
+                              </span>
                             </div>
                             <p className="text-[11px] text-slate-400 mt-0.5">{doc.file_name ?? '—'} · {doc.category}</p>
+                            <p className="text-[10px] text-slate-400 italic mt-0.5">{ragBadge.reason}</p>
                           </div>
                           {isSensOrEsc && (
                             <span className="flex items-center gap-1 text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1 shrink-0">

@@ -682,22 +682,37 @@ export default function AskPage() {
               ref={inputRef}
               type="text"
               value={input}
+              maxLength={500}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && input.trim() && handlePrompt(input.trim())}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && input.trim().length >= 3) handlePrompt(input.trim())
+              }}
               placeholder="Ask a question about your policies or procedures…"
               className="flex-1 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 outline-none bg-transparent"
             />
             <button
-              onClick={() => input.trim() && handlePrompt(input.trim())}
+              onClick={() => { if (input.trim().length >= 3) handlePrompt(input.trim()) }}
               disabled={isLoading}
               className="px-4 py-2 bg-teal-700 hover:bg-teal-800 disabled:bg-teal-400 text-white rounded-xl transition-colors"
             >
               {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
             </button>
           </div>
-          <p className="text-xs text-slate-400 text-center mt-2">
-            Your questions are private. WorkTwin answers from approved documents only.
-          </p>
+          {input.trim().length > 0 && input.trim().length < 3 && (
+            <p className="text-xs text-amber-600 text-center mt-1">
+              Please enter at least 3 characters.
+            </p>
+          )}
+          {input.length >= 500 && (
+            <p className="text-xs text-amber-600 text-center mt-1">
+              Questions must be 500 characters or fewer.
+            </p>
+          )}
+          {!(input.trim().length > 0 && input.trim().length < 3) && input.length < 500 && (
+            <p className="text-xs text-slate-400 text-center mt-2">
+              Your questions are private. WorkTwin answers from approved documents only.
+            </p>
+          )}
         </div>
       </div>
     </AppLayout>

@@ -4,7 +4,7 @@ import io
 from fastapi import FastAPI, Form, UploadFile, File, HTTPException, Depends, Header
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Literal, Optional, List, Dict, Any, Tuple
 from datetime import datetime
 import uuid
@@ -1407,7 +1407,7 @@ def _validate_grounded_answer_result(
 # ---------------------------------------------------------------------------
 
 class AskRequest(BaseModel):
-    question: str
+    question: str = Field(..., max_length=500)
 
 
 def _check_ask_rate_limit(organisation_id: str, user_id: str) -> None:
@@ -2175,9 +2175,9 @@ def ask_worktwin(payload: AskRequest):
     # ------------------------------------------------------------------
     # Query prep
     # ------------------------------------------------------------------
-    query_clean = payload.question.strip()[:MAX_QUERY_CHARS]
-    if not query_clean:
-        raise HTTPException(status_code=400, detail="Question must not be empty.")
+    query_clean = payload.question.strip()
+    if len(query_clean) < 3:
+        return _staff_fallback_response()
 
     # ------------------------------------------------------------------
     # Escalation short-circuit — no retrieval, no LLM

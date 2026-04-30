@@ -7,7 +7,7 @@ const quickActions = [
   { href: '/policies', icon: BookOpen, label: 'Policy Library', desc: 'Browse approved documents' },
   { href: '/onboarding', icon: ClipboardList, label: 'My Onboarding', desc: 'Continue where you left off' },
   { href: '/scenarios', icon: PlayCircle, label: 'Practice Scenarios', desc: 'Build confidence safely' },
-  { href: '/notes', icon: Lock, label: 'Private Notes', desc: 'Only you can see these' },
+  { href: '/notes', icon: Lock, label: 'Private Notes', desc: 'Private notes demo' },
 ]
 
 const onboardingTasks = [
@@ -37,7 +37,7 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold mb-1">Welcome back, Demo User</h1>
           <p className="text-teal-100 text-sm">Thumhara Centre &middot; Care Worker &middot; Week 2</p>
           <p className="text-teal-200 text-xs mt-2">
-            WorkTwin helps with approved policies, onboarding and safe escalation &mdash; no private data is tracked.
+            WorkTwin helps with approved policies, onboarding and safe escalation &mdash; private Ask questions and notes are not shown to managers in this prototype.
           </p>
         </div>
 

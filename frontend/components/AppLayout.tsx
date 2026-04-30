@@ -91,16 +91,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         {/* Demo switcher + user */}
         <div className="border-t border-slate-200 p-3 space-y-3">
-          <div>
-            <p className="text-xs text-slate-400 mb-0.5 px-1 font-medium">Demo only: switch view</p>
-            <p className="text-xs text-slate-300 mb-1.5 px-1 leading-tight">In a real deployment, admin access is permission-controlled.</p>
+          {/* Demo-only view switcher — visually separated from employee nav */}
+          <div className="rounded-xl bg-amber-50 border border-amber-200 p-2.5">
+            <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">Demo Mode — Switch View</p>
+            <p className="text-xs text-amber-700 mb-2 leading-tight">
+              In a real deployment, admin access is permission-controlled and not available to staff.
+            </p>
             <div className="flex gap-1.5">
               <Link
                 href="/dashboard"
                 className={`flex-1 text-center text-xs py-1.5 rounded-md font-medium transition-colors ${
                   !isAdmin
                     ? 'bg-teal-700 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    : 'bg-white border border-amber-200 text-amber-700 hover:bg-amber-100'
                 }`}
               >
                 <Users size={12} className="inline mr-1" />
@@ -111,7 +114,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 className={`flex-1 text-center text-xs py-1.5 rounded-md font-medium transition-colors ${
                   isAdmin
                     ? 'bg-teal-700 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    : 'bg-white border border-amber-200 text-amber-700 hover:bg-amber-100'
                 }`}
               >
                 <Shield size={12} className="inline mr-1" />

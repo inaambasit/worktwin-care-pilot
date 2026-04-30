@@ -107,7 +107,7 @@ export default function NotesPage() {
         <div className="bg-teal-50 border border-teal-200 rounded-2xl px-4 py-3 flex items-center gap-3 mb-3">
           <Shield size={16} className="text-teal-700 shrink-0" />
           <p className="text-sm text-teal-800">
-            <span className="font-semibold">Your notes are completely private.</span> Managers and colleagues cannot view, search or export your notes. Only you can see them.
+            <span className="font-semibold">Notes are private in this demo.</span> In a real deployment, notes would not be accessible to managers or colleagues.
           </p>
         </div>
         {/* Demo disclaimer */}
@@ -205,7 +205,7 @@ export default function NotesPage() {
                 {/* Footer */}
                 <div className="px-5 py-2 border-t border-slate-100 flex items-center gap-2">
                   <Lock size={12} className="text-slate-400" />
-                  <p className="text-xs text-slate-400">Private to you only · Not visible to managers or admin</p>
+                  <p className="text-xs text-slate-400">Demo only — session storage · Not persisted between sessions</p>
                 </div>
               </>
             )}

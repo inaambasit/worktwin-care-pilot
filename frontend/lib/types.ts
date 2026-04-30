@@ -38,6 +38,7 @@ export interface AskResponse {
   source_confidence?: number
   risk_category: RiskCategory
   anonymised_insight_topic?: string
+  contact_routes?: string[]
 }
 
 // ---------------------------------------------------------------------------

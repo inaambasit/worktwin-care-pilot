@@ -554,6 +554,7 @@ def _staff_fallback_response(
     answer: Optional[str] = None,
     next_steps: Optional[List[str]] = None,
     vertical_subcategory: Optional[str] = None,
+    contact_routes: Optional[List[str]] = None,
 ) -> "AskResponse":
     """Return a safe AskResponse with no source content."""
     return AskResponse(
@@ -568,6 +569,7 @@ def _staff_fallback_response(
         learning_option=None,
         anonymised_insight_topic=None,
         vertical_subcategory=vertical_subcategory,
+        contact_routes=contact_routes or [],
     )
 
 
@@ -1042,6 +1044,12 @@ _TOPIC_RESPONSE: Dict[str, Dict[str, Any]] = {
             "Follow your organisation's safeguarding procedure.",
             "Do not take action without guidance from a qualified lead.",
         ],
+        "contact_routes": [
+            "Safeguarding Lead",
+            "Registered Manager",
+            "Local authority safeguarding team (if immediate risk)",
+            "Emergency services — 999 (if immediate danger)",
+        ],
         "risk_category": "vertical_sensitive",
         "vertical_subcategory": "safeguarding",
     },
@@ -1055,6 +1063,11 @@ _TOPIC_RESPONSE: Dict[str, Dict[str, Any]] = {
             "Raise your concern with a line manager or designated lead.",
             "Use your organisation's freedom-to-speak-up or whistleblowing procedure.",
             "You can raise concerns anonymously if your organisation allows it.",
+        ],
+        "contact_routes": [
+            "Registered Manager",
+            "Freedom to Speak Up / nominated concerns lead",
+            "External regulator (e.g. CQC) if appropriate",
         ],
         "risk_category": "vertical_sensitive",
         "vertical_subcategory": "whistleblowing",
@@ -1071,6 +1084,13 @@ _TOPIC_RESPONSE: Dict[str, Dict[str, Any]] = {
             "In an emergency involving medication, call 999 or 111.",
             "Record any medication incident in line with your organisation's procedure.",
         ],
+        "contact_routes": [
+            "Medication Lead",
+            "Registered Manager",
+            "Pharmacist or GP (routine query)",
+            "NHS 111 (urgent non-emergency)",
+            "Emergency services — 999 (if immediate danger)",
+        ],
         "risk_category": "vertical_sensitive",
         "vertical_subcategory": "medication",
     },
@@ -1085,6 +1105,13 @@ _TOPIC_RESPONSE: Dict[str, Dict[str, Any]] = {
             "If immediate danger exists, call 999.",
             "Ask your HR team about an employee assistance programme (EAP) if available.",
         ],
+        "contact_routes": [
+            "Line Manager",
+            "Wellbeing Lead",
+            "Occupational Health (if available)",
+            "Employee Assistance Programme (EAP) if available",
+            "Emergency services — 999 (if immediate danger)",
+        ],
         "risk_category": "wellbeing",
         "vertical_subcategory": "wellbeing",
     },
@@ -1097,6 +1124,11 @@ _TOPIC_RESPONSE: Dict[str, Dict[str, Any]] = {
             "Contact your HR team or people team.",
             "Refer to your contract of employment or staff handbook.",
             "Speak to your line manager or designated lead.",
+        ],
+        "contact_routes": [
+            "HR team / People team",
+            "Line Manager",
+            "Staff handbook (HR section)",
         ],
         "risk_category": "hr",
         "vertical_subcategory": "hr",
@@ -1111,6 +1143,11 @@ _TOPIC_RESPONSE: Dict[str, Dict[str, Any]] = {
             "Contact your compliance lead or registered manager.",
             "Seek independent legal advice if required.",
             "Refer to your organisation's regulatory compliance procedure.",
+        ],
+        "contact_routes": [
+            "Compliance Lead",
+            "Registered Manager",
+            "Independent legal advice (where appropriate)",
         ],
         "risk_category": "legal",
         "vertical_subcategory": "legal_compliance",
@@ -1344,6 +1381,7 @@ class AskResponse(BaseModel):
     ] = "standard"
     vertical_subcategory: Optional[str] = None
     anonymised_insight_topic: Optional[str] = None
+    contact_routes: List[str] = []
 
 
 # ---------------------------------------------------------------------------
@@ -2067,6 +2105,7 @@ def ask_worktwin(payload: AskRequest):
             answer=_topic_cfg["answer"],
             next_steps=_topic_cfg["next_steps"],
             vertical_subcategory=_topic_cfg["vertical_subcategory"],
+            contact_routes=_topic_cfg.get("contact_routes", []),
         )
 
     # ------------------------------------------------------------------

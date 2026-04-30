@@ -45,6 +45,7 @@ interface DisplayAnswer {
   allowedToAnswer: boolean
   riskCategory: string
   isDemo: boolean
+  contactRoutes: string[]
 }
 
 // Demo fallback answers — shown when the backend is unreachable.
@@ -81,6 +82,7 @@ const medicationAnswer: DisplayAnswer = {
   allowedToAnswer: true,
   riskCategory: 'medication',
   isDemo: true,
+  contactRoutes: [],
 }
 
 const safeguardingAnswer: DisplayAnswer = {
@@ -113,6 +115,7 @@ const safeguardingAnswer: DisplayAnswer = {
   allowedToAnswer: true,
   riskCategory: 'safeguarding',
   isDemo: true,
+  contactRoutes: [],
 }
 
 const checklistItems = [
@@ -154,6 +157,7 @@ function mapApiResponse(question: string, res: AskResponse): DisplayAnswer {
     allowedToAnswer: res.allowed_to_answer,
     riskCategory: res.risk_category,
     isDemo: false,
+    contactRoutes: res.contact_routes ?? [],
   }
 }
 
@@ -342,6 +346,19 @@ export default function AskPage() {
                     </li>
                   ))}
                 </ul>
+                {currentAnswer.contactRoutes.length > 0 && (
+                  <div className="mb-3">
+                    <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-1.5">Who to contact</p>
+                    <ul className="space-y-1">
+                      {currentAnswer.contactRoutes.map((route, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-amber-900">
+                          <span className="text-amber-500 shrink-0 mt-0.5">→</span>
+                          {route}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 <Link href="/escalation" className="inline-block text-sm text-amber-700 underline font-medium">
                   View escalation contacts →
                 </Link>

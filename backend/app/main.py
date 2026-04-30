@@ -2038,7 +2038,7 @@ def health_check():
 # ---------------------------------------------------------------------------
 
 @app.get("/debug/storage-config")
-def debug_storage_config():
+def debug_storage_config(_: None = Depends(_require_admin)):
     """Returns booleans and safe metadata only. Never logs or returns secret values."""
     if os.getenv("DEBUG_ENDPOINTS_ENABLED", "").lower() != "true":
         raise HTTPException(status_code=404, detail="Not Found")

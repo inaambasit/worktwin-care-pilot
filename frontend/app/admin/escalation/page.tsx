@@ -266,7 +266,10 @@ export default function EscalationPage() {
                       <div key={contact.name} className="bg-white/70 rounded-xl p-3.5 border border-white">
                         <div className="flex items-start justify-between gap-3 mb-1">
                           <div>
-                            <p className="font-semibold text-slate-900 text-sm">{contact.name}</p>
+                            <p className="font-semibold text-slate-900 text-sm">
+                          {contact.name}
+                          <span className="font-normal text-xs text-slate-400 ml-1">(sample)</span>
+                        </p>
                             <p className="text-xs text-slate-500">{contact.role}</p>
                           </div>
                           <span className="text-xs text-slate-400 whitespace-nowrap">{contact.availability}</span>

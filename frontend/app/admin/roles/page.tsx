@@ -172,7 +172,7 @@ export default function RolesPage() {
         </div>
 
         <p className="text-xs text-slate-400 text-center">
-          Contact your WorkTwin administrator to request role changes. Changes take effect at next login.
+          This page shows the intended permission model for the pilot. Role enforcement is not active in this demo.
         </p>
       </div>
     </AppLayout>

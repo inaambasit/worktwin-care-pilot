@@ -80,7 +80,7 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-4">
             <Link href="/dashboard" className="text-sm text-slate-600 hover:text-slate-900 font-medium">
-              Sign in
+              Explore demo
             </Link>
             <a
               href="mailto:hello@worktwin.ai?subject=WorkTwin%20pilot%20enquiry"
@@ -138,7 +138,6 @@ export default function LandingPage() {
           <Link href="/ask" className="hover:text-white underline underline-offset-2">Ask WorkTwin</Link>
           <Link href="/onboarding" className="hover:text-white underline underline-offset-2">My Onboarding</Link>
           <Link href="/scenarios" className="hover:text-white underline underline-offset-2">Practice Scenarios</Link>
-          <Link href="/admin/insights" className="hover:text-white underline underline-offset-2">Anonymous Insights</Link>
         </div>
       </div>
 
@@ -252,7 +251,7 @@ export default function LandingPage() {
           </p>
           <div className="flex gap-4 text-xs text-slate-500">
             <Link href="/#privacy" className="hover:text-slate-300">Privacy model</Link>
-            <Link href="/admin/escalation" className="hover:text-slate-300">Escalation</Link>
+            <Link href="/escalation" className="hover:text-slate-300">Escalation</Link>
           </div>
         </div>
       </footer>

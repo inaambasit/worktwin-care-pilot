@@ -240,11 +240,11 @@ function PolicyModal({ doc, onClose }: { doc: StaffPolicyRecord; onClose: () => 
         <div className="p-5 border-t border-slate-100 flex gap-2">
           {safeForAi && (
             <a
-              href={`/ask?policy=${encodeURIComponent(doc.title)}`}
+              href="/ask"
               className="flex-1 flex items-center justify-center gap-2 bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
             >
               <MessageCircle size={15} />
-              Ask WorkTwin about this policy
+              Ask WorkTwin a question
             </a>
           )}
           <button

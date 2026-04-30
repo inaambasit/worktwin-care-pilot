@@ -60,6 +60,11 @@ export default function AdminOverviewPage() {
           </p>
         </div>
 
+        {/* Sample figures notice */}
+        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-4 py-2.5">
+          Sample figures — these numbers are illustrative and do not reflect real Thumhara Centre data.
+        </p>
+
         {/* Summary cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {summaryCards.map(({ label, value, sub, icon: Icon }) => (
@@ -110,7 +115,7 @@ export default function AdminOverviewPage() {
             </Link>
           </div>
           <p className="text-xs text-slate-400 mb-3">
-            Anonymised topic trends — no individual staff data is shown
+            Sample topic trends — illustrative figures only
           </p>
           <div className="space-y-3">
             {topTrends.map(({ topic, count }) => (

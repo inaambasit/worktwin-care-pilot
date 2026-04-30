@@ -200,29 +200,41 @@ export default function ScenariosPage() {
               </div>
 
               {activeScenario === scenario.id && (
-                <div className="border-t border-teal-100 bg-teal-50 px-5 py-4">
-                  <p className="text-sm font-semibold text-teal-800 mb-2">Scenario in progress — Demo preview</p>
-                  <div className="bg-white border border-teal-200 rounded-xl p-4 text-sm text-slate-700">
-                    <p className="font-medium text-slate-800 mb-2">Scene setting:</p>
-                    <p className="leading-relaxed text-slate-600">
-                      You are on the afternoon shift. Mrs. A (a service user in Room 4) tells you she does not want to
-                      take her blood pressure medication today. She says she &quot;doesn&apos;t feel well&quot; and wants to rest.
-                      She is calm and appears to understand what you are saying.
-                    </p>
-                    <p className="font-medium text-slate-800 mt-3 mb-1">What do you do first?</p>
-                    <div className="space-y-2 mt-2">
-                      {['Try to persuade her by explaining the medication is important', 'Respect her decision, record it on the MAR chart and notify your manager', 'Give her a reduced dose and record that instead', 'Leave the medication and do not record anything yet'].map((opt, i) => (
-                        <button key={i} className="w-full text-left text-sm border border-slate-200 hover:border-teal-400 hover:bg-teal-50 rounded-lg px-3 py-2 transition-colors">
-                          <span className="font-semibold text-slate-500 mr-2">{String.fromCharCode(65 + i)}.</span>
-                          {opt}
-                        </button>
-                      ))}
+                scenario.id === 1 ? (
+                  <div className="border-t border-teal-100 bg-teal-50 px-5 py-4">
+                    <p className="text-sm font-semibold text-teal-800 mb-2">Scenario in progress — Demo preview</p>
+                    <div className="bg-white border border-teal-200 rounded-xl p-4 text-sm text-slate-700">
+                      <p className="font-medium text-slate-800 mb-2">Scene setting:</p>
+                      <p className="leading-relaxed text-slate-600">
+                        You are on the afternoon shift. A service user in your care tells you she does not want to
+                        take her blood pressure medication today. She says she &quot;doesn&apos;t feel well&quot; and wants to rest.
+                        She is calm and appears to understand what you are saying.
+                      </p>
+                      <p className="font-medium text-slate-800 mt-3 mb-1">What do you do first?</p>
+                      <div className="space-y-2 mt-2">
+                        {['Try to persuade her by explaining the medication is important', 'Respect her decision, record it on the MAR chart and notify your manager', 'Give her a reduced dose and record that instead', 'Leave the medication and do not record anything yet'].map((opt, i) => (
+                          <button key={i} className="w-full text-left text-sm border border-slate-200 hover:border-teal-400 hover:bg-teal-50 rounded-lg px-3 py-2 transition-colors">
+                            <span className="font-semibold text-slate-500 mr-2">{String.fromCharCode(65 + i)}.</span>
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
                     </div>
+                    <p className="text-xs text-slate-400 mt-2">
+                      This is a demo preview. The full scenario system will guide you through multiple steps with feedback.
+                    </p>
                   </div>
-                  <p className="text-xs text-slate-400 mt-2">
-                    This is a demo preview. The full scenario system will guide you through multiple steps with feedback.
-                  </p>
-                </div>
+                ) : (
+                  <div className="border-t border-slate-100 bg-slate-50 px-5 py-4">
+                    <p className="text-sm font-semibold text-slate-700 mb-2">Demo preview — scenario content coming soon</p>
+                    <p className="text-sm text-slate-500 leading-relaxed">
+                      The full interactive scenario for <span className="font-medium text-slate-700">{scenario.title}</span> is being prepared and will guide you through realistic steps with branching decisions and feedback.
+                    </p>
+                    <p className="text-xs text-slate-400 mt-3">
+                      This is a demo-only preview. Scenario content for this topic will be added before the controlled pilot.
+                    </p>
+                  </div>
+                )
               )}
             </div>
           ))}

@@ -1,7 +1,8 @@
 'use client'
 import { useState } from 'react'
+import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
-import { CheckCircle, Circle, BookOpen, Calendar, ChevronDown, ChevronRight } from 'lucide-react'
+import { CheckCircle, Circle, Calendar, ChevronDown, ChevronRight } from 'lucide-react'
 
 const weeks = [
   {
@@ -82,7 +83,7 @@ export default function OnboardingPage() {
       <div className="max-w-2xl mx-auto space-y-6">
         <div>
           <h1 className="text-xl font-bold text-slate-900">My Onboarding</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Your personalised onboarding plan for Thumhara Centre</p>
+          <p className="text-sm text-slate-500 mt-0.5">Pilot onboarding pathway for Thumhara Centre staff</p>
         </div>
 
         {/* Progress summary */}
@@ -115,10 +116,13 @@ export default function OnboardingPage() {
             <p className="text-sm font-semibold text-amber-800">2-week check-in due soon</p>
             <p className="text-xs text-amber-700">Book your check-in with your line manager before 30 April.</p>
           </div>
-          <button className="text-xs bg-amber-600 hover:bg-amber-700 text-white font-medium px-3 py-1.5 rounded-lg transition-colors">
-            Book now
-          </button>
+          <p className="text-xs text-amber-700 font-medium">Speak to your line manager to book this.</p>
         </div>
+
+        {/* Safety note */}
+        <p className="text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
+          Safeguarding, medication and wellbeing topics are for awareness and scenario practice only. Real concerns must be escalated to the appropriate human lead.
+        </p>
 
         {/* Week sections */}
         <div className="space-y-3">
@@ -176,10 +180,9 @@ export default function OnboardingPage() {
                           </a>
                         )}
                         {!task.done && task.type === 'read' && (
-                          <div className="flex items-center gap-1 text-xs text-teal-700 cursor-pointer hover:underline">
-                            <BookOpen size={12} />
-                            Open
-                          </div>
+                          <Link href="/policies" className="text-xs text-teal-700 hover:underline font-medium">
+                            View policy →
+                          </Link>
                         )}
                       </div>
                     ))}
@@ -191,7 +194,7 @@ export default function OnboardingPage() {
         </div>
 
         <p className="text-xs text-slate-400 text-center">
-          Your onboarding progress is visible to your manager. Private notes and conversations are not.
+          Prototype note: this pathway is for demonstration only. Private notes and Ask questions are not shown to managers in this prototype.
         </p>
       </div>
     </AppLayout>

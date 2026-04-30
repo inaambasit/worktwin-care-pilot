@@ -22,7 +22,7 @@ const SAMPLE_DOCS: DocumentRecord[] = [
     category: 'HR', tags: ['onboarding', 'conduct', 'employment'],
     status: 'approved', access_roles: ['All Staff'],
     is_sensitive: false, escalation_required: false, approved_for_ai_answers: true,
-    approved_for_staff_visibility: true,
+    approved_for_staff_visibility: true, approved_for_source_grounded_answers: true,
     contains_personal_data_warning: false, primary_language: 'en',
     available_languages: ['en', 'ur', 'pa'], translation_status: 'complete',
     human_review_required: false, version: '3.0', review_due_date: '2026-01-12',
@@ -37,7 +37,7 @@ const SAMPLE_DOCS: DocumentRecord[] = [
     category: 'Medication', tags: ['medication', 'MAR', 'controlled drugs', 'safety'],
     status: 'approved', access_roles: ['Care Worker', 'Senior Carer', 'Nurse'],
     is_sensitive: true, escalation_required: true, approved_for_ai_answers: true,
-    approved_for_staff_visibility: false,
+    approved_for_staff_visibility: false, approved_for_source_grounded_answers: false,
     contains_personal_data_warning: false, primary_language: 'en',
     available_languages: ['en'], translation_status: 'not_required',
     human_review_required: false, version: '2.1', review_due_date: '2026-01-20',
@@ -52,7 +52,7 @@ const SAMPLE_DOCS: DocumentRecord[] = [
     category: 'Safeguarding', tags: ['safeguarding', 'CQC', 'reporting'],
     status: 'approved', access_roles: ['All Staff'],
     is_sensitive: true, escalation_required: true, approved_for_ai_answers: false,
-    approved_for_staff_visibility: false,
+    approved_for_staff_visibility: false, approved_for_source_grounded_answers: false,
     contains_personal_data_warning: false, primary_language: 'en',
     available_languages: ['en', 'ur'], translation_status: 'in_progress',
     human_review_required: true, version: '4.0', review_due_date: '2026-02-05',
@@ -67,7 +67,7 @@ const SAMPLE_DOCS: DocumentRecord[] = [
     category: 'Complaints', tags: ['complaints', 'feedback', 'service users'],
     status: 'approved', access_roles: ['All Staff'],
     is_sensitive: false, escalation_required: false, approved_for_ai_answers: true,
-    approved_for_staff_visibility: true,
+    approved_for_staff_visibility: true, approved_for_source_grounded_answers: true,
     contains_personal_data_warning: false, primary_language: 'en',
     available_languages: ['en', 'ur', 'pa', 'ar'], translation_status: 'complete',
     human_review_required: false, version: '1.2', review_due_date: '2026-02-14',
@@ -82,7 +82,7 @@ const SAMPLE_DOCS: DocumentRecord[] = [
     category: 'Health and Safety', tags: ['infection control', 'PPE', 'hygiene'],
     status: 'approved', access_roles: ['All Staff'],
     is_sensitive: false, escalation_required: false, approved_for_ai_answers: true,
-    approved_for_staff_visibility: true,
+    approved_for_staff_visibility: true, approved_for_source_grounded_answers: true,
     contains_personal_data_warning: false, primary_language: 'en',
     available_languages: ['en'], translation_status: 'not_required',
     human_review_required: false, version: '3.1', review_due_date: '2026-03-01',
@@ -97,7 +97,7 @@ const SAMPLE_DOCS: DocumentRecord[] = [
     category: 'Training', tags: ['MCA', 'mental capacity', 'best interests'],
     status: 'approved', access_roles: ['Care Worker', 'Senior Carer', 'Nurse'],
     is_sensitive: false, escalation_required: false, approved_for_ai_answers: true,
-    approved_for_staff_visibility: false,
+    approved_for_staff_visibility: false, approved_for_source_grounded_answers: false,
     contains_personal_data_warning: false, primary_language: 'en',
     available_languages: ['en'], translation_status: 'pending',
     human_review_required: false, version: '2.0', review_due_date: '2025-11-22',
@@ -112,7 +112,7 @@ const SAMPLE_DOCS: DocumentRecord[] = [
     category: 'Health and Safety', tags: ['incident', 'accident', 'RIDDOR'],
     status: 'approved', access_roles: ['All Staff'],
     is_sensitive: false, escalation_required: false, approved_for_ai_answers: true,
-    approved_for_staff_visibility: true,
+    approved_for_staff_visibility: true, approved_for_source_grounded_answers: true,
     contains_personal_data_warning: false, primary_language: 'en',
     available_languages: ['en'], translation_status: 'not_required',
     human_review_required: false, version: '2.0', review_due_date: '2026-04-03',
@@ -127,7 +127,7 @@ const SAMPLE_DOCS: DocumentRecord[] = [
     category: 'Onboarding', tags: ['induction', 'onboarding', 'DBS', 'mandatory training'],
     status: 'approved', access_roles: ['All Staff', 'Manager'],
     is_sensitive: false, escalation_required: false, approved_for_ai_answers: true,
-    approved_for_staff_visibility: true,
+    approved_for_staff_visibility: true, approved_for_source_grounded_answers: true,
     contains_personal_data_warning: false, primary_language: 'en',
     available_languages: ['en', 'ur', 'pa', 'bn'], translation_status: 'in_progress',
     human_review_required: false, version: '2.0', review_due_date: '2026-06-01',
@@ -184,7 +184,7 @@ function getLanguageStatus(doc: DocumentRecord, lang: string): { label: string; 
 function isSafeForAiCta(doc: DocumentRecord): boolean {
   return (
     doc.status !== 'archived' &&
-    doc.approved_for_ai_answers === true &&
+    doc.approved_for_source_grounded_answers === true &&
     doc.approved_for_staff_visibility === true &&
     doc.is_sensitive !== true &&
     doc.escalation_required !== true

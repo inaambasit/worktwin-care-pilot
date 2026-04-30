@@ -2,137 +2,62 @@
 import { useState, useEffect } from 'react'
 import AppLayout from '@/components/AppLayout'
 import { fetchPolicies } from '@/lib/api'
-import type { DocumentRecord } from '@/lib/types'
+import type { StaffPolicyRecord } from '@/lib/types'
 import { LANGUAGE_NAMES } from '@/lib/types'
 import {
-  BookOpen, Search, CheckCircle, Globe, Users, MessageCircle,
+  BookOpen, Search, CheckCircle, Globe, MessageCircle,
   X, Calendar, AlertTriangle, Shield, FileText, ChevronRight,
-  Lock, Archive,
+  Archive,
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
 // Sample fallback data — approved policies only (shown when backend unavailable)
 // ---------------------------------------------------------------------------
-const SAMPLE_DOCS: DocumentRecord[] = [
+const SAMPLE_DOCS: StaffPolicyRecord[] = [
   {
-    id: 'doc-001', organisation_id: 'demo-org', title: 'Staff Handbook',
+    id: 'doc-001', title: 'Staff Handbook',
     description: 'Comprehensive guide for all Thumhara Centre staff covering employment terms, conduct standards, key procedures and benefits.',
-    file_name: 'staff_handbook_v3.pdf', file_type: 'pdf', file_size_bytes: 1468006,
-    storage_key: 'placeholder/demo-org/staff_handbook_v3.pdf', vertical: 'care',
+    file_type: 'pdf', file_size_bytes: 1468006,
     category: 'HR', tags: ['onboarding', 'conduct', 'employment'],
-    status: 'approved', access_roles: ['All Staff'],
-    is_sensitive: false, escalation_required: false, approved_for_ai_answers: true,
-    approved_for_staff_visibility: true, approved_for_source_grounded_answers: true,
-    contains_personal_data_warning: false, primary_language: 'en',
+    status: 'approved', primary_language: 'en',
     available_languages: ['en', 'ur', 'pa'], translation_status: 'complete',
-    human_review_required: false, version: '3.0', review_due_date: '2026-01-12',
-    embedding_status: 'indexed', created_by: 'admin',
-    created_at: '2025-01-12T00:00:00Z', updated_at: '2025-01-12T00:00:00Z', metadata: {},
+    version: '3.0', review_due_date: '2026-01-12',
   },
   {
-    id: 'doc-002', organisation_id: 'demo-org', title: 'Medication Administration Policy',
-    description: 'Procedure for safe medication administration including MAR chart guidance, controlled drugs handling and error reporting.',
-    file_name: 'medication_admin_policy_v2.pdf', file_type: 'pdf', file_size_bytes: 911360,
-    storage_key: 'placeholder/demo-org/medication_admin_policy_v2.pdf', vertical: 'care',
-    category: 'Medication', tags: ['medication', 'MAR', 'controlled drugs', 'safety'],
-    status: 'approved', access_roles: ['Care Worker', 'Senior Carer', 'Nurse'],
-    is_sensitive: true, escalation_required: true, approved_for_ai_answers: true,
-    approved_for_staff_visibility: false, approved_for_source_grounded_answers: false,
-    contains_personal_data_warning: false, primary_language: 'en',
-    available_languages: ['en'], translation_status: 'not_required',
-    human_review_required: false, version: '2.1', review_due_date: '2026-01-20',
-    embedding_status: 'indexed', created_by: 'admin',
-    created_at: '2025-01-20T00:00:00Z', updated_at: '2025-01-20T00:00:00Z', metadata: {},
-  },
-  {
-    id: 'doc-003', organisation_id: 'demo-org', title: 'Safeguarding Policy and Procedure',
-    description: 'Adults and children safeguarding policy including reporting routes, designated lead contacts and CQC compliance requirements.',
-    file_name: 'safeguarding_policy_v4.pdf', file_type: 'pdf', file_size_bytes: 1153433,
-    storage_key: 'placeholder/demo-org/safeguarding_policy_v4.pdf', vertical: 'care',
-    category: 'Safeguarding', tags: ['safeguarding', 'CQC', 'reporting'],
-    status: 'approved', access_roles: ['All Staff'],
-    is_sensitive: true, escalation_required: true, approved_for_ai_answers: false,
-    approved_for_staff_visibility: false, approved_for_source_grounded_answers: false,
-    contains_personal_data_warning: false, primary_language: 'en',
-    available_languages: ['en', 'ur'], translation_status: 'in_progress',
-    human_review_required: true, version: '4.0', review_due_date: '2026-02-05',
-    embedding_status: 'not_started', created_by: 'admin',
-    created_at: '2025-02-05T00:00:00Z', updated_at: '2025-02-05T00:00:00Z', metadata: {},
-  },
-  {
-    id: 'doc-005', organisation_id: 'demo-org', title: 'Complaints Procedure',
+    id: 'doc-005', title: 'Complaints Procedure',
     description: 'Step-by-step procedure for handling service user and family complaints, including timelines, recording requirements and escalation routes.',
-    file_name: 'complaints_procedure_v1.pdf', file_type: 'pdf', file_size_bytes: 440320,
-    storage_key: 'placeholder/demo-org/complaints_procedure_v1.pdf', vertical: 'care',
+    file_type: 'pdf', file_size_bytes: 440320,
     category: 'Complaints', tags: ['complaints', 'feedback', 'service users'],
-    status: 'approved', access_roles: ['All Staff'],
-    is_sensitive: false, escalation_required: false, approved_for_ai_answers: true,
-    approved_for_staff_visibility: true, approved_for_source_grounded_answers: true,
-    contains_personal_data_warning: false, primary_language: 'en',
+    status: 'approved', primary_language: 'en',
     available_languages: ['en', 'ur', 'pa', 'ar'], translation_status: 'complete',
-    human_review_required: false, version: '1.2', review_due_date: '2026-02-14',
-    embedding_status: 'indexed', created_by: 'admin',
-    created_at: '2025-02-14T00:00:00Z', updated_at: '2025-02-14T00:00:00Z', metadata: {},
+    version: '1.2', review_due_date: '2026-02-14',
   },
   {
-    id: 'doc-006', organisation_id: 'demo-org', title: 'Infection Control Procedure',
+    id: 'doc-006', title: 'Infection Control Procedure',
     description: 'Standard precautions for infection prevention and control, PPE guidance, hand hygiene, and outbreak management protocols.',
-    file_name: 'infection_control_v3.pdf', file_type: 'pdf', file_size_bytes: 696320,
-    storage_key: 'placeholder/demo-org/infection_control_v3.pdf', vertical: 'care',
+    file_type: 'pdf', file_size_bytes: 696320,
     category: 'Health and Safety', tags: ['infection control', 'PPE', 'hygiene'],
-    status: 'approved', access_roles: ['All Staff'],
-    is_sensitive: false, escalation_required: false, approved_for_ai_answers: true,
-    approved_for_staff_visibility: true, approved_for_source_grounded_answers: true,
-    contains_personal_data_warning: false, primary_language: 'en',
+    status: 'approved', primary_language: 'en',
     available_languages: ['en'], translation_status: 'not_required',
-    human_review_required: false, version: '3.1', review_due_date: '2026-03-01',
-    embedding_status: 'indexed', created_by: 'admin',
-    created_at: '2025-03-01T00:00:00Z', updated_at: '2025-03-01T00:00:00Z', metadata: {},
+    version: '3.1', review_due_date: '2026-03-01',
   },
   {
-    id: 'doc-007', organisation_id: 'demo-org', title: 'Mental Capacity Act Guidance',
-    description: 'Practical guidance on applying the Mental Capacity Act 2005 in care settings, including best interests decisions and advocacy.',
-    file_name: 'mental_capacity_act_guidance_v2.pdf', file_type: 'pdf', file_size_bytes: 532480,
-    storage_key: 'placeholder/demo-org/mental_capacity_act_guidance_v2.pdf', vertical: 'care',
-    category: 'Training', tags: ['MCA', 'mental capacity', 'best interests'],
-    status: 'approved', access_roles: ['Care Worker', 'Senior Carer', 'Nurse'],
-    is_sensitive: false, escalation_required: false, approved_for_ai_answers: true,
-    approved_for_staff_visibility: false, approved_for_source_grounded_answers: false,
-    contains_personal_data_warning: false, primary_language: 'en',
-    available_languages: ['en'], translation_status: 'pending',
-    human_review_required: false, version: '2.0', review_due_date: '2025-11-22',
-    embedding_status: 'pending', created_by: 'admin',
-    created_at: '2024-11-22T00:00:00Z', updated_at: '2024-11-22T00:00:00Z', metadata: {},
-  },
-  {
-    id: 'doc-008', organisation_id: 'demo-org', title: 'Incident Reporting Procedure',
+    id: 'doc-008', title: 'Incident Reporting Procedure',
     description: 'Process for reporting accidents, near misses, and incidents including RIDDOR obligations and duty of candour.',
-    file_name: 'incident_reporting_v2.pdf', file_type: 'pdf', file_size_bytes: 348160,
-    storage_key: 'placeholder/demo-org/incident_reporting_v2.pdf', vertical: 'care',
+    file_type: 'pdf', file_size_bytes: 348160,
     category: 'Health and Safety', tags: ['incident', 'accident', 'RIDDOR'],
-    status: 'approved', access_roles: ['All Staff'],
-    is_sensitive: false, escalation_required: false, approved_for_ai_answers: true,
-    approved_for_staff_visibility: true, approved_for_source_grounded_answers: true,
-    contains_personal_data_warning: false, primary_language: 'en',
+    status: 'approved', primary_language: 'en',
     available_languages: ['en'], translation_status: 'not_required',
-    human_review_required: false, version: '2.0', review_due_date: '2026-04-03',
-    embedding_status: 'indexed', created_by: 'admin',
-    created_at: '2025-04-03T00:00:00Z', updated_at: '2025-04-03T00:00:00Z', metadata: {},
+    version: '2.0', review_due_date: '2026-04-03',
   },
   {
-    id: 'doc-012', organisation_id: 'demo-org', title: 'New Staff Induction Checklist',
+    id: 'doc-012', title: 'New Staff Induction Checklist',
     description: 'Structured onboarding checklist for new starters covering mandatory training, policy sign-offs, DBS checks and buddy assignment.',
-    file_name: 'induction_checklist_v2.pdf', file_type: 'pdf', file_size_bytes: 184320,
-    storage_key: 'placeholder/demo-org/induction_checklist_v2.pdf', vertical: 'care',
+    file_type: 'pdf', file_size_bytes: 184320,
     category: 'Onboarding', tags: ['induction', 'onboarding', 'DBS', 'mandatory training'],
-    status: 'approved', access_roles: ['All Staff', 'Manager'],
-    is_sensitive: false, escalation_required: false, approved_for_ai_answers: true,
-    approved_for_staff_visibility: true, approved_for_source_grounded_answers: true,
-    contains_personal_data_warning: false, primary_language: 'en',
+    status: 'approved', primary_language: 'en',
     available_languages: ['en', 'ur', 'pa', 'bn'], translation_status: 'in_progress',
-    human_review_required: false, version: '2.0', review_due_date: '2026-06-01',
-    embedding_status: 'indexed', created_by: 'admin',
-    created_at: '2025-03-20T00:00:00Z', updated_at: '2025-03-20T00:00:00Z', metadata: {},
+    version: '2.0', review_due_date: '2026-06-01',
   },
 ]
 
@@ -162,7 +87,7 @@ function formatBytes(bytes?: number): string {
 // Primary language is always Approved (document is approved).
 // Other languages derive status from translation_status and position in list.
 // ---------------------------------------------------------------------------
-function getLanguageStatus(doc: DocumentRecord, lang: string): { label: string; colour: string } {
+function getLanguageStatus(doc: StaffPolicyRecord, lang: string): { label: string; colour: string } {
   if (lang === doc.primary_language) {
     return { label: 'Approved', colour: 'bg-teal-100 text-teal-800' }
   }
@@ -181,21 +106,17 @@ function getLanguageStatus(doc: DocumentRecord, lang: string): { label: string; 
 // ---------------------------------------------------------------------------
 // CTA safety gate: must NOT show "Ask WorkTwin" if document is unsafe for AI
 // ---------------------------------------------------------------------------
-function isSafeForAiCta(doc: DocumentRecord): boolean {
-  return (
-    doc.status !== 'archived' &&
-    doc.approved_for_source_grounded_answers === true &&
-    doc.approved_for_staff_visibility === true &&
-    doc.is_sensitive !== true &&
-    doc.escalation_required !== true
-  )
+function isSafeForAiCta(doc: StaffPolicyRecord): boolean {
+  // Backend gate enforces governance conditions before serving; status is the only
+  // remaining discriminator meaningful at the staff UI layer.
+  return doc.status !== 'archived'
 }
 
 // ---------------------------------------------------------------------------
 // Ask status badge — 4-tier label shown on every card and in the modal
 // ---------------------------------------------------------------------------
 
-function AskStatusBadge({ doc, small = true }: { doc: DocumentRecord; small?: boolean }) {
+function AskStatusBadge({ doc, small = true }: { doc: StaffPolicyRecord; small?: boolean }) {
   const sz = small ? 10 : 11
   const base = `inline-flex items-center gap-1 font-medium px-2 py-0.5 rounded-full border ${small ? 'text-[11px]' : 'text-xs'}`
   if (doc.status === 'archived') {
@@ -205,23 +126,9 @@ function AskStatusBadge({ doc, small = true }: { doc: DocumentRecord; small?: bo
       </span>
     )
   }
-  if (doc.is_sensitive || doc.escalation_required) {
-    return (
-      <span className={`${base} bg-red-50 text-red-700 border-red-100`}>
-        <Lock size={sz} />Human-only — Ask blocked
-      </span>
-    )
-  }
-  if (isSafeForAiCta(doc)) {
-    return (
-      <span className={`${base} bg-teal-50 text-teal-700 border-teal-100`}>
-        <MessageCircle size={sz} />Ask enabled
-      </span>
-    )
-  }
   return (
-    <span className={`${base} bg-amber-50 text-amber-700 border-amber-100`}>
-      <Shield size={sz} />Admin-test only
+    <span className={`${base} bg-teal-50 text-teal-700 border-teal-100`}>
+      <CheckCircle size={sz} />Staff-visible
     </span>
   )
 }
@@ -230,7 +137,7 @@ function AskStatusBadge({ doc, small = true }: { doc: DocumentRecord; small?: bo
 // Detail modal
 // ---------------------------------------------------------------------------
 
-function PolicyModal({ doc, onClose }: { doc: DocumentRecord; onClose: () => void }) {
+function PolicyModal({ doc, onClose }: { doc: StaffPolicyRecord; onClose: () => void }) {
   const safeForAi = isSafeForAiCta(doc)
 
   return (
@@ -269,16 +176,6 @@ function PolicyModal({ doc, onClose }: { doc: DocumentRecord; onClose: () => voi
             <AskStatusBadge doc={doc} small={false} />
           </div>
 
-          {/* Human-only notice */}
-          {(doc.is_sensitive || doc.escalation_required) && (
-            <div className="flex items-start gap-2 bg-red-50 border border-red-100 rounded-xl px-4 py-3">
-              <Lock size={15} className="text-red-600 mt-0.5 shrink-0" />
-              <p className="text-xs text-red-800 font-medium">
-                This policy covers sensitive or escalation-required topics. WorkTwin cannot answer questions on this document — always speak to your manager or the correct designated lead.
-              </p>
-            </div>
-          )}
-
           {/* Description */}
           {doc.description && (
             <p className="text-sm text-slate-600 leading-relaxed">{doc.description}</p>
@@ -297,10 +194,6 @@ function PolicyModal({ doc, onClose }: { doc: DocumentRecord; onClose: () => voi
             <div className="bg-slate-50 rounded-xl p-3">
               <p className="text-slate-400 font-medium mb-0.5">File size</p>
               <p className="text-slate-800 font-semibold">{formatBytes(doc.file_size_bytes)}</p>
-            </div>
-            <div className="bg-slate-50 rounded-xl p-3">
-              <p className="text-slate-400 font-medium mb-0.5">Accessible to</p>
-              <p className="text-slate-800 font-semibold">{doc.access_roles.join(', ')}</p>
             </div>
           </div>
 
@@ -343,9 +236,9 @@ function PolicyModal({ doc, onClose }: { doc: DocumentRecord; onClose: () => voi
           )}
         </div>
 
-        {/* Footer — CTA is gated by safety flags */}
+        {/* Footer — CTA shown for non-archived policies only */}
         <div className="p-5 border-t border-slate-100 flex gap-2">
-          {safeForAi ? (
+          {safeForAi && (
             <a
               href={`/ask?policy=${encodeURIComponent(doc.title)}`}
               className="flex-1 flex items-center justify-center gap-2 bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
@@ -353,22 +246,6 @@ function PolicyModal({ doc, onClose }: { doc: DocumentRecord; onClose: () => voi
               <MessageCircle size={15} />
               Ask WorkTwin about this policy
             </a>
-          ) : (doc.is_sensitive || doc.escalation_required) ? (
-            <div className="flex-1 flex flex-col gap-1.5">
-              <div className="flex items-center justify-center gap-2 bg-red-50 border border-red-200 text-red-800 text-sm font-medium px-4 py-2.5 rounded-xl">
-                <Lock size={15} />
-                Human-only — Ask blocked
-              </div>
-              <p className="text-center text-xs text-slate-400">Speak to your manager or the correct designated lead.</p>
-            </div>
-          ) : (
-            <div className="flex-1 flex flex-col gap-1.5">
-              <div className="flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-sm font-medium px-4 py-2.5 rounded-xl">
-                <Shield size={15} />
-                Admin-test only
-              </div>
-              <p className="text-center text-xs text-slate-400">Not yet approved for staff answers.</p>
-            </div>
           )}
           <button
             onClick={onClose}
@@ -387,12 +264,12 @@ function PolicyModal({ doc, onClose }: { doc: DocumentRecord; onClose: () => voi
 // ---------------------------------------------------------------------------
 
 export default function PoliciesPage() {
-  const [docs, setDocs] = useState<DocumentRecord[]>([])
+  const [docs, setDocs] = useState<StaffPolicyRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [usingFallback, setUsingFallback] = useState(false)
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('All')
-  const [selected, setSelected] = useState<DocumentRecord | null>(null)
+  const [selected, setSelected] = useState<StaffPolicyRecord | null>(null)
 
   useEffect(() => {
     fetchPolicies()
@@ -450,12 +327,7 @@ export default function PoliciesPage() {
         <div className="flex items-start gap-3 bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4">
           <MessageCircle size={16} className="text-slate-400 mt-0.5 shrink-0" />
           <p className="text-xs text-slate-600 leading-relaxed">
-            <span className="font-semibold text-slate-700">
-              {usingFallback
-                ? 'Demo policy library — Ask safety labels shown for illustration.'
-                : 'Live policy library — Ask safety labels reflect current governance settings.'}
-            </span>
-            {' '}WorkTwin only answers questions from documents that have been approved for staff visibility. Each policy shows a clear safety label such as: <span className="font-medium text-teal-700">Ask enabled</span> — approved for staff Ask; <span className="font-medium text-red-700">Human-only — Ask blocked</span> — sensitive or escalation-required topic; must be handled by the correct lead or manager; <span className="font-medium text-amber-700">Admin-test only</span> — not approved for staff answers; or <span className="font-medium text-slate-500">Archived</span> — document no longer in active use.
+            WorkTwin only shows staff-visible policies here. Ask WorkTwin will still check approved source-grounded documents and escalate high-risk topics before answering.
           </p>
         </div>
 
@@ -565,10 +437,6 @@ export default function PoliciesPage() {
                           {formatDate(doc.review_due_date)}
                         </span>
                       )}
-                      <span className="flex items-center gap-1">
-                        <Users size={11} />
-                        {doc.access_roles[0]}{doc.access_roles.length > 1 ? ` +${doc.access_roles.length - 1}` : ''}
-                      </span>
                     </div>
                     <ChevronRight size={14} className="text-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>

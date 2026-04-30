@@ -1,6 +1,6 @@
 // WorkTwin API helper — calls the FastAPI backend at NEXT_PUBLIC_API_URL.
 
-import type { AskRequest, AskResponse, DocumentRecord, DocumentListResponse, UploadDocumentResult, GenerateEmbeddingsResult, VectorSearchResponse, AnswerDebugResponse, GovernanceUpdateRequest } from './types'
+import type { AskRequest, AskResponse, DocumentRecord, StaffPolicyRecord, DocumentListResponse, UploadDocumentResult, GenerateEmbeddingsResult, VectorSearchResponse, AnswerDebugResponse, GovernanceUpdateRequest } from './types'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
@@ -71,7 +71,7 @@ export async function fetchPolicies(params?: {
   vertical?: string
   category?: string
   language?: string
-}): Promise<DocumentRecord[]> {
+}): Promise<StaffPolicyRecord[]> {
   const qs = new URLSearchParams()
   if (params?.vertical) qs.set('vertical', params.vertical)
   if (params?.category) qs.set('category', params.category)
@@ -79,7 +79,7 @@ export async function fetchPolicies(params?: {
   const url = `${API_BASE_URL}/policies${qs.toString() ? `?${qs}` : ''}`
   const response = await fetch(url, { signal: AbortSignal.timeout(5_000) })
   if (!response.ok) throw new Error(`API error: ${response.status}`)
-  return response.json() as Promise<DocumentRecord[]>
+  return response.json() as Promise<StaffPolicyRecord[]>
 }
 
 export async function approveDocument(id: string): Promise<DocumentRecord> {

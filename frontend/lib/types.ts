@@ -105,6 +105,24 @@ export interface DocumentRecord {
   approved_for_source_grounded_answers?: boolean
 }
 
+// Staff-safe subset returned by GET /policies (Milestone 4S.45).
+// Internal governance booleans and access control fields are stripped server-side.
+export interface StaffPolicyRecord {
+  id: string
+  title: string
+  description?: string
+  file_type?: string
+  file_size_bytes?: number
+  category: string
+  tags: string[]
+  status: DocumentStatus
+  primary_language: string
+  available_languages: string[]
+  translation_status: TranslationStatus
+  version: string
+  review_due_date?: string
+}
+
 // ---------------------------------------------------------------------------
 // Document list response (Milestone 4C.1)
 // ---------------------------------------------------------------------------

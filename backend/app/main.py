@@ -1521,6 +1521,7 @@ class DocumentRecord(BaseModel):
 
 # Milestone 4S.31 — staff-safe response shape for GET /policies.
 # Strips admin/storage/governance fields; exposes only what the Policy Library UI needs.
+# Milestone 4S.45 — removed internal governance booleans and access control fields.
 class StaffPolicyRecord(BaseModel):
     id: str
     title: str
@@ -1530,16 +1531,9 @@ class StaffPolicyRecord(BaseModel):
     category: str
     tags: List[str] = []
     status: DocumentStatus = "draft"
-    access_roles: List[str] = []
-    is_sensitive: bool = False
-    escalation_required: bool = False
-    approved_for_staff_visibility: Optional[bool] = False
-    approved_for_source_grounded_answers: Optional[bool] = False
-    contains_personal_data_warning: bool = False
     primary_language: str = "en"
     available_languages: List[str] = ["en"]
     translation_status: TranslationStatus = "not_required"
-    human_review_required: bool = True
     version: str = "1.0"
     review_due_date: Optional[str] = None
 

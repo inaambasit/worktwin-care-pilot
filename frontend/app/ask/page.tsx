@@ -178,12 +178,14 @@ export default function AskPage() {
     try {
       const response = await askWorktwin(prompt)
       setCurrentAnswer(mapApiResponse(prompt, response))
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch {
       // Backend unreachable — use demo answers for known questions, error otherwise
       const demo = getDemoFallback(prompt)
       if (demo) {
         setCurrentAnswer(demo)
         setIsDemoFallback(true)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
       } else {
         setApiError(
           'WorkTwin could not connect to the knowledge base. Please try again or speak to your manager.',
@@ -337,7 +339,7 @@ export default function AskPage() {
             </div>
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex items-center gap-3">
               <Loader2 size={18} className="text-teal-600 animate-spin shrink-0" />
-              <span className="text-sm text-slate-600">WorkTwin is checking the knowledge base…</span>
+              <span className="text-sm text-slate-600">Checking approved policies and procedures…</span>
             </div>
           </div>
         )}
@@ -402,6 +404,10 @@ export default function AskPage() {
                   <Shield size={16} className="text-amber-600" />
                   <p className="text-sm font-semibold text-slate-800">WorkTwin cannot answer this directly</p>
                 </div>
+                <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5 mb-3">
+                  <AlertTriangle size={12} className="text-amber-600 shrink-0" />
+                  <span className="text-xs text-amber-700 font-medium">No approved policy found — please escalate</span>
+                </div>
                 <p className="text-sm text-slate-600">
                   {currentAnswer.answer ||
                     'This question falls outside WorkTwin’s permitted answer scope, or no approved document covers this topic. Please speak to your manager or refer to the relevant policy.'}
@@ -461,6 +467,10 @@ export default function AskPage() {
                     </div>
                     <p className="text-sm font-semibold text-slate-800">WorkTwin</p>
                     <span className="text-xs text-slate-400">· Answer from approved documents</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-teal-50 border border-teal-200 rounded-lg px-3 py-1.5 mb-3">
+                    <BadgeCheck size={12} className="text-teal-600 shrink-0" />
+                    <span className="text-xs text-teal-700 font-medium">Answer based on approved policy</span>
                   </div>
                   <p className="text-slate-700 text-sm leading-relaxed">{currentAnswer.answer}</p>
                   {currentAnswer.disclaimer && (
@@ -692,27 +702,24 @@ export default function AskPage() {
             />
             <button
               onClick={() => { if (input.trim().length >= 3) handlePrompt(input.trim()) }}
-              disabled={isLoading}
-              className="px-4 py-2 bg-teal-700 hover:bg-teal-800 disabled:bg-teal-400 text-white rounded-xl transition-colors"
+              disabled={isLoading || input.trim().length < 3}
+              className="px-4 py-2 bg-teal-700 hover:bg-teal-800 disabled:bg-teal-400 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
             >
               {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
             </button>
           </div>
-          {input.trim().length > 0 && input.trim().length < 3 && (
-            <p className="text-xs text-amber-600 text-center mt-1">
-              Please enter at least 3 characters.
-            </p>
-          )}
-          {input.length >= 500 && (
-            <p className="text-xs text-amber-600 text-center mt-1">
-              Questions must be 500 characters or fewer.
-            </p>
-          )}
-          {!(input.trim().length > 0 && input.trim().length < 3) && input.length < 500 && (
-            <p className="text-xs text-slate-400 text-center mt-2">
-              Your questions are private. WorkTwin answers from approved documents only.
-            </p>
-          )}
+          <div className="flex items-center justify-between mt-1.5 px-1">
+            {input.trim().length > 0 && input.trim().length < 3 ? (
+              <p className="text-xs text-amber-600">Please enter at least 3 characters.</p>
+            ) : (
+              <p className="text-xs text-slate-400">Your questions are private. WorkTwin answers from approved documents only.</p>
+            )}
+            <p className={`text-xs tabular-nums shrink-0 ml-3 ${
+              input.length >= 500 ? 'text-red-500' :
+              input.length >= 450 ? 'text-amber-500' :
+              'text-slate-400'
+            }`}>{input.length} / 500</p>
+          </div>
         </div>
       </div>
     </AppLayout>

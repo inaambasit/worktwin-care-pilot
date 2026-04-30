@@ -9,7 +9,6 @@ export interface AskSource {
   section?: string
   page?: number
   source_label?: string
-  source_preview?: string
 }
 
 export type RiskCategory =

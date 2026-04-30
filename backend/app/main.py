@@ -1434,7 +1434,6 @@ class Source(BaseModel):
     section: Optional[str] = None
     page: Optional[int] = None
     source_label: Optional[str] = None    # e.g. "[Source 1]" — citation label
-    source_preview: Optional[str] = None  # ≤200 chars of matched chunk text
 
 
 class AskResponse(BaseModel):
@@ -2315,14 +2314,13 @@ def ask_worktwin(payload: AskRequest):
     # ------------------------------------------------------------------
     # Map sources to safe staff shape.
     # Strips: document_id, chunk_id, similarity, chunk_index,
-    #         category, vertical, governance flags.
-    # Exposes: document_name (title), source_label, source_preview ≤200 chars.
+    #         category, vertical, governance flags, source_preview.
+    # Exposes: document_name (title), source_label only.
     # ------------------------------------------------------------------
     staff_sources = [
         Source(
             document_name=s["document_title"],
             source_label=s["source_label"],
-            source_preview=(s.get("source_preview") or "")[:200],
             section=None,
             page=None,
         )

@@ -31,7 +31,6 @@ interface DisplaySource {
   title: string
   section?: string
   page?: number
-  source_preview?: string
 }
 
 interface DisplayAnswer {
@@ -129,7 +128,7 @@ function mapApiResponse(question: string, res: AskResponse): DisplayAnswer {
       title: s.document_name,
       section: s.section,
       page: s.page,
-      source_preview: s.source_preview,
+
     })),
     escalateIf: res.escalate_if,
     learningOption: res.learning_option ?? '',
@@ -503,11 +502,6 @@ export default function AskPage() {
                         <p className="text-sm font-semibold text-slate-800">{src.title}</p>
                         {src.section && <p className="text-xs text-slate-500">{src.section}</p>}
                         {src.page != null && <p className="text-xs text-slate-400">Page {src.page}</p>}
-                        {src.source_preview && (
-                          <p className="mt-1.5 text-xs text-slate-600 italic border-l-2 border-teal-200 pl-2">
-                            {src.source_preview}
-                          </p>
-                        )}
                       </div>
                     ))}
                   </div>

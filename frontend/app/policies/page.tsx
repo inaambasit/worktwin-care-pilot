@@ -61,6 +61,10 @@ const SAMPLE_DOCS: StaffPolicyRecord[] = [
   },
 ]
 
+const HIGH_RISK_CATEGORIES = new Set([
+  'Safeguarding', 'Medication', 'HR', 'Legal', 'Compliance', 'Wellbeing', 'Complaints',
+])
+
 const CATEGORY_COLOURS: Record<string, string> = {
   HR: 'bg-violet-50 text-violet-700',
   Medication: 'bg-orange-50 text-orange-700',
@@ -237,22 +241,35 @@ function PolicyModal({ doc, onClose }: { doc: StaffPolicyRecord; onClose: () => 
         </div>
 
         {/* Footer — CTA shown for non-archived policies only */}
-        <div className="p-5 border-t border-slate-100 flex gap-2">
-          {safeForAi && (
-            <a
-              href="/ask"
-              className="flex-1 flex items-center justify-center gap-2 bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
-            >
-              <MessageCircle size={15} />
-              Ask WorkTwin a question
-            </a>
+        <div className="p-5 border-t border-slate-100 space-y-3">
+          {safeForAi && HIGH_RISK_CATEGORIES.has(doc.category) && (
+            <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5">
+              <AlertTriangle size={13} className="text-amber-600 mt-0.5 shrink-0" />
+              <p className="text-xs text-amber-700">Questions on this topic may be escalated to a human lead.</p>
+            </div>
           )}
-          <button
-            onClick={onClose}
-            className="px-4 py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900 rounded-xl hover:bg-slate-50 transition-colors"
-          >
-            Close
-          </button>
+          <div className="flex gap-2">
+            {safeForAi && (
+              <a
+                href="/ask"
+                className="flex-1 flex items-center justify-center gap-2 bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
+              >
+                <MessageCircle size={15} />
+                Ask a policy question
+              </a>
+            )}
+            <button
+              onClick={onClose}
+              className="px-4 py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900 rounded-xl hover:bg-slate-50 transition-colors"
+            >
+              Close
+            </button>
+          </div>
+          {safeForAi && (
+            <p className="text-xs text-slate-400 text-center px-2">
+              WorkTwin checks whether a question can be answered safely. High-risk topics are escalated to the appropriate human lead.
+            </p>
+          )}
         </div>
       </div>
     </div>

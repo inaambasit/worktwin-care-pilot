@@ -687,7 +687,7 @@ export default function AskPage() {
             {input.trim().length > 0 && input.trim().length < 3 ? (
               <p className="text-xs text-amber-600">Please enter at least 3 characters.</p>
             ) : (
-              <p className="text-xs text-slate-400">Your questions are private. WorkTwin answers from approved documents only.</p>
+              <p className="text-xs text-slate-400">Private from managers in this demo. WorkTwin does not show raw questions on admin pages.</p>
             )}
             <p className={`text-xs tabular-nums shrink-0 ml-3 ${
               input.length >= 500 ? 'text-red-500' :

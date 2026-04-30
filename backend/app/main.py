@@ -985,7 +985,7 @@ def _normalise_search_result(row: Dict[str, Any]) -> Dict[str, Any]:
 # Raw query text is NEVER stored; only the resolved topic label is audited.
 _TOPIC_PATTERNS: List[Tuple[str, "re.Pattern[str]"]] = [
     ("safeguarding", re.compile(
-        r'\b(safeguard(?:ing)?|abuse|neglect|harm|exploitation|'
+        r'\b(safeguard(?:ing)?|abus(?:e[sd]?|ing)|neglect|harm|exploitation|'
         r'being\s+hurt|service\s+user.*hurt|hurt.*service\s+user|'
         r'hurting\s+someone|vulnerable\s+adult|child\s+protection|'
         r'adult\s+at\s+risk|maltreatment|disclosure|'

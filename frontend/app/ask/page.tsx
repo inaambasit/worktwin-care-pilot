@@ -9,16 +9,15 @@ import Link from 'next/link'
 import { askWorktwin } from '@/lib/api'
 import type { AskResponse } from '@/lib/types'
 
-const MEDICATION_Q = 'What do I do if a service user refuses medication?'
-const SAFEGUARDING_Q = 'How do I report a safeguarding concern?'
+const MEDICATION_Q = 'A service user missed medication. What should I do?'
+const SAFEGUARDING_Q = 'I have a safeguarding concern. What should I do?'
 
 const suggestedPrompts = [
-  MEDICATION_Q,
+  'What should I do when a visitor arrives?',
+  'What details should be recorded in the visitor log?',
+  'Can a visitor go beyond reception without speaking to staff?',
   SAFEGUARDING_Q,
-  'What is the correct incident reporting procedure?',
-  'What are my responsibilities under the infection control policy?',
-  'How do I complete a risk assessment?',
-  'What do I do if I witness a colleague acting inappropriately?',
+  MEDICATION_Q,
 ]
 
 // ---------------------------------------------------------------------------
@@ -53,87 +52,66 @@ interface DisplayAnswer {
 const medicationAnswer: DisplayAnswer = {
   question: MEDICATION_Q,
   answer:
-    'If a service user refuses their prescribed medication, you must respect their right to refuse — this is part of their autonomy and is protected in law. Do not force or pressurise the service user to take medication under any circumstances. Document the refusal immediately and follow the steps set out in the Medication Administration Policy.',
-  disclaimer:
-    'This is policy guidance, not clinical advice. Follow company policy and speak to the senior person on duty if unsure.',
-  nextSteps: [
-    'Stay calm and listen — ask if there is a reason for the refusal',
-    'Record the refusal on the Medication Administration Record (MAR) chart immediately',
-    'Notify your line manager or the senior carer on duty',
-    'If capacity may be in question, follow the Mental Capacity Act guidance in the policy',
-    'Contact the prescribing GP or clinician if there is clinical risk',
-    'Never leave medication unattended or unsecured',
-  ],
-  sources: [{
-    source_label: '[Source 1]',
-    title: 'Medication Administration Policy',
-    section: 'Section 4.2 — Refusal of Medication',
-  }],
+    'This is a medication incident. WorkTwin cannot advise on this directly. Please speak to the medication lead, registered manager or senior person on duty immediately.',
+  disclaimer: null,
+  nextSteps: [],
+  sources: [],
   escalateIf: [
-    'The service user appears distressed, in pain, or frightened',
-    'You believe the service user may lack mental capacity',
-    'The refusal occurs more than once without a clear reason',
-    'Any immediate clinical risk is present',
-    'You are unsure of the correct next step',
+    'Call 999 immediately if the service user is showing signs of a serious adverse reaction or is in immediate danger',
   ],
-  learningOption:
-    'Would you like to practise a medication refusal scenario to build your confidence before your next shift?',
-  requiresEscalation: false,
-  allowedToAnswer: true,
+  learningOption: '',
+  requiresEscalation: true,
+  allowedToAnswer: false,
   riskCategory: 'medication',
   isDemo: true,
-  contactRoutes: [],
+  contactRoutes: [
+    'Medication Lead',
+    'Registered Manager',
+    'Senior person on duty',
+    'NHS 111 — for urgent non-emergency medical guidance',
+    '999 — if the service user is in immediate danger',
+  ],
 }
 
 const safeguardingAnswer: DisplayAnswer = {
   question: SAFEGUARDING_Q,
   answer:
-    'If you have a safeguarding concern, you must act immediately. Do not attempt to investigate the concern yourself — your role is to report, not to investigate. Safeguarding protects the welfare of vulnerable individuals and must always be treated as urgent. Follow the procedure set out in the Safeguarding Policy.',
+    'This is a safeguarding concern. WorkTwin cannot advise on this directly. Please report immediately to the Designated Safeguarding Lead or your line manager. Do not investigate yourself.',
   disclaimer: null,
-  nextSteps: [
-    'Do not investigate the concern yourself — that is not your role',
-    'Record factual information only: what you saw, heard or were told, in your own words',
-    'Report immediately to the Designated Safeguarding Lead or your line manager',
-    'If there is immediate risk to safety, escalate urgently — do not delay',
-    'Complete the formal safeguarding concern form as directed by your manager',
-    'Do not discuss the concern with colleagues or the person alleged to have caused harm',
-    'Follow the Safeguarding Policy — do not wait to seek guidance before reporting',
-  ],
-  sources: [{
-    source_label: '[Source 1]',
-    title: 'Safeguarding Policy',
-    section: 'Section 3.1 — Reporting a Concern',
-  }],
+  nextSteps: [],
+  sources: [],
   escalateIf: [
-    'There is immediate risk to the safety of a service user or staff member',
-    'The concern involves a child or vulnerable adult',
-    'The person causing harm is in a position of trust, such as a staff member or manager',
-    'You are unsure whether the concern meets the reporting threshold — if in doubt, always report',
+    'Call 999 immediately if there is immediate risk to life or physical safety',
   ],
-  learningOption: 'Would you like to practise a safeguarding scenario to build your confidence?',
-  requiresEscalation: false,
-  allowedToAnswer: true,
+  learningOption: '',
+  requiresEscalation: true,
+  allowedToAnswer: false,
   riskCategory: 'safeguarding',
   isDemo: true,
-  contactRoutes: [],
+  contactRoutes: [
+    'Designated Safeguarding Lead',
+    'Line Manager or Registered Manager',
+    'Senior person on duty if the Designated Lead is unavailable',
+    '999 — if there is immediate risk to life or physical safety',
+  ],
 }
 
 const checklistItems = [
-  'Stay calm — do not force or pressurise',
-  'Record refusal on MAR chart',
-  'Notify line manager or senior carer on duty',
-  'Check Mental Capacity Act guidance if needed',
-  'Contact GP if clinical risk is present',
-  'Keep medication secured',
+  'Record missed dose on the MAR chart immediately',
+  'Notify your line manager or senior carer on duty',
+  'Contact the GP or pharmacist if there is clinical risk',
+  'Complete a medication incident form',
+  'Do not administer a double dose without clinical direction',
+  'Keep all medication secured',
 ]
 
 const quizQuestion = {
-  question: 'What is the FIRST thing you must do when a service user refuses medication?',
+  question: 'What is the FIRST thing you must do when a service user misses their medication?',
   options: [
-    'Persuade them by explaining the importance of the medication',
-    'Record the refusal on the MAR chart and notify your manager',
-    'Contact the GP immediately',
-    'Leave the medication on the bedside table for later',
+    'Administer the missed dose as soon as you notice',
+    'Record the missed dose on the MAR chart and notify your manager',
+    'Contact the GP immediately before doing anything else',
+    'Leave it and continue with the next scheduled dose',
   ],
   correct: 1,
 }
@@ -224,31 +202,73 @@ export default function AskPage() {
         <div>
           <h1 className="text-xl font-bold text-slate-900">Ask WorkTwin</h1>
           <p className="text-sm text-slate-500 mt-0.5">
-            Answers grounded in your company&apos;s approved documents. All conversations are private to you.
+            Ask questions about approved policies and care procedures. WorkTwin can only answer from documents your organisation has approved for staff use. All conversations are private to you.
           </p>
         </div>
 
-        {/* Suggested prompts — shown when idle or after an error */}
+        {/* Scope panel and suggested prompts — shown when idle */}
         {!showAnswer && !isLoading && (
-          <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Suggested questions</p>
-            <div className="flex flex-wrap gap-2">
-              {suggestedPrompts.map((p) => (
-                <button
-                  key={p}
-                  onClick={() => handlePrompt(p)}
-                  className={`text-sm border bg-white rounded-full px-3 py-1.5 transition-colors ${
-                    p === SAFEGUARDING_Q
-                      ? 'border-amber-300 text-amber-800 hover:bg-amber-50 hover:border-amber-400'
-                      : 'border-slate-200 text-slate-700 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-800'
-                  }`}
-                >
-                  {p === SAFEGUARDING_Q && <Shield size={12} className="inline mr-1.5 text-amber-600" />}
-                  {p}
-                </button>
-              ))}
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="bg-teal-50 border border-teal-100 rounded-xl p-4">
+                <p className="text-xs font-semibold text-teal-700 uppercase tracking-wider mb-2">What you can ask</p>
+                <ul className="space-y-1.5">
+                  {[
+                    'Ask about approved policies',
+                    'Ask about visitor sign-in, onboarding and safe workplace procedures',
+                    'Ask for simple explanations of approved guidance',
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm text-teal-800">
+                      <span className="text-teal-500 shrink-0 mt-0.5">·</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
+                <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-2">When to speak to a person</p>
+                <ul className="space-y-1.5">
+                  {[
+                    'Safeguarding concerns',
+                    'Medication incidents',
+                    'HR, grievance or payroll matters',
+                    'Legal, CQC or compliance queries',
+                    'Wellbeing or immediate risk',
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm text-amber-800">
+                      <span className="text-amber-500 shrink-0 mt-0.5">·</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/escalation" className="mt-2.5 inline-block text-xs text-amber-700 underline font-medium">
+                  Escalation contacts →
+                </Link>
+              </div>
             </div>
-          </div>
+
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Try asking</p>
+              <div className="flex flex-wrap gap-2">
+                {suggestedPrompts.map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => handlePrompt(p)}
+                    className={`text-sm border bg-white rounded-full px-3 py-1.5 transition-colors ${
+                      p === SAFEGUARDING_Q || p === MEDICATION_Q
+                        ? 'border-amber-300 text-amber-800 hover:bg-amber-50 hover:border-amber-400'
+                        : 'border-slate-200 text-slate-700 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-800'
+                    }`}
+                  >
+                    {(p === SAFEGUARDING_Q || p === MEDICATION_Q) && (
+                      <Shield size={12} className="inline mr-1.5 text-amber-600" />
+                    )}
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
         )}
 
         {/* Loading state */}
@@ -306,7 +326,7 @@ export default function AskPage() {
             {!currentAnswer.isDemo && !isDemoFallback && (
               <div className="flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-xl px-4 py-2.5 text-xs text-teal-800">
                 <Zap size={13} className="shrink-0 text-teal-600" />
-                Ask WorkTwin answers from approved staff-visible documents only and shows the source used.
+                WorkTwin answers from documents your organisation has approved for staff use, and shows the source.
               </div>
             )}
 
@@ -375,7 +395,7 @@ export default function AskPage() {
                       <span className="text-white text-xs font-bold">W</span>
                     </div>
                     <p className="text-sm font-semibold text-slate-800">WorkTwin</p>
-                    <span className="text-xs text-slate-400">· Source-cited answer</span>
+                    <span className="text-xs text-slate-400">· Answer from approved documents</span>
                   </div>
                   <p className="text-slate-700 text-sm leading-relaxed">{currentAnswer.answer}</p>
                   {currentAnswer.disclaimer && (
@@ -503,7 +523,7 @@ export default function AskPage() {
             )}
 
             {/* Checklist panel — medication only */}
-            {showChecklist && currentAnswer.riskCategory === 'medication' && (
+            {showChecklist && currentAnswer.riskCategory === 'medication' && currentAnswer.allowedToAnswer && !currentAnswer.requiresEscalation && (
               <div className="bg-white border border-teal-200 rounded-2xl p-5 shadow-sm">
                 <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
                   <List size={16} className="text-teal-600" />
@@ -527,7 +547,7 @@ export default function AskPage() {
             )}
 
             {/* Quiz panel — medication only */}
-            {showQuiz && currentAnswer.riskCategory === 'medication' && (
+            {showQuiz && currentAnswer.riskCategory === 'medication' && currentAnswer.allowedToAnswer && !currentAnswer.requiresEscalation && (
               <div className="bg-white border border-violet-200 rounded-2xl p-5 shadow-sm">
                 <h3 className="font-semibold text-slate-900 mb-1 flex items-center gap-2">
                   <CheckSquare size={16} className="text-violet-600" />

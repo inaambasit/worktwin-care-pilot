@@ -450,7 +450,11 @@ export default function PoliciesPage() {
         <div className="flex items-start gap-3 bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4">
           <MessageCircle size={16} className="text-slate-400 mt-0.5 shrink-0" />
           <p className="text-xs text-slate-600 leading-relaxed">
-            <span className="font-semibold text-slate-700">Demo policy library — Ask safety labels shown for illustration.</span>
+            <span className="font-semibold text-slate-700">
+              {usingFallback
+                ? 'Demo policy library — Ask safety labels shown for illustration.'
+                : 'Live policy library — Ask safety labels reflect current governance settings.'}
+            </span>
             {' '}WorkTwin only answers questions from documents that have been approved for staff visibility. Each policy shows a clear safety label such as: <span className="font-medium text-teal-700">Ask enabled</span> — approved for staff Ask; <span className="font-medium text-red-700">Human-only — Ask blocked</span> — sensitive or escalation-required topic; must be handled by the correct lead or manager; <span className="font-medium text-amber-700">Admin-test only</span> — not approved for staff answers; or <span className="font-medium text-slate-500">Archived</span> — document no longer in active use.
           </p>
         </div>

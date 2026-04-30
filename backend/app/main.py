@@ -552,11 +552,13 @@ def _staff_fallback_response(
     requires_escalation: bool = True,
     risk_category: str = "standard",
     answer: Optional[str] = None,
+    next_steps: Optional[List[str]] = None,
+    vertical_subcategory: Optional[str] = None,
 ) -> "AskResponse":
     """Return a safe AskResponse with no source content."""
     return AskResponse(
         answer=answer or _STAFF_FALLBACK_ANSWER,
-        next_steps=["Please speak to your line manager or designated lead."],
+        next_steps=next_steps or ["Please speak to your line manager or designated lead."],
         sources=[],
         escalate_if=_STANDARD_ESCALATE_IF,
         requires_escalation=requires_escalation,
@@ -565,6 +567,7 @@ def _staff_fallback_response(
         risk_category=risk_category,
         learning_option=None,
         anonymised_insight_topic=None,
+        vertical_subcategory=vertical_subcategory,
     )
 
 
@@ -977,17 +980,150 @@ def _normalise_search_result(row: Dict[str, Any]) -> Dict[str, Any]:
 # OPENAI_API_KEY and ANSWER_MODEL are never logged, returned, or transmitted.
 # ---------------------------------------------------------------------------
 
-_ESCALATION_TOPICS_RE = re.compile(
-    r'\b(safeguard(?:ing)?|medication|complaint|disciplinary|grievance|'
-    r'\bhr\b|payroll|legal|solicitor|tribunal|health\s+and\s+safety|'
-    r'incident|accident|wellbeing|mental\s+health|redundancy|dismissal|'
-    r'named\s+individual|personal\s+data|gdpr|driving|vehicle)\b',
-    re.IGNORECASE,
-)
+# Per-topic escalation patterns — first match wins.
+# Covers all six required categories plus legacy terms from prior milestone.
+# Raw query text is NEVER stored; only the resolved topic label is audited.
+_TOPIC_PATTERNS: List[Tuple[str, "re.Pattern[str]"]] = [
+    ("safeguarding", re.compile(
+        r'\b(safeguard(?:ing)?|abuse|neglect|harm|exploitation|'
+        r'being\s+hurt|service\s+user.*hurt|hurt.*service\s+user|'
+        r'hurting\s+someone|vulnerable\s+adult|child\s+protection|'
+        r'adult\s+at\s+risk|maltreatment|disclosure|'
+        r'incident|accident)\b',
+        re.IGNORECASE,
+    )),
+    ("whistleblowing", re.compile(
+        r'\b(whistle\s*blow(?:ing)?|raising\s+(?:a\s+)?concern|raise\s+(?:a\s+)?concern|'
+        r'unsafe\s+practice|freedom\s+to\s+speak\s+up|speak\s+up|'
+        r'report\s+(?:a\s+)?concern|malpractice)\b',
+        re.IGNORECASE,
+    )),
+    ("medication", re.compile(
+        r'\b(medication|medicine|medic(?:ines)?|dose|dosage|'
+        r'missed\s+dose|overdose|mar\b|mar\s+sheet|'
+        r'controlled\s+drug|prescription|administer(?:ing)?|'
+        r'drug\s+error|wrong\s+medication)\b',
+        re.IGNORECASE,
+    )),
+    ("wellbeing", re.compile(
+        r'\b(wellbeing|well-being|mental\s+health|self[\s-]harm|'
+        r'suicide|suicidal|self[\s-]injur|emotional\s+distress|'
+        r'psychological\s+harm)\b',
+        re.IGNORECASE,
+    )),
+    ("hr", re.compile(
+        r'\b(disciplinary|grievance|payroll|sickness\s+absence|sickness|'
+        r'redundancy|dismissal|capability|performance\s+management|'
+        r'tribunal|annual\s+leave|holiday\s+pay|complaint|'
+        r'\bhr\b|human\s+resources|employment\s+contract)\b',
+        re.IGNORECASE,
+    )),
+    ("legal", re.compile(
+        r'\b(legal|solicitor|lawyer|cqc|regulator|regulatory|'
+        r'compliance|ofsted|inspection|litigation|gdpr|data\s+protection|'
+        r'ico|information\s+commissioner|named\s+individual|personal\s+data|'
+        r'health\s+and\s+safety|driving|vehicle)\b',
+        re.IGNORECASE,
+    )),
+]
+
+# Per-topic response configs — answer, next_steps, risk_category, vertical_subcategory.
+# These are deterministic strings: no LLM, no RAG, no source content.
+_TOPIC_RESPONSE: Dict[str, Dict[str, Any]] = {
+    "safeguarding": {
+        "answer": (
+            "This may be a safeguarding concern. I cannot advise on this directly. "
+            "Please contact your safeguarding lead, registered manager or designated lead immediately. "
+            "If someone is in immediate danger, follow emergency procedures."
+        ),
+        "next_steps": [
+            "Contact your safeguarding lead or registered manager immediately.",
+            "If someone is in immediate danger, call emergency services.",
+            "Follow your organisation's safeguarding procedure.",
+            "Do not take action without guidance from a qualified lead.",
+        ],
+        "risk_category": "vertical_sensitive",
+        "vertical_subcategory": "safeguarding",
+    },
+    "whistleblowing": {
+        "answer": (
+            "This may be a raising concerns or whistleblowing matter. I cannot advise on this directly. "
+            "Please raise it with the appropriate manager, freedom-to-speak-up contact or designated lead "
+            "using your organisation's process."
+        ),
+        "next_steps": [
+            "Raise your concern with a line manager or designated lead.",
+            "Use your organisation's freedom-to-speak-up or whistleblowing procedure.",
+            "You can raise concerns anonymously if your organisation allows it.",
+        ],
+        "risk_category": "vertical_sensitive",
+        "vertical_subcategory": "whistleblowing",
+    },
+    "medication": {
+        "answer": (
+            "Medication queries must be handled by a suitably trained and authorised person. "
+            "I cannot advise on medication, dosing or administration directly. "
+            "Please speak to your registered manager, medication lead or, in an emergency, "
+            "a medical professional immediately."
+        ),
+        "next_steps": [
+            "Contact your medication lead or registered manager.",
+            "In an emergency involving medication, call 999 or 111.",
+            "Record any medication incident in line with your organisation's procedure.",
+        ],
+        "risk_category": "vertical_sensitive",
+        "vertical_subcategory": "medication",
+    },
+    "wellbeing": {
+        "answer": (
+            "This relates to mental health or personal wellbeing. I cannot advise on this directly. "
+            "Please speak to your line manager, designated wellbeing lead, or occupational health contact. "
+            "If you or someone else is in immediate danger, contact emergency services."
+        ),
+        "next_steps": [
+            "Speak to your line manager or wellbeing lead.",
+            "If immediate danger exists, call 999.",
+            "Ask your HR team about an employee assistance programme (EAP) if available.",
+        ],
+        "risk_category": "wellbeing",
+        "vertical_subcategory": "wellbeing",
+    },
+    "hr": {
+        "answer": (
+            "This is an HR or employment matter. I cannot advise on disciplinary, grievance, payroll "
+            "or employment queries directly. Please speak to your HR team or line manager."
+        ),
+        "next_steps": [
+            "Contact your HR team or people team.",
+            "Refer to your contract of employment or staff handbook.",
+            "Speak to your line manager or designated lead.",
+        ],
+        "risk_category": "hr",
+        "vertical_subcategory": "hr",
+    },
+    "legal": {
+        "answer": (
+            "This relates to a legal, regulatory or compliance matter. I cannot advise on this directly. "
+            "Please speak to your registered manager, compliance lead or seek independent legal advice "
+            "as appropriate."
+        ),
+        "next_steps": [
+            "Contact your compliance lead or registered manager.",
+            "Seek independent legal advice if required.",
+            "Refer to your organisation's regulatory compliance procedure.",
+        ],
+        "risk_category": "legal",
+        "vertical_subcategory": "legal_compliance",
+    },
+}
 
 
-def _detect_escalation_topic(query: str) -> bool:
-    return bool(_ESCALATION_TOPICS_RE.search(query))
+def _classify_escalation_topic(query: str) -> Optional[str]:
+    """Return the topic category name if the query matches a high-risk pattern, else None."""
+    for topic, pattern in _TOPIC_PATTERNS:
+        if pattern.search(query):
+            return topic
+    return None
 
 
 def _build_source_context(
@@ -1911,20 +2047,26 @@ def ask_worktwin(payload: AskRequest):
 
     # ------------------------------------------------------------------
     # Escalation short-circuit — no retrieval, no LLM
+    # Topic is audited; raw query text is never stored.
     # ------------------------------------------------------------------
-    if _detect_escalation_topic(query_clean):
+    _escalation_topic = _classify_escalation_topic(query_clean)
+    if _escalation_topic is not None:
         _create_audit_event(
             organisation_id=payload.organisation_id,
             event_type="staff_ask_escalated",
             metadata={
                 "query_length": len(query_clean),
                 "user_role": payload.user_role,
+                "escalation_topic": _escalation_topic,
             },
         )
+        _topic_cfg = _TOPIC_RESPONSE[_escalation_topic]
         return _staff_fallback_response(
             requires_escalation=True,
-            risk_category="hr",
-            answer=_STAFF_ESCALATION_ANSWER,
+            risk_category=_topic_cfg["risk_category"],
+            answer=_topic_cfg["answer"],
+            next_steps=_topic_cfg["next_steps"],
+            vertical_subcategory=_topic_cfg["vertical_subcategory"],
         )
 
     # ------------------------------------------------------------------
@@ -2680,7 +2822,7 @@ def answer_debug(payload: AnswerDebugRequest, _: None = Depends(_require_admin))
         raise HTTPException(status_code=400, detail="Query must not be empty.")
 
     safe_count = max(1, min(payload.match_count, MAX_ANSWER_CHUNKS))
-    is_escalation_topic = _detect_escalation_topic(query_clean)
+    is_escalation_topic = _classify_escalation_topic(query_clean) is not None
     safety_note: Optional[str] = (
         "This query involves a sensitive topic. Please escalate to your line manager or designated lead."
         if is_escalation_topic else None

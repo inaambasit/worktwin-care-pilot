@@ -77,7 +77,7 @@ _OPENAI_CONFIGURED: bool = bool(_OPENAI_API_KEY)
 # ---------------------------------------------------------------------------
 ANSWER_MODEL: str = os.getenv("ANSWER_MODEL", "gpt-4o-mini")
 MAX_ANSWER_CHUNKS: int = 5          # max source chunks fed to answer model
-MAX_SOURCE_CONTEXT_CHARS: int = 4000  # total character cap for source context
+MAX_SOURCE_CONTEXT_CHARS: int = 6000  # total character cap for source context
 
 # ---------------------------------------------------------------------------
 # Milestone 4P.4 — Admin bearer-token guard
@@ -972,7 +972,7 @@ def _normalise_search_result(row: Dict[str, Any]) -> Dict[str, Any]:
         "approved_for_ai_answers": bool(row.get("approved_for_ai_answers", False)),
         "escalation_required": bool(row.get("escalation_required", False)),
         "is_sensitive": bool(row.get("is_sensitive", False)),
-        "chunk_preview": _clean_extracted_text(row.get("chunk_text") or "")[:350],
+        "chunk_preview": _clean_extracted_text(row.get("chunk_text") or "")[:800],
     }
 
 
@@ -1179,7 +1179,7 @@ def _build_source_context(
 
     for i, chunk in enumerate(limited):
         label = f"[Source {i + 1}]"
-        preview = _clean_extracted_text(chunk.get("chunk_preview") or chunk.get("chunk_text") or "")[:350]
+        preview = _clean_extracted_text(chunk.get("chunk_preview") or chunk.get("chunk_text") or "")[:800]
         if not preview:
             continue
         remaining = MAX_SOURCE_CONTEXT_CHARS - total_chars
@@ -1235,7 +1235,7 @@ def _generate_source_grounded_answer(
         "- If sources are insufficient, say exactly: "
         "\"I can't answer that from the available approved sources.\"\n"
         "- Do not mention policies or procedures not present in the sources.\n"
-        "- Keep answers concise and factual.\n"
+        "- Be complete and factual. When the source lists specific items, such as what to record or what steps to follow, include all of them. Do not summarise a source list into fewer items than the source provides.\n"
         "- Do not give legal, clinical, safeguarding, or HR advice beyond the source wording.\n"
         "- Do not invent generic escalation phrases such as "
         "\"Please escalate this to your line manager or designated lead.\" "

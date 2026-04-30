@@ -310,16 +310,16 @@ export default function AskPage() {
               </div>
             )}
 
-            {/* Not allowed to answer */}
-            {!currentAnswer.allowedToAnswer && (
+            {/* Not allowed to answer — only shown when no escalation card is also displayed */}
+            {!currentAnswer.allowedToAnswer && !currentAnswer.requiresEscalation && (
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
                   <Shield size={16} className="text-amber-600" />
                   <p className="text-sm font-semibold text-slate-800">WorkTwin cannot answer this directly</p>
                 </div>
                 <p className="text-sm text-slate-600">
-                  This question falls outside WorkTwin&apos;s permitted answer scope, or no approved document covers
-                  this topic. Please speak to your manager, your Designated Safeguarding Lead, or refer to the relevant policy.
+                  {currentAnswer.answer ||
+                    'This question falls outside WorkTwin’s permitted answer scope, or no approved document covers this topic. Please speak to your manager or refer to the relevant policy.'}
                 </p>
                 <Link href="/escalation" className="mt-3 inline-block text-sm text-teal-700 underline font-medium">
                   View escalation contacts →
@@ -327,7 +327,7 @@ export default function AskPage() {
               </div>
             )}
 
-            {/* Escalation required — show safe wording, never the answer */}
+            {/* Escalation required — use backend answer for category-specific wording */}
             {currentAnswer.requiresEscalation && (
               <div className="bg-amber-50 border border-amber-300 rounded-2xl p-5 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
@@ -335,8 +335,8 @@ export default function AskPage() {
                   <p className="text-sm font-semibold text-amber-800">This topic requires human escalation</p>
                 </div>
                 <p className="text-sm text-amber-700 mb-3">
-                  For safeguarding, medication incidents, HR, legal, or wellbeing concerns, WorkTwin does not provide
-                  a direct answer. Please escalate to the appropriate person immediately.
+                  {currentAnswer.answer ||
+                    'WorkTwin does not provide a direct answer on this topic. Please escalate to the appropriate person immediately.'}
                 </p>
                 <ul className="space-y-1.5 mb-3">
                   {currentAnswer.escalateIf.map((item, i) => (

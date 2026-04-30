@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import AppLayout from '@/components/AppLayout'
-import { Lock, Plus, Trash2, Save, Shield } from 'lucide-react'
+import { Lock, Plus, Trash2, Save, Shield, AlertTriangle } from 'lucide-react'
 
 interface Note {
   id: number
@@ -104,10 +104,17 @@ export default function NotesPage() {
     <AppLayout>
       <div className="max-w-4xl mx-auto">
         {/* Privacy notice */}
-        <div className="bg-teal-50 border border-teal-200 rounded-2xl px-4 py-3 flex items-center gap-3 mb-5">
+        <div className="bg-teal-50 border border-teal-200 rounded-2xl px-4 py-3 flex items-center gap-3 mb-3">
           <Shield size={16} className="text-teal-700 shrink-0" />
           <p className="text-sm text-teal-800">
             <span className="font-semibold">Your notes are completely private.</span> Managers and colleagues cannot view, search or export your notes. Only you can see them.
+          </p>
+        </div>
+        {/* Demo disclaimer */}
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 flex items-center gap-3 mb-5">
+          <AlertTriangle size={16} className="text-amber-600 shrink-0" />
+          <p className="text-sm text-amber-800">
+            <span className="font-semibold">Demo only:</span> In this demo, notes are stored in this browser session only and are not saved to a server.
           </p>
         </div>
 

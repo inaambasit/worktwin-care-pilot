@@ -2,7 +2,7 @@
 import { useState, useRef } from 'react'
 import AppLayout from '@/components/AppLayout'
 import {
-  Send, BookOpen, PlayCircle, Lock, List, Zap,
+  Send, BookOpen, PlayCircle, List, Zap,
   AlertTriangle, CheckSquare, ChevronDown, Shield, Loader2,
   MessageSquare, ArrowLeft,
   UserCheck, ClipboardList, Building2, Briefcase, BadgeCheck, Heart, Pill,
@@ -158,7 +158,6 @@ export default function AskPage() {
   const [isDemoFallback, setIsDemoFallback] = useState(false)
   const [showChecklist, setShowChecklist] = useState(false)
   const [showQuiz, setShowQuiz] = useState(false)
-  const [noteSaved, setNoteSaved] = useState(false)
   const [selectedOption, setSelectedOption] = useState<number | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -168,7 +167,6 @@ export default function AskPage() {
     setInput(prompt)
     setShowChecklist(false)
     setShowQuiz(false)
-    setNoteSaved(false)
     setSelectedOption(null)
     setApiError(null)
     setCurrentAnswer(null)
@@ -203,12 +201,7 @@ export default function AskPage() {
     setIsDemoFallback(false)
     setShowChecklist(false)
     setShowQuiz(false)
-    setNoteSaved(false)
     setSelectedOption(null)
-  }
-
-  function handleSaveNote() {
-    setNoteSaved(true)
   }
 
   return (
@@ -552,17 +545,6 @@ export default function AskPage() {
                     <PlayCircle size={15} />
                     Practise this scenario
                   </Link>
-                  <button
-                    onClick={handleSaveNote}
-                    className={`flex items-center gap-1.5 text-sm border font-medium px-4 py-2 rounded-lg transition-colors ${
-                      noteSaved
-                        ? 'border-teal-200 bg-teal-50 text-teal-700'
-                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                    }`}
-                  >
-                    <Lock size={15} />
-                    {noteSaved ? 'Saved to private notes ✓' : 'Save to private notes'}
-                  </button>
                   {currentAnswer.riskCategory === 'medication' && (
                     <>
                       <button

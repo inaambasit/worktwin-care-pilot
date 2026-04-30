@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
 import { PlayCircle, CheckCircle, Clock, Filter } from 'lucide-react'
 
@@ -192,9 +193,9 @@ export default function ScenariosPage() {
                     <PlayCircle size={15} />
                     {scenario.status === 'Completed' ? 'Repeat scenario' : scenario.status === 'In progress' ? 'Continue' : 'Start scenario'}
                   </button>
-                  <button className="text-sm border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-medium px-4 py-2 rounded-lg transition-colors">
-                    View guidance
-                  </button>
+                  <Link href="/policies" className="text-sm border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-medium px-4 py-2 rounded-lg transition-colors">
+                    View related policies
+                  </Link>
                 </div>
               </div>
 

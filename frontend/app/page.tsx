@@ -45,7 +45,7 @@ const trustItems = [
   'All answers are grounded in your approved documents',
   'Sensitive topics are escalated to a human — never answered automatically',
   'No performance scoring, surveillance or sentiment tracking',
-  'Hosted in the UK, GDPR-compliant',
+  'Hosted in the UK, built around UK GDPR principles',
 ]
 
 const steps = [
@@ -82,12 +82,12 @@ export default function LandingPage() {
             <Link href="/dashboard" className="text-sm text-slate-600 hover:text-slate-900 font-medium">
               Sign in
             </Link>
-            <Link
-              href="/dashboard"
+            <a
+              href="mailto:hello@worktwin.ai?subject=WorkTwin%20pilot%20enquiry"
               className="text-sm bg-teal-700 hover:bg-teal-800 text-white font-semibold px-4 py-2 rounded-lg transition-colors"
             >
               Book a pilot
-            </Link>
+            </a>
           </div>
         </div>
       </nav>
@@ -111,12 +111,12 @@ export default function LandingPage() {
             how the platform can support UK care providers with care-specific policies and scenarios.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/dashboard"
+            <a
+              href="mailto:hello@worktwin.ai?subject=WorkTwin%20pilot%20enquiry"
               className="w-full sm:w-auto px-8 py-3.5 bg-teal-600 hover:bg-teal-500 text-white font-semibold rounded-xl text-base transition-colors shadow-lg shadow-teal-900/40"
             >
               Book a pilot
-            </Link>
+            </a>
             <Link
               href="#privacy"
               className="w-full sm:w-auto px-8 py-3.5 border border-slate-600 hover:border-slate-400 text-slate-300 hover:text-white font-semibold rounded-xl text-base transition-colors"
@@ -228,12 +228,12 @@ export default function LandingPage() {
             We start small with approved documents, a narrow employee group and anonymised insight
             reporting. No surveillance, no performance scoring, no productivity tracking.
           </p>
-          <Link
-            href="/dashboard"
+          <a
+            href="mailto:hello@worktwin.ai?subject=WorkTwin%20pilot%20enquiry"
             className="inline-block px-10 py-3.5 bg-white text-teal-700 font-bold rounded-xl hover:bg-teal-50 transition-colors text-base shadow-lg"
           >
             Book a pilot
-          </Link>
+          </a>
         </div>
       </section>
 
@@ -251,7 +251,7 @@ export default function LandingPage() {
             WorkTwin Care Pilot is the first vertical test of the broader WorkTwin platform. &copy; {new Date().getFullYear()} WorkTwin.
           </p>
           <div className="flex gap-4 text-xs text-slate-500">
-            <Link href="/admin/insights" className="hover:text-slate-300">Privacy model</Link>
+            <Link href="/#privacy" className="hover:text-slate-300">Privacy model</Link>
             <Link href="/admin/escalation" className="hover:text-slate-300">Escalation</Link>
           </div>
         </div>

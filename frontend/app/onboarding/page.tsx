@@ -94,8 +94,8 @@ export default function OnboardingPage() {
               <p className="text-2xl font-bold">{completedCount} of {allTasks.length} tasks</p>
             </div>
             <div className="text-right">
-              <p className="text-teal-200 text-sm">Started</p>
-              <p className="font-semibold">14 April 2025</p>
+              <p className="text-teal-200 text-sm">Pathway</p>
+              <p className="font-semibold">Demo pathway</p>
             </div>
           </div>
           <div className="bg-teal-800/50 rounded-full h-2.5">
@@ -114,7 +114,7 @@ export default function OnboardingPage() {
           <Calendar size={18} className="text-amber-600 shrink-0" />
           <div className="flex-1">
             <p className="text-sm font-semibold text-amber-800">2-week check-in due soon</p>
-            <p className="text-xs text-amber-700">Book your check-in with your line manager before 30 April.</p>
+            <p className="text-xs text-amber-700">Discuss your 2-week check-in with your line manager.</p>
           </div>
           <p className="text-xs text-amber-700 font-medium">Speak to your line manager to book this.</p>
         </div>

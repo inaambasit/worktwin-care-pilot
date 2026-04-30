@@ -87,6 +87,18 @@ MAX_SOURCE_CONTEXT_CHARS: int = 6000  # total character cap for source context
 # ---------------------------------------------------------------------------
 _ADMIN_TOKEN: str = os.getenv("ADMIN_TOKEN", "")
 
+# ---------------------------------------------------------------------------
+# Milestone 4S.41 — allowed organisation ID allowlist
+# Populated from ALLOWED_ORGANISATION_IDS env var, comma-separated.
+# Defaults to demo-org only when absent or empty.
+# Never logged, returned, or used to confirm organisation existence to callers.
+# ---------------------------------------------------------------------------
+_raw_allowed_orgs = os.getenv("ALLOWED_ORGANISATION_IDS", "demo-org")
+_ALLOWED_ORGANISATION_IDS: frozenset = frozenset(
+    org.strip() for org in _raw_allowed_orgs.split(",") if org.strip()
+) or frozenset({"demo-org"})
+del _raw_allowed_orgs
+
 
 def _require_admin(authorization: Optional[str] = Header(default=None)) -> None:
     if not _ADMIN_TOKEN:
@@ -2147,6 +2159,10 @@ def ask_worktwin(payload: AskRequest):
     - OpenAI key and admin token are never returned or logged.
     """
     _check_ask_rate_limit(payload)
+
+    if payload.organisation_id not in _ALLOWED_ORGANISATION_IDS:
+        return _staff_fallback_response()
+
     import httpx as _httpx
 
     # ------------------------------------------------------------------

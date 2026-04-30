@@ -1449,6 +1449,31 @@ class DocumentRecord(BaseModel):
     approved_for_source_grounded_answers: Optional[bool] = False
 
 
+# Milestone 4S.31 — staff-safe response shape for GET /policies.
+# Strips admin/storage/governance fields; exposes only what the Policy Library UI needs.
+class StaffPolicyRecord(BaseModel):
+    id: str
+    title: str
+    description: Optional[str] = None
+    file_type: Optional[str] = None
+    file_size_bytes: Optional[int] = None
+    category: str
+    tags: List[str] = []
+    status: DocumentStatus = "draft"
+    access_roles: List[str] = []
+    is_sensitive: bool = False
+    escalation_required: bool = False
+    approved_for_staff_visibility: Optional[bool] = False
+    approved_for_source_grounded_answers: Optional[bool] = False
+    contains_personal_data_warning: bool = False
+    primary_language: str = "en"
+    available_languages: List[str] = ["en"]
+    translation_status: TranslationStatus = "not_required"
+    human_review_required: bool = True
+    version: str = "1.0"
+    review_due_date: Optional[str] = None
+
+
 class DocumentCreate(BaseModel):
     organisation_id: str = "demo-org"
     title: str
@@ -3030,7 +3055,7 @@ def answer_debug(payload: AnswerDebugRequest, _: None = Depends(_require_admin))
 # This endpoint is intentionally narrower than /documents (admin).
 # ---------------------------------------------------------------------------
 
-@app.get("/policies", response_model=List[DocumentRecord])
+@app.get("/policies", response_model=List[StaffPolicyRecord])
 def list_policies(
     user_role: Optional[str] = None,
     vertical: Optional[str] = None,

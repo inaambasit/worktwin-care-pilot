@@ -4,6 +4,7 @@ import AppLayout from '@/components/AppLayout'
 import {
   Send, BookOpen, PlayCircle, Lock, List, Zap,
   AlertTriangle, CheckSquare, ChevronDown, Shield, Loader2,
+  MessageSquare, CheckCircle, ArrowRight,
 } from 'lucide-react'
 import Link from 'next/link'
 import { askWorktwin } from '@/lib/api'
@@ -199,18 +200,23 @@ export default function AskPage() {
   return (
     <AppLayout>
       <div className="max-w-3xl mx-auto space-y-5">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Ask WorkTwin</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Ask questions about approved policies and care procedures. WorkTwin can only answer from documents your organisation has approved for staff use. All conversations are private to you.
-          </p>
+        <div className="flex items-start gap-3">
+          <div className="w-9 h-9 rounded-xl bg-teal-700 flex items-center justify-center shrink-0 mt-0.5">
+            <MessageSquare size={18} className="text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-slate-900">Ask WorkTwin</h1>
+            <p className="text-sm text-slate-500 mt-0.5">
+              Ask questions about approved policies and care procedures. WorkTwin can only answer from documents your organisation has approved for staff use. All conversations are private to you.
+            </p>
+          </div>
         </div>
 
         {/* Scope panel and suggested prompts — shown when idle */}
         {!showAnswer && !isLoading && (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="bg-teal-50 border border-teal-100 rounded-xl p-4">
+              <div className="bg-teal-50 border border-teal-100 rounded-xl p-3">
                 <p className="text-xs font-semibold text-teal-700 uppercase tracking-wider mb-2">What you can ask</p>
                 <ul className="space-y-1.5">
                   {[
@@ -219,13 +225,13 @@ export default function AskPage() {
                     'Ask for simple explanations of approved guidance',
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-teal-800">
-                      <span className="text-teal-500 shrink-0 mt-0.5">·</span>
+                      <CheckCircle size={12} className="text-teal-500 shrink-0 mt-0.5" />
                       {item}
                     </li>
                   ))}
                 </ul>
               </div>
-              <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
+              <div className="bg-amber-50 border border-amber-100 rounded-xl p-3">
                 <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-2">When to speak to a person</p>
                 <ul className="space-y-1.5">
                   {[
@@ -236,7 +242,7 @@ export default function AskPage() {
                     'Wellbeing or immediate risk',
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-amber-800">
-                      <span className="text-amber-500 shrink-0 mt-0.5">·</span>
+                      <ArrowRight size={12} className="text-amber-500 shrink-0 mt-0.5" />
                       {item}
                     </li>
                   ))}
@@ -249,23 +255,31 @@ export default function AskPage() {
 
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Try asking</p>
-              <div className="flex flex-wrap gap-2">
-                {suggestedPrompts.map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => handlePrompt(p)}
-                    className={`text-sm border bg-white rounded-full px-3 py-1.5 transition-colors ${
-                      p === SAFEGUARDING_Q || p === MEDICATION_Q
-                        ? 'border-amber-300 text-amber-800 hover:bg-amber-50 hover:border-amber-400'
-                        : 'border-slate-200 text-slate-700 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-800'
-                    }`}
-                  >
-                    {(p === SAFEGUARDING_Q || p === MEDICATION_Q) && (
+              <div className="space-y-2.5">
+                <div className="flex flex-wrap gap-2">
+                  {suggestedPrompts.slice(0, 3).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => handlePrompt(p)}
+                      className="text-sm border border-slate-200 bg-white rounded-full px-3 py-1.5 transition-colors text-slate-700 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-800"
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-2 items-center">
+                  <span className="text-xs font-semibold text-amber-600 uppercase tracking-wider">Escalation examples</span>
+                  {suggestedPrompts.slice(3).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => handlePrompt(p)}
+                      className="text-sm border border-amber-300 bg-white text-amber-800 rounded-full px-3 py-1.5 transition-colors hover:bg-amber-50 hover:border-amber-400"
+                    >
                       <Shield size={12} className="inline mr-1.5 text-amber-600" />
-                    )}
-                    {p}
-                  </button>
-                ))}
+                      {p}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </>
@@ -617,7 +631,7 @@ export default function AskPage() {
               ))}
             </div>
           )}
-          <div className="flex gap-2 bg-white border border-slate-200 rounded-2xl p-1.5 shadow-sm">
+          <div className="flex gap-2 bg-white border border-slate-200 rounded-2xl p-1.5 shadow-sm focus-within:border-teal-300 focus-within:ring-2 focus-within:ring-teal-100 transition-shadow">
             <input
               type="text"
               value={input}

@@ -1,18 +1,13 @@
 import AppLayout from '@/components/AppLayout'
 import Link from 'next/link'
-import { MessageCircle, ClipboardList, PlayCircle, Lock, AlertTriangle, BookOpen, CheckCircle } from 'lucide-react'
+import { MessageCircle, ClipboardList, PlayCircle, Lock, AlertTriangle, BookOpen, CheckCircle, ShieldCheck } from 'lucide-react'
 
 const quickActions = [
-  { href: '/ask', icon: MessageCircle, label: 'Ask WorkTwin', colour: 'teal', desc: 'Get a policy-grounded answer' },
-  { href: '/onboarding', icon: ClipboardList, label: 'My Onboarding', colour: 'blue', desc: 'Continue where you left off' },
-  { href: '/scenarios', icon: PlayCircle, label: 'Practice Scenarios', colour: 'violet', desc: 'Build confidence safely' },
-  { href: '/notes', icon: Lock, label: 'Private Notes', colour: 'slate', desc: 'Only you can see these' },
-]
-
-const recentTopics = [
-  { topic: 'Medication administration policy', time: '2 hours ago' },
-  { topic: 'What to do during a safeguarding concern', time: 'Yesterday' },
-  { topic: 'Infection control procedure', time: '3 days ago' },
+  { href: '/ask', icon: MessageCircle, label: 'Ask WorkTwin', desc: 'Get a policy-grounded answer' },
+  { href: '/policies', icon: BookOpen, label: 'Policy Library', desc: 'Browse approved documents' },
+  { href: '/onboarding', icon: ClipboardList, label: 'My Onboarding', desc: 'Continue where you left off' },
+  { href: '/scenarios', icon: PlayCircle, label: 'Practice Scenarios', desc: 'Build confidence safely' },
+  { href: '/notes', icon: Lock, label: 'Private Notes', desc: 'Only you can see these' },
 ]
 
 const onboardingTasks = [
@@ -33,9 +28,17 @@ export default function DashboardPage() {
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Welcome */}
         <div className="bg-gradient-to-r from-teal-700 to-teal-600 rounded-2xl p-6 text-white">
+          <div className="mb-2">
+            <span className="text-xs font-medium bg-white/20 text-teal-50 px-2.5 py-0.5 rounded-full">
+              Pilot demo
+            </span>
+          </div>
           <p className="text-teal-200 text-sm mb-1">Good morning,</p>
           <h1 className="text-2xl font-bold mb-1">Welcome back, Demo User</h1>
-          <p className="text-teal-100 text-sm">Thumhara Centre · Care Worker · Week 2</p>
+          <p className="text-teal-100 text-sm">Thumhara Centre &middot; Care Worker &middot; Week 2</p>
+          <p className="text-teal-200 text-xs mt-2">
+            WorkTwin helps with approved policies, onboarding and safe escalation &mdash; no private data is tracked.
+          </p>
         </div>
 
         {/* Onboarding progress */}
@@ -43,7 +46,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold text-slate-900">Onboarding progress</h2>
             <Link href="/onboarding" className="text-sm text-teal-700 hover:text-teal-800 font-medium">
-              View all →
+              View all &rarr;
             </Link>
           </div>
           <div className="flex items-center gap-3 mb-3">
@@ -81,7 +84,7 @@ export default function DashboardPage() {
         {/* Quick actions */}
         <div>
           <h2 className="font-semibold text-slate-900 mb-3">Quick actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {quickActions.map(({ href, icon: Icon, label, desc }) => (
               <Link
                 key={href}
@@ -98,40 +101,45 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Suggested question + recent */}
+        {/* Learning suggestion + Safe support reminders */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Suggested question of the day */}
+          {/* Learning suggestion */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
               <BookOpen size={16} className="text-teal-600" />
               <h2 className="font-semibold text-slate-900 text-sm">Learning suggestion</h2>
             </div>
             <p className="text-slate-600 text-sm mb-4 leading-relaxed">
-              You have not yet completed the medication module. Would you like to practise a medication refusal scenario first?
+              You have not yet completed the medication module. Build confidence with a safe practice scenario before your next shift.
             </p>
             <Link
-              href="/ask"
+              href="/scenarios"
               className="inline-block text-sm bg-teal-700 hover:bg-teal-800 text-white font-medium px-4 py-2 rounded-lg transition-colors"
             >
-              Ask WorkTwin about medication
+              Practise a medication scenario
             </Link>
           </div>
 
-          {/* Recent topics */}
+          {/* Safe support reminders */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
-              <MessageCircle size={16} className="text-teal-600" />
-              <h2 className="font-semibold text-slate-900 text-sm">Recent topics</h2>
+              <ShieldCheck size={16} className="text-teal-600" />
+              <h2 className="font-semibold text-slate-900 text-sm">Safe support reminders</h2>
             </div>
-            <p className="text-xs text-slate-400 mb-3">Your conversation topics — only visible to you</p>
-            <div className="space-y-2.5">
-              {recentTopics.map(({ topic, time }) => (
-                <div key={topic} className="flex items-start justify-between gap-3">
-                  <p className="text-sm text-slate-700 leading-snug">{topic}</p>
-                  <span className="text-xs text-slate-400 whitespace-nowrap shrink-0">{time}</span>
-                </div>
-              ))}
-            </div>
+            <ul className="space-y-2.5 text-sm text-slate-600">
+              <li className="flex items-start gap-2">
+                <span className="text-teal-600 font-bold shrink-0 mt-0.5">&middot;</span>
+                <span>WorkTwin answers from approved, staff-visible documents only.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-teal-600 font-bold shrink-0 mt-0.5">&middot;</span>
+                <span>Safeguarding, medication, HR, legal, compliance and wellbeing concerns must be escalated to a human lead.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-teal-600 font-bold shrink-0 mt-0.5">&middot;</span>
+                <span>No manager can view your private questions in this prototype.</span>
+              </li>
+            </ul>
           </div>
         </div>
 
@@ -142,7 +150,7 @@ export default function DashboardPage() {
             <p className="text-sm font-semibold text-amber-800">Sensitive concerns? Always escalate to a person.</p>
             <p className="text-xs text-amber-700 mt-0.5">
               For safeguarding, medication incidents, HR concerns or health and safety issues, speak to your
-              escalation contact — not only WorkTwin.{' '}
+              escalation contact &mdash; not only WorkTwin.{' '}
               <Link href="/escalation" className="underline font-medium">View escalation contacts</Link>
             </p>
           </div>

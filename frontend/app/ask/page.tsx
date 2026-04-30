@@ -1,10 +1,11 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import AppLayout from '@/components/AppLayout'
 import {
   Send, BookOpen, PlayCircle, Lock, List, Zap,
   AlertTriangle, CheckSquare, ChevronDown, Shield, Loader2,
-  MessageSquare, CheckCircle, ArrowRight,
+  MessageSquare,
+  UserCheck, ClipboardList, Building2, Briefcase, BadgeCheck, Heart, Pill,
 } from 'lucide-react'
 import Link from 'next/link'
 import { askWorktwin } from '@/lib/api'
@@ -160,6 +161,7 @@ export default function AskPage() {
   const [showQuiz, setShowQuiz] = useState(false)
   const [noteSaved, setNoteSaved] = useState(false)
   const [selectedOption, setSelectedOption] = useState<number | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const showAnswer = currentAnswer !== null && !isLoading
 
@@ -200,88 +202,118 @@ export default function AskPage() {
   return (
     <AppLayout>
       <div className="max-w-3xl mx-auto space-y-5">
-        <div className="flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-teal-700 flex items-center justify-center shrink-0 mt-0.5">
-            <MessageSquare size={18} className="text-white" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">Ask WorkTwin</h1>
-            <p className="text-sm text-slate-500 mt-0.5">
-              Ask questions about approved policies and care procedures. WorkTwin can only answer from documents your organisation has approved for staff use. All conversations are private to you.
-            </p>
-          </div>
-        </div>
 
-        {/* Scope panel and suggested prompts — shown when idle */}
+        {/* Idle state — friendly assistant hero + cards */}
         {!showAnswer && !isLoading && (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="bg-teal-50 border border-teal-100 rounded-xl p-3">
-                <p className="text-xs font-semibold text-teal-700 uppercase tracking-wider mb-2">What you can ask</p>
-                <ul className="space-y-1.5">
-                  {[
-                    'Ask about approved policies',
-                    'Ask about visitor sign-in, onboarding and safe workplace procedures',
-                    'Ask for simple explanations of approved guidance',
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-teal-800">
-                      <CheckCircle size={12} className="text-teal-500 shrink-0 mt-0.5" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+            {/* Hero */}
+            <div className="rounded-2xl bg-teal-700 px-5 py-5 text-white">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                  <MessageSquare size={20} className="text-white" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold leading-tight">Hi, I'm WorkTwin</p>
+                  <p className="text-sm text-teal-100 mt-0.5">Your Thumhara Centre policy assistant</p>
+                </div>
               </div>
-              <div className="bg-amber-50 border border-amber-100 rounded-xl p-3">
-                <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-2">When to speak to a person</p>
-                <ul className="space-y-1.5">
-                  {[
-                    'Safeguarding concerns',
-                    'Medication incidents',
-                    'HR, grievance or payroll matters',
-                    'Legal, CQC or compliance queries',
-                    'Wellbeing or immediate risk',
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-amber-800">
-                      <ArrowRight size={12} className="text-amber-500 shrink-0 mt-0.5" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/escalation" className="mt-2.5 inline-block text-xs text-amber-700 underline font-medium">
-                  Escalation contacts →
+              <p className="text-sm text-teal-100 mb-1">I can help you understand approved Thumhara Centre policies.</p>
+              <p className="text-sm font-semibold text-white">What do you need help with today?</p>
+            </div>
+
+            {/* Quick action cards */}
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Quick actions</p>
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  onClick={() => handlePrompt('What should I do when a visitor arrives?')}
+                  className="flex flex-col items-start gap-2.5 bg-white border border-slate-200 rounded-xl p-4 text-left hover:bg-teal-50 hover:border-teal-200 transition-colors"
+                >
+                  <UserCheck size={18} className="text-teal-600" />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">Visitor arrived</p>
+                    <p className="text-xs text-slate-500 mt-0.5">What do I do?</p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => handlePrompt('What details should be recorded in the visitor log?')}
+                  className="flex flex-col items-start gap-2.5 bg-white border border-slate-200 rounded-xl p-4 text-left hover:bg-teal-50 hover:border-teal-200 transition-colors"
+                >
+                  <ClipboardList size={18} className="text-teal-600" />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">Visitor log</p>
+                    <p className="text-xs text-slate-500 mt-0.5">What to record?</p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => handlePrompt('Can a visitor go beyond reception without speaking to staff?')}
+                  className="flex flex-col items-start gap-2.5 bg-white border border-slate-200 rounded-xl p-4 text-left hover:bg-teal-50 hover:border-teal-200 transition-colors"
+                >
+                  <Building2 size={18} className="text-teal-600" />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">Reception access</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Visitor beyond reception?</p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => inputRef.current?.focus()}
+                  className="flex flex-col items-start gap-2.5 bg-white border border-slate-200 rounded-xl p-4 text-left hover:bg-teal-50 hover:border-teal-200 transition-colors"
+                >
+                  <MessageSquare size={18} className="text-teal-600" />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">Ask a question</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Type below</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Need to speak to someone? */}
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Need to speak to someone?</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <button
+                  onClick={() => handlePrompt(SAFEGUARDING_Q)}
+                  className="flex items-center gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-3 text-left hover:bg-amber-100 hover:border-amber-300 transition-colors"
+                >
+                  <Shield size={15} className="text-amber-600 shrink-0" />
+                  <p className="text-sm font-semibold text-amber-900">Safeguarding</p>
+                </button>
+                <button
+                  onClick={() => handlePrompt(MEDICATION_Q)}
+                  className="flex items-center gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-3 text-left hover:bg-amber-100 hover:border-amber-300 transition-colors"
+                >
+                  <Pill size={15} className="text-amber-600 shrink-0" />
+                  <p className="text-sm font-semibold text-amber-900">Medication</p>
+                </button>
+                <Link
+                  href="/escalation"
+                  className="flex items-center gap-2.5 bg-red-50 border border-red-200 rounded-xl px-3.5 py-3 hover:bg-red-100 hover:border-red-300 transition-colors"
+                >
+                  <Briefcase size={15} className="text-red-600 shrink-0" />
+                  <p className="text-sm font-semibold text-red-900">HR / grievance</p>
+                </Link>
+                <Link
+                  href="/escalation"
+                  className="flex items-center gap-2.5 bg-red-50 border border-red-200 rounded-xl px-3.5 py-3 hover:bg-red-100 hover:border-red-300 transition-colors"
+                >
+                  <BadgeCheck size={15} className="text-red-600 shrink-0" />
+                  <p className="text-sm font-semibold text-red-900">CQC / compliance</p>
+                </Link>
+                <Link
+                  href="/escalation"
+                  className="flex items-center gap-2.5 bg-red-50 border border-red-200 rounded-xl px-3.5 py-3 hover:bg-red-100 hover:border-red-300 transition-colors"
+                >
+                  <Heart size={15} className="text-red-600 shrink-0" />
+                  <p className="text-sm font-semibold text-red-900">Wellbeing</p>
                 </Link>
               </div>
             </div>
 
-            <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Try asking</p>
-              <div className="space-y-2.5">
-                <div className="flex flex-wrap gap-2">
-                  {suggestedPrompts.slice(0, 3).map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => handlePrompt(p)}
-                      className="text-sm border border-slate-200 bg-white rounded-full px-3 py-1.5 transition-colors text-slate-700 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-800"
-                    >
-                      {p}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex flex-wrap gap-2 items-center">
-                  <span className="text-xs font-semibold text-amber-600 uppercase tracking-wider">Escalation examples</span>
-                  {suggestedPrompts.slice(3).map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => handlePrompt(p)}
-                      className="text-sm border border-amber-300 bg-white text-amber-800 rounded-full px-3 py-1.5 transition-colors hover:bg-amber-50 hover:border-amber-400"
-                    >
-                      <Shield size={12} className="inline mr-1.5 text-amber-600" />
-                      {p}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
+            {/* Privacy note */}
+            <p className="text-xs text-slate-400 text-center px-4">
+              WorkTwin only answers from approved staff-visible documents. Sensitive concerns are sent to the right human lead.
+            </p>
           </>
         )}
 
@@ -633,6 +665,7 @@ export default function AskPage() {
           )}
           <div className="flex gap-2 bg-white border border-slate-200 rounded-2xl p-1.5 shadow-sm focus-within:border-teal-300 focus-within:ring-2 focus-within:ring-teal-100 transition-shadow">
             <input
+              ref={inputRef}
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}

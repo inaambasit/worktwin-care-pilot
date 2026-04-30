@@ -233,91 +233,84 @@ export default function AskPage() {
               <p className="text-sm font-semibold text-white">What do you need help with today?</p>
             </div>
 
-            {/* Quick action cards */}
+            {/* Common questions */}
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Quick actions</p>
-              <div className="grid grid-cols-2 gap-2.5">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Common questions</p>
+              <div className="space-y-2">
                 <button
                   onClick={() => handlePrompt('What should I do when a visitor arrives?')}
-                  className="flex flex-col items-start gap-2.5 bg-white border border-slate-200 rounded-xl p-4 text-left hover:bg-teal-50 hover:border-teal-200 transition-colors"
+                  className="w-full flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-left hover:bg-teal-50 hover:border-teal-200 transition-colors"
                 >
-                  <UserCheck size={18} className="text-teal-600" />
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">Visitor arrived</p>
-                    <p className="text-xs text-slate-500 mt-0.5">What do I do?</p>
-                  </div>
+                  <UserCheck size={16} className="text-teal-600 shrink-0" />
+                  <span className="text-sm font-medium text-slate-800">What should I do when a visitor arrives?</span>
                 </button>
                 <button
                   onClick={() => handlePrompt('What details should be recorded in the visitor log?')}
-                  className="flex flex-col items-start gap-2.5 bg-white border border-slate-200 rounded-xl p-4 text-left hover:bg-teal-50 hover:border-teal-200 transition-colors"
+                  className="w-full flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-left hover:bg-teal-50 hover:border-teal-200 transition-colors"
                 >
-                  <ClipboardList size={18} className="text-teal-600" />
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">Visitor log</p>
-                    <p className="text-xs text-slate-500 mt-0.5">What to record?</p>
-                  </div>
+                  <ClipboardList size={16} className="text-teal-600 shrink-0" />
+                  <span className="text-sm font-medium text-slate-800">What details should be recorded in the visitor log?</span>
                 </button>
                 <button
                   onClick={() => handlePrompt('Can a visitor go beyond reception without speaking to staff?')}
-                  className="flex flex-col items-start gap-2.5 bg-white border border-slate-200 rounded-xl p-4 text-left hover:bg-teal-50 hover:border-teal-200 transition-colors"
+                  className="w-full flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-left hover:bg-teal-50 hover:border-teal-200 transition-colors"
                 >
-                  <Building2 size={18} className="text-teal-600" />
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">Reception access</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Visitor beyond reception?</p>
-                  </div>
+                  <Building2 size={16} className="text-teal-600 shrink-0" />
+                  <span className="text-sm font-medium text-slate-800">Can a visitor go beyond reception without speaking to staff?</span>
                 </button>
                 <button
-                  onClick={() => inputRef.current?.focus()}
-                  className="flex flex-col items-start gap-2.5 bg-white border border-slate-200 rounded-xl p-4 text-left hover:bg-teal-50 hover:border-teal-200 transition-colors"
+                  onClick={() => handlePrompt(SAFEGUARDING_Q)}
+                  className="w-full flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3.5 text-left hover:bg-amber-100 hover:border-amber-300 transition-colors"
                 >
-                  <MessageSquare size={18} className="text-teal-600" />
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">Ask a question</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Type below</p>
-                  </div>
+                  <Shield size={16} className="text-amber-600 shrink-0" />
+                  <span className="text-sm font-medium text-amber-900">I have a safeguarding concern. What should I do?</span>
+                </button>
+                <button
+                  onClick={() => handlePrompt(MEDICATION_Q)}
+                  className="w-full flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3.5 text-left hover:bg-amber-100 hover:border-amber-300 transition-colors"
+                >
+                  <Pill size={16} className="text-amber-600 shrink-0" />
+                  <span className="text-sm font-medium text-amber-900">A service user missed medication. What should I do?</span>
                 </button>
               </div>
             </div>
 
-            {/* Need to speak to someone? */}
+            {/* Ask your own question */}
+            <button
+              onClick={() => inputRef.current?.focus()}
+              className="w-full flex items-center justify-between bg-white border border-dashed border-slate-300 rounded-xl px-4 py-3.5 text-left hover:bg-slate-50 hover:border-teal-300 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <MessageSquare size={16} className="text-slate-400 shrink-0" />
+                <span className="text-sm text-slate-500">Ask your own question — type in the box below</span>
+              </div>
+              <span className="text-xs font-semibold text-teal-600">↓</span>
+            </button>
+
+            {/* Escalation contacts */}
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Need to speak to someone?</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                <button
-                  onClick={() => handlePrompt(SAFEGUARDING_Q)}
-                  className="flex items-center gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-3 text-left hover:bg-amber-100 hover:border-amber-300 transition-colors"
-                >
-                  <Shield size={15} className="text-amber-600 shrink-0" />
-                  <p className="text-sm font-semibold text-amber-900">Safeguarding</p>
-                </button>
-                <button
-                  onClick={() => handlePrompt(MEDICATION_Q)}
-                  className="flex items-center gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-3 text-left hover:bg-amber-100 hover:border-amber-300 transition-colors"
-                >
-                  <Pill size={15} className="text-amber-600 shrink-0" />
-                  <p className="text-sm font-semibold text-amber-900">Medication</p>
-                </button>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Escalation contacts</p>
+              <div className="grid grid-cols-3 gap-2">
                 <Link
                   href="/escalation"
-                  className="flex items-center gap-2.5 bg-red-50 border border-red-200 rounded-xl px-3.5 py-3 hover:bg-red-100 hover:border-red-300 transition-colors"
+                  className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5 hover:bg-red-100 hover:border-red-300 transition-colors"
                 >
-                  <Briefcase size={15} className="text-red-600 shrink-0" />
-                  <p className="text-sm font-semibold text-red-900">HR / grievance</p>
+                  <Briefcase size={14} className="text-red-600 shrink-0" />
+                  <p className="text-xs font-semibold text-red-900">HR / grievance</p>
                 </Link>
                 <Link
                   href="/escalation"
-                  className="flex items-center gap-2.5 bg-red-50 border border-red-200 rounded-xl px-3.5 py-3 hover:bg-red-100 hover:border-red-300 transition-colors"
+                  className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5 hover:bg-red-100 hover:border-red-300 transition-colors"
                 >
-                  <BadgeCheck size={15} className="text-red-600 shrink-0" />
-                  <p className="text-sm font-semibold text-red-900">CQC / compliance</p>
+                  <BadgeCheck size={14} className="text-red-600 shrink-0" />
+                  <p className="text-xs font-semibold text-red-900">CQC / compliance</p>
                 </Link>
                 <Link
                   href="/escalation"
-                  className="flex items-center gap-2.5 bg-red-50 border border-red-200 rounded-xl px-3.5 py-3 hover:bg-red-100 hover:border-red-300 transition-colors"
+                  className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5 hover:bg-red-100 hover:border-red-300 transition-colors"
                 >
-                  <Heart size={15} className="text-red-600 shrink-0" />
-                  <p className="text-sm font-semibold text-red-900">Wellbeing</p>
+                  <Heart size={14} className="text-red-600 shrink-0" />
+                  <p className="text-xs font-semibold text-red-900">Wellbeing</p>
                 </Link>
               </div>
             </div>

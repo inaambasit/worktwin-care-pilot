@@ -7,7 +7,7 @@ import { LANGUAGE_NAMES } from '@/lib/types'
 import {
   BookOpen, Search, CheckCircle, Globe, Users, MessageCircle,
   X, Calendar, AlertTriangle, Shield, FileText, ChevronRight,
-  Brain, UserCheck, Lock,
+  Lock, Archive,
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -22,6 +22,7 @@ const SAMPLE_DOCS: DocumentRecord[] = [
     category: 'HR', tags: ['onboarding', 'conduct', 'employment'],
     status: 'approved', access_roles: ['All Staff'],
     is_sensitive: false, escalation_required: false, approved_for_ai_answers: true,
+    approved_for_staff_visibility: true,
     contains_personal_data_warning: false, primary_language: 'en',
     available_languages: ['en', 'ur', 'pa'], translation_status: 'complete',
     human_review_required: false, version: '3.0', review_due_date: '2026-01-12',
@@ -36,6 +37,7 @@ const SAMPLE_DOCS: DocumentRecord[] = [
     category: 'Medication', tags: ['medication', 'MAR', 'controlled drugs', 'safety'],
     status: 'approved', access_roles: ['Care Worker', 'Senior Carer', 'Nurse'],
     is_sensitive: true, escalation_required: true, approved_for_ai_answers: true,
+    approved_for_staff_visibility: false,
     contains_personal_data_warning: false, primary_language: 'en',
     available_languages: ['en'], translation_status: 'not_required',
     human_review_required: false, version: '2.1', review_due_date: '2026-01-20',
@@ -50,6 +52,7 @@ const SAMPLE_DOCS: DocumentRecord[] = [
     category: 'Safeguarding', tags: ['safeguarding', 'CQC', 'reporting'],
     status: 'approved', access_roles: ['All Staff'],
     is_sensitive: true, escalation_required: true, approved_for_ai_answers: false,
+    approved_for_staff_visibility: false,
     contains_personal_data_warning: false, primary_language: 'en',
     available_languages: ['en', 'ur'], translation_status: 'in_progress',
     human_review_required: true, version: '4.0', review_due_date: '2026-02-05',
@@ -64,6 +67,7 @@ const SAMPLE_DOCS: DocumentRecord[] = [
     category: 'Complaints', tags: ['complaints', 'feedback', 'service users'],
     status: 'approved', access_roles: ['All Staff'],
     is_sensitive: false, escalation_required: false, approved_for_ai_answers: true,
+    approved_for_staff_visibility: true,
     contains_personal_data_warning: false, primary_language: 'en',
     available_languages: ['en', 'ur', 'pa', 'ar'], translation_status: 'complete',
     human_review_required: false, version: '1.2', review_due_date: '2026-02-14',
@@ -78,6 +82,7 @@ const SAMPLE_DOCS: DocumentRecord[] = [
     category: 'Health and Safety', tags: ['infection control', 'PPE', 'hygiene'],
     status: 'approved', access_roles: ['All Staff'],
     is_sensitive: false, escalation_required: false, approved_for_ai_answers: true,
+    approved_for_staff_visibility: true,
     contains_personal_data_warning: false, primary_language: 'en',
     available_languages: ['en'], translation_status: 'not_required',
     human_review_required: false, version: '3.1', review_due_date: '2026-03-01',
@@ -92,6 +97,7 @@ const SAMPLE_DOCS: DocumentRecord[] = [
     category: 'Training', tags: ['MCA', 'mental capacity', 'best interests'],
     status: 'approved', access_roles: ['Care Worker', 'Senior Carer', 'Nurse'],
     is_sensitive: false, escalation_required: false, approved_for_ai_answers: true,
+    approved_for_staff_visibility: false,
     contains_personal_data_warning: false, primary_language: 'en',
     available_languages: ['en'], translation_status: 'pending',
     human_review_required: false, version: '2.0', review_due_date: '2025-11-22',
@@ -106,6 +112,7 @@ const SAMPLE_DOCS: DocumentRecord[] = [
     category: 'Health and Safety', tags: ['incident', 'accident', 'RIDDOR'],
     status: 'approved', access_roles: ['All Staff'],
     is_sensitive: false, escalation_required: false, approved_for_ai_answers: true,
+    approved_for_staff_visibility: true,
     contains_personal_data_warning: false, primary_language: 'en',
     available_languages: ['en'], translation_status: 'not_required',
     human_review_required: false, version: '2.0', review_due_date: '2026-04-03',
@@ -120,6 +127,7 @@ const SAMPLE_DOCS: DocumentRecord[] = [
     category: 'Onboarding', tags: ['induction', 'onboarding', 'DBS', 'mandatory training'],
     status: 'approved', access_roles: ['All Staff', 'Manager'],
     is_sensitive: false, escalation_required: false, approved_for_ai_answers: true,
+    approved_for_staff_visibility: true,
     contains_personal_data_warning: false, primary_language: 'en',
     available_languages: ['en', 'ur', 'pa', 'bn'], translation_status: 'in_progress',
     human_review_required: false, version: '2.0', review_due_date: '2026-06-01',
@@ -174,7 +182,48 @@ function getLanguageStatus(doc: DocumentRecord, lang: string): { label: string; 
 // CTA safety gate: must NOT show "Ask WorkTwin" if document is unsafe for AI
 // ---------------------------------------------------------------------------
 function isSafeForAiCta(doc: DocumentRecord): boolean {
-  return doc.approved_for_ai_answers && !doc.escalation_required
+  return (
+    doc.status !== 'archived' &&
+    doc.approved_for_ai_answers === true &&
+    doc.approved_for_staff_visibility === true &&
+    doc.is_sensitive !== true &&
+    doc.escalation_required !== true
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Ask status badge — 4-tier label shown on every card and in the modal
+// ---------------------------------------------------------------------------
+
+function AskStatusBadge({ doc, small = true }: { doc: DocumentRecord; small?: boolean }) {
+  const sz = small ? 10 : 11
+  const base = `inline-flex items-center gap-1 font-medium px-2 py-0.5 rounded-full border ${small ? 'text-[11px]' : 'text-xs'}`
+  if (doc.status === 'archived') {
+    return (
+      <span className={`${base} bg-slate-100 text-slate-500 border-slate-200`}>
+        <Archive size={sz} />Archived
+      </span>
+    )
+  }
+  if (doc.is_sensitive || doc.escalation_required) {
+    return (
+      <span className={`${base} bg-red-50 text-red-700 border-red-100`}>
+        <Lock size={sz} />Human-only — Ask blocked
+      </span>
+    )
+  }
+  if (isSafeForAiCta(doc)) {
+    return (
+      <span className={`${base} bg-teal-50 text-teal-700 border-teal-100`}>
+        <MessageCircle size={sz} />Ask enabled
+      </span>
+    )
+  }
+  return (
+    <span className={`${base} bg-amber-50 text-amber-700 border-amber-100`}>
+      <Shield size={sz} />Admin-test only
+    </span>
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -215,39 +264,17 @@ function PolicyModal({ doc, onClose }: { doc: DocumentRecord; onClose: () => voi
             </p>
           </div>
 
-          {/* Safety labels row */}
+          {/* Ask status badge */}
           <div className="flex flex-wrap gap-2">
-            {doc.approved_for_ai_answers && !doc.escalation_required ? (
-              <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 border border-teal-100">
-                <Brain size={11} />
-                AI answers allowed
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
-                <Lock size={11} />
-                AI answer disabled for this document
-              </span>
-            )}
-            {doc.escalation_required && (
-              <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-100">
-                <AlertTriangle size={11} />
-                Human escalation required
-              </span>
-            )}
-            {doc.is_sensitive && (
-              <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-red-50 text-red-700 border border-red-100">
-                <Shield size={11} />
-                Sensitive
-              </span>
-            )}
+            <AskStatusBadge doc={doc} small={false} />
           </div>
 
-          {/* Escalation notice */}
-          {doc.escalation_required && (
-            <div className="flex items-start gap-2 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
-              <AlertTriangle size={15} className="text-amber-600 mt-0.5 shrink-0" />
-              <p className="text-xs text-amber-800 font-medium">
-                Topics covered by this policy require human escalation. Always speak to your manager or designated lead — do not rely on AI guidance alone.
+          {/* Human-only notice */}
+          {(doc.is_sensitive || doc.escalation_required) && (
+            <div className="flex items-start gap-2 bg-red-50 border border-red-100 rounded-xl px-4 py-3">
+              <Lock size={15} className="text-red-600 mt-0.5 shrink-0" />
+              <p className="text-xs text-red-800 font-medium">
+                This policy covers sensitive or escalation-required topics. WorkTwin cannot answer questions on this document — always speak to your manager or the correct designated lead.
               </p>
             </div>
           )}
@@ -326,21 +353,21 @@ function PolicyModal({ doc, onClose }: { doc: DocumentRecord; onClose: () => voi
               <MessageCircle size={15} />
               Ask WorkTwin about this policy
             </a>
-          ) : doc.escalation_required ? (
+          ) : (doc.is_sensitive || doc.escalation_required) ? (
             <div className="flex-1 flex flex-col gap-1.5">
-              <div className="flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium px-4 py-2.5 rounded-xl">
-                <UserCheck size={15} />
-                Human escalation required
+              <div className="flex items-center justify-center gap-2 bg-red-50 border border-red-200 text-red-800 text-sm font-medium px-4 py-2.5 rounded-xl">
+                <Lock size={15} />
+                Human-only — Ask blocked
               </div>
-              <p className="text-center text-xs text-slate-400">Speak to the relevant lead — do not rely on AI for this topic.</p>
+              <p className="text-center text-xs text-slate-400">Speak to your manager or the correct designated lead.</p>
             </div>
           ) : (
             <div className="flex-1 flex flex-col gap-1.5">
-              <div className="flex items-center justify-center gap-2 bg-slate-100 text-slate-500 text-sm font-medium px-4 py-2.5 rounded-xl">
-                <Lock size={15} />
-                View policy guidance only
+              <div className="flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-sm font-medium px-4 py-2.5 rounded-xl">
+                <Shield size={15} />
+                Admin-test only
               </div>
-              <p className="text-center text-xs text-slate-400">AI answer disabled for this document.</p>
+              <p className="text-center text-xs text-slate-400">Not yet approved for staff answers.</p>
             </div>
           )}
           <button
@@ -419,6 +446,15 @@ export default function PoliciesPage() {
           </div>
         </div>
 
+        {/* Ask status explainer */}
+        <div className="flex items-start gap-3 bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4">
+          <MessageCircle size={16} className="text-slate-400 mt-0.5 shrink-0" />
+          <p className="text-xs text-slate-600 leading-relaxed">
+            <span className="font-semibold text-slate-700">Demo policy library — Ask safety labels shown for illustration.</span>
+            {' '}WorkTwin only answers questions from documents that have been approved for staff visibility. Each policy shows a clear safety label such as: <span className="font-medium text-teal-700">Ask enabled</span> — approved for staff Ask; <span className="font-medium text-red-700">Human-only — Ask blocked</span> — sensitive or escalation-required topic; must be handled by the correct lead or manager; <span className="font-medium text-amber-700">Admin-test only</span> — not approved for staff answers; or <span className="font-medium text-slate-500">Archived</span> — document no longer in active use.
+          </p>
+        </div>
+
         {usingFallback && (
           <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-700">
             <AlertTriangle size={13} className="shrink-0" />
@@ -474,31 +510,22 @@ export default function PoliciesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {filtered.map(doc => {
-              const safeForAi = isSafeForAiCta(doc)
-              return (
+            {filtered.map(doc => (
                 <button
                   key={doc.id}
                   onClick={() => setSelected(doc)}
                   className="bg-white border border-slate-200 rounded-2xl p-5 text-left hover:border-teal-300 hover:shadow-sm transition-all group"
                 >
-                  {/* Category + flags */}
+                  {/* Category + language flag */}
                   <div className="flex items-center justify-between mb-3">
                     <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${CATEGORY_COLOURS[doc.category] ?? 'bg-slate-100 text-slate-600'}`}>
                       {doc.category}
                     </span>
-                    <div className="flex items-center gap-1.5">
-                      {doc.escalation_required && (
-                        <span title="Human escalation required">
-                          <AlertTriangle size={13} className="text-amber-500" />
-                        </span>
-                      )}
-                      {doc.available_languages.length > 1 && (
-                        <span title={`Available in ${doc.available_languages.map(l => LANGUAGE_NAMES[l] ?? l).join(', ')}`}>
-                          <Globe size={13} className="text-slate-400" />
-                        </span>
-                      )}
-                    </div>
+                    {doc.available_languages.length > 1 && (
+                      <span title={`Available in ${doc.available_languages.map(l => LANGUAGE_NAMES[l] ?? l).join(', ')}`}>
+                        <Globe size={13} className="text-slate-400" />
+                      </span>
+                    )}
                   </div>
 
                   {/* Title */}
@@ -513,30 +540,13 @@ export default function PoliciesPage() {
                     </p>
                   )}
 
-                  {/* Safety labels */}
+                  {/* Ask status + supplementary labels */}
                   <div className="flex flex-wrap gap-1.5 mb-3">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-teal-50 text-teal-700">
-                      <CheckCircle size={10} />
-                      Approved policy
-                    </span>
-                    {safeForAi ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-50 text-slate-500">
-                        <Brain size={10} />
-                        AI answers allowed
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-400">
-                        <Lock size={10} />
-                        {doc.escalation_required ? 'Human escalation required' : 'AI answer disabled'}
-                      </span>
-                    )}
+                    <AskStatusBadge doc={doc} />
                     {doc.available_languages.length > 1 && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-50 text-slate-500">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-50 text-slate-500 border border-slate-100">
                         <Globe size={10} />
-                        {doc.translation_status === 'complete' ? 'Translation available' :
-                         doc.translation_status === 'in_progress' ? 'Translation pending' :
-                         doc.translation_status === 'pending' ? 'Translation pending' :
-                         'Translation available'}
+                        {doc.translation_status === 'complete' ? 'Translation available' : 'Translation pending'}
                       </span>
                     )}
                   </div>
@@ -559,8 +569,7 @@ export default function PoliciesPage() {
                     <ChevronRight size={14} className="text-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </button>
-              )
-            })}
+            ))}
           </div>
         )}
 

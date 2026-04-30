@@ -7,9 +7,6 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
 export async function askWorktwin(question: string): Promise<AskResponse> {
   const payload: AskRequest = {
-    organisation_id: 'demo-org',
-    user_id: 'demo-user',
-    user_role: 'care-worker',
     question,
   }
 
@@ -71,13 +68,11 @@ export async function fetchDocument(id: string): Promise<DocumentRecord> {
 // ---------------------------------------------------------------------------
 
 export async function fetchPolicies(params?: {
-  user_role?: string
   vertical?: string
   category?: string
   language?: string
 }): Promise<DocumentRecord[]> {
   const qs = new URLSearchParams()
-  if (params?.user_role) qs.set('user_role', params.user_role)
   if (params?.vertical) qs.set('vertical', params.vertical)
   if (params?.category) qs.set('category', params.category)
   if (params?.language) qs.set('language', params.language)

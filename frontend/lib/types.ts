@@ -21,9 +21,6 @@ export type RiskCategory =
   | 'wellbeing'
 
 export interface AskRequest {
-  organisation_id: string
-  user_id: string
-  user_role: string
   question: string
 }
 

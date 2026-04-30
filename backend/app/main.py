@@ -100,6 +100,15 @@ _ALLOWED_ORGANISATION_IDS: frozenset = frozenset(
 del _raw_allowed_orgs
 
 
+def _get_pilot_staff_context() -> tuple:
+    """Return (organisation_id, user_id, user_role) derived from server-side env vars."""
+    return (
+        os.getenv("PILOT_ORGANISATION_ID", "demo-org"),
+        os.getenv("PILOT_USER_ID", "pilot-staff-demo"),
+        os.getenv("PILOT_USER_ROLE", "Care Worker"),
+    )
+
+
 def _require_admin(authorization: Optional[str] = Header(default=None)) -> None:
     if not _ADMIN_TOKEN:
         raise HTTPException(status_code=503, detail="Admin auth not configured.")
@@ -1398,15 +1407,12 @@ def _validate_grounded_answer_result(
 # ---------------------------------------------------------------------------
 
 class AskRequest(BaseModel):
-    organisation_id: str
-    user_id: str
-    user_role: str
     question: str
 
 
-def _check_ask_rate_limit(payload: AskRequest) -> None:
-    user_key = f"user:{payload.organisation_id}:{payload.user_id}"
-    org_key = f"org:{payload.organisation_id}"
+def _check_ask_rate_limit(organisation_id: str, user_id: str) -> None:
+    user_key = f"user:{organisation_id}:{user_id}"
+    org_key = f"org:{organisation_id}"
     retry = _check_rate_bucket(user_key, ASK_USER_RATE_LIMIT, ASK_USER_RATE_WINDOW_SECONDS)
     if retry:
         raise HTTPException(
@@ -2158,9 +2164,11 @@ def ask_worktwin(payload: AskRequest):
       and full chunk text are never returned to the staff response.
     - OpenAI key and admin token are never returned or logged.
     """
-    _check_ask_rate_limit(payload)
+    organisation_id, user_id, user_role = _get_pilot_staff_context()
 
-    if payload.organisation_id not in _ALLOWED_ORGANISATION_IDS:
+    _check_ask_rate_limit(organisation_id, user_id)
+
+    if organisation_id not in _ALLOWED_ORGANISATION_IDS:
         return _staff_fallback_response()
 
     import httpx as _httpx
@@ -2185,11 +2193,11 @@ def ask_worktwin(payload: AskRequest):
     _escalation_topic = _classify_escalation_topic(query_clean)
     if _escalation_topic is not None:
         _create_audit_event(
-            organisation_id=payload.organisation_id,
+            organisation_id=organisation_id,
             event_type="staff_ask_escalated",
             metadata={
                 "query_length": len(query_clean),
-                "user_role": payload.user_role,
+                "user_role": user_role,
                 "escalation_topic": _escalation_topic,
             },
         )
@@ -2219,7 +2227,7 @@ def ask_worktwin(payload: AskRequest):
     rpc_url = f"{_SUPABASE_URL}/rest/v1/rpc/match_document_chunks"
     rpc_payload = {
         "query_embedding": vector_str,
-        "match_organisation_id": payload.organisation_id,
+        "match_organisation_id": organisation_id,
         "match_threshold": 0.0,
         "match_count": MAX_ANSWER_CHUNKS,
     }
@@ -2251,7 +2259,7 @@ def ask_worktwin(payload: AskRequest):
         elig = elig_map.get(doc_id_str)
         if elig is None:
             continue  # no governance record → exclude
-        ok, _ = _can_use_document_for_staff_ask(elig, payload.user_role)
+        ok, _ = _can_use_document_for_staff_ask(elig, user_role)
         if ok:
             filtered_rows.append(row)
 
@@ -2260,12 +2268,12 @@ def ask_worktwin(payload: AskRequest):
     # ------------------------------------------------------------------
     if not filtered_rows:
         _create_audit_event(
-            organisation_id=payload.organisation_id,
+            organisation_id=organisation_id,
             event_type="staff_ask_no_source",
             metadata={
                 "query_length": len(query_clean),
                 "rpc_result_count": len(raw_rows),
-                "user_role": payload.user_role,
+                "user_role": user_role,
             },
         )
         return _staff_fallback_response()
@@ -2294,13 +2302,13 @@ def ask_worktwin(payload: AskRequest):
     # Audit event — no raw query text, no user_id
     # ------------------------------------------------------------------
     _create_audit_event(
-        organisation_id=payload.organisation_id,
+        organisation_id=organisation_id,
         event_type="staff_ask_answered",
         metadata={
             "query_length": len(query_clean),
             "result_count": len(filtered_rows),
             "confidence": confidence,
-            "user_role": payload.user_role,
+            "user_role": user_role,
         },
     )
 
@@ -3127,7 +3135,6 @@ def answer_debug(payload: AnswerDebugRequest, _: None = Depends(_require_admin))
 
 @app.get("/policies", response_model=List[StaffPolicyRecord])
 def list_policies(
-    user_role: Optional[str] = None,
     vertical: Optional[str] = None,
     category: Optional[str] = None,
     language: Optional[str] = None,
@@ -3137,7 +3144,9 @@ def list_policies(
 
     Safety guarantees enforced here (pre-RAG):
     - Only approved documents are returned.
-    - Documents are filtered by the caller's role — a staff member only
+    - Organisation and role are derived server-side from pilot env vars —
+      the caller cannot supply or override these values.
+    - Documents are filtered by the server-derived role; a staff member only
       receives policies their role is permitted to see.
     - No embedding status, storage keys or internal pipeline metadata
       are used to determine visibility; only explicit access_roles.
@@ -3146,18 +3155,19 @@ def list_policies(
       are still listed here so staff can read the policy, but the frontend
       must block the "Ask WorkTwin" CTA for those documents.
     """
+    _pilot_org_id, _pilot_user_id, pilot_role = _get_pilot_staff_context()
+
     if _DB_CONFIGURED:
         try:
             db_docs = _list_registry_records(status="approved")
             docs: List[Dict[str, Any]] = [
                 d for d in db_docs if _can_show_document_to_staff(d)[0]
             ]
-            if user_role:
-                docs = [
-                    d for d in docs
-                    if "All Staff" in (d.get("access_roles") or [])
-                    or user_role in (d.get("access_roles") or [])
-                ]
+            docs = [
+                d for d in docs
+                if "All Staff" in (d.get("access_roles") or [])
+                or pilot_role in (d.get("access_roles") or [])
+            ]
             if vertical:
                 docs = [d for d in docs if d.get("vertical") == vertical]
             if category:
@@ -3169,11 +3179,10 @@ def list_policies(
             pass  # fall through to in-memory demo data
 
     docs_mem = [d for d in _documents if _can_show_document_to_staff(d)[0]]
-    if user_role:
-        docs_mem = [
-            d for d in docs_mem
-            if "All Staff" in d["access_roles"] or user_role in d["access_roles"]
-        ]
+    docs_mem = [
+        d for d in docs_mem
+        if "All Staff" in d["access_roles"] or pilot_role in d["access_roles"]
+    ]
     if vertical:
         docs_mem = [d for d in docs_mem if d["vertical"] == vertical]
     if category:

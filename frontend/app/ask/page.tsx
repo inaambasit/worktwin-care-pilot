@@ -4,7 +4,7 @@ import AppLayout from '@/components/AppLayout'
 import {
   Send, BookOpen, PlayCircle, Lock, List, Zap,
   AlertTriangle, CheckSquare, ChevronDown, Shield, Loader2,
-  MessageSquare,
+  MessageSquare, ArrowLeft,
   UserCheck, ClipboardList, Building2, Briefcase, BadgeCheck, Heart, Pill,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -195,6 +195,17 @@ export default function AskPage() {
     }
   }
 
+  function handleBackToQuickActions() {
+    setCurrentAnswer(null)
+    setInput('')
+    setApiError(null)
+    setIsDemoFallback(false)
+    setShowChecklist(false)
+    setShowQuiz(false)
+    setNoteSaved(false)
+    setSelectedOption(null)
+  }
+
   function handleSaveNote() {
     setNoteSaved(true)
   }
@@ -353,6 +364,15 @@ export default function AskPage() {
         {/* Answer area */}
         {showAnswer && currentAnswer && (
           <div className="space-y-4 pb-40">
+            {/* Back to quick actions */}
+            <button
+              onClick={handleBackToQuickActions}
+              className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-teal-700 transition-colors"
+            >
+              <ArrowLeft size={15} />
+              Back to quick actions
+            </button>
+
             {/* Question bubble */}
             <div className="flex justify-end">
               <div className="bg-teal-700 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-sm text-sm">

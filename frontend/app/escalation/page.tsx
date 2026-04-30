@@ -1,5 +1,6 @@
+import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
-import { Phone, Mail, AlertTriangle, Shield, Heart, Users, Activity, Star, MessageSquare } from 'lucide-react'
+import { Phone, Mail, AlertTriangle, Shield, Heart, Users, Activity, Star, MessageSquare, ArrowLeft } from 'lucide-react'
 
 interface Contact {
   name: string
@@ -115,6 +116,14 @@ export default function EscalationPage() {
   return (
     <AppLayout>
       <div className="max-w-2xl mx-auto space-y-5">
+        <Link
+          href="/ask"
+          className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-teal-700 transition-colors"
+        >
+          <ArrowLeft size={15} />
+          Back to Ask WorkTwin
+        </Link>
+
         <div>
           <h1 className="text-xl font-bold text-slate-900">Escalation Contacts</h1>
           <p className="text-sm text-slate-500 mt-0.5">

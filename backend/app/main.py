@@ -8,6 +8,8 @@ from pydantic import BaseModel
 from typing import Literal, Optional, List, Dict, Any, Tuple
 from datetime import datetime
 import uuid
+import time
+import threading
 
 app = FastAPI(title="WorkTwin API", version="0.1.0")
 
@@ -92,6 +94,38 @@ def _require_admin(authorization: Optional[str] = Header(default=None)) -> None:
     scheme, _, token = (authorization or "").partition(" ")
     if scheme.lower() != "bearer" or token != _ADMIN_TOKEN:
         raise HTTPException(status_code=401, detail="Unauthorised.")
+
+
+# ---------------------------------------------------------------------------
+# Milestone 4S.39 — /ask in-memory rate limiter
+# Counters are kept in process memory only and are never exposed via any API.
+# No question text, answer text, source text, vectors, or IP addresses stored.
+# ---------------------------------------------------------------------------
+ASK_USER_RATE_LIMIT = 20
+ASK_USER_RATE_WINDOW_SECONDS = 15 * 60
+ASK_ORG_RATE_LIMIT = 100
+ASK_ORG_RATE_WINDOW_SECONDS = 60 * 60
+
+_rate_buckets: Dict[str, list] = {}  # keyed by "user:<org>:<uid>" or "org:<org>"
+_rate_lock = threading.Lock()
+
+
+def _check_rate_bucket(key: str, limit: int, window: int) -> int:
+    """Sliding-window counter. Returns seconds to wait if over limit, else 0."""
+    now = time.monotonic()
+    cutoff = now - window
+    with _rate_lock:
+        timestamps = _rate_buckets.get(key)
+        if timestamps is None:
+            _rate_buckets[key] = [now]
+            return 0
+        while timestamps and timestamps[0] < cutoff:
+            timestamps.pop(0)
+        if len(timestamps) >= limit:
+            return max(1, int(timestamps[0] + window - now) + 1)
+        timestamps.append(now)
+        return 0
+
 
 try:
     from pypdf import PdfReader as _PdfReader
@@ -1358,6 +1392,25 @@ class AskRequest(BaseModel):
     question: str
 
 
+def _check_ask_rate_limit(payload: AskRequest) -> None:
+    user_key = f"user:{payload.organisation_id}:{payload.user_id}"
+    org_key = f"org:{payload.organisation_id}"
+    retry = _check_rate_bucket(user_key, ASK_USER_RATE_LIMIT, ASK_USER_RATE_WINDOW_SECONDS)
+    if retry:
+        raise HTTPException(
+            status_code=429,
+            detail="Too many requests. Please wait a moment before asking again.",
+            headers={"Retry-After": str(retry)},
+        )
+    retry = _check_rate_bucket(org_key, ASK_ORG_RATE_LIMIT, ASK_ORG_RATE_WINDOW_SECONDS)
+    if retry:
+        raise HTTPException(
+            status_code=429,
+            detail="Too many requests. Please wait a moment before asking again.",
+            headers={"Retry-After": str(retry)},
+        )
+
+
 class Source(BaseModel):
     document_name: str
     section: Optional[str] = None
@@ -2093,6 +2146,7 @@ def ask_worktwin(payload: AskRequest):
       and full chunk text are never returned to the staff response.
     - OpenAI key and admin token are never returned or logged.
     """
+    _check_ask_rate_limit(payload)
     import httpx as _httpx
 
     # ------------------------------------------------------------------

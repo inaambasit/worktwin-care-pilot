@@ -3138,6 +3138,9 @@ def list_policies(
     - Only approved documents are returned.
     - Organisation and role are derived server-side from pilot env vars —
       the caller cannot supply or override these values.
+    - Tenant scoping is enforced by passing the server-derived organisation ID
+      directly into the registry query; no cross-tenant documents can leak
+      through this endpoint even if other organisations have approved records.
     - Documents are filtered by the server-derived role; a staff member only
       receives policies their role is permitted to see.
     - No embedding status, storage keys or internal pipeline metadata
@@ -3151,7 +3154,10 @@ def list_policies(
 
     if _DB_CONFIGURED:
         try:
-            db_docs = _list_registry_records(status="approved")
+            db_docs = _list_registry_records(
+                organisation_id=_pilot_org_id,
+                status="approved",
+            )
             docs: List[Dict[str, Any]] = [
                 d for d in db_docs if _can_show_document_to_staff(d)[0]
             ]
@@ -3170,7 +3176,10 @@ def list_policies(
         except RuntimeError:
             pass  # fall through to in-memory demo data
 
-    docs_mem = [d for d in _documents if _can_show_document_to_staff(d)[0]]
+    docs_mem = [
+        d for d in _documents
+        if d.get("organisation_id") == _pilot_org_id and _can_show_document_to_staff(d)[0]
+    ]
     docs_mem = [
         d for d in docs_mem
         if "All Staff" in d["access_roles"] or pilot_role in d["access_roles"]

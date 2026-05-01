@@ -7,6 +7,8 @@ import {
   Users, AlertTriangle, BookOpen,
 } from 'lucide-react'
 
+const ADMIN_DEMO_ENABLED = process.env.NEXT_PUBLIC_ADMIN_DEMO_ENABLED === 'true'
+
 const employeeNav = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/ask', label: 'Ask WorkTwin', icon: MessageCircle },
@@ -91,42 +93,44 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         {/* Demo switcher + user */}
         <div className="border-t border-slate-200 p-3 space-y-3">
-          {/* Demo-only view switcher — visually separated from employee nav */}
-          <div className="rounded-xl bg-amber-50 border border-amber-200 p-2.5">
-            <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">Demo Mode — Switch View</p>
-            <p className="text-xs text-amber-700 mb-2 leading-tight">
-              Demo host only — staff would not see admin access in a real deployment.
-            </p>
-            <div className="flex gap-1.5">
-              <Link
-                href="/dashboard"
-                className={`flex-1 text-center text-xs py-1.5 rounded-md font-medium transition-colors ${
-                  !isAdmin
-                    ? 'bg-teal-700 text-white'
-                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                <Users size={12} className="inline mr-1" />
-                Employee
-              </Link>
-              <Link
-                href="/admin"
-                className={`flex-1 text-center text-xs py-1.5 rounded-md font-medium transition-colors ${
-                  isAdmin
-                    ? 'bg-amber-600 text-white'
-                    : 'bg-amber-100 border border-amber-300 text-amber-800 hover:bg-amber-200'
-                }`}
-              >
-                <Shield size={12} className="inline mr-1" />
-                Admin ↗
-              </Link>
-            </div>
-            {!isAdmin && (
-              <p className="text-xs text-amber-600 mt-1.5 text-center">
-                Host-only area — not a staff feature
+          {/* Demo-only view switcher — only shown when admin demo is explicitly enabled */}
+          {ADMIN_DEMO_ENABLED && (
+            <div className="rounded-xl bg-amber-50 border border-amber-200 p-2.5">
+              <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">Demo Mode — Switch View</p>
+              <p className="text-xs text-amber-700 mb-2 leading-tight">
+                Demo host only — staff would not see admin access in a real deployment.
               </p>
-            )}
-          </div>
+              <div className="flex gap-1.5">
+                <Link
+                  href="/dashboard"
+                  className={`flex-1 text-center text-xs py-1.5 rounded-md font-medium transition-colors ${
+                    !isAdmin
+                      ? 'bg-teal-700 text-white'
+                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <Users size={12} className="inline mr-1" />
+                  Employee
+                </Link>
+                <Link
+                  href="/admin"
+                  className={`flex-1 text-center text-xs py-1.5 rounded-md font-medium transition-colors ${
+                    isAdmin
+                      ? 'bg-amber-600 text-white'
+                      : 'bg-amber-100 border border-amber-300 text-amber-800 hover:bg-amber-200'
+                  }`}
+                >
+                  <Shield size={12} className="inline mr-1" />
+                  Admin ↗
+                </Link>
+              </div>
+              {!isAdmin && (
+                <p className="text-xs text-amber-600 mt-1.5 text-center">
+                  Host-only area — not a staff feature
+                </p>
+              )}
+            </div>
+          )}
           <div className="flex items-center gap-2 px-1">
             <div className="w-8 h-8 rounded-full bg-teal-700 text-white text-xs font-bold flex items-center justify-center shrink-0">
               DU

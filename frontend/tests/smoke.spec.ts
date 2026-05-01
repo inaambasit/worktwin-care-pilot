@@ -16,6 +16,9 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByText('Safe support reminders')).toBeVisible()
     await expect(page.getByText('Private notes demo')).toBeVisible()
     await expect(page.getByRole('link', { name: 'Policy Library Browse approved documents' })).toBeVisible()
+
+    const adminLinks = await page.locator('a[href^="/admin"], a[href*="/admin/"]').count()
+    expect(adminLinks).toBe(0)
   })
 
   test('ask page shows common questions and safe privacy wording', async ({ page }) => {
@@ -61,17 +64,13 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByText(/999|emergency/i).first()).toBeVisible()
   })
 
-  test('admin pages are visibly contained as demo-host-only areas', async ({ page }) => {
+  test('admin pages show disabled message by default', async ({ page }) => {
     await page.goto('/admin')
-    await expect(page.getByText(/Admin demo area.*not visible to staff/i)).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Admin demo disabled' })).toBeVisible()
+    await expect(page.getByText('This public deployment does not expose admin demo screens')).toBeVisible()
 
     await page.goto('/admin/documents')
-    await expect(page.getByText(/Admin document tools.*demo and testing only/i)).toBeVisible()
-
-    await page.goto('/admin/insights')
-    await expect(page.getByText(/Sample data only.*illustrative themes.*not real staff usage/i)).toBeVisible()
-
-    await page.goto('/admin/roles')
-    await expect(page.getByText(/Intended permission model only.*not enforced in this demo/i)).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Admin demo disabled' })).toBeVisible()
+    await expect(page.getByText('This public deployment does not expose admin demo screens')).toBeVisible()
   })
 })

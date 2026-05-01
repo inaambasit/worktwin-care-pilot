@@ -16,3 +16,7 @@ build/
 # Claude local settings
 .claude/settings.local.json
 .claude/
+
+# Playwright test artefacts
+frontend/playwright-report/
+frontend/test-results/

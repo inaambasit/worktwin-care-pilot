@@ -1370,6 +1370,15 @@ def _generate_source_grounded_answer(
     return {"answer": answer_text, "model": ANSWER_MODEL, "estimated_cost_note": cost_note}
 
 
+def _answer_contains_visible_source_label(answer: str, sources: List[Dict[str, Any]]) -> bool:
+    """Return True only if the answer text includes at least one [Source n] label from the retrieved sources."""
+    if not answer or not sources:
+        return False
+    labels = {str(s.get("source_label") or "").strip() for s in sources}
+    labels = {label for label in labels if label}
+    return any(label in answer for label in labels)
+
+
 def _validate_grounded_answer_result(
     answer: str,
     sources: List[Dict[str, Any]],
@@ -1377,12 +1386,15 @@ def _validate_grounded_answer_result(
     """
     Derive confidence label from the answer and retrieved sources.
     Returns: "source_grounded" | "insufficient_sources"
+    "source_grounded" requires at least one visible [Source n] label in the answer.
     "blocked_safety" is determined upstream (before answer generation) when all
     raw RPC matches were excluded by safety rules.
     """
     if not sources:
         return "insufficient_sources"
     if "can't answer that from the available approved sources" in answer.lower():
+        return "insufficient_sources"
+    if not _answer_contains_visible_source_label(answer, sources):
         return "insufficient_sources"
     return "source_grounded"
 

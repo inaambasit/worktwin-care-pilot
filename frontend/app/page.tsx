@@ -24,35 +24,35 @@ const features = [
     icon: Shield,
     title: 'Privacy by default',
     description:
-      'Employee chats are private. Managers only ever see anonymised trends, not individual conversations.',
+      'Employee chats are private. WorkTwin is designed so managers see anonymised themes only, not individual conversations.',
   },
   {
     icon: BarChart2,
     title: 'Anonymous insights for leaders',
     description:
-      'Identify training gaps, workflow confusion and document improvement opportunities without breaching staff trust.',
+      'Identify policy areas needing clearer guidance, repeated workflow questions and common support themes without breaching staff trust.',
   },
   {
     icon: CheckCircle,
     title: 'Source-cited answers',
     description:
-      'Every answer cites the approved company document it came from, so staff can trust what they read and audit trails are clear.',
+      'WorkTwin is designed to show approved sources for answers, so staff can see where guidance comes from and audit trails stay clear.',
   },
 ]
 
 const trustItems = [
-  'Employee chats are never shared with managers',
+  'Employee chat content is not shown on manager pages in this demo',
   'All answers are grounded in your approved documents',
-  'Sensitive topics are escalated to a human — never answered automatically',
+  'Sensitive topics are escalated to a human - never answered automatically',
   'No performance scoring, surveillance or sentiment tracking',
-  'Hosted in the UK, built around UK GDPR principles',
+  'Designed around UK GDPR principles',
 ]
 
 const steps = [
   {
     step: '1',
     title: 'Upload approved documents',
-    description: 'Upload existing handbooks, SOPs, policies, workflows and training documents. WorkTwin indexes them securely.',
+    description: 'Upload existing handbooks, SOPs, policies, workflows and training documents. WorkTwin prepares approved documents for governed retrieval.',
   },
   {
     step: '2',
@@ -62,7 +62,7 @@ const steps = [
   {
     step: '3',
     title: 'Leaders see trends, not transcripts',
-    description: 'Managers view anonymised trends: training gaps, repeated questions and documents needing improvement. Never private chats.',
+    description: 'Leaders view anonymised themes: repeated questions, unclear policies and documents needing improvement. Never private chats.',
   },
 ]
 

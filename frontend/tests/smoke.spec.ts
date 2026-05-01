@@ -30,6 +30,17 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByText('Private from managers in this demo')).toBeVisible()
   })
 
+  test('ask page returns a visitor answer when common question is clicked', async ({ page }) => {
+    await page.goto('/ask')
+    await page.getByRole('button', { name: /What should I do when a visitor arrives/i }).click()
+
+    await expect(page.getByText(/Could not reach WorkTwin/i)).not.toBeVisible({ timeout: 30000 })
+
+    await expect(
+      page.getByText(/Visitor Sign-In and Identification Procedure|visitor log|visitor arrives/i).first()
+    ).toBeVisible({ timeout: 30000 })
+  })
+
   test('policy library loads as a staff-facing page', async ({ page }) => {
     await page.goto('/policies')
     await expect(page.getByRole('heading', { name: 'Policy Library' })).toBeVisible()

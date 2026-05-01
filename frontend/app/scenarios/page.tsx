@@ -56,7 +56,7 @@ const scenarios: Scenario[] = [
   },
   {
     id: 5,
-    title: 'Food and nutrition — identifying concerns',
+    title: 'Food and nutrition - identifying concerns',
     category: 'Health & Nutrition',
     description: 'Practise identifying when a service user may be at nutritional risk, how to record concerns and when to escalate.',
     difficulty: 'Beginner',
@@ -88,6 +88,15 @@ const scenarios: Scenario[] = [
     description: 'Practise responding to a formal or informal complaint, recording it correctly and following the complaints procedure.',
     difficulty: 'Intermediate',
     duration: '10 min',
+    status: 'Not started',
+  },
+  {
+    id: 9,
+    title: 'Service user refuses entry at the door',
+    category: 'Access / Welfare',
+    description: 'A staff member arrives for a visit, but the service user does not want to let them inside. The service user is around 100 years old and the staff member is unsure what to do. Practise calm communication, first contacting the service user\'s son as advised by Shagufta, and escalating to Shagufta as Registered Manager / Safeguarding Lead if there are any welfare, safety, capacity, distress, neglect, missed medication or immediate-risk concerns.',
+    difficulty: 'Intermediate',
+    duration: '7 min',
     status: 'Not started',
   },
 ]

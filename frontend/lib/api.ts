@@ -108,7 +108,6 @@ export async function archiveDocument(id: string): Promise<DocumentRecord> {
 
 export interface UploadDocumentParams {
   file: File
-  organisation_id: string
   title: string
   vertical: string
   category: string
@@ -127,7 +126,6 @@ export interface UploadDocumentParams {
 export async function uploadDocumentPdf(params: UploadDocumentParams): Promise<UploadDocumentResult> {
   const form = new FormData()
   form.append('file', params.file)
-  form.append('organisation_id', params.organisation_id)
   form.append('title', params.title)
   form.append('vertical', params.vertical)
   form.append('category', params.category)

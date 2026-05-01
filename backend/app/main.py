@@ -3213,7 +3213,6 @@ _PROHIBITED_PATTERNS = [
 @app.post("/documents/upload")
 async def upload_document_pdf(
     file: UploadFile = File(...),
-    organisation_id: str = Form(...),
     title: str = Form(...),
     vertical: str = Form("care"),
     category: str = Form(...),
@@ -3237,7 +3236,15 @@ async def upload_document_pdf(
 
     No embeddings are created. No AI answers are generated.
     embedding_status is always set to 'pending' after upload.
+
+    organisation_id is derived server-side from PILOT_ORGANISATION_ID and
+    cannot be supplied by the browser.
     """
+    # ---- 0. Derive and verify organisation server-side ----
+    organisation_id, _, _ = _get_pilot_staff_context()
+    if organisation_id not in _ALLOWED_ORGANISATION_IDS:
+        raise HTTPException(status_code=403, detail="Organisation is not allowed for document upload.")
+
     # ---- 1. File type validation ----
     filename = file.filename or "upload.pdf"
     ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""

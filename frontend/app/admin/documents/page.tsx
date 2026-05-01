@@ -367,7 +367,6 @@ function computeRagBadge(doc: DocumentRecord): RagBadgeResult {
 // ---------------------------------------------------------------------------
 
 interface UploadFormState {
-  organisation_id: string
   title: string
   description: string
   vertical: string
@@ -384,7 +383,6 @@ interface UploadFormState {
 }
 
 const EMPTY_FORM: UploadFormState = {
-  organisation_id: 'demo-org',
   title: '',
   description: '',
   vertical: 'care',
@@ -548,7 +546,6 @@ export default function DocumentRegistryPage() {
     try {
       const result = await uploadDocumentPdf({
         file: uploadFile,
-        organisation_id: form.organisation_id,
         title: form.title.trim(),
         description: form.description.trim() || undefined,
         vertical: form.vertical,

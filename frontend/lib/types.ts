@@ -31,9 +31,7 @@ export interface AskResponse {
   learning_option?: string
   requires_escalation: boolean
   allowed_to_answer: boolean
-  source_confidence?: number
   risk_category: RiskCategory
-  anonymised_insight_topic?: string
   contact_routes?: string[]
 }
 

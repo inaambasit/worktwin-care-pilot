@@ -619,10 +619,8 @@ def _staff_fallback_response(
         escalate_if=_STANDARD_ESCALATE_IF,
         requires_escalation=requires_escalation,
         allowed_to_answer=False,
-        source_confidence=None,
         risk_category=risk_category,
         learning_option=None,
-        anonymised_insight_topic=None,
         vertical_subcategory=vertical_subcategory,
         contact_routes=contact_routes or [],
     )
@@ -1457,12 +1455,10 @@ class AskResponse(BaseModel):
 
     requires_escalation: bool = False
     allowed_to_answer: bool = True
-    source_confidence: Optional[float] = None
     risk_category: Literal[
         "standard", "policy", "hr", "legal", "wellbeing", "compliance", "vertical_sensitive"
     ] = "standard"
     vertical_subcategory: Optional[str] = None
-    anonymised_insight_topic: Optional[str] = None
     contact_routes: List[str] = []
 
 
@@ -2344,10 +2340,8 @@ def ask_worktwin(payload: AskRequest):
         escalate_if=_STANDARD_ESCALATE_IF,
         requires_escalation=not is_grounded,
         allowed_to_answer=is_grounded,
-        source_confidence=None,   # raw similarity score never exposed to staff
         risk_category="standard",
         learning_option=None,
-        anonymised_insight_topic=None,
     )
 
 

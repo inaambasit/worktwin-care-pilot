@@ -686,6 +686,19 @@ export default function DocumentRegistryPage() {
           </div>
         </div>
 
+        {/* Admin containment banner */}
+        <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl px-5 py-4 flex items-start gap-3">
+          <ShieldAlert size={18} className="text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-bold text-amber-900">Admin document tools — demo and testing only</p>
+            <p className="text-sm text-amber-800 mt-0.5 leading-relaxed">
+              These tools are for controlled demo and product-owner use. Do not upload real staff, service-user,
+              safeguarding, medication, HR or payroll records. The document list below is sample data only and
+              does not reflect real Thumhara Centre documents.
+            </p>
+          </div>
+        </div>
+
         {/* Upload safety notice */}
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
           <div className="flex items-start gap-3">

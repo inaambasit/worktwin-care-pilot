@@ -62,11 +62,12 @@ export default function InsightsPage() {
         </div>
 
         {/* Sample data banner */}
-        <div className="bg-amber-50 border border-amber-300 rounded-2xl px-4 py-3 flex items-start gap-3">
+        <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl px-4 py-3 flex items-start gap-3">
           <AlertCircle size={16} className="text-amber-600 shrink-0 mt-0.5" />
           <p className="text-sm text-amber-800">
-            <span className="font-semibold">Sample data only.</span>{' '}
-            These figures are illustrative and do not represent real staff usage at Thumhara Centre or any other organisation.
+            <span className="font-semibold">Sample data only — illustrative themes, not real staff usage.</span>{' '}
+            These figures do not represent real staff activity at Thumhara Centre or any other organisation.
+            In a real deployment, this view is restricted to authorised managers only.
           </p>
         </div>
 

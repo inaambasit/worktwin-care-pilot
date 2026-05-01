@@ -1,6 +1,6 @@
 import AppLayout from '@/components/AppLayout'
 import Link from 'next/link'
-import { Users, FileText, BarChart2, Shield, Phone, AlertTriangle, TrendingUp, BookOpen } from 'lucide-react'
+import { Users, FileText, BarChart2, Shield, Phone, AlertTriangle, TrendingUp, BookOpen, Lock } from 'lucide-react'
 
 const summaryCards = [
   { label: 'Pilot participants', value: '24', sub: 'Organisation usage', icon: Users, colour: 'teal' },
@@ -20,7 +20,7 @@ const adminSections = [
     href: '/admin/insights',
     icon: BarChart2,
     label: 'Anonymous Insights',
-    desc: 'View anonymised staff question trends, training gaps and document suggestions.',
+    desc: 'View anonymised staff question trends, common support themes and document suggestions.',
   },
   {
     href: '/admin/roles',
@@ -50,6 +50,19 @@ export default function AdminOverviewPage() {
         <div>
           <h1 className="text-xl font-bold text-slate-900">Admin Overview</h1>
           <p className="text-sm text-slate-500 mt-0.5">Thumhara Centre · WorkTwin Care Pilot</p>
+        </div>
+
+        {/* Admin containment banner */}
+        <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl px-5 py-4 flex items-start gap-3">
+          <Lock size={18} className="text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-bold text-amber-900">Admin demo area — not visible to staff</p>
+            <p className="text-sm text-amber-800 mt-0.5 leading-relaxed">
+              This is a sample configuration and reporting area for demo and product-owner use only.
+              All figures are illustrative — no real staff data is shown. In a real deployment, admin
+              screens are access-controlled and not reachable by staff.
+            </p>
+          </div>
         </div>
 
         {/* Privacy reminder */}

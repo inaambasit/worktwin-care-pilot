@@ -95,7 +95,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="rounded-xl bg-amber-50 border border-amber-200 p-2.5">
             <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">Demo Mode — Switch View</p>
             <p className="text-xs text-amber-700 mb-2 leading-tight">
-              In a real deployment, admin access is permission-controlled and not available to staff.
+              Demo host only — staff would not see admin access in a real deployment.
             </p>
             <div className="flex gap-1.5">
               <Link
@@ -103,7 +103,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 className={`flex-1 text-center text-xs py-1.5 rounded-md font-medium transition-colors ${
                   !isAdmin
                     ? 'bg-teal-700 text-white'
-                    : 'bg-white border border-amber-200 text-amber-700 hover:bg-amber-100'
+                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                 }`}
               >
                 <Users size={12} className="inline mr-1" />
@@ -113,14 +113,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 href="/admin"
                 className={`flex-1 text-center text-xs py-1.5 rounded-md font-medium transition-colors ${
                   isAdmin
-                    ? 'bg-teal-700 text-white'
-                    : 'bg-white border border-amber-200 text-amber-700 hover:bg-amber-100'
+                    ? 'bg-amber-600 text-white'
+                    : 'bg-amber-100 border border-amber-300 text-amber-800 hover:bg-amber-200'
                 }`}
               >
                 <Shield size={12} className="inline mr-1" />
-                Admin
+                Admin ↗
               </Link>
             </div>
+            {!isAdmin && (
+              <p className="text-xs text-amber-600 mt-1.5 text-center">
+                Host-only area — not a staff feature
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-2 px-1">
             <div className="w-8 h-8 rounded-full bg-teal-700 text-white text-xs font-bold flex items-center justify-center shrink-0">

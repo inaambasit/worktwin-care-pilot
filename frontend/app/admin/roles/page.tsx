@@ -1,5 +1,5 @@
 import AppLayout from '@/components/AppLayout'
-import { Shield, Check, Minus, Info } from 'lucide-react'
+import { Shield, Check, Minus, Info, AlertTriangle } from 'lucide-react'
 
 const roles = ['Care Worker', 'Senior Carer', 'Nurse', 'Manager', 'HR Coordinator', 'Admin']
 
@@ -91,6 +91,19 @@ export default function RolesPage() {
           </p>
         </div>
 
+        {/* Admin containment banner */}
+        <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl px-5 py-4 flex items-start gap-3">
+          <AlertTriangle size={18} className="text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-bold text-amber-900">Intended permission model only — not enforced in this demo</p>
+            <p className="text-sm text-amber-800 mt-0.5 leading-relaxed">
+              This matrix shows the planned role and permission structure for a real deployment. Role-based
+              access control is not active in the current demo — any user can navigate to any area. Do not
+              treat this as live RBAC.
+            </p>
+          </div>
+        </div>
+
         {/* Important notice */}
         <div className="bg-teal-50 border border-teal-200 rounded-2xl px-4 py-3 flex items-start gap-3">
           <Shield size={16} className="text-teal-700 shrink-0 mt-0.5" />
@@ -172,7 +185,7 @@ export default function RolesPage() {
         </div>
 
         <p className="text-xs text-slate-400 text-center">
-          This page shows the intended permission model for the pilot. Role enforcement is not active in this demo.
+          This page shows the intended permission model for the pilot. Role enforcement is not active in this demo — see the notice above.
         </p>
       </div>
     </AppLayout>

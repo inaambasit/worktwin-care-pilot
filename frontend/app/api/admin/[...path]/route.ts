@@ -1,14 +1,18 @@
 // Milestone 4S.2A — Server-side proxy for admin/document endpoints.
 // ADMIN_TOKEN stays server-side; the browser never receives or sends it.
+// Proxy is disabled unless ADMIN_PROXY_ENABLED=true in the deployment environment.
 //
-// SECURITY NOTE (interim): This proxy hides ADMIN_TOKEN from the browser bundle
-// but does not add admin session auth. A later milestone must add real session
-// protection before real users access the admin area.
+// SECURITY NOTE (interim):
+// - ADMIN_TOKEN stays server-side; never exposed to the browser.
+// - Proxy is disabled unless ADMIN_PROXY_ENABLED=true.
+// - This is not a replacement for real admin session auth; a later milestone
+//   must add proper session protection before real users access the admin area.
 import { NextRequest, NextResponse } from 'next/server'
 
 // Allow up to 120 s on Vercel — generate-embeddings can take that long
 export const maxDuration = 120
 
+const ADMIN_PROXY_ENABLED = process.env.ADMIN_PROXY_ENABLED === 'true'
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN ?? ''
 const BACKEND_URL =
   process.env.API_BASE_URL ??
@@ -19,6 +23,13 @@ async function proxyHandler(
   request: NextRequest,
   { params }: { params: { path: string[] } },
 ): Promise<NextResponse> {
+  if (!ADMIN_PROXY_ENABLED) {
+    return NextResponse.json(
+      { detail: 'Admin proxy is disabled for this deployment.' },
+      { status: 403 },
+    )
+  }
+
   if (!ADMIN_TOKEN || !BACKEND_URL) {
     return NextResponse.json({ detail: 'Admin proxy not configured.' }, { status: 503 })
   }

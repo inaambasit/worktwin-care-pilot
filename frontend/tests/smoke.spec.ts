@@ -63,9 +63,10 @@ test.describe('WorkTwin smoke tests', () => {
 
   test('notes page states session-only demo behaviour', async ({ page }) => {
     await page.goto('/notes')
-    await expect(page.getByText('Notes are private in this demo')).toBeVisible()
-    await expect(page.getByText('notes are stored in this browser session only')).toBeVisible()
-    await expect(page.getByText(/Not persisted between sessions|session storage/i)).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Private Notes' })).toBeVisible()
+    await expect(page.getByText('Session-only notes')).toBeVisible()
+    await expect(page.getByText('Private notes stay private in this demo and are not shown on admin pages.')).toBeVisible()
+    await expect(page.getByText('Session only - not saved between sessions')).toBeVisible()
   })
 
   test('escalation contacts page loads with sample or fictional disclaimer', async ({ page }) => {

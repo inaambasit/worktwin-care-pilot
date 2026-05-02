@@ -6,12 +6,12 @@ import type { StaffPolicyRecord } from '@/lib/types'
 import { LANGUAGE_NAMES } from '@/lib/types'
 import {
   BookOpen, Search, CheckCircle, Globe, MessageCircle,
-  X, Calendar, AlertTriangle, Shield, FileText, ChevronRight,
-  Archive,
+  X, Calendar, AlertTriangle, FileText, ChevronRight,
+  Archive, ShieldCheck, Loader2,
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
-// Sample fallback data — approved policies only (shown when backend unavailable)
+// Sample fallback data - approved policies only (shown when backend unavailable)
 // ---------------------------------------------------------------------------
 const SAMPLE_DOCS: StaffPolicyRecord[] = [
   {
@@ -75,19 +75,21 @@ const CATEGORY_COLOURS: Record<string, string> = {
   Onboarding: 'bg-emerald-50 text-emerald-700',
 }
 
+const CONTEXT_CHIPS = ['Approved documents', 'Staff-visible guidance', 'Source-grounded answers', 'Care provider pilot']
+
 function formatDate(iso?: string): string {
-  if (!iso) return '—'
+  if (!iso) return '-'
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 function formatBytes(bytes?: number): string {
-  if (!bytes) return '—'
+  if (!bytes) return '-'
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
 // ---------------------------------------------------------------------------
-// Per-language approval status (sample — real per-language approval in 4B+)
+// Per-language approval status (sample - real per-language approval in 4B+)
 // Primary language is always Approved (document is approved).
 // Other languages derive status from translation_status and position in list.
 // ---------------------------------------------------------------------------
@@ -111,13 +113,11 @@ function getLanguageStatus(doc: StaffPolicyRecord, lang: string): { label: strin
 // CTA safety gate: must NOT show "Ask WorkTwin" if document is unsafe for AI
 // ---------------------------------------------------------------------------
 function isSafeForAiCta(doc: StaffPolicyRecord): boolean {
-  // Backend gate enforces governance conditions before serving; status is the only
-  // remaining discriminator meaningful at the staff UI layer.
   return doc.status !== 'archived'
 }
 
 // ---------------------------------------------------------------------------
-// Ask status badge — 4-tier label shown on every card and in the modal
+// Ask status badge - 4-tier label shown on every card and in the modal
 // ---------------------------------------------------------------------------
 
 function AskStatusBadge({ doc, small = true }: { doc: StaffPolicyRecord; small?: boolean }) {
@@ -171,7 +171,7 @@ function PolicyModal({ doc, onClose }: { doc: StaffPolicyRecord; onClose: () => 
           <div className="flex items-start gap-2 bg-teal-50 border border-teal-100 rounded-xl px-4 py-3">
             <CheckCircle size={15} className="text-teal-600 mt-0.5 shrink-0" />
             <p className="text-xs text-teal-800 font-medium">
-              Approved policy — all Thumhara Centre staff should follow it.
+              Approved policy - all Thumhara Centre staff should follow it.
             </p>
           </div>
 
@@ -240,7 +240,7 @@ function PolicyModal({ doc, onClose }: { doc: StaffPolicyRecord; onClose: () => 
           )}
         </div>
 
-        {/* Footer — CTA shown for non-archived policies only */}
+        {/* Footer - CTA shown for non-archived policies only */}
         <div className="p-5 border-t border-slate-100 space-y-3">
           {safeForAi && HIGH_RISK_CATEGORIES.has(doc.category) && (
             <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5">
@@ -310,107 +310,167 @@ export default function PoliciesPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-4xl mx-auto space-y-5">
+      <div className="max-w-6xl mx-auto px-4 pt-4 pb-8 space-y-6">
 
-        {/* Header */}
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <BookOpen size={20} className="text-teal-600" />
-              <h1 className="text-xl font-bold text-slate-900">Policy Library</h1>
+        {/* Hero card */}
+        <div className="bg-gradient-to-br from-teal-700 via-teal-800 to-teal-900 rounded-3xl p-7 text-white relative overflow-hidden shadow-lg">
+          <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full bg-white/5 pointer-events-none" />
+          <div className="absolute right-6 -bottom-14 w-40 h-40 rounded-full bg-teal-600/25 pointer-events-none" />
+          <div className="absolute -left-6 bottom-4 w-24 h-24 rounded-full bg-teal-800/40 pointer-events-none" />
+          <div className="relative">
+            <span className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1 rounded-full text-xs font-semibold mb-5">
+              <BookOpen size={11} />
+              Policy library
+            </span>
+            <h1 className="text-3xl font-bold mb-2.5 leading-snug">Policy Library</h1>
+            <p className="text-teal-100 text-sm leading-relaxed max-w-lg mb-5">
+              Browse approved staff-visible documents used by WorkTwin to support policy-grounded answers during the pilot demo.
+            </p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {CONTEXT_CHIPS.map(chip => (
+                <span key={chip} className="bg-white/15 text-white text-xs px-3 py-1.5 rounded-full font-medium">
+                  {chip}
+                </span>
+              ))}
             </div>
-            <p className="text-sm text-slate-500">
-              Approved Thumhara Centre policies and procedures. All WorkTwin answers are grounded in these documents.
-            </p>
-          </div>
-          <span className="text-xs text-slate-500 bg-slate-100 rounded-full px-3 py-1.5 font-medium whitespace-nowrap shrink-0">
-            {docs.length} approved {docs.length === 1 ? 'policy' : 'policies'}
-          </span>
-        </div>
-
-        {/* Approved notice banner */}
-        <div className="flex items-start gap-3 bg-teal-50 border border-teal-100 rounded-2xl px-5 py-4">
-          <Shield size={18} className="text-teal-600 mt-0.5 shrink-0" />
-          <div>
-            <p className="text-sm font-semibold text-teal-900">Approved company documents</p>
-            <p className="text-xs text-teal-700 mt-0.5">
-              All documents in this library have been reviewed and approved by Thumhara Centre management.
-              Approved English-language policies are the source of truth. Translations are provided where a human-reviewed version has been approved.
+            <p className="text-teal-200 text-xs">
+              Only approved staff-visible documents should be used for staff-facing answers.
             </p>
           </div>
         </div>
 
-        {/* Ask status explainer */}
-        <div className="flex items-start gap-3 bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4">
-          <MessageCircle size={16} className="text-slate-400 mt-0.5 shrink-0" />
-          <p className="text-xs text-slate-600 leading-relaxed">
-            WorkTwin only shows staff-visible policies here. Ask WorkTwin will still check approved source-grounded documents and escalate high-risk topics before answering.
-          </p>
+        {/* Summary cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-3">
+            <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center shrink-0">
+              <FileText size={18} className="text-teal-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-teal-700">{loading ? '-' : docs.length}</p>
+              <p className="text-xs text-slate-500">Staff-visible documents</p>
+            </div>
+          </div>
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-3">
+            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center shrink-0">
+              <BookOpen size={18} className="text-slate-500" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-700 leading-tight">Care policies</p>
+              <p className="text-xs text-slate-500">Available in demo</p>
+            </div>
+          </div>
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-3">
+            <div className="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center shrink-0">
+              <ShieldCheck size={18} className="text-teal-600" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-700 leading-tight">Source-grounded</p>
+              <p className="text-xs text-slate-500">Source-grounded support</p>
+            </div>
+          </div>
         </div>
 
+        {/* Demo / fallback notice */}
         {usingFallback && (
-          <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-700">
-            <AlertTriangle size={13} className="shrink-0" />
-            Demo mode — showing sample data. Connect the backend to load live documents.
+          <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
+            <AlertTriangle size={16} className="text-amber-600 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-amber-800">Could not load policy library</p>
+              <p className="text-xs text-amber-700 mt-0.5">
+                WorkTwin could not connect to the policy library. Showing sample data for this demo. Please try again or speak to your manager.
+              </p>
+            </div>
           </div>
         )}
 
-        {/* Search */}
-        <div className="relative">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search policies by name, topic or keyword…"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 text-sm border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-teal-300 placeholder-slate-400"
-          />
-        </div>
+        {/* Filter / search card */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Browse approved policies</p>
 
-        {/* Category filter */}
-        <div className="flex flex-wrap gap-2">
-          {categories.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
-                activeCategory === cat
-                  ? 'bg-teal-700 border-teal-700 text-white'
-                  : 'border-slate-200 text-slate-600 hover:border-teal-300 bg-white'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+          {/* Search */}
+          <div className="relative">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search policies by name, topic or keyword..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full pl-9 pr-4 py-2.5 text-sm border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-teal-300 placeholder-slate-400"
+            />
+          </div>
+
+          {/* Category filter */}
+          <div className="flex flex-wrap gap-2">
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`text-xs font-semibold px-3.5 py-1.5 rounded-full border-2 transition-all ${
+                  activeCategory === cat
+                    ? 'bg-teal-700 border-teal-700 text-white shadow-sm'
+                    : 'border-slate-200 text-slate-600 hover:border-teal-300 hover:text-teal-700 bg-white'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Policy cards */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="bg-white border border-slate-100 rounded-2xl p-5 animate-pulse">
-                <div className="h-4 bg-slate-100 rounded w-3/4 mb-3" />
-                <div className="h-3 bg-slate-50 rounded w-full mb-1.5" />
-                <div className="h-3 bg-slate-50 rounded w-2/3" />
-              </div>
-            ))}
+          <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-5">
+            <div className="text-center space-y-2">
+              <Loader2 size={28} className="mx-auto text-teal-400 animate-spin" />
+              <p className="font-semibold text-slate-700">Loading approved policies</p>
+              <p className="text-xs text-slate-400">Checking staff-visible documents for this pilot demo.</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="bg-slate-50 border border-slate-100 rounded-2xl p-5 animate-pulse">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="w-10 h-10 bg-slate-100 rounded-xl shrink-0" />
+                    <div className="flex-1">
+                      <div className="h-4 bg-slate-100 rounded w-3/4 mb-2" />
+                      <div className="h-3 bg-slate-100 rounded w-1/2" />
+                    </div>
+                  </div>
+                  <div className="h-3 bg-slate-100 rounded w-full mb-1.5" />
+                  <div className="h-3 bg-slate-100 rounded w-2/3" />
+                </div>
+              ))}
+            </div>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16 text-slate-400">
-            <BookOpen size={32} className="mx-auto mb-3 opacity-40" />
-            <p className="text-sm font-medium">No policies found</p>
-            <p className="text-xs mt-1">Try a different search term or category</p>
+          <div className="bg-white border border-slate-200 rounded-2xl p-10 shadow-sm text-center space-y-3">
+            <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto">
+              <BookOpen size={24} className="text-slate-400" />
+            </div>
+            <p className="font-semibold text-slate-700">
+              {search || activeCategory !== 'All'
+                ? 'No policies match your filter'
+                : 'No staff-visible policies are available yet.'}
+            </p>
+            <p className="text-sm text-slate-400 max-w-sm mx-auto">
+              {search || activeCategory !== 'All'
+                ? 'Try a different search term or select a different category.'
+                : 'Approved documents will appear here once they have been reviewed for staff visibility.'}
+            </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {filtered.map(doc => (
-                <button
-                  key={doc.id}
-                  onClick={() => setSelected(doc)}
-                  className="bg-white border border-slate-200 rounded-2xl p-5 text-left hover:border-teal-300 hover:shadow-sm transition-all group"
-                >
-                  {/* Category + language flag */}
-                  <div className="flex items-center justify-between mb-3">
+              <button
+                key={doc.id}
+                onClick={() => setSelected(doc)}
+                className="bg-white border border-slate-200 rounded-3xl p-6 text-left hover:border-teal-300 hover:shadow-md transition-all group"
+              >
+                {/* Icon tile + category */}
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-teal-100 transition-colors">
+                    <FileText size={18} className="text-teal-600" />
+                  </div>
+                  <div className="flex-1 min-w-0 flex items-start justify-between gap-2 pt-0.5">
                     <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${CATEGORY_COLOURS[doc.category] ?? 'bg-slate-100 text-slate-600'}`}>
                       {doc.category}
                     </span>
@@ -420,50 +480,54 @@ export default function PoliciesPage() {
                       </span>
                     )}
                   </div>
+                </div>
 
-                  {/* Title */}
-                  <h3 className="font-semibold text-slate-900 text-sm leading-snug mb-2 group-hover:text-teal-700 transition-colors">
-                    {doc.title}
-                  </h3>
+                {/* Title */}
+                <h3 className="font-bold text-slate-900 text-base leading-snug mb-2 group-hover:text-teal-700 transition-colors">
+                  {doc.title}
+                </h3>
 
-                  {/* Description */}
-                  {doc.description && (
-                    <p className="text-xs text-slate-500 leading-relaxed line-clamp-2 mb-3">
-                      {doc.description}
-                    </p>
+                {/* Description */}
+                {doc.description && (
+                  <p className="text-xs text-slate-500 leading-relaxed line-clamp-2 mb-3">
+                    {doc.description}
+                  </p>
+                )}
+
+                {/* Status chips */}
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  <AskStatusBadge doc={doc} />
+                  {doc.available_languages.length > 1 && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-50 text-slate-500 border border-slate-100">
+                      <Globe size={10} />
+                      {doc.translation_status === 'complete' ? 'Translation available' : 'Translation pending'}
+                    </span>
                   )}
+                </div>
 
-                  {/* Ask status + supplementary labels */}
-                  <div className="flex flex-wrap gap-1.5 mb-3">
-                    <AskStatusBadge doc={doc} />
-                    {doc.available_languages.length > 1 && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-50 text-slate-500 border border-slate-100">
-                        <Globe size={10} />
-                        {doc.translation_status === 'complete' ? 'Translation available' : 'Translation pending'}
+                {/* Footer metadata */}
+                <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                  <div className="flex items-center gap-3 text-xs text-slate-400">
+                    <span>v{doc.version}</span>
+                    {doc.review_due_date && (
+                      <span className="flex items-center gap-1">
+                        <Calendar size={11} />
+                        {formatDate(doc.review_due_date)}
                       </span>
                     )}
                   </div>
-
-                  {/* Footer metadata */}
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-50">
-                    <div className="flex items-center gap-3 text-xs text-slate-400">
-                      <span>v{doc.version}</span>
-                      {doc.review_due_date && (
-                        <span className="flex items-center gap-1">
-                          <Calendar size={11} />
-                          {formatDate(doc.review_due_date)}
-                        </span>
-                      )}
-                    </div>
-                    <ChevronRight size={14} className="text-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="flex items-center gap-1 text-xs text-teal-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>View policy</span>
+                    <ChevronRight size={14} />
                   </div>
-                </button>
+                </div>
+              </button>
             ))}
           </div>
         )}
 
         {/* Multilingual notice */}
-        <div className="flex items-start gap-3 bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4">
+        <div className="bg-white border border-slate-100 rounded-2xl px-5 py-4 shadow-sm flex items-start gap-3">
           <Globe size={16} className="text-slate-400 mt-0.5 shrink-0" />
           <div>
             <p className="text-xs font-semibold text-slate-600">Multilingual support</p>
@@ -475,9 +539,37 @@ export default function PoliciesPage() {
           </div>
         </div>
 
-        <p className="text-xs text-slate-400 text-center">
-          Only documents shown here are used to answer staff questions. WorkTwin does not use the internet or external sources.
-        </p>
+        {/* Safe support reminders */}
+        <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="w-9 h-9 bg-teal-100 rounded-xl flex items-center justify-center shrink-0">
+              <ShieldCheck size={17} className="text-teal-600" />
+            </div>
+            <h2 className="font-semibold text-slate-900 text-sm">Safe support reminders</h2>
+          </div>
+          <ul className="space-y-3">
+            <li className="flex items-start gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0 mt-[7px]" />
+              <span className="text-sm text-slate-600 leading-relaxed">
+                Policy library content is for staff guidance during the pilot demo. Safeguarding, medication, HR, legal, wellbeing or immediate-risk concerns should still be escalated to the right human lead.
+              </span>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0 mt-[7px]" />
+              <span className="text-sm text-slate-600 leading-relaxed">
+                Only documents shown here are used to answer staff questions. WorkTwin does not use the internet or external sources.
+              </span>
+            </li>
+            <li className="flex items-start gap-2.5 bg-red-50 rounded-xl px-3 py-2.5 -mx-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-[7px]" />
+              <span className="text-sm text-red-700 font-medium leading-relaxed">
+                If someone is in immediate danger, call{' '}
+                <a href="tel:999" className="font-bold underline">999</a>.
+              </span>
+            </li>
+          </ul>
+        </div>
+
       </div>
 
       {selected && <PolicyModal doc={selected} onClose={() => setSelected(null)} />}

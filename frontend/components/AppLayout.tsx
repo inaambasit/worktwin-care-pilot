@@ -82,10 +82,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
               <Link
                 href="/escalation"
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  pathname === '/escalation'
+                    ? 'bg-teal-50 text-teal-700 border border-teal-100'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                }`}
               >
                 <AlertTriangle size={16} className="text-amber-500" />
                 Escalation Contacts
+                {pathname === '/escalation' && <ChevronRight size={14} className="ml-auto text-teal-400" />}
               </Link>
             </>
           )}

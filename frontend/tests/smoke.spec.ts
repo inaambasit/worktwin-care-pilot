@@ -14,7 +14,7 @@ test.describe('WorkTwin smoke tests', () => {
     await page.goto('/dashboard')
     await expect(page.getByText(/Demo Mode.*Sample Data Only/i)).toBeVisible()
     await expect(page.getByText('Safe support reminders')).toBeVisible()
-    await expect(page.getByText('Private notes demo')).toBeVisible()
+    await expect(page.getByText('Session-only demo notes')).toBeVisible()
     await expect(page.getByRole('link', { name: 'Policy Library Browse approved documents' })).toBeVisible()
 
     const adminLinks = await page.locator('a[href^="/admin"], a[href*="/admin/"]').count()

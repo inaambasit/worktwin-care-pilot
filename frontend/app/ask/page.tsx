@@ -128,7 +128,6 @@ function mapApiResponse(question: string, res: AskResponse): DisplayAnswer {
       title: s.document_name,
       section: s.section,
       page: s.page,
-
     })),
     escalateIf: res.escalate_if,
     learningOption: res.learning_option ?? '',
@@ -149,6 +148,8 @@ function getDemoFallback(question: string): DisplayAnswer | null {
 // ---------------------------------------------------------------------------
 // Page component
 // ---------------------------------------------------------------------------
+
+const CONTEXT_CHIPS = ['Policy-grounded answers', 'Private in this demo', 'Human escalation', 'Care staff support']
 
 export default function AskPage() {
   const [input, setInput] = useState('')
@@ -206,112 +207,160 @@ export default function AskPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-3xl mx-auto space-y-5">
+      <div className="max-w-6xl mx-auto px-4 pt-4 pb-8 space-y-6">
 
-        {/* Idle state — friendly assistant hero + cards */}
+        {/* Idle state */}
         {!showAnswer && !isLoading && (
           <>
-            {/* Hero */}
-            <div className="rounded-2xl bg-teal-700 px-5 py-5 text-white">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                  <MessageSquare size={20} className="text-white" />
+            {/* Hero card */}
+            <div className="bg-gradient-to-br from-teal-700 via-teal-800 to-teal-900 rounded-3xl p-7 text-white relative overflow-hidden shadow-lg">
+              <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full bg-white/5 pointer-events-none" />
+              <div className="absolute right-6 -bottom-14 w-40 h-40 rounded-full bg-teal-600/25 pointer-events-none" />
+              <div className="absolute -left-6 bottom-4 w-24 h-24 rounded-full bg-teal-800/40 pointer-events-none" />
+              <div className="relative">
+                <span className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1 rounded-full text-xs font-semibold mb-5">
+                  <MessageSquare size={11} />
+                  Policy assistant
+                </span>
+                <h1 className="text-3xl font-bold mb-2.5 leading-snug">Ask WorkTwin</h1>
+                <p className="text-teal-100 text-sm leading-relaxed max-w-lg mb-5">
+                  Ask approved staff guidance questions in plain English. WorkTwin will answer from approved documents where it can, and route sensitive concerns to the right human lead.
+                </p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {CONTEXT_CHIPS.map(chip => (
+                    <span key={chip} className="bg-white/15 text-white text-xs px-3 py-1.5 rounded-full font-medium">
+                      {chip}
+                    </span>
+                  ))}
                 </div>
-                <div>
-                  <p className="text-lg font-bold leading-tight">Hi, I'm WorkTwin</p>
-                  <p className="text-sm text-teal-100 mt-0.5">Your Thumhara Centre policy assistant</p>
-                </div>
+                <p className="text-teal-200 text-xs">
+                  Private Ask questions are not shown to managers in this demo.
+                </p>
               </div>
-              <p className="text-sm text-teal-100 mb-1">I can help you understand approved Thumhara Centre policies.</p>
-              <p className="text-sm font-semibold text-white">What do you need help with today?</p>
             </div>
 
             {/* Common questions */}
-            <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Common questions</p>
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+              <h2 className="font-semibold text-slate-900 mb-1">Common questions</h2>
+              <p className="text-sm text-slate-500 mb-4">Start with a safe example or type your own question below.</p>
               <div className="space-y-2">
                 <button
                   onClick={() => handlePrompt('What should I do when a visitor arrives?')}
-                  className="w-full flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-left hover:bg-teal-50 hover:border-teal-200 transition-colors"
+                  className="w-full flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-left hover:bg-teal-50 hover:border-teal-300 hover:shadow-sm transition-all group"
                 >
-                  <UserCheck size={16} className="text-teal-600 shrink-0" />
-                  <span className="text-sm font-medium text-slate-800">What should I do when a visitor arrives?</span>
+                  <div className="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center shrink-0 group-hover:bg-teal-200 transition-colors">
+                    <UserCheck size={15} className="text-teal-700" />
+                  </div>
+                  <span className="text-sm font-medium text-slate-800 group-hover:text-teal-900">What should I do when a visitor arrives?</span>
                 </button>
                 <button
                   onClick={() => handlePrompt('What details should be recorded in the visitor log?')}
-                  className="w-full flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-left hover:bg-teal-50 hover:border-teal-200 transition-colors"
+                  className="w-full flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-left hover:bg-teal-50 hover:border-teal-300 hover:shadow-sm transition-all group"
                 >
-                  <ClipboardList size={16} className="text-teal-600 shrink-0" />
-                  <span className="text-sm font-medium text-slate-800">What details should be recorded in the visitor log?</span>
+                  <div className="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center shrink-0 group-hover:bg-teal-200 transition-colors">
+                    <ClipboardList size={15} className="text-teal-700" />
+                  </div>
+                  <span className="text-sm font-medium text-slate-800 group-hover:text-teal-900">What details should be recorded in the visitor log?</span>
                 </button>
                 <button
                   onClick={() => handlePrompt('Can a visitor go beyond reception without speaking to staff?')}
-                  className="w-full flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-left hover:bg-teal-50 hover:border-teal-200 transition-colors"
+                  className="w-full flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-left hover:bg-teal-50 hover:border-teal-300 hover:shadow-sm transition-all group"
                 >
-                  <Building2 size={16} className="text-teal-600 shrink-0" />
-                  <span className="text-sm font-medium text-slate-800">Can a visitor go beyond reception without speaking to staff?</span>
+                  <div className="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center shrink-0 group-hover:bg-teal-200 transition-colors">
+                    <Building2 size={15} className="text-teal-700" />
+                  </div>
+                  <span className="text-sm font-medium text-slate-800 group-hover:text-teal-900">Can a visitor go beyond reception without speaking to staff?</span>
                 </button>
                 <button
                   onClick={() => handlePrompt(SAFEGUARDING_Q)}
-                  className="w-full flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3.5 text-left hover:bg-amber-100 hover:border-amber-300 transition-colors"
+                  className="w-full flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3.5 text-left hover:bg-amber-100 hover:border-amber-300 hover:shadow-sm transition-all group"
                 >
-                  <Shield size={16} className="text-amber-600 shrink-0" />
+                  <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0 group-hover:bg-amber-200 transition-colors">
+                    <Shield size={15} className="text-amber-700" />
+                  </div>
                   <span className="text-sm font-medium text-amber-900">I have a safeguarding concern. What should I do?</span>
                 </button>
                 <button
                   onClick={() => handlePrompt(MEDICATION_Q)}
-                  className="w-full flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3.5 text-left hover:bg-amber-100 hover:border-amber-300 transition-colors"
+                  className="w-full flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3.5 text-left hover:bg-amber-100 hover:border-amber-300 hover:shadow-sm transition-all group"
                 >
-                  <Pill size={16} className="text-amber-600 shrink-0" />
+                  <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0 group-hover:bg-amber-200 transition-colors">
+                    <Pill size={15} className="text-amber-700" />
+                  </div>
                   <span className="text-sm font-medium text-amber-900">A service user missed medication. What should I do?</span>
                 </button>
               </div>
             </div>
 
             {/* Ask your own question */}
-            <button
-              onClick={() => inputRef.current?.focus()}
-              className="w-full flex items-center justify-between bg-white border border-dashed border-slate-300 rounded-xl px-4 py-3.5 text-left hover:bg-slate-50 hover:border-teal-300 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <MessageSquare size={16} className="text-slate-400 shrink-0" />
-                <span className="text-sm text-slate-500">Ask your own question — type in the box below</span>
-              </div>
-              <span className="text-xs font-semibold text-teal-600">↓</span>
-            </button>
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+              <h2 className="font-semibold text-slate-900 mb-1">Ask your own question</h2>
+              <p className="text-sm text-slate-500 mb-4">Type a policy or procedure question. Sensitive concerns will be routed to human support.</p>
+              <button
+                onClick={() => inputRef.current?.focus()}
+                className="w-full flex items-center gap-3 border border-dashed border-slate-300 rounded-xl px-4 py-3.5 text-left hover:border-teal-400 hover:bg-teal-50 transition-all group"
+              >
+                <MessageSquare size={16} className="text-slate-400 group-hover:text-teal-600 shrink-0" />
+                <span className="text-sm text-slate-400 group-hover:text-teal-700">Type in the box below to ask your own question...</span>
+                <span className="ml-auto text-xs font-semibold text-teal-600 group-hover:text-teal-700">Type below</span>
+              </button>
+            </div>
 
             {/* Escalation contacts */}
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Escalation contacts</p>
-              <div className="grid grid-cols-3 gap-2">
+              <h2 className="font-semibold text-slate-900 mb-3">Escalation contacts</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <Link
                   href="/escalation"
-                  className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5 hover:bg-red-100 hover:border-red-300 transition-colors"
+                  className="flex items-center gap-3 bg-white border border-slate-200 rounded-2xl px-4 py-4 hover:shadow-md hover:border-slate-300 transition-all group"
                 >
-                  <Briefcase size={14} className="text-red-600 shrink-0" />
-                  <p className="text-xs font-semibold text-red-900">HR / grievance</p>
+                  <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 group-hover:bg-slate-200 transition-colors">
+                    <Briefcase size={16} className="text-slate-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">HR / grievance</p>
+                    <p className="text-xs text-slate-400 mt-0.5">People concerns</p>
+                  </div>
                 </Link>
                 <Link
                   href="/escalation"
-                  className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5 hover:bg-red-100 hover:border-red-300 transition-colors"
+                  className="flex items-center gap-3 bg-white border border-slate-200 rounded-2xl px-4 py-4 hover:shadow-md hover:border-slate-300 transition-all group"
                 >
-                  <BadgeCheck size={14} className="text-red-600 shrink-0" />
-                  <p className="text-xs font-semibold text-red-900">CQC / compliance</p>
+                  <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center shrink-0 group-hover:bg-teal-100 transition-colors">
+                    <BadgeCheck size={16} className="text-teal-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">CQC / compliance</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Regulatory concerns</p>
+                  </div>
                 </Link>
                 <Link
                   href="/escalation"
-                  className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5 hover:bg-red-100 hover:border-red-300 transition-colors"
+                  className="flex items-center gap-3 bg-white border border-slate-200 rounded-2xl px-4 py-4 hover:shadow-md hover:border-slate-300 transition-all group"
                 >
-                  <Heart size={14} className="text-red-600 shrink-0" />
-                  <p className="text-xs font-semibold text-red-900">Wellbeing</p>
+                  <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center shrink-0 group-hover:bg-rose-100 transition-colors">
+                    <Heart size={16} className="text-rose-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">Wellbeing</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Staff support</p>
+                  </div>
                 </Link>
               </div>
             </div>
 
-            {/* Privacy note */}
-            <p className="text-xs text-slate-400 text-center px-4">
-              WorkTwin only answers from approved staff-visible documents. Sensitive concerns are sent to the right human lead.
-            </p>
+            {/* Privacy card */}
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm flex items-start gap-3">
+              <div className="w-9 h-9 bg-teal-100 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
+                <Shield size={16} className="text-teal-700" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-slate-800 text-sm mb-1">Privacy-first design</h2>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Private from managers in this demo. WorkTwin does not show raw questions on admin pages.
+                </p>
+              </div>
+            </div>
           </>
         )}
 
@@ -319,13 +368,25 @@ export default function AskPage() {
         {isLoading && (
           <div className="space-y-4">
             <div className="flex justify-end">
-              <div className="bg-teal-700 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-sm text-sm">
+              <div className="bg-gradient-to-br from-teal-700 to-teal-800 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-sm text-sm shadow-sm">
                 {input}
               </div>
             </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex items-center gap-3">
-              <Loader2 size={18} className="text-teal-600 animate-spin shrink-0" />
-              <span className="text-sm text-slate-600">Checking approved policies and procedures…</span>
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-teal-100 flex items-center justify-center shrink-0">
+                  <Loader2 size={18} className="text-teal-600 animate-spin" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-700">WorkTwin is checking approved policies</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Searching approved documents and procedures...</p>
+                </div>
+              </div>
+              <div className="mt-4 space-y-2">
+                <div className="h-3 bg-slate-100 rounded-full animate-pulse w-3/4" />
+                <div className="h-3 bg-slate-100 rounded-full animate-pulse w-1/2" />
+                <div className="h-3 bg-slate-100 rounded-full animate-pulse w-5/6" />
+              </div>
             </div>
           </div>
         )}
@@ -334,16 +395,23 @@ export default function AskPage() {
         {apiError && !isLoading && (
           <div className="space-y-4">
             <div className="flex justify-end">
-              <div className="bg-teal-700 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-sm text-sm">
+              <div className="bg-gradient-to-br from-teal-700 to-teal-800 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-sm text-sm shadow-sm">
                 {input}
               </div>
             </div>
-            <div className="bg-red-50 border border-red-200 rounded-2xl p-5 shadow-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <AlertTriangle size={16} className="text-red-600 shrink-0" />
-                <p className="text-sm font-semibold text-red-700">Could not reach WorkTwin</p>
+            <div className="bg-white border border-red-200 rounded-2xl p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+                  <AlertTriangle size={16} className="text-red-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">Could not reach WorkTwin</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Connection issue</p>
+                </div>
               </div>
-              <p className="text-sm text-red-600">{apiError}</p>
+              <p className="text-sm text-slate-600 leading-relaxed bg-red-50 border border-red-100 rounded-xl px-4 py-3">
+                {apiError}
+              </p>
             </div>
           </div>
         )}
@@ -362,7 +430,7 @@ export default function AskPage() {
 
             {/* Question bubble */}
             <div className="flex justify-end">
-              <div className="bg-teal-700 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-sm text-sm">
+              <div className="bg-gradient-to-br from-teal-700 to-teal-800 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-sm text-sm shadow-sm">
                 {currentAnswer.question}
               </div>
             </div>
@@ -371,7 +439,7 @@ export default function AskPage() {
             {isDemoFallback && (
               <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-800">
                 <AlertTriangle size={13} className="shrink-0 text-amber-600" />
-                Backend unavailable — showing demo answer. WorkTwin will serve live answers once connected.
+                Backend unavailable - showing demo answer. WorkTwin will serve live answers once connected.
               </div>
             )}
 
@@ -386,151 +454,193 @@ export default function AskPage() {
             {/* Not allowed to answer — only shown when no escalation card is also displayed */}
             {!currentAnswer.allowedToAnswer && !currentAnswer.requiresEscalation && (
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-                <div className="flex items-center gap-2 mb-3">
-                  <Shield size={16} className="text-amber-600" />
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
+                    <Shield size={16} className="text-amber-600" />
+                  </div>
                   <p className="text-sm font-semibold text-slate-800">WorkTwin cannot answer this directly</p>
                 </div>
-                <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5 mb-3">
+                <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5 mb-3">
                   <AlertTriangle size={12} className="text-amber-600 shrink-0" />
-                  <span className="text-xs text-amber-700 font-medium">No approved policy found — please escalate</span>
+                  <span className="text-xs text-amber-700 font-medium">No approved policy found - please escalate</span>
                 </div>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-slate-600 leading-relaxed">
                   {currentAnswer.answer ||
-                    'This question falls outside WorkTwin’s permitted answer scope, or no approved document covers this topic. Please speak to your manager or refer to the relevant policy.'}
+                    'This question falls outside WorkTwin\'s permitted answer scope, or no approved document covers this topic. Please speak to your manager or refer to the relevant policy.'}
                 </p>
                 <Link href="/escalation" className="mt-3 inline-block text-sm text-teal-700 underline font-medium">
-                  View escalation contacts →
+                  View escalation contacts
                 </Link>
               </div>
             )}
 
-            {/* Escalation required — use backend answer for category-specific wording */}
+            {/* Escalation required */}
             {currentAnswer.requiresEscalation && (
-              <div className="bg-amber-50 border border-amber-300 rounded-2xl p-5 shadow-sm">
-                <div className="flex items-center gap-2 mb-3">
-                  <AlertTriangle size={16} className="text-amber-600" />
-                  <p className="text-sm font-semibold text-amber-800">This topic requires human escalation</p>
+              <div className="bg-white border border-amber-200 rounded-2xl overflow-hidden shadow-sm">
+                <div className="bg-amber-50 px-5 py-4 border-b border-amber-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+                      <AlertTriangle size={16} className="text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-amber-900">WorkTwin response</p>
+                      <p className="text-xs text-amber-700 mt-0.5">This topic requires human escalation</p>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-sm text-amber-700 mb-3">
-                  {currentAnswer.answer ||
-                    'WorkTwin does not provide a direct answer on this topic. Please escalate to the appropriate person immediately.'}
-                </p>
-                <ul className="space-y-1.5 mb-3">
-                  {currentAnswer.escalateIf.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-amber-800">
-                      <span className="text-amber-500 shrink-0 mt-0.5">·</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+                <div className="p-5 border-b border-amber-100">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">You asked</p>
+                  <p className="text-sm text-slate-700 italic mb-4">&ldquo;{currentAnswer.question}&rdquo;</p>
+                  <p className="text-sm text-slate-700 leading-relaxed">
+                    {currentAnswer.answer ||
+                      'WorkTwin does not provide a direct answer on this topic. Please escalate to the appropriate person immediately.'}
+                  </p>
+                </div>
+                {currentAnswer.escalateIf.length > 0 && (
+                  <div className="px-5 py-4 bg-red-50 border-b border-red-100">
+                    <div className="flex items-center gap-2 mb-2.5">
+                      <AlertTriangle size={14} className="text-red-600" />
+                      <p className="text-xs font-bold text-red-700 uppercase tracking-wider">Escalate immediately if</p>
+                    </div>
+                    <ul className="space-y-1.5">
+                      {currentAnswer.escalateIf.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-red-800">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-[6px]" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 {currentAnswer.contactRoutes.length > 0 && (
-                  <div className="mb-3">
-                    <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-1.5">Who to contact</p>
-                    <ul className="space-y-1">
+                  <div className="px-5 py-4 border-b border-amber-100">
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2.5">Who to contact</p>
+                    <ul className="space-y-1.5">
                       {currentAnswer.contactRoutes.map((route, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-amber-900">
-                          <span className="text-amber-500 shrink-0 mt-0.5">→</span>
+                        <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                          <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0 mt-[6px]" />
                           {route}
                         </li>
                       ))}
                     </ul>
                   </div>
                 )}
-                <Link href="/escalation" className="inline-block text-sm text-amber-700 underline font-medium">
-                  View escalation contacts →
-                </Link>
+                <div className="px-5 py-4">
+                  <Link href="/escalation" className="inline-flex items-center gap-1.5 text-sm text-teal-700 font-semibold hover:text-teal-800 underline">
+                    View escalation contacts
+                  </Link>
+                </div>
               </div>
             )}
 
             {/* Main answer card — only shown when permitted and no escalation required */}
             {currentAnswer.allowedToAnswer && !currentAnswer.requiresEscalation && (
               <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                {/* Answer */}
-                <div className="p-5 border-b border-slate-100">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 rounded-full bg-teal-700 flex items-center justify-center shrink-0">
-                      <span className="text-white text-xs font-bold">W</span>
+                {/* Answer header */}
+                <div className="bg-teal-50 border-b border-teal-100 px-5 py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-teal-700 flex items-center justify-center shrink-0">
+                      <span className="text-white text-sm font-bold">W</span>
                     </div>
-                    <p className="text-sm font-semibold text-slate-800">WorkTwin</p>
-                    <span className="text-xs text-slate-400">· Answer from approved documents</span>
+                    <div>
+                      <p className="text-sm font-bold text-teal-900">WorkTwin response</p>
+                      <p className="text-xs text-teal-700 mt-0.5">Answer from approved documents</p>
+                    </div>
+                    <span className="ml-auto flex items-center gap-1 bg-teal-700 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                      <BadgeCheck size={11} />
+                      Policy-grounded
+                    </span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-teal-50 border border-teal-200 rounded-lg px-3 py-1.5 mb-3">
-                    <BadgeCheck size={12} className="text-teal-600 shrink-0" />
-                    <span className="text-xs text-teal-700 font-medium">Answer based on approved policy</span>
-                  </div>
+                </div>
+
+                {/* Answer body */}
+                <div className="p-5 border-b border-slate-100">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">You asked</p>
+                  <p className="text-sm text-slate-600 italic mb-4">&ldquo;{currentAnswer.question}&rdquo;</p>
                   <p className="text-slate-700 text-sm leading-relaxed">{currentAnswer.answer}</p>
                   {currentAnswer.disclaimer && (
-                    <p className="mt-3 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                    <p className="mt-3 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
                       <span className="font-semibold">Note: </span>{currentAnswer.disclaimer}
                     </p>
                   )}
                 </div>
 
-                {/* What to do next */}
-                <div className="p-5 border-b border-slate-100 bg-slate-50">
-                  <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
-                    What you should do next
-                  </h3>
-                  <ol className="space-y-2">
-                    {currentAnswer.nextSteps.map((step, i) => (
-                      <li key={i} className="flex items-start gap-2.5 text-sm text-slate-700">
-                        <span className="w-5 h-5 rounded-full bg-teal-100 text-teal-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
-                          {i + 1}
-                        </span>
-                        {step}
-                      </li>
-                    ))}
-                  </ol>
-                </div>
+                {/* Next steps */}
+                {currentAnswer.nextSteps.length > 0 && (
+                  <div className="p-5 border-b border-slate-100 bg-slate-50">
+                    <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+                      What you should do next
+                    </h3>
+                    <ol className="space-y-2">
+                      {currentAnswer.nextSteps.map((step, i) => (
+                        <li key={i} className="flex items-start gap-2.5 text-sm text-slate-700">
+                          <span className="w-5 h-5 rounded-full bg-teal-100 text-teal-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                            {i + 1}
+                          </span>
+                          {step}
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
 
-                {/* Sources */}
-                <div className="px-5 py-4 border-b border-slate-100">
-                  <div className="flex items-center gap-2 mb-3">
-                    <BookOpen size={16} className="text-teal-600 shrink-0" />
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                      {currentAnswer.sources.length === 1 ? 'Source' : 'Sources'}
-                    </p>
+                {/* Sources used */}
+                {currentAnswer.sources.length > 0 && (
+                  <div className="px-5 py-4 border-b border-slate-100">
+                    <div className="flex items-center gap-2 mb-3">
+                      <BookOpen size={15} className="text-teal-600 shrink-0" />
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        Sources used
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      {currentAnswer.sources.map((src, i) => (
+                        <div key={i} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 flex items-start gap-3">
+                          <div className="w-7 h-7 rounded-lg bg-teal-100 flex items-center justify-center shrink-0 mt-0.5">
+                            <BookOpen size={13} className="text-teal-700" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-teal-700 mb-0.5">{src.source_label}</p>
+                            <p className="text-sm font-semibold text-slate-800">{src.title}</p>
+                            {src.section && <p className="text-xs text-slate-500 mt-0.5">{src.section}</p>}
+                            {src.page != null && <p className="text-xs text-slate-400 mt-0.5">Page {src.page}</p>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="space-y-2.5">
-                    {currentAnswer.sources.map((src, i) => (
-                      <div key={i} className="rounded-lg border border-slate-100 bg-slate-50 px-4 py-3">
-                        <p className="text-xs font-semibold text-teal-700 mb-0.5">{src.source_label}</p>
-                        <p className="text-sm font-semibold text-slate-800">{src.title}</p>
-                        {src.section && <p className="text-xs text-slate-500">{src.section}</p>}
-                        {src.page != null && <p className="text-xs text-slate-400">Page {src.page}</p>}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                )}
 
                 {/* Escalate if */}
-                <div className="px-5 py-4 border-b border-slate-100 bg-amber-50">
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle size={15} className="text-amber-600" />
-                    <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider">Escalate if</p>
+                {currentAnswer.escalateIf.length > 0 && (
+                  <div className="px-5 py-4 border-b border-slate-100 bg-amber-50">
+                    <div className="flex items-center gap-2 mb-2.5">
+                      <AlertTriangle size={14} className="text-amber-600" />
+                      <p className="text-xs font-bold text-amber-700 uppercase tracking-wider">Escalate if</p>
+                    </div>
+                    <ul className="space-y-1.5">
+                      {currentAnswer.escalateIf.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-amber-800">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-[6px]" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                    <Link
+                      href="/escalation"
+                      className="mt-3 inline-block text-xs text-amber-700 font-semibold underline"
+                    >
+                      View escalation contacts
+                    </Link>
                   </div>
-                  <ul className="space-y-1.5">
-                    {currentAnswer.escalateIf.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-amber-800">
-                        <span className="text-amber-500 shrink-0 mt-0.5">·</span>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    href="/escalation"
-                    className="mt-2 inline-block text-xs text-amber-700 underline font-medium"
-                  >
-                    View escalation contacts →
-                  </Link>
-                </div>
+                )}
 
                 {/* Learning option */}
                 {currentAnswer.learningOption && (
                   <div className="px-5 py-4 border-b border-slate-100 bg-teal-50">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Zap size={15} className="text-teal-600" />
-                      <p className="text-xs font-semibold text-teal-700 uppercase tracking-wider">Learning option</p>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Zap size={14} className="text-teal-600" />
+                      <p className="text-xs font-bold text-teal-700 uppercase tracking-wider">Learning option</p>
                     </div>
                     <p className="text-sm text-teal-800">{currentAnswer.learningOption}</p>
                   </div>
@@ -540,7 +650,7 @@ export default function AskPage() {
                 <div className="px-5 py-4 flex flex-wrap gap-2">
                   <Link
                     href="/scenarios"
-                    className="flex items-center gap-1.5 text-sm bg-teal-700 hover:bg-teal-800 text-white font-medium px-4 py-2 rounded-lg transition-colors"
+                    className="flex items-center gap-1.5 text-sm bg-teal-700 hover:bg-teal-800 text-white font-semibold px-4 py-2.5 rounded-xl transition-colors shadow-sm"
                   >
                     <PlayCircle size={15} />
                     Practise this scenario
@@ -549,14 +659,14 @@ export default function AskPage() {
                     <>
                       <button
                         onClick={() => { setShowChecklist(!showChecklist); setShowQuiz(false) }}
-                        className="flex items-center gap-1.5 text-sm border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium px-4 py-2 rounded-lg transition-colors"
+                        className="flex items-center gap-1.5 text-sm border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold px-4 py-2.5 rounded-xl transition-colors"
                       >
                         <List size={15} />
                         Turn into checklist
                       </button>
                       <button
                         onClick={() => { setShowQuiz(!showQuiz); setShowChecklist(false) }}
-                        className="flex items-center gap-1.5 text-sm border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium px-4 py-2 rounded-lg transition-colors"
+                        className="flex items-center gap-1.5 text-sm border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold px-4 py-2.5 rounded-xl transition-colors"
                       >
                         <CheckSquare size={15} />
                         Quiz me
@@ -569,81 +679,101 @@ export default function AskPage() {
 
             {/* Checklist panel — medication only */}
             {showChecklist && currentAnswer.riskCategory === 'medication' && currentAnswer.allowedToAnswer && !currentAnswer.requiresEscalation && (
-              <div className="bg-white border border-teal-200 rounded-2xl p-5 shadow-sm">
-                <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                  <List size={16} className="text-teal-600" />
-                  Medication refusal checklist
-                </h3>
-                <div className="space-y-2">
+              <div className="bg-white border border-teal-200 rounded-2xl overflow-hidden shadow-sm">
+                <div className="bg-teal-50 border-b border-teal-100 px-5 py-4">
+                  <h3 className="font-semibold text-teal-900 flex items-center gap-2 text-sm">
+                    <List size={16} className="text-teal-600" />
+                    Medication incident checklist
+                  </h3>
+                </div>
+                <div className="p-5 space-y-2.5">
                   {checklistItems.map((item, i) => (
                     <label key={i} className="flex items-center gap-3 cursor-pointer group">
-                      <input type="checkbox" className="w-4 h-4 rounded accent-teal-600 cursor-pointer" />
+                      <input type="checkbox" className="w-4 h-4 rounded accent-teal-600 cursor-pointer shrink-0" />
                       <span className="text-sm text-slate-700 group-hover:text-slate-900">{item}</span>
                     </label>
                   ))}
                 </div>
-                <button
-                  onClick={() => setShowChecklist(false)}
-                  className="mt-4 text-xs text-slate-400 hover:text-slate-600"
-                >
-                  <ChevronDown size={12} className="inline" /> Hide checklist
-                </button>
+                <div className="px-5 pb-4">
+                  <button
+                    onClick={() => setShowChecklist(false)}
+                    className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1"
+                  >
+                    <ChevronDown size={12} /> Hide checklist
+                  </button>
+                </div>
               </div>
             )}
 
             {/* Quiz panel — medication only */}
             {showQuiz && currentAnswer.riskCategory === 'medication' && currentAnswer.allowedToAnswer && !currentAnswer.requiresEscalation && (
-              <div className="bg-white border border-violet-200 rounded-2xl p-5 shadow-sm">
-                <h3 className="font-semibold text-slate-900 mb-1 flex items-center gap-2">
-                  <CheckSquare size={16} className="text-violet-600" />
-                  Quick quiz
-                </h3>
-                <p className="text-sm text-slate-600 mb-4">{quizQuestion.question}</p>
-                <div className="space-y-2">
-                  {quizQuestion.options.map((opt, i) => {
-                    const isSelected = selectedOption === i
-                    const isCorrect = i === quizQuestion.correct
-                    const revealed = selectedOption !== null
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => !revealed && setSelectedOption(i)}
-                        disabled={revealed}
-                        className={`w-full text-left text-sm px-4 py-3 rounded-xl border transition-colors ${
-                          !revealed
-                            ? 'border-slate-200 hover:border-teal-300 hover:bg-teal-50 text-slate-700'
-                            : isCorrect
-                            ? 'border-teal-300 bg-teal-50 text-teal-800 font-medium'
-                            : isSelected
-                            ? 'border-red-200 bg-red-50 text-red-700'
-                            : 'border-slate-100 text-slate-400'
-                        }`}
-                      >
-                        <span className="font-semibold mr-2 text-slate-400">
-                          {String.fromCharCode(65 + i)}.
-                        </span>
-                        {opt}
-                        {revealed && isCorrect && ' ✓'}
-                        {revealed && isSelected && !isCorrect && ' ✗'}
-                      </button>
-                    )
-                  })}
+              <div className="bg-white border border-violet-200 rounded-2xl overflow-hidden shadow-sm">
+                <div className="bg-violet-50 border-b border-violet-100 px-5 py-4">
+                  <h3 className="font-semibold text-violet-900 flex items-center gap-2 text-sm">
+                    <CheckSquare size={16} className="text-violet-600" />
+                    Quick quiz
+                  </h3>
                 </div>
-                {selectedOption !== null && (
-                  <p className={`mt-3 text-sm font-medium ${selectedOption === quizQuestion.correct ? 'text-teal-700' : 'text-red-600'}`}>
-                    {selectedOption === quizQuestion.correct
-                      ? 'Correct — well done! The MAR chart must be completed immediately.'
-                      : 'Not quite. The correct answer is B — record on the MAR chart and notify your manager first.'}
-                  </p>
-                )}
-                <button
-                  onClick={() => setShowQuiz(false)}
-                  className="mt-3 text-xs text-slate-400 hover:text-slate-600"
-                >
-                  <ChevronDown size={12} className="inline" /> Hide quiz
-                </button>
+                <div className="p-5">
+                  <p className="text-sm text-slate-700 font-medium mb-4">{quizQuestion.question}</p>
+                  <div className="space-y-2">
+                    {quizQuestion.options.map((opt, i) => {
+                      const isSelected = selectedOption === i
+                      const isCorrect = i === quizQuestion.correct
+                      const revealed = selectedOption !== null
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => !revealed && setSelectedOption(i)}
+                          disabled={revealed}
+                          className={`w-full text-left text-sm px-4 py-3 rounded-xl border-2 transition-all ${
+                            !revealed
+                              ? 'border-slate-200 hover:border-teal-300 hover:bg-teal-50 text-slate-700'
+                              : isCorrect
+                              ? 'border-teal-300 bg-teal-50 text-teal-800 font-semibold'
+                              : isSelected
+                              ? 'border-red-200 bg-red-50 text-red-700'
+                              : 'border-slate-100 text-slate-400'
+                          }`}
+                        >
+                          <span className="font-bold mr-2 text-slate-400">
+                            {String.fromCharCode(65 + i)}.
+                          </span>
+                          {opt}
+                          {revealed && isCorrect && ' ✓'}
+                          {revealed && isSelected && !isCorrect && ' ✗'}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {selectedOption !== null && (
+                    <p className={`mt-4 text-sm font-semibold px-4 py-3 rounded-xl ${
+                      selectedOption === quizQuestion.correct
+                        ? 'text-teal-700 bg-teal-50 border border-teal-200'
+                        : 'text-red-600 bg-red-50 border border-red-200'
+                    }`}>
+                      {selectedOption === quizQuestion.correct
+                        ? 'Correct - well done! The MAR chart must be completed immediately.'
+                        : 'Not quite. The correct answer is B - record on the MAR chart and notify your manager first.'}
+                    </p>
+                  )}
+                  <button
+                    onClick={() => setShowQuiz(false)}
+                    className="mt-4 text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1"
+                  >
+                    <ChevronDown size={12} /> Hide quiz
+                  </button>
+                </div>
               </div>
             )}
+
+            {/* Privacy reminder */}
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center gap-3">
+              <Shield size={15} className="text-teal-600 shrink-0" />
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Private from managers in this demo. WorkTwin does not show raw questions on admin pages.
+              </p>
+            </div>
           </div>
         )}
 
@@ -672,7 +802,7 @@ export default function AskPage() {
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && input.trim().length >= 3) handlePrompt(input.trim())
               }}
-              placeholder="Ask a question about your policies or procedures…"
+              placeholder="Ask a question about your policies or procedures..."
               className="flex-1 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 outline-none bg-transparent"
             />
             <button
@@ -696,6 +826,7 @@ export default function AskPage() {
             }`}>{input.length} / 500</p>
           </div>
         </div>
+
       </div>
     </AppLayout>
   )

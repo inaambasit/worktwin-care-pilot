@@ -23,11 +23,11 @@ test.describe('WorkTwin smoke tests', () => {
 
   test('ask page shows common questions and safe privacy wording', async ({ page }) => {
     await page.goto('/ask')
-    await expect(page.getByText("Hi, I'm WorkTwin")).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Ask WorkTwin' })).toBeVisible()
     await expect(page.getByText('Common questions')).toBeVisible()
     await expect(page.getByRole('button', { name: /What should I do when a visitor arrives/i })).toBeVisible()
     await expect(page.getByRole('button', { name: /I have a safeguarding concern/i })).toBeVisible()
-    await expect(page.getByText('Private from managers in this demo')).toBeVisible()
+    await expect(page.getByText('Private from managers in this demo').first()).toBeVisible()
   })
 
   test('ask page returns a visitor answer when common question is clicked', async ({ page }) => {

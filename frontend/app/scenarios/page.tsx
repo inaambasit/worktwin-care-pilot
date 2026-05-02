@@ -179,7 +179,7 @@ export default function ScenariosPage() {
                       <h3 className="font-semibold text-slate-900 text-sm leading-snug">{scenario.title}</h3>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-xs text-slate-400">{scenario.category}</span>
-                        <span className="text-slate-200">·</span>
+                        <span className="text-slate-300">-</span>
                         <span className="text-xs text-slate-400">{scenario.duration}</span>
                       </div>
                     </div>
@@ -195,13 +195,23 @@ export default function ScenariosPage() {
                 </div>
                 <p className="text-sm text-slate-500 leading-relaxed pl-7">{scenario.description}</p>
                 <div className="flex gap-2 mt-4 pl-7">
-                  <button
-                    onClick={() => setActiveScenario(activeScenario === scenario.id ? null : scenario.id)}
-                    className="text-sm bg-teal-700 hover:bg-teal-800 text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5"
-                  >
-                    <PlayCircle size={15} />
-                    {scenario.status === 'Completed' ? 'Repeat scenario' : scenario.status === 'In progress' ? 'Continue' : 'Start scenario'}
-                  </button>
+                  {scenario.id === 9 ? (
+                    <Link
+                      href="/scenarios/access-refusal"
+                      className="text-sm bg-teal-700 hover:bg-teal-800 text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5"
+                    >
+                      <PlayCircle size={15} />
+                      Start scenario
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => setActiveScenario(activeScenario === scenario.id ? null : scenario.id)}
+                      className="text-sm bg-teal-700 hover:bg-teal-800 text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5"
+                    >
+                      <PlayCircle size={15} />
+                      {scenario.status === 'Completed' ? 'Repeat scenario' : scenario.status === 'In progress' ? 'Continue' : 'Start scenario'}
+                    </button>
+                  )}
                   <Link href="/policies" className="text-sm border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-medium px-4 py-2 rounded-lg transition-colors">
                     View related policies
                   </Link>

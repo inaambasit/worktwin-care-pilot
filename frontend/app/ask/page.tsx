@@ -239,6 +239,58 @@ export default function AskPage() {
               </div>
             </div>
 
+            {/* Demo safety mode panel */}
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
+                  <Shield size={16} className="text-amber-600" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="font-semibold text-amber-900 mb-1">Demo safety mode</h2>
+                  <p className="text-sm text-amber-800 leading-relaxed mb-4">
+                    Ask WorkTwin can use approved, governed documents only when the backend, database and document gates are ready. If no safe source is available, it gives fallback guidance. Safeguarding, medication, HR, legal and wellbeing topics must be escalated to a human lead.
+                  </p>
+                  <h3 className="text-xs font-bold text-amber-900 uppercase tracking-wider mb-2">What this means</h3>
+                  <ul className="space-y-1.5">
+                    <li className="flex items-start gap-2 text-sm text-amber-800">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-[6px]" />
+                      Source-grounded answers should come from approved policy documents.
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-amber-800">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-[6px]" />
+                      If no approved source is available, WorkTwin should say so and guide staff to a human lead.
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-amber-800">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-[6px]" />
+                      High-risk topics are not answered by AI and should be escalated.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Worked example card */}
+            <div className="bg-white border border-teal-200 rounded-2xl overflow-hidden shadow-sm">
+              <div className="bg-teal-50 border-b border-teal-100 px-5 py-4 flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <BookOpen size={15} className="text-teal-600" />
+                  <h2 className="font-semibold text-teal-900 text-sm">Example of a good source-grounded answer</h2>
+                </div>
+                <span className="text-xs bg-amber-100 text-amber-800 font-semibold px-2.5 py-1 rounded-full">Example only - not a live retrieved answer</span>
+              </div>
+              <div className="p-5">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Question</p>
+                <p className="text-sm text-slate-700 italic mb-4">&ldquo;What should I do if a visitor arrives without signing in?&rdquo;</p>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Answer</p>
+                <p className="text-sm text-slate-700 leading-relaxed mb-4">Ask the visitor to follow the sign-in process and wear the required identification, then speak to the person in charge if you are unsure.</p>
+                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 mb-4">
+                  <BookOpen size={12} className="text-teal-600 shrink-0" />
+                  <span className="text-xs text-slate-600"><span className="font-semibold">Example source:</span> Visitor Sign-In and Identification Procedure</span>
+                </div>
+                <p className="text-xs text-slate-400">This is an example of the expected answer format. It is not proof that this answer was retrieved during your session.</p>
+              </div>
+            </div>
+
             {/* Common questions */}
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
               <h2 className="font-semibold text-slate-900 mb-1">Common questions</h2>
@@ -302,7 +354,6 @@ export default function AskPage() {
               >
                 <MessageSquare size={16} className="text-slate-400 group-hover:text-teal-600 shrink-0" />
                 <span className="text-sm text-slate-400 group-hover:text-teal-700">Type in the box below to ask your own question...</span>
-                <span className="ml-auto text-xs font-semibold text-teal-600 group-hover:text-teal-700">Type below</span>
               </button>
             </div>
 
@@ -458,7 +509,10 @@ export default function AskPage() {
                   <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
                     <Shield size={16} className="text-amber-600" />
                   </div>
-                  <p className="text-sm font-semibold text-slate-800">WorkTwin cannot answer this directly</p>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">WorkTwin cannot answer this directly</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Fallback guidance</p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5 mb-3">
                   <AlertTriangle size={12} className="text-amber-600 shrink-0" />
@@ -484,7 +538,7 @@ export default function AskPage() {
                     </div>
                     <div>
                       <p className="text-sm font-bold text-amber-900">WorkTwin response</p>
-                      <p className="text-xs text-amber-700 mt-0.5">This topic requires human escalation</p>
+                      <p className="text-xs text-amber-700 mt-0.5">Escalation required</p>
                     </div>
                   </div>
                 </div>
@@ -544,7 +598,7 @@ export default function AskPage() {
                     </div>
                     <div>
                       <p className="text-sm font-bold text-teal-900">WorkTwin response</p>
-                      <p className="text-xs text-teal-700 mt-0.5">Answer from approved documents</p>
+                      <p className="text-xs text-teal-700 mt-0.5">Source-grounded answer</p>
                     </div>
                     <span className="ml-auto flex items-center gap-1 bg-teal-700 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
                       <BadgeCheck size={11} />

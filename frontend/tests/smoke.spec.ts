@@ -28,6 +28,9 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByRole('button', { name: /What should I do when a visitor arrives/i })).toBeVisible()
     await expect(page.getByRole('button', { name: /I have a safeguarding concern/i })).toBeVisible()
     await expect(page.getByText('Private from managers in this demo').first()).toBeVisible()
+    await expect(page.getByText('Demo safety mode')).toBeVisible()
+    await expect(page.getByText('Example of a good source-grounded answer')).toBeVisible()
+    await expect(page.getByText('Example only - not a live retrieved answer')).toBeVisible()
   })
 
   test('ask page returns a visitor answer when common question is clicked', async ({ page }) => {

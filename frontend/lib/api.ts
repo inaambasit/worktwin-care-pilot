@@ -7,9 +7,6 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
 export async function askWorktwin(question: string): Promise<AskResponse> {
   const payload: AskRequest = {
-    organisation_id: 'demo-org',
-    user_id: 'demo-staff-1',
-    user_role: 'Care Worker',
     question,
   }
 

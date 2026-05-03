@@ -183,10 +183,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Mobile drawer panel */}
       <aside
+        id="mobile-nav-drawer"
         className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] bg-white shadow-2xl flex flex-col transition-transform duration-300 md:hidden ${
           drawerOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         aria-label="Navigation menu"
+        role="dialog"
+        aria-modal="true"
+        aria-hidden={!drawerOpen}
       >
         <div className="flex items-center justify-end px-3 py-3 border-b border-slate-200 shrink-0">
           <button
@@ -217,6 +221,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             className="md:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 shrink-0"
             onClick={() => setDrawerOpen(true)}
             aria-label="Open menu"
+            aria-expanded={drawerOpen}
+            aria-controls="mobile-nav-drawer"
           >
             <Menu size={20} />
           </button>

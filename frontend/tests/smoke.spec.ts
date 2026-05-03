@@ -79,6 +79,34 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByText(/999|emergency/i).first()).toBeVisible()
   })
 
+  test('private notes includes clear session-only and privacy notice', async ({ page }) => {
+    await page.goto('/notes')
+    await expect(page.getByText('Session only — notes will not be saved.')).toBeVisible()
+    await expect(page.getByText(/Managers and admins cannot view them/i)).toBeVisible()
+    await expect(page.getByText(/Closing or refreshing this tab will clear all notes/i)).toBeVisible()
+    await expect(page.getByText(/Do not rely on notes surviving a browser close/i)).toBeVisible()
+  })
+
+  test('private notes has no horizontal scroll at 375px width', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.goto('/notes')
+    const overflows = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth
+    )
+    expect(overflows).toBe(false)
+  })
+
+  test('mobile drawer can open and close at 375px width', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.goto('/dashboard')
+    const drawer = page.locator('#mobile-nav-drawer')
+    await expect(drawer).toHaveAttribute('aria-hidden', 'true')
+    await page.getByRole('button', { name: 'Open menu' }).click()
+    await expect(drawer).toHaveAttribute('aria-hidden', 'false')
+    await page.getByRole('button', { name: 'Close menu' }).click()
+    await expect(drawer).toHaveAttribute('aria-hidden', 'true')
+  })
+
   test('admin pages show disabled message by default', async ({ page }) => {
     await page.goto('/admin')
     await expect(page.getByRole('heading', { name: 'Admin demo disabled' })).toBeVisible()

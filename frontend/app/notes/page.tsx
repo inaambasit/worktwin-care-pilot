@@ -167,12 +167,21 @@ export default function NotesPage() {
         {/* Note editor section */}
         <div>
           <h2 className="font-semibold text-slate-900 mb-1">Your private note</h2>
-          <p className="text-sm text-slate-500 mb-4">Write reminders, reflections or questions you want to keep for yourself during this session.</p>
+          <p className="text-sm text-slate-500 mb-3">Write reminders, reflections or questions you want to keep for yourself during this session.</p>
 
-          <div className="flex gap-4 h-[480px]">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-2.5 mb-4">
+            <Clock size={15} className="text-amber-600 shrink-0 mt-0.5" />
+            <p className="text-xs text-amber-800 leading-relaxed">
+              <span className="font-semibold">Session only — notes will not be saved.</span>{' '}
+              These notes are private to you during this demo session. Managers and admins cannot view them.
+              Closing or refreshing this tab will clear all notes. Do not rely on notes surviving a browser close.
+            </p>
+          </div>
+
+          <div className="flex flex-col md:flex-row gap-4 md:h-[480px]">
 
             {/* Note list sidebar */}
-            <div className="w-64 shrink-0 flex flex-col gap-2">
+            <div className="w-full md:w-64 shrink-0 flex flex-col gap-2">
               <button
                 onClick={createNewNote}
                 className="flex items-center gap-2 w-full px-3 py-2.5 bg-teal-700 hover:bg-teal-800 text-white rounded-xl text-sm font-medium transition-colors"
@@ -180,7 +189,7 @@ export default function NotesPage() {
                 <Plus size={16} />
                 New note
               </button>
-              <div className="flex-1 overflow-y-auto space-y-1.5">
+              <div className="max-h-44 md:max-h-none md:flex-1 overflow-y-auto space-y-1.5">
                 {notes.length === 0 ? (
                   <div className="bg-white border border-slate-200 rounded-xl px-4 py-5 text-center">
                     <Lock size={24} className="mx-auto mb-2 text-slate-300" />
@@ -217,7 +226,7 @@ export default function NotesPage() {
             </div>
 
             {/* Note editor panel */}
-            <div className="flex-1 bg-white border border-slate-200 rounded-3xl flex flex-col overflow-hidden shadow-sm">
+            <div className="flex-1 min-h-[320px] md:min-h-0 bg-white border border-slate-200 rounded-3xl flex flex-col overflow-hidden shadow-sm">
               {notes.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center">
                   <div className="text-center px-8">

@@ -661,7 +661,7 @@ curl -X POST "http://localhost:8000/documents/{id}/generate-embeddings" \
 - No AI answer generation - no LLM, no chat, no completion endpoint
 - No staff-facing RAG - `/ask` is unchanged and still returns a placeholder
 - No real Thumhara/QCS documents - dummy/sample PDFs only
-- No authentication or authorisation enforcement yet
+- No per-user authentication or role-based access control on admin endpoints (bearer-token protection was added in Milestone 4P)
 
 ### Cost: one tiny query embedding only
 
@@ -789,7 +789,7 @@ Location: `/admin/documents` - collapsible purple card labelled "Vector Search T
 - No staff-facing AI answers
 - No changes to `/ask`
 - No real Thumhara/QCS policy documents - dummy/sample only
-- No authentication enforcement
+- No per-user authentication or role-based access control (bearer-token protection was added in Milestone 4P)
 - No rate limiting
 
 ### Answer model safety rules
@@ -1038,7 +1038,7 @@ Returns: the updated `DocumentRecord`.
 - Staff-facing `/ask` remains a placeholder - AI answers are NOT enabled for staff
 - No real Thumhara/QCS documents should be embedded until governance fields are confirmed and `approved_for_embedding=true`
 - No changes to the staff policy library UI or the `/ask` endpoint
-- No authentication or role-based access control on admin endpoints (planned for a later milestone)
+- No per-user authentication or role-based access control on admin endpoints (bearer-token protection was added in Milestone 4P; full session/role-based admin auth is planned for a later milestone)
 
 ### Manual test steps (Milestone 4I)
 
@@ -1730,7 +1730,7 @@ Prepare and index one real, clean, fully governed, staff-visible test policy doc
 
 ### Important caveat
 
-This milestone hides the backend `ADMIN_TOKEN` from browser JavaScript. It does not add full admin user authentication (sessions, login, role-based access). A later milestone must add admin session or auth protection before real users or external care providers access the admin area.
+This milestone hides the backend `ADMIN_TOKEN` from browser JavaScript. It does not add full admin user authentication (sessions, login, role-based access). A later milestone must add admin session or auth protection before real users or external care providers access the admin area. Public frontend admin demo screens (the document registry, vector search test, and answer-debug panels at `/admin/documents`) are disabled by default and must be explicitly enabled before they are accessible to non-developer users.
 
 ### Decision
 

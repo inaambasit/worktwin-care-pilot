@@ -4,7 +4,7 @@ test.describe('WorkTwin smoke tests', () => {
   test('landing page is public and does not link directly into admin pages', async ({ page }) => {
     await page.goto('/')
     await expect(page.getByRole('link', { name: /Explore demo/i })).toBeVisible()
-    await expect(page.getByRole('link', { name: /Book a pilot/i }).first()).toHaveAttribute('href', /mailto:/)
+    await expect(page.getByRole('link', { name: /Book a pilot/i }).first()).toHaveAttribute('href', '/book-pilot')
 
     const adminLinks = await page.locator('a[href^="/admin"], a[href*="/admin/"]').count()
     expect(adminLinks).toBe(0)
@@ -105,6 +105,26 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(drawer).toHaveAttribute('aria-hidden', 'false')
     await page.getByRole('button', { name: 'Close menu' }).click()
     await expect(drawer).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  test('/book-pilot enquiry page shows form, privacy note, and confirmation on submit', async ({ page }) => {
+    await page.goto('/book-pilot')
+    await expect(page.getByRole('heading', { name: 'Book a WorkTwin Care Pilot' })).toBeVisible()
+    await expect(page.getByLabel('Your name')).toBeVisible()
+    await expect(page.getByLabel('Organisation')).toBeVisible()
+    await expect(page.getByLabel('Role')).toBeVisible()
+    await expect(page.getByLabel('What are you looking to explore?')).toBeVisible()
+    await expect(page.getByText(/Please do not include service-user details/i)).toBeVisible()
+
+    await page.getByLabel('Your name').fill('Test User')
+    await page.getByLabel('Organisation').fill('Test Org')
+    await page.getByLabel('Role').fill('Manager')
+    await page.getByLabel('What are you looking to explore?').fill('Exploring onboarding support')
+    await page.getByRole('button', { name: 'Submit enquiry' }).click()
+
+    await expect(page.getByText('Thank you, Test User')).toBeVisible()
+    await expect(page.getByText(/This demo stores nothing/i).first()).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Back to the demo' })).toBeVisible()
   })
 
   test('admin pages show disabled message by default', async ({ page }) => {

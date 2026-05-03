@@ -82,12 +82,12 @@ export default function LandingPage() {
             <Link href="/dashboard" className="text-sm text-slate-600 hover:text-slate-900 font-medium">
               Explore demo
             </Link>
-            <a
-              href="mailto:hello@worktwin.ai?subject=WorkTwin%20pilot%20enquiry"
+            <Link
+              href="/book-pilot"
               className="text-sm bg-teal-700 hover:bg-teal-800 text-white font-semibold px-4 py-2 rounded-lg transition-colors"
             >
               Book a pilot
-            </a>
+            </Link>
           </div>
         </div>
       </nav>
@@ -96,7 +96,7 @@ export default function LandingPage() {
       <section className="pt-24 pb-20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         <div className="max-w-5xl mx-auto px-6 text-center">
           <div className="inline-block mb-5 text-xs font-semibold text-teal-400 border border-teal-800 bg-teal-900/40 px-3 py-1.5 rounded-full uppercase tracking-wider">
-            WorkTwin · Care Pilot
+            WorkTwin | Care Pilot
           </div>
           <p className="mb-4 text-sm font-medium text-teal-200">
             The first vertical of the WorkTwin platform for regulated SMEs.
@@ -111,12 +111,12 @@ export default function LandingPage() {
             how the platform can support UK care providers with care-specific policies and scenarios.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a
-              href="mailto:hello@worktwin.ai?subject=WorkTwin%20pilot%20enquiry"
+            <Link
+              href="/book-pilot"
               className="w-full sm:w-auto px-8 py-3.5 bg-teal-600 hover:bg-teal-500 text-white font-semibold rounded-xl text-base transition-colors shadow-lg shadow-teal-900/40"
             >
               Book a pilot
-            </a>
+            </Link>
             <Link
               href="#privacy"
               className="w-full sm:w-auto px-8 py-3.5 border border-slate-600 hover:border-slate-400 text-slate-300 hover:text-white font-semibold rounded-xl text-base transition-colors"
@@ -125,7 +125,7 @@ export default function LandingPage() {
             </Link>
           </div>
           <p className="mt-6 text-xs text-slate-500">
-            First internal test: Thumhara Centre · Sample documents only · No real staff, service-user or client data
+            First internal test: Thumhara Centre | Sample documents only | No real staff, service-user or client data
           </p>
         </div>
       </section>
@@ -227,12 +227,12 @@ export default function LandingPage() {
             We start small with approved documents, a narrow employee group and anonymised insight
             reporting. No surveillance, no performance scoring, no productivity tracking.
           </p>
-          <a
-            href="mailto:hello@worktwin.ai?subject=WorkTwin%20pilot%20enquiry"
+          <Link
+            href="/book-pilot"
             className="inline-block px-10 py-3.5 bg-white text-teal-700 font-bold rounded-xl hover:bg-teal-50 transition-colors text-base shadow-lg"
           >
             Book a pilot
-          </a>
+          </Link>
         </div>
       </section>
 

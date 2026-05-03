@@ -11,6 +11,8 @@ import uuid
 import time
 import threading
 
+from app.staff_context import staff_context_from_header
+
 app = FastAPI(title="WorkTwin API", version="0.1.0")
 
 _default_origins = "http://localhost:3000,http://localhost:3001"
@@ -2147,7 +2149,7 @@ def debug_storage_config(_: None = Depends(_require_admin)):
 # ---------------------------------------------------------------------------
 
 @app.post("/ask", response_model=AskResponse)
-def ask_worktwin(payload: AskRequest):
+def ask_worktwin(payload: AskRequest, authorization: Optional[str] = Header(default=None)):
     """
     Staff-facing RAG endpoint — Milestone 4S.5.
 
@@ -2165,7 +2167,13 @@ def ask_worktwin(payload: AskRequest):
       and full chunk text are never returned to the staff response.
     - OpenAI key and admin token are never returned or logged.
     """
-    organisation_id, user_id, user_role = _get_pilot_staff_context()
+    if os.getenv("PILOT_AUTH_MODE", "") == "true":
+        ctx = staff_context_from_header(authorization)
+        organisation_id = ctx.organisation_id
+        user_id = ctx.user_id
+        user_role = ctx.role
+    else:
+        organisation_id, user_id, user_role = _get_pilot_staff_context()
 
     _check_ask_rate_limit(organisation_id, user_id)
 

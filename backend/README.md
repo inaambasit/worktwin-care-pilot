@@ -46,7 +46,7 @@ curl "http://localhost:8000/policies?category=Medication"
 |--------|------|-------------|
 | GET | / | Root - service identity and status |
 | GET | /health | Health check |
-| POST | /ask | Placeholder answer endpoint |
+| POST | /ask | Governed staff answer endpoint -- source-grounded when OpenAI and DB are configured and a qualifying governed document exists; falls back safely otherwise |
 | GET | /policies | Staff-safe policy library (Milestone 4A.1) - reads from Supabase DB when configured |
 | GET | /documents | Admin document registry - reads from Supabase DB when configured (Milestone 4C) |
 | GET | /documents/{id} | Single document - DB first, in-memory fallback |
@@ -1809,14 +1809,14 @@ Role filtering (`access_roles`) applies after the above gate.
 - **4S-prep passed - Visitor Sign-In and Identification Procedure uploaded, chunked, embedded (2 chunks, failed_count=0), governance set to approved_for_staff; appears in /policies; AC32 excluded; /ask still placeholder (Milestone 4S-prep)**
 - **Server-side admin API proxy shipped - NEXT_PUBLIC_ADMIN_TOKEN removed from Vercel; admin calls proxied through /api/admin/... on Vercel; browser never sees admin bearer token; public endpoints unchanged (Milestone 4S.2A)**
 - **Staff policy visibility filter enforced - `_can_show_document_to_staff` requires is_sensitive=false, escalation_required=false, real_document=true, dummy_document=false, status=approved, approved_for_staff_visibility=true; both DB and in-memory fallback paths use the same gate; /policies returned only Visitor Sign-In and Identification Procedure; AC32 and dummy documents excluded (Milestone 4S.3)**
-- Staff-facing `/ask` remains a placeholder - RAG is governed-disabled
+- Staff-facing `/ask` has a governed RAG path in the backend code; it requires OpenAI, a configured database, and a qualifying governed document to return source-grounded answers; it falls back safely when not configured, when no qualifying source exists, or when a topic is high risk
 - `governance_reviewed_by` and `governance_reviewed_at` are null on the visitor SOP - must be set before staff RAG goes live
 - No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a human reviewer
 
 ## Next steps (Milestone 4S+)
 
 - **4S.4:** Set `governance_reviewed_by` and `governance_reviewed_at` on the Visitor Sign-In and Identification Procedure - required by the Milestone 4R gate list before staff RAG can go live. After this the Visitor SOP passes all 4R gates.
-- **4S.5:** Build the staff `/ask` RAG foundation using the Milestone 4R gate list and the Visitor Sign-In and Identification Procedure as the first qualifying staff-visible test document.
+- **4S.5 (complete):** The governed staff `/ask` RAG path is built using the Milestone 4R gate list; a real staff pilot still requires authentication, RBAC, admin session protection, full safety tests, and pilot governance sign-off.
 - Governance sign-off and safety review of real Thumhara/QCS policy documents, then set `real_document=true`, `approved_for_embedding=true`, `approved_for_source_grounded_answers=true`, `approved_for_staff_visibility=true` for approved documents.
 - Authentication and organisation membership verification.
 - Rate limiting and anonymised query logging (no user-level data, no raw query text stored).

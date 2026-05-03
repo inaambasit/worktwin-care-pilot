@@ -36,9 +36,12 @@ admin and debug API endpoints are protected by bearer token. Browser admin
 calls are routed through a server-side Vercel proxy so the token is never
 exposed in the browser bundle.
 
-**Demo status:** The app is a working pilot/demo prototype. All answers on the
-staff-facing Ask WorkTwin screen are placeholder responses. No staff-facing
-document-grounded RAG is active.
+**Demo status:** The app is a working pilot/demo prototype. The backend contains
+a governed staff /ask RAG path, but it requires OpenAI, the database, and a
+qualifying governed document to return source-grounded answers. High-risk topics
+always short-circuit to human escalation. When infrastructure is unavailable or
+no qualifying source exists, the endpoint returns a safe fallback. The public
+demo is governed and fallback-safe, not production-ready.
 
 ---
 
@@ -48,8 +51,12 @@ The following screens are accessible in the live staff demo:
 
 - **Landing page** - product overview, value proposition, Book a Pilot CTA.
 - **Dashboard** - summary cards, quick links to key features.
-- **Ask WorkTwin** - placeholder assistant flow with safe canned responses.
-  Document-grounded answers are not enabled for staff.
+- **Ask WorkTwin** - governed staff assistant flow. The backend has a
+  source-grounded RAG path with strict document gates. It falls back safely
+  when OpenAI, the database, or a qualifying governed document is unavailable,
+  or when a topic is high risk. The public demo must be treated as non-production
+  and fallback-safe unless its live configuration and qualifying source state
+  have been explicitly verified.
 - **Policy library** - browse and search approved policy documents. Currently
   shows the Visitor Sign-In and Identification Procedure as the safe visible
   test document.
@@ -68,9 +75,16 @@ The following screens are accessible in the live staff demo:
 ## 4. Current Backend and Governance Reality
 
 - Admin-only vector search and answer-debug endpoints exist and are governed.
-- The staff-facing /ask endpoint returns placeholder responses only.
-- Staff-facing document-grounded RAG is not enabled and will not be enabled
-  until governance sign-off is complete.
+- The backend contains a governed staff /ask RAG path. It only attempts
+  source-grounded answers when OpenAI and the database are configured and a
+  qualifying governed document passes all strict staff Ask gates.
+- High-risk topics always short-circuit to human escalation -- no AI answer
+  is returned.
+- If infrastructure is unavailable, no qualifying source exists, or a topic is
+  high risk, the endpoint returns a safe fallback.
+- The product is not pilot-ready. Authentication, RBAC, admin session protection,
+  full safety tests, and pilot governance must be in place before any real staff
+  use or real documents are uploaded.
 - AC32 (Mobile Phone and Portable Device Use Policy) is excluded from staff
   visibility by design. It is not surfaced on the /policies page and will not
   be used in any staff-facing AI answer.
@@ -276,8 +290,12 @@ as new findings, but they are welcome to comment on severity or priority.
    management, or role-based access control. The server-side proxy protects the
    admin token but there is no staff authentication at all.
 
-4. **Staff-facing document-grounded RAG is not enabled.** Ask WorkTwin returns
-   safe placeholder responses. The RAG pipeline exists admin-side only.
+4. **Staff-facing document-grounded RAG is governed and not fully active for
+   the public demo.** The backend contains a governed staff /ask RAG path with
+   strict document gates and safe fallback behaviour. It requires OpenAI, the
+   database, and a qualifying governed document to return source-grounded
+   answers. The product is not pilot-ready without authentication, RBAC, and
+   completed pilot governance.
 
 5. **Brand name WorkTwin needs clearance.** The name has not been through
    trademark or brand clearance. This is not a blocker for a pilot but must be

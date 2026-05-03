@@ -22,7 +22,7 @@ The staff app is mobile-responsive with drawer navigation on mobile and a fixed 
 
 - Landing page
 - Employee dashboard
-- Ask WorkTwin (placeholder safe assistant flow -- document-grounded RAG is not yet enabled)
+- Ask WorkTwin (governed staff /ask path -- source-grounded answers require OpenAI, a configured database, and a qualifying governed document; falls back safely when infrastructure is unavailable, no qualifying source exists, or a topic is high risk)
 - Policy library
 - Onboarding hub
 - Practice scenarios
@@ -33,10 +33,11 @@ The staff app is mobile-responsive with drawer navigation on mobile and a fixed 
 ## Backend and governance
 
 - Admin-only vector search and answer-debug endpoints exist for governed documents
-- Staff-facing /ask remains a placeholder and does not use document-grounded RAG
+- The backend contains a governed staff /ask RAG path with strict document gates; it falls back safely when OpenAI, the database, or a qualifying governed document is unavailable, or when a topic is high risk
+- High-risk topics (safeguarding, medication, HR, payroll, legal) always short-circuit to human escalation -- no AI answer is returned
 - AC32 is excluded from staff visibility
 - Visitor Sign-In and Identification Procedure is the first safe staff-visible test policy in /policies
-- Staff-facing RAG must not be enabled until full governance and authentication are in place
+- A real staff pilot must not proceed until authentication, RBAC, admin session protection, full safety tests, and pilot governance are in place
 
 ## Tech stack
 
@@ -79,7 +80,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 - No surveillance, sentiment tracking or productivity monitoring
 - Private notes are not visible to employers
 - High-risk topics (safeguarding, medication, HR, payroll, legal) escalate to humans -- no AI answers
-- Staff-facing document-grounded RAG is controlled and currently off
+- Staff-facing document-grounded answers are governed and require OpenAI, a configured database, and a qualifying governed document -- the public demo must be treated as non-production and fallback-safe unless its live configuration and qualifying source state have been explicitly verified
 - No service-user records, MAR charts, care plans, HR/payroll files or private case files should be uploaded
 
 ## Documentation
@@ -93,5 +94,5 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 - Authentication is not implemented
 - "Book a pilot" CTA on the landing page needs a destination or action
 - Private Notes mobile layout needs improvement
-- Staff-facing document-grounded RAG is not enabled
+- Staff-facing document-grounded answers require a qualifying governed document, configured infrastructure, authentication, and RBAC before real staff use
 - A real pilot would require approved policy governance and role-based access control

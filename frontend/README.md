@@ -92,4 +92,4 @@ npx playwright test tests/smoke.spec.ts
 - **Book a Pilot CTA** - the call-to-action on the landing page has no destination or form action yet
 - **Private Notes mobile layout** - the `/notes` page works on mobile but layout polish is incomplete
 - **Authentication** - auth is not implemented; all pages are accessible without login
-- **Staff-facing document-grounded RAG** - the `/ask` page uses the backend `/ask` endpoint, but staff-facing document-grounded RAG is not yet enabled
+- **Staff-facing document-grounded RAG** - the `/ask` page uses the backend `/ask` endpoint; the backend has a governed RAG path but requires configured infrastructure and a qualifying governed document to return source-grounded answers; the product is not pilot-ready without authentication and RBAC

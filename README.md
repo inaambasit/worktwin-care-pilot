@@ -29,18 +29,18 @@ The employer sees anonymised trends, not private employee conversations.
 
 ## First niche
 
-Care providers with 20–250 staff.
+Care providers with 20-250 staff.
 
 ## First pilot offer
 
-"We’ll build a private AI staff assistant around your care policies and onboarding documents in 14 days."
+"We'll build a private AI staff assistant around your care policies and onboarding documents in 14 days."
 
 Suggested pilot:
-- £1,500–£3,000 setup
-- £500–£1,000 per month
-- 60–90 day pilot
-- up to 25–50 users
-- 10–30 approved company documents
+- GBP 1,500-GBP 3,000 setup
+- GBP 500-GBP 1,000 per month
+- 60-90 day pilot
+- up to 25-50 users
+- 10-30 approved company documents
 
 ## MVP modules
 
@@ -75,11 +75,11 @@ Then build a real MVP using:
 
 ### What was built
 
-**Policy Library (`/policies`)** — Staff-facing page showing only approved documents. Staff can search, filter by category, open a policy detail card, and see a "Ask WorkTwin about this policy" CTA. Only approved documents appear here.
+**Policy Library (`/policies`)** - Staff-facing page showing only approved documents. Staff can search, filter by category, open a policy detail card, and see a "Ask WorkTwin about this policy" CTA. Only approved documents appear here.
 
-**Document Registry (`/admin/documents`)** — Admin power-user view of all documents across all statuses. Shows the full metadata schema including vertical, category, status, role access, sensitive flag, escalation flag, AI-approved flag, primary and available languages, review due date, and embedding status. Admins can approve draft/under-review documents or archive any document.
+**Document Registry (`/admin/documents`)** - Admin power-user view of all documents across all statuses. Shows the full metadata schema including vertical, category, status, role access, sensitive flag, escalation flag, AI-approved flag, primary and available languages, review due date, and embedding status. Admins can approve draft/under-review documents or archive any document.
 
-**Backend document registry (`GET|POST /documents`, `GET|PATCH /documents/{id}`, `POST /documents/{id}/approve|archive`)** — FastAPI endpoints backed by an in-memory registry with 12 sample documents. No real storage yet — that comes in Milestone 4B.
+**Backend document registry (`GET|POST /documents`, `GET|PATCH /documents/{id}`, `POST /documents/{id}/approve|archive`)** - FastAPI endpoints backed by an in-memory registry with 12 sample documents. No real storage yet - that comes in Milestone 4B.
 
 ### Document Registry schema fields
 
@@ -100,18 +100,18 @@ Then build a real MVP using:
 | `available_languages` | Languages this policy is available in: en, ur, pa, ar, bn, gu |
 | `translation_status` | `not_required \| pending \| in_progress \| complete` |
 | `embedding_status` | `not_started \| pending \| processing \| indexed \| failed` |
-| `review_due_date` | ISO date — when the document next needs human review |
+| `review_due_date` | ISO date - when the document next needs human review |
 | `version` | Semantic version string |
 | `metadata` | Extensible dict for future fields |
 
 ### What does NOT happen here
 
-- No real file storage (S3/Supabase — Milestone 4B)
+- No real file storage (S3/Supabase - Milestone 4B)
 - No text extraction or chunking (Milestone 4B)
 - No embeddings or pgvector indexing (Milestone 4B)
 - No RAG retrieval (Milestone 4C)
 - No OpenAI/Claude API calls (Milestone 4C)
-- No real Thumhara documents — all sample demo data only
+- No real Thumhara documents - all sample demo data only
 - No real personal data
 
 ### Privacy guarantees preserved

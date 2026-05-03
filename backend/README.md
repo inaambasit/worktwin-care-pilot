@@ -44,24 +44,24 @@ curl "http://localhost:8000/policies?category=Medication"
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | / | Root — service identity and status |
+| GET | / | Root - service identity and status |
 | GET | /health | Health check |
 | POST | /ask | Placeholder answer endpoint |
-| GET | /policies | Staff-safe policy library (Milestone 4A.1) — reads from Supabase DB when configured |
-| GET | /documents | Admin document registry — reads from Supabase DB when configured (Milestone 4C) |
-| GET | /documents/{id} | Single document — DB first, in-memory fallback |
+| GET | /policies | Staff-safe policy library (Milestone 4A.1) - reads from Supabase DB when configured |
+| GET | /documents | Admin document registry - reads from Supabase DB when configured (Milestone 4C) |
+| GET | /documents/{id} | Single document - DB first, in-memory fallback |
 | POST | /documents | Create document record (in-memory) |
 | PATCH | /documents/{id} | Update document record |
-| POST | /documents/{id}/approve | Approve a document — updates DB when configured |
-| POST | /documents/{id}/archive | Archive a document — updates DB when configured |
-| POST | /documents/upload | Safe PDF upload — validates, stores in Supabase Storage, persists to DB registry (Milestone 4C) |
-| GET | /documents/{id}/chunks | Admin/debug — chunk metadata and 250-char previews (Milestone 4D) |
-| GET | /documents/{id}/embedding-readiness | Admin — embedding readiness counts and flags (Milestones 4E–4F) |
-| POST | /documents/{id}/generate-embeddings | **Admin-only** — controlled embedding generation for dummy/sample docs (Milestone 4F) |
-| POST | /documents/search-vector | **Admin/debug** — vector similarity search, no AI answer (Milestone 4G) |
-| POST | /documents/answer-debug | **Admin/debug** — source-grounded answer test from retrieved chunks only (Milestone 4H) |
-| PATCH | /documents/{id}/governance | **Admin-only** — update governance fields with safety enforcement (Milestone 4I) |
-| GET | /documents/{id}/governance-readiness | **Admin/debug** — governance readiness summary with blocked reasons (Milestone 4I.1) |
+| POST | /documents/{id}/approve | Approve a document - updates DB when configured |
+| POST | /documents/{id}/archive | Archive a document - updates DB when configured |
+| POST | /documents/upload | Safe PDF upload - validates, stores in Supabase Storage, persists to DB registry (Milestone 4C) |
+| GET | /documents/{id}/chunks | Admin/debug - chunk metadata and 250-char previews (Milestone 4D) |
+| GET | /documents/{id}/embedding-readiness | Admin - embedding readiness counts and flags (Milestones 4E-4F) |
+| POST | /documents/{id}/generate-embeddings | **Admin-only** - controlled embedding generation for dummy/sample docs (Milestone 4F) |
+| POST | /documents/search-vector | **Admin/debug** - vector similarity search, no AI answer (Milestone 4G) |
+| POST | /documents/answer-debug | **Admin/debug** - source-grounded answer test from retrieved chunks only (Milestone 4H) |
+| PATCH | /documents/{id}/governance | **Admin-only** - update governance fields with safety enforcement (Milestone 4I) |
+| GET | /documents/{id}/governance-readiness | **Admin/debug** - governance readiness summary with blocked reasons (Milestone 4I.1) |
 
 ## CORS
 
@@ -88,16 +88,16 @@ Multiple origins are comma-separated. No wildcard `*` is used in production.
 |----------|-------|
 | `ENVIRONMENT` | `production` |
 | `ALLOWED_ORIGINS` | `https://worktwin-care-pilot.vercel.app` |
-| `ADMIN_TOKEN` | Secret bearer token — required to call admin/debug endpoints |
+| `ADMIN_TOKEN` | Secret bearer token - required to call admin/debug endpoints |
 
 ### Environment variables to set in Vercel (frontend)
 
 | Variable | Value | Notes |
 |----------|-------|-------|
-| `NEXT_PUBLIC_API_URL` | `https://<your-render-service-name>.onrender.com` | Public — used by `/ask`, `/policies`, `/health` |
-| `API_BASE_URL` | `https://<your-render-service-name>.onrender.com` | Server-side only — used by the `/api/admin/...` proxy (Milestone 4S.2A) |
-| `ADMIN_TOKEN` | Must match `ADMIN_TOKEN` set in Render | Server-side only — used by the proxy; never exposed to the browser (Milestone 4S.2A) |
-| ~~`NEXT_PUBLIC_ADMIN_TOKEN`~~ | ~~Removed~~ | Removed in Milestone 4S.2A — admin token is no longer sent from the browser |
+| `NEXT_PUBLIC_API_URL` | `https://<your-render-service-name>.onrender.com` | Public - used by `/ask`, `/policies`, `/health` |
+| `API_BASE_URL` | `https://<your-render-service-name>.onrender.com` | Server-side only - used by the `/api/admin/...` proxy (Milestone 4S.2A) |
+| `ADMIN_TOKEN` | Must match `ADMIN_TOKEN` set in Render | Server-side only - used by the proxy; never exposed to the browser (Milestone 4S.2A) |
+| ~~`NEXT_PUBLIC_ADMIN_TOKEN`~~ | ~~Removed~~ | Removed in Milestone 4S.2A - admin token is no longer sent from the browser |
 
 Replace `<your-render-service-name>` with the subdomain Render assigns when you create the service.
 
@@ -122,7 +122,7 @@ Replace `<your-render-service-name>` with the subdomain Render assigns when you 
 
 ### Upload endpoint
 
-`POST /documents/upload` — multipart form data. Required fields: `file`, `organisation_id`, `title`, `category`. All other fields have safe defaults.
+`POST /documents/upload` - multipart form data. Required fields: `file`, `organisation_id`, `title`, `category`. All other fields have safe defaults.
 
 Storage path: `{organisation_id}/documents/{document_id}/{safe_filename}`
 
@@ -130,8 +130,8 @@ Storage path: `{organisation_id}/documents/{document_id}/{safe_filename}`
 
 - PDF validation (extension, `%PDF` magic bytes, 10 MB limit)
 - Rejects prohibited document types (care plans, MAR charts, payroll, HR cases, named complaints)
-- Stores PDF in the private Supabase bucket — no public URL created
-- Extracts a short text preview (≤ 2,000 characters) using `pypdf` — full text is not stored
+- Stores PDF in the private Supabase bucket - no public URL created
+- Extracts a short text preview (<= 2,000 characters) using `pypdf` - full text is not stored
 - Runs a basic personal-data risk scan (email, UK phone, postcode, NHS number patterns, DOB labels)
 - Creates an in-memory document registry record with `embedding_status = pending`
 - Returns extraction and risk results to the admin UI
@@ -154,19 +154,19 @@ The backend will return HTTP 503 with a JSON body including `storage_status: "no
 
 ## Safety guarantees (Milestone 4A.1)
 
-- **Staff-safe retrieval only** — `/policies` returns only approved documents.
-- **Role-based visibility** — `user_role` query param filters by `access_roles`.
-- **No AI answers from unapproved documents** — `approved_for_ai_answers=False` documents are listed but the frontend blocks the "Ask WorkTwin" CTA.
-- **No embeddings or RAG pipeline active** — embedding status is tracked per document but no pipeline runs yet.
-- **No real file upload** — `/documents/upload` returns a placeholder response.
-- **No personal data in demo store** — all in-memory documents are sample policy metadata only.
+- **Staff-safe retrieval only** - `/policies` returns only approved documents.
+- **Role-based visibility** - `user_role` query param filters by `access_roles`.
+- **No AI answers from unapproved documents** - `approved_for_ai_answers=False` documents are listed but the frontend blocks the "Ask WorkTwin" CTA.
+- **No embeddings or RAG pipeline active** - embedding status is tracked per document but no pipeline runs yet.
+- **No real file upload** - `/documents/upload` returns a placeholder response.
+- **No personal data in demo store** - all in-memory documents are sample policy metadata only.
 
 ## Milestone 4C: Persistent document registry
 
 ### What Milestone 4C adds
 
-- Supabase Postgres `document_registry` table — document metadata survives restarts
-- Backend-only PostgREST / Data API access — no frontend direct DB access
+- Supabase Postgres `document_registry` table - document metadata survives restarts
+- Backend-only PostgREST / Data API access - no frontend direct DB access
 - `GET /documents` reads from DB when configured; falls back to in-memory sample data
 - `GET /policies` reads approved records from DB when configured
 - `POST /documents/upload` persists the registry record to DB after storage upload
@@ -187,7 +187,7 @@ Run this **once** in Supabase SQL Editor before uploading real documents:
 
 Table name: `document_registry`
 
-### Database access — backend only
+### Database access - backend only
 
 The service role key is used exclusively by the Render backend via PostgREST calls:
 
@@ -222,9 +222,9 @@ If `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are set, the backend attempts 
 1. Run the SQL migration in Supabase SQL Editor
 2. Upload a dummy PDF via the admin UI at `/admin/documents`
 3. Confirm `registry_status: saved` in the upload result
-4. Click **Refresh** — the uploaded document should appear in the registry list
-5. Check Supabase Table Editor → `document_registry` for the persisted row
-6. Test **Approve** and **Archive** actions — they should update the DB row
+4. Click **Refresh** - the uploaded document should appear in the registry list
+5. Check Supabase Table Editor -> `document_registry` for the persisted row
+6. Test **Approve** and **Archive** actions - they should update the DB row
 
 ### Milestone 4C upload response shape
 
@@ -252,7 +252,7 @@ If the DB table is missing, `registry_status` is `"failed"` and `registry_error`
   - `registry_source`: `"database"` when reading live from Supabase, `"demo_fallback"` otherwise
   - `registry_warning`: non-null when DB is configured but unavailable (e.g. table missing or DB error)
 - Admin documents page shows a live/demo registry indicator pill in the header
-- "Live registry" or "Demo sample registry" or "Database unavailable — demo fallback" states are clearly labelled
+- "Live registry" or "Demo sample registry" or "Database unavailable - demo fallback" states are clearly labelled
 - Empty-state messaging when the live DB has no documents yet: "No persistent documents yet. Upload a dummy or sample PDF first."
 - Optional demo seed SQL: `backend/sql/002_seed_demo_document_registry.sql`
 
@@ -265,19 +265,19 @@ If the DB table is missing, `registry_status` is `"failed"` and `registry_error`
 
 ### Important constraints (still apply through Milestone 4C/4C.1)
 
-- Only dummy or sample PDFs should be uploaded — no real Thumhara/QCS policy documents until governance review is passed
-- Uploaded documents are **not AI-answerable** — embedding_status remains `pending` and no RAG pipeline is active
+- Only dummy or sample PDFs should be uploaded - no real Thumhara/QCS policy documents until governance review is passed
+- Uploaded documents are **not AI-answerable** - embedding_status remains `pending` and no RAG pipeline is active
 - No chunking, no embeddings, no pgvector, no LLM calls
 
 ### Optional demo seed
 
 `backend/sql/002_seed_demo_document_registry.sql` inserts the 12 sample policy metadata records into the live `document_registry` table.
 
-- Run ONLY in development or demo environments — **not for production client data**
+- Run ONLY in development or demo environments - **not for production client data**
 - Requires `001_document_registry.sql` to have been run first
-- Uses `ON CONFLICT (id) DO NOTHING` — safe to re-run
-- Storage keys are placeholder paths — no real files exist for these records
-- `embedding_status` is `not_started` for all records — no actual embeddings
+- Uses `ON CONFLICT (id) DO NOTHING` - safe to re-run
+- Storage keys are placeholder paths - no real files exist for these records
+- `embedding_status` is `not_started` for all records - no actual embeddings
 
 To seed: open Supabase SQL Editor, paste the file contents, click Run.
 
@@ -285,22 +285,22 @@ To seed: open Supabase SQL Editor, paste the file contents, click Run.
 
 ### What Milestone 4D adds
 
-- Full extracted text is stored server-side in a new `document_extractions` table — never exposed in the staff UI
-- Text is split into chunks (~1,000–1,200 characters with 150-character overlap) using a simple, deterministic character-based chunker — no AI, no NLP
+- Full extracted text is stored server-side in a new `document_extractions` table - never exposed in the staff UI
+- Text is split into chunks (~1,000-1,200 characters with 150-character overlap) using a simple, deterministic character-based chunker - no AI, no NLP
 - Chunks are stored in a new `document_chunks` table, carrying `organisation_id`, `document_id`, `access_roles`, `vertical`, `category`, and safety flags on every row
-- `embedding_status` on each chunk is always `not_started` — no embeddings are generated yet
+- `embedding_status` on each chunk is always `not_started` - no embeddings are generated yet
 - `document_registry.metadata` is updated with `chunk_count` after chunking
 - Upload response now includes `extraction_storage_status`, `chunking_status`, `chunk_count`, and a `chunking_note`
-- New admin/debug endpoint: `GET /documents/{id}/chunks` — returns chunk metadata and 250-character previews; full chunk text is never returned
+- New admin/debug endpoint: `GET /documents/{id}/chunks` - returns chunk metadata and 250-character previews; full chunk text is never returned
 
 ### What Milestone 4D does NOT do
 
-- No embeddings — no pgvector, no embedding model calls
-- No RAG — no retrieval pipeline
+- No embeddings - no pgvector, no embedding model calls
+- No RAG - no retrieval pipeline
 - No LLM API calls of any kind
 - No staff-facing chunk display
 - No AI answers from chunks
-- No real Thumhara/QCS policy documents yet — dummy/sample PDFs only until governance review passes
+- No real Thumhara/QCS policy documents yet - dummy/sample PDFs only until governance review passes
 
 ### SQL migrations
 
@@ -315,15 +315,15 @@ Run both in Supabase SQL Editor **after** `001_document_registry.sql`.
 
 - Target ~1,200 characters per chunk
 - 150-character overlap between adjacent chunks
-- Advances by step = `max_chars − overlap_chars` (= 1,050 chars) per iteration
+- Advances by step = `max_chars - overlap_chars` (= 1,050 chars) per iteration
 - End of each window snaps to the nearest word boundary within the last 100 characters
 - All chunks carry: `organisation_id`, `document_id`, `access_roles`, `vertical`, `category`, `is_sensitive`, `escalation_required`, `approved_for_ai_answers`
-- `embedding_status = not_started` on every chunk — no embeddings in this milestone
+- `embedding_status = not_started` on every chunk - no embeddings in this milestone
 
 ### Safety guarantees (Milestone 4D)
 
 - Full extracted text is stored in `document_extractions`, not in the API response or the staff UI
-- Chunk text is stored in `document_chunks` — accessible only via the admin/debug endpoint (250-char preview only; full text never returned)
+- Chunk text is stored in `document_chunks` - accessible only via the admin/debug endpoint (250-char preview only; full text never returned)
 - Staff cannot see chunks or extracted text
 - `approved_for_ai_answers` is inherited from the document flags at upload time
 - Escalation-required and sensitive documents still get chunks, but `embedding_status = not_started` and `approved_for_ai_answers` remains false unless explicitly set
@@ -348,7 +348,7 @@ Run both in Supabase SQL Editor **after** `001_document_registry.sql`.
 
 ### Admin/debug chunk endpoint
 
-`GET /documents/{id}/chunks` — returns:
+`GET /documents/{id}/chunks` - returns:
 
 ```json
 {
@@ -381,8 +381,8 @@ Run both in Supabase SQL Editor **after** `001_document_registry.sql`.
    - `chunking_status: prepared`
    - `chunk_count > 0`
    - `embedding_status: pending`
-5. Check Supabase Table Editor → `document_extractions` for a row with the full text
-6. Check Supabase Table Editor → `document_chunks` for chunk rows
+5. Check Supabase Table Editor -> `document_extractions` for a row with the full text
+6. Check Supabase Table Editor -> `document_chunks` for chunk rows
 7. Call `GET /documents/{id}/chunks` and confirm 250-char previews are returned
 8. Confirm no AI answers, no embeddings, no RAG are enabled
 
@@ -390,25 +390,25 @@ Run both in Supabase SQL Editor **after** `001_document_registry.sql`.
 
 ### What Milestone 4E adds
 
-- Enables the `vector` Postgres extension (pgvector) via SQL migration — safe no-op if already installed
+- Enables the `vector` Postgres extension (pgvector) via SQL migration - safe no-op if already installed
 - New `document_embeddings` table: one row per chunk, created at upload time
 - Each embedding record carries `organisation_id`, `document_id`, `chunk_id`, `access_roles`, `vertical`, `category`, and all safety flags copied from `document_chunks`
-- `embedding_status = not_started` on every record — no embeddings are generated
-- `embedding` column is nullable `vector(1536)` — stays NULL until a future milestone
+- `embedding_status = not_started` on every record - no embeddings are generated
+- `embedding` column is nullable `vector(1536)` - stays NULL until a future milestone
 - Upload flow now runs a step 10c after chunking: `_prepare_embedding_records_for_document`
 - Upload response includes `embedding_preparation_status`, `embedding_record_count`, and `embedding_note`
-- New admin endpoint: `GET /documents/{id}/embedding-readiness` — returns counts and readiness flags only
+- New admin endpoint: `GET /documents/{id}/embedding-readiness` - returns counts and readiness flags only
 - New backend-only helpers: `_prepare_embedding_records_for_document`, `_list_embedding_records`, `_get_embedding_readiness`
 
 ### What Milestone 4E does NOT do
 
-- No embeddings are generated — no embedding model is called
-- No pgvector index (IVFFlat / HNSW) — not needed until embeddings exist
+- No embeddings are generated - no embedding model is called
+- No pgvector index (IVFFlat / HNSW) - not needed until embeddings exist
 - No RAG pipeline
 - No LLM API calls of any kind
 - No staff-facing retrieval
 - No AI answers
-- No real Thumhara/QCS policy documents yet — dummy/sample PDFs only until governance review passes
+- No real Thumhara/QCS policy documents yet - dummy/sample PDFs only until governance review passes
 
 ### SQL migration
 
@@ -421,11 +421,11 @@ Run **after** `001_document_registry.sql`, `003_document_chunks.sql`, and `004_d
 3. Paste the contents of `backend/sql/005_document_embeddings.sql`
 4. Click **Run**
 
-Vector dimensions: `vector(1536)` — matches OpenAI `text-embedding-ada-002` and `text-embedding-3-small`. Change to `vector(3072)` for `text-embedding-3-large` or `vector(768)` for smaller open-source models before generating any embeddings.
+Vector dimensions: `vector(1536)` - matches OpenAI `text-embedding-ada-002` and `text-embedding-3-small`. Change to `vector(3072)` for `text-embedding-3-large` or `vector(768)` for smaller open-source models before generating any embeddings.
 
 ### Embedding readiness endpoint
 
-`GET /documents/{id}/embedding-readiness` — returns:
+`GET /documents/{id}/embedding-readiness` - returns:
 
 ```json
 {
@@ -466,11 +466,11 @@ No vectors are returned. No secrets are returned. No extracted text is returned.
 ```
 
 `embedding_preparation_status` values:
-- `prepared` — new embedding records created for all chunks
-- `already_prepared` — records already existed (safe to re-run)
-- `failed` — insert failed (usually means `005_document_embeddings.sql` has not been run)
-- `skipped` — no chunks available (chunking failed or produced no text)
-- `not_configured` — DB not configured
+- `prepared` - new embedding records created for all chunks
+- `already_prepared` - records already existed (safe to re-run)
+- `failed` - insert failed (usually means `005_document_embeddings.sql` has not been run)
+- `skipped` - no chunks available (chunking failed or produced no text)
+- `not_configured` - DB not configured
 
 ### Manual test steps (Milestone 4E)
 
@@ -482,42 +482,42 @@ No vectors are returned. No secrets are returned. No extracted text is returned.
    - `embedding_record_count > 0`
    - `embedding_status: pending`
    - `embedding_note: "Embedding records prepared. No embeddings have been generated yet."`
-4. Check Supabase Table Editor → `document_embeddings` for rows with `embedding_status = not_started`
+4. Check Supabase Table Editor -> `document_embeddings` for rows with `embedding_status = not_started`
 5. Confirm the `embedding` column is NULL on all rows
 6. Call `GET /documents/{id}/embedding-readiness` and confirm safe metadata is returned
 7. Confirm no AI answers, no embeddings, no vectors, no RAG are active
 
 ### Important constraints (still apply through Milestone 4E)
 
-- Only dummy or sample PDFs should be uploaded — no real Thumhara/QCS policy documents until governance review is passed
+- Only dummy or sample PDFs should be uploaded - no real Thumhara/QCS policy documents until governance review is passed
 - `approved_for_ai_answers` remains `false` for all uploaded documents
 - No RAG retrieval, no LLM calls
-- All embedding records are inert placeholders — they cannot be searched or served to staff
+- All embedding records are inert placeholders - they cannot be searched or served to staff
 
 ## Milestone 4F: Controlled embedding generation
 
 ### What Milestone 4F adds
 
 - Controlled embedding generation using OpenAI `text-embedding-3-small` (1536 dimensions)
-- New endpoint: `POST /documents/{id}/generate-embeddings` — admin-only, backend-only
+- New endpoint: `POST /documents/{id}/generate-embeddings` - admin-only, backend-only
 - Embedding vectors are stored in `document_embeddings.embedding` (the nullable `vector(1536)` column)
 - `document_embeddings.embedding_status` updated to `embedded` per successful chunk
 - `document_chunks.embedding_status` updated to `embedded` per chunk
 - `document_registry.embedding_status` updated to `indexed` / `partial` / `failed` based on results
-- Updated `GET /documents/{id}/embedding-readiness` — now returns `is_ready_for_vector_search` and counts `embedded` status
-- Frontend admin control: `⚡ Generate embeddings` button for eligible (non-sensitive, non-escalation) documents
+- Updated `GET /documents/{id}/embedding-readiness` - now returns `is_ready_for_vector_search` and counts `embedded` status
+- Frontend admin control: `Generate embeddings` button for eligible (non-sensitive, non-escalation) documents
 - Frontend shows embedded_count, skipped_count, failed_count, estimated cost note inline
 
 ### What Milestone 4F does NOT do
 
-- No RAG pipeline — no vector similarity search
-- No AI answers — the `/ask` endpoint still returns a placeholder
-- No pgvector IVFFlat/HNSW index — not needed until RAG is wired
+- No RAG pipeline - no vector similarity search
+- No AI answers - the `/ask` endpoint still returns a placeholder
+- No pgvector IVFFlat/HNSW index - not needed until RAG is wired
 - No LLM/chat/completion API calls of any kind
-- No real Thumhara/QCS policy documents — dummy/sample PDFs only
+- No real Thumhara/QCS policy documents - dummy/sample PDFs only
 - No staff-facing retrieval
 
-### OPENAI_API_KEY — backend only
+### OPENAI_API_KEY - backend only
 
 | Variable | Description |
 |----------|-------------|
@@ -525,8 +525,8 @@ No vectors are returned. No secrets are returned. No extracted text is returned.
 
 - Model: `text-embedding-3-small`
 - Dimensions: 1536 (matches the `vector(1536)` column in `document_embeddings`)
-- Do **not** use `text-embedding-3-large` — the column is `vector(1536)`, not `vector(3072)`
-- If `OPENAI_API_KEY` is not set, the endpoint returns `status: not_configured` — it does not crash
+- Do **not** use `text-embedding-3-large` - the column is `vector(1536)`, not `vector(3072)`
+- If `OPENAI_API_KEY` is not set, the endpoint returns `status: not_configured` - it does not crash
 
 ### Embedding generation endpoint
 
@@ -541,15 +541,15 @@ Request body (JSON):
 }
 ```
 
-- `allow_dummy_override: true` — required for dummy/sample documents that have not been through governance approval (i.e. `real_document=false` and `approved_for_embedding=false`)
-- `max_chunks` — capped at 20 per request (adjust as needed for testing)
+- `allow_dummy_override: true` - required for dummy/sample documents that have not been through governance approval (i.e. `real_document=false` and `approved_for_embedding=false`)
+- `max_chunks` - capped at 20 per request (adjust as needed for testing)
 
 Safety rules (Milestone 4I governance separation applies):
 - Chunks with `escalation_required=true` are **always skipped** regardless of governance flags
 - Chunks with `is_sensitive=true` are **always skipped** regardless of governance flags
-- `approved_for_ai_answers` (chunk-level flag) is **not** checked during embedding — embedding approval is governed by `document_registry.approved_for_embedding` at the document level
+- `approved_for_ai_answers` (chunk-level flag) is **not** checked during embedding - embedding approval is governed by `document_registry.approved_for_embedding` at the document level
 - Only `not_started` or `failed` embedding records are eligible
-- No force-re-embed — already `embedded` records are skipped
+- No force-re-embed - already `embedded` records are skipped
 
 ### Embedding generation response shape
 
@@ -570,10 +570,10 @@ Safety rules (Milestone 4I governance separation applies):
 ```
 
 `embedding_status` values in this response:
-- `indexed` — all eligible chunks embedded successfully
-- `partial` — some embedded, some not yet processed
-- `failed` — all attempted chunks failed
-- `not_configured` — OPENAI_API_KEY missing
+- `indexed` - all eligible chunks embedded successfully
+- `partial` - some embedded, some not yet processed
+- `failed` - all attempted chunks failed
+- `not_configured` - OPENAI_API_KEY missing
 
 ### Updated embedding-readiness endpoint
 
@@ -596,9 +596,9 @@ Safety rules (Milestone 4I governance separation applies):
 ### Cost caution
 
 - `text-embedding-3-small` costs $0.020 per 1 million input tokens
-- A 1,200-character chunk ≈ ~300 tokens ≈ $0.000006 per chunk
-- 20 chunks ≈ $0.0001 — negligible for testing
-- **Do not run this on large batches of real documents — governance sign-off is required before embedding real policy documents**
+- A 1,200-character chunk approximately ~300 tokens approximately $0.000006 per chunk
+- 20 chunks approximately $0.0001 - negligible for testing
+- **Do not run this on large batches of real documents - governance sign-off is required before embedding real policy documents**
 - Do not embed real Thumhara/QCS policy documents yet
 
 ### Manual test steps (Milestone 4F)
@@ -606,7 +606,7 @@ Safety rules (Milestone 4I governance separation applies):
 1. Set `OPENAI_API_KEY` in Render environment variables (backend service only)
 2. Upload a dummy PDF via the admin UI at `/admin/documents`
 3. Confirm `embedding_preparation_status: prepared` in the upload result
-4. Use the `⚡ Generate embeddings` button in the admin UI, or:
+4. Use the `Generate embeddings` button in the admin UI, or:
 
 ```bash
 # Check readiness first
@@ -618,20 +618,20 @@ curl -X POST "http://localhost:8000/documents/{id}/generate-embeddings" \
   -d '{"allow_dummy_override": true, "max_chunks": 20}'
 ```
 
-5. Check Supabase Table Editor → `document_embeddings`:
+5. Check Supabase Table Editor -> `document_embeddings`:
    - `embedding_status` = `embedded`
    - `embedding` column is no longer NULL
    - `embedding_model` = `text-embedding-3-small`
    - `embedding_dimensions` = 1536
 6. Check `document_registry.embedding_status` = `indexed` (or `partial`)
-7. Confirm the admin UI shows "Indexed ✓" in the Embedding column
+7. Confirm the admin UI shows "Indexed" in the Embedding column
 8. Confirm AI answers are still disabled (the `/ask` endpoint still returns a placeholder)
 
 ### Important constraints (still apply through Milestone 4F)
 
-- Only dummy or sample PDFs — no real Thumhara/QCS policy documents
-- AI answers remain disabled — embeddings cannot be searched or served to staff
-- No pgvector index in this milestone — the optional HNSW index was added in Milestone 4G
+- Only dummy or sample PDFs - no real Thumhara/QCS policy documents
+- AI answers remain disabled - embeddings cannot be searched or served to staff
+- No pgvector index in this milestone - the optional HNSW index was added in Milestone 4G
 - No RAG pipeline, no LLM calls
 
 ## Milestone 4G: Admin-only vector search / retrieval test
@@ -639,14 +639,14 @@ curl -X POST "http://localhost:8000/documents/{id}/generate-embeddings" \
 ### What Milestone 4G adds
 
 - SQL migration `006_vector_search.sql`:
-  - Optional HNSW vector index on `document_embeddings.embedding` (cosine distance, pgvector ≥ 0.5.0)
-  - Postgres function `match_document_chunks` — cosine similarity search with joins to `document_chunks` and `document_registry`
-  - `REVOKE EXECUTE ... FROM PUBLIC` — no anon or authenticated (frontend) access
+  - Optional HNSW vector index on `document_embeddings.embedding` (cosine distance, pgvector >= 0.5.0)
+  - Postgres function `match_document_chunks` - cosine similarity search with joins to `document_chunks` and `document_registry`
+  - `REVOKE EXECUTE ... FROM PUBLIC` - no anon or authenticated (frontend) access
 - Backend helpers (backend-only, never exposed to frontend):
-  - `_embed_query_text(query)` — calls OpenAI text-embedding-3-small for a single query string
-  - `_vector_search_chunks(...)` — calls `match_document_chunks` via Supabase RPC, applies post-fetch safety filter
-  - `_normalise_search_result(row)` — converts RPC rows into safe, truncated API output (350-char chunk preview only)
-- New endpoint: `POST /documents/search-vector` — admin/debug only, no AI answer, no LLM
+  - `_embed_query_text(query)` - calls OpenAI text-embedding-3-small for a single query string
+  - `_vector_search_chunks(...)` - calls `match_document_chunks` via Supabase RPC, applies post-fetch safety filter
+  - `_normalise_search_result(row)` - converts RPC rows into safe, truncated API output (350-char chunk preview only)
+- New endpoint: `POST /documents/search-vector` - admin/debug only, no AI answer, no LLM
 - Frontend admin panel: "Vector Search Test" (collapsible, clearly labelled Admin/debug only) at `/admin/documents`
 - Safety filters enforced throughout:
   - `escalation_required=True` chunks always excluded
@@ -658,14 +658,14 @@ curl -X POST "http://localhost:8000/documents/{id}/generate-embeddings" \
 
 ### What Milestone 4G does NOT do
 
-- No AI answer generation — no LLM, no chat, no completion endpoint
-- No staff-facing RAG — `/ask` is unchanged and still returns a placeholder
-- No real Thumhara/QCS documents — dummy/sample PDFs only
+- No AI answer generation - no LLM, no chat, no completion endpoint
+- No staff-facing RAG - `/ask` is unchanged and still returns a placeholder
+- No real Thumhara/QCS documents - dummy/sample PDFs only
 - No authentication or authorisation enforcement yet
 
 ### Cost: one tiny query embedding only
 
-`text-embedding-3-small` costs $0.020 per 1 million tokens. A single query of ~50 words ≈ ~70 tokens ≈ **$0.0000014** — effectively zero. Each test search costs less than $0.01.
+`text-embedding-3-small` costs $0.020 per 1 million tokens. A single query of ~50 words approximately ~70 tokens approximately **$0.0000014** - effectively zero. Each test search costs less than $0.01.
 
 ### SQL migration
 
@@ -746,25 +746,25 @@ curl -X POST "http://localhost:8000/documents/search-vector" \
 
 4. Or use the **Vector Search Test** panel at `/admin/documents` (purple collapsible card at the bottom of the page)
 5. Confirm `result_count > 0` and `similarity` scores are returned
-6. Confirm `chunk_preview` shows only the first 350 characters — full text not returned
-7. Confirm no AI answer is generated — the response contains only `note: "Vector retrieval only. AI answers are still disabled."`
+6. Confirm `chunk_preview` shows only the first 350 characters - full text not returned
+7. Confirm no AI answer is generated - the response contains only `note: "Vector retrieval only. AI answers are still disabled."`
 8. Confirm `/ask` still returns a placeholder response
 
 ### Frontend Vector Search Test panel
 
-Location: `/admin/documents` — collapsible purple card labelled "Vector Search Test (Admin/debug only)"
+Location: `/admin/documents` - collapsible purple card labelled "Vector Search Test (Admin/debug only)"
 
 - Clearly labelled admin/debug only
 - Warning: "This tests retrieval only. It does not generate staff answers."
-- Inputs: query text, match count (1–10), "Allow dummy/sample documents" checkbox
+- Inputs: query text, match count (1-10), "Allow dummy/sample documents" checkbox
 - Button: "Test vector search"
 - Output: result count, per-chunk cards showing document title, chunk index, similarity %, chunk preview, safety flags
 - Full extracted text and embeddings never displayed
 
 ### Important constraints (still apply through Milestone 4G)
 
-- Only dummy or sample PDFs — no real Thumhara/QCS policy documents
-- AI answers remain fully disabled — embeddings cannot be served to staff
+- Only dummy or sample PDFs - no real Thumhara/QCS policy documents
+- AI answers remain fully disabled - embeddings cannot be served to staff
 - No staff-facing RAG pipeline
 - No LLM calls of any kind
 
@@ -773,29 +773,29 @@ Location: `/admin/documents` — collapsible purple card labelled "Vector Search
 ### What Milestone 4H adds
 
 - New backend-only helpers:
-  - `_build_source_context(chunks)` — builds a labelled source context string (max 5 chunks, max 4,000 characters)
-  - `_format_source_citations(sources)` — formats a citation list for the prompt
-  - `_generate_source_grounded_answer(query, context, citations)` — calls ANSWER_MODEL with a strict source-only prompt
-  - `_validate_grounded_answer_result(answer, sources)` — derives confidence label
-  - `_detect_escalation_topic(query)` — pattern matches sensitive care/HR/safeguarding keywords
-- New endpoint: `POST /documents/answer-debug` — admin/debug only
+  - `_build_source_context(chunks)` - builds a labelled source context string (max 5 chunks, max 4,000 characters)
+  - `_format_source_citations(sources)` - formats a citation list for the prompt
+  - `_generate_source_grounded_answer(query, context, citations)` - calls ANSWER_MODEL with a strict source-only prompt
+  - `_validate_grounded_answer_result(answer, sources)` - derives confidence label
+  - `_detect_escalation_topic(query)` - pattern matches sensitive care/HR/safeguarding keywords
+- New endpoint: `POST /documents/answer-debug` - admin/debug only
 - Frontend admin panel: "Source-Grounded Answer Test" (collapsible, indigo card) at `/admin/documents`
 - New `AnswerDebugRequest` Pydantic model
 - New `ANSWER_MODEL` env var (default: `gpt-4o-mini`)
-- Staff `/ask` endpoint is unchanged — AI answers remain disabled for staff
+- Staff `/ask` endpoint is unchanged - AI answers remain disabled for staff
 
 ### What Milestone 4H does NOT do
 
 - No staff-facing AI answers
 - No changes to `/ask`
-- No real Thumhara/QCS policy documents — dummy/sample only
+- No real Thumhara/QCS policy documents - dummy/sample only
 - No authentication enforcement
 - No rate limiting
 
 ### Answer model safety rules
 
 The model is instructed to:
-- Answer only from the supplied sources — no outside knowledge
+- Answer only from the supplied sources - no outside knowledge
 - Cite sources using `[Source 1]`, `[Source 2]`, etc.
 - If sources are insufficient, say exactly: "I can't answer that from the available approved sources."
 - Not mention policies or documents not in the sources
@@ -803,11 +803,11 @@ The model is instructed to:
 - Use UK English
 
 Confidence values:
-- `source_grounded` — answer generated from retrieved sources
-- `insufficient_sources` — no matching chunks, or model said it cannot answer
-- `blocked_safety` — chunks matched but all excluded by safety rules (escalation_required or is_sensitive)
+- `source_grounded` - answer generated from retrieved sources
+- `insufficient_sources` - no matching chunks, or model said it cannot answer
+- `blocked_safety` - chunks matched but all excluded by safety rules (escalation_required or is_sensitive)
 
-### Environment variables (Render — backend only)
+### Environment variables (Render - backend only)
 
 | Variable | Description |
 |----------|-------------|
@@ -876,11 +876,11 @@ Expected response:
 
 ### Frontend Source-Grounded Answer Test panel
 
-Location: `/admin/documents` — collapsible indigo card labelled "Source-Grounded Answer Test (Admin/debug only)"
+Location: `/admin/documents` - collapsible indigo card labelled "Source-Grounded Answer Test (Admin/debug only)"
 
 - Clearly labelled admin/debug only
 - Warning: "This tests answer generation from retrieved chunks only. It is not enabled for staff."
-- Inputs: query text, match count (1–5), "Allow dummy/sample documents" checkbox
+- Inputs: query text, match count (1-5), "Allow dummy/sample documents" checkbox
 - Button: "Generate source-grounded test answer"
 - Output: confidence badge, answer text, safety note (if applicable), sources used (with previews), model name, estimated cost note
 - Vectors never displayed. Full extracted text never displayed.
@@ -888,11 +888,11 @@ Location: `/admin/documents` — collapsible indigo card labelled "Source-Ground
 
 ### Manual test steps (Milestone 4H)
 
-1. Ensure Milestones 4E–4G are complete: SQL migrations run, dummy PDF uploaded, embeddings generated
+1. Ensure Milestones 4E-4G are complete: SQL migrations run, dummy PDF uploaded, embeddings generated
 2. Set `OPENAI_API_KEY` in Render env vars (backend service only)
 3. Optionally set `ANSWER_MODEL` (defaults to `gpt-4o-mini`)
 4. Use the **Source-Grounded Answer Test** panel at `/admin/documents`
-   — or test via the curl command above
+   - or test via the curl command above
 5. Confirm:
    - Answer cites `[Source 1]` etc.
    - `confidence: "source_grounded"`
@@ -918,21 +918,21 @@ Do not expose `/documents/answer-debug` to staff or make it publicly accessible.
 ### What Milestone 4I adds
 
 - SQL migration `007_document_governance.sql`:
-  - 14 new governance columns on `document_registry` (all added with `ADD COLUMN IF NOT EXISTS` — safe to re-run on existing tables)
-  - New `document_audit_events` table with RLS enabled — backend service role only, no frontend access
+  - 14 new governance columns on `document_registry` (all added with `ADD COLUMN IF NOT EXISTS` - safe to re-run on existing tables)
+  - New `document_audit_events` table with RLS enabled - backend service role only, no frontend access
 - Governance helper functions (backend-only, never exposed to frontend):
-  - `_create_audit_event(...)` — fire-and-forget audit logging; errors are swallowed so audit failure never blocks core operations
-  - `_get_document_governance_summary(document_id)` — fetches governance fields for one document
-  - `_get_document_governance_batch(document_ids)` — single PostgREST `in.(...)` query for multiple document IDs (used by answer-debug filter)
-  - `_can_embed_document(document, allow_dummy_override)` — governance gate for embedding generation
-  - `_can_use_document_for_answer_debug(document, allow_dummy_override)` — governance gate for source-grounded answer testing
-  - `_can_show_document_to_staff(document)` — governance gate for staff-facing policy library
+  - `_create_audit_event(...)` - fire-and-forget audit logging; errors are swallowed so audit failure never blocks core operations
+  - `_get_document_governance_summary(document_id)` - fetches governance fields for one document
+  - `_get_document_governance_batch(document_ids)` - single PostgREST `in.(...)` query for multiple document IDs (used by answer-debug filter)
+  - `_can_embed_document(document, allow_dummy_override)` - governance gate for embedding generation
+  - `_can_use_document_for_answer_debug(document, allow_dummy_override)` - governance gate for source-grounded answer testing
+  - `_can_show_document_to_staff(document)` - governance gate for staff-facing policy library
 - Upload flow now sets governance defaults on every new document:
   `governance_status="not_reviewed"`, `real_document=False`, `dummy_document=True`, `approved_for_embedding=False`, `approved_for_staff_visibility=False`, `approved_for_source_grounded_answers=False`
 - Upload flow emits four audit events: `document_uploaded`, `extraction_saved`, `chunks_prepared`, `embedding_records_prepared`
 - Embedding generation (`POST /documents/{id}/generate-embeddings`) now checks document-level governance gate before processing any chunks
 - Answer-debug (`POST /documents/answer-debug`) now filters retrieved chunks by document-level governance gate before passing to the LLM
-- New admin endpoint: `PATCH /documents/{id}/governance` — updates governance fields with safety enforcement
+- New admin endpoint: `PATCH /documents/{id}/governance` - updates governance fields with safety enforcement
 - Admin UI at `/admin/documents` now shows a **Document Governance** panel (emerald, collapsible) with per-document governance cards and action buttons
 
 ### Governance fields added to `document_registry`
@@ -945,8 +945,8 @@ Do not expose `/documents/answer-debug` to staff or make it publicly accessible.
 | `approved_for_embedding` | `boolean` | `false` | Admin must explicitly approve before embeddings can be generated |
 | `approved_for_staff_visibility` | `boolean` | `false` | Admin must explicitly approve before document appears in staff policy library |
 | `approved_for_source_grounded_answers` | `boolean` | `false` | Admin must explicitly approve before document is used for AI answer generation |
-| `requires_human_review_before_embedding` | `boolean` | `true` | Reminder flag — human review required before embedding |
-| `requires_human_review_before_staff_visibility` | `boolean` | `true` | Reminder flag — human review required before staff visibility |
+| `requires_human_review_before_embedding` | `boolean` | `true` | Reminder flag - human review required before embedding |
+| `requires_human_review_before_staff_visibility` | `boolean` | `true` | Reminder flag - human review required before staff visibility |
 | `governance_reviewed_by` | `text` | `null` | Who performed the governance review |
 | `governance_reviewed_at` | `timestamptz` | `null` | When the governance review was completed |
 | `governance_notes` | `text` | `null` | Free-text governance notes |
@@ -959,11 +959,11 @@ Allowed `governance_status` values (enforced by backend, not DB constraint):
 
 ### Governance rules (enforced at all times)
 
-1. **Sensitive documents (`is_sensitive=true`) are always blocked** — they cannot be approved for embedding or AI answers regardless of governance status
-2. **Escalation-required documents (`escalation_required=true`) are always blocked** — same as sensitive
+1. **Sensitive documents (`is_sensitive=true`) are always blocked** - they cannot be approved for embedding or AI answers regardless of governance status
+2. **Escalation-required documents (`escalation_required=true`) are always blocked** - same as sensitive
 3. **Real documents require explicit `approved_for_embedding=true`** before embedding generation runs
 4. **Real documents require explicit `approved_for_source_grounded_answers=true`** before they are used in answer-debug
-5. **Dummy/sample documents** can still be tested with `allow_dummy_override=true` — governance gate allows through
+5. **Dummy/sample documents** can still be tested with `allow_dummy_override=true` - governance gate allows through
 6. **Pre-migration records** (before `007_document_governance.sql` is run) are treated permissively in the answer-debug filter to avoid breaking existing test workflows
 
 ### Governance gate behaviour in each endpoint
@@ -976,7 +976,7 @@ Allowed `governance_status` values (enforced by backend, not DB constraint):
 
 ### Audit events
 
-All governance events and pipeline operations are recorded in `document_audit_events`. The table is backend service role only — no frontend access.
+All governance events and pipeline operations are recorded in `document_audit_events`. The table is backend service role only - no frontend access.
 
 | `event_type` | When it fires |
 |-------------|--------------|
@@ -989,7 +989,7 @@ All governance events and pipeline operations are recorded in `document_audit_ev
 | `answer_debug_tested` | Source-grounded answer debug test completed |
 | `governance_status_changed` | `PATCH /documents/{id}/governance` updated governance fields |
 
-Audit failures are swallowed silently — a failed audit write never causes an HTTP 4xx/5xx response.
+Audit failures are swallowed silently - a failed audit write never causes an HTTP 4xx/5xx response.
 
 ### SQL migration
 
@@ -1002,7 +1002,7 @@ Run **after** `001_document_registry.sql` through `006_vector_search.sql`:
 3. Paste the contents of `backend/sql/007_document_governance.sql`
 4. Click **Run**
 
-The migration is idempotent — `ADD COLUMN IF NOT EXISTS` and `CREATE TABLE IF NOT EXISTS` mean it is safe to re-run.
+The migration is idempotent - `ADD COLUMN IF NOT EXISTS` and `CREATE TABLE IF NOT EXISTS` mean it is safe to re-run.
 
 ### Governance admin endpoint
 
@@ -1015,9 +1015,9 @@ Request body (all fields optional):
   "governance_status": "pilot_approved",
   "real_document": true,
   "dummy_document": false,
-  "governance_notes": "Reviewed by admin — cleared for embedding test",
+  "governance_notes": "Reviewed by admin - cleared for embedding test",
   "source_owner": "Thumhara Centre",
-  "source_licence_notes": "Internal document — no third-party licence",
+  "source_licence_notes": "Internal document - no third-party licence",
   "contains_qcs_or_third_party_content": false,
   "approved_for_embedding": true,
   "approved_for_staff_visibility": false,
@@ -1035,7 +1035,7 @@ Returns: the updated `DocumentRecord`.
 
 ### What Milestone 4I does NOT do
 
-- Staff-facing `/ask` remains a placeholder — AI answers are NOT enabled for staff
+- Staff-facing `/ask` remains a placeholder - AI answers are NOT enabled for staff
 - No real Thumhara/QCS documents should be embedded until governance fields are confirmed and `approved_for_embedding=true`
 - No changes to the staff policy library UI or the `/ask` endpoint
 - No authentication or role-based access control on admin endpoints (planned for a later milestone)
@@ -1043,42 +1043,42 @@ Returns: the updated `DocumentRecord`.
 ### Manual test steps (Milestone 4I)
 
 1. Run `007_document_governance.sql` in Supabase SQL Editor
-2. Upload a dummy PDF — confirm the upload result includes governance defaults in the returned `document` object
-3. Check Supabase Table Editor → `document_registry` — confirm the new governance columns exist and are populated with defaults
-4. Open `/admin/documents` → **Document Governance** panel (emerald card)
-5. Click **Approve for Embedding** on a dummy document — confirm the API response shows `approved_for_embedding: true`
-6. Generate embeddings with `allow_dummy_override=true` — confirm they succeed
-7. Try clicking **Approve for Embedding** on a sensitive or escalation-required document — confirm it is disabled (lock icon)
+2. Upload a dummy PDF - confirm the upload result includes governance defaults in the returned `document` object
+3. Check Supabase Table Editor -> `document_registry` - confirm the new governance columns exist and are populated with defaults
+4. Open `/admin/documents` -> **Document Governance** panel (emerald card)
+5. Click **Approve for Embedding** on a dummy document - confirm the API response shows `approved_for_embedding: true`
+6. Generate embeddings with `allow_dummy_override=true` - confirm they succeed
+7. Try clicking **Approve for Embedding** on a sensitive or escalation-required document - confirm it is disabled (lock icon)
 8. Use the `PATCH /documents/{id}/governance` endpoint directly to mark a document as `real_document=true`
 9. Confirm that generating embeddings for that real document now returns `status: "blocked"` without `approved_for_embedding=true`
-10. Check Supabase Table Editor → `document_audit_events` for logged events
+10. Check Supabase Table Editor -> `document_audit_events` for logged events
 
 ## Milestone 4I.1: Governance hardening and real-document readiness checklist
 
 ### What Milestone 4I.1 adds
 
-- **Clearer blocked reason messages** — governance gate functions now return plain English explanations:
+- **Clearer blocked reason messages** - governance gate functions now return plain English explanations:
   - "Document is marked sensitive and cannot be embedded."
   - "Document requires escalation and cannot be used for AI answers."
   - "Real document requires governance approval before embedding."
   - "Dummy document requires allow_dummy_override=true for test embedding."
   - `answer-debug` blocked safety case now returns: "No safe approved chunks available for answer generation."
-- **Human-readable audit event summaries** — `PATCH /documents/{id}/governance` now writes specific summaries:
+- **Human-readable audit event summaries** - `PATCH /documents/{id}/governance` now writes specific summaries:
   - "Document approved for embedding."
   - "Document approved for source-grounded answer testing."
   - "Document approved for staff visibility."
   - "Document marked as real pilot document."
   - "Document rejected during governance review."
   - "Document archived."
-- **New governance readiness endpoint** — `GET /documents/{id}/governance-readiness` (see below)
-- **Frontend: real-document readiness checklist** — guidance checklist visible in the Document Governance panel before approving any document for embedding or staff visibility
-- **Frontend: per-document readiness display** — each document card in the governance panel now shows "Embed: Yes/No", "AI test: Yes/No", "Staff: Yes/No" and the main blocked reason (if any)
+- **New governance readiness endpoint** - `GET /documents/{id}/governance-readiness` (see below)
+- **Frontend: real-document readiness checklist** - guidance checklist visible in the Document Governance panel before approving any document for embedding or staff visibility
+- **Frontend: per-document readiness display** - each document card in the governance panel now shows "Embed: Yes/No", "AI test: Yes/No", "Staff: Yes/No" and the main blocked reason (if any)
 
 ### What Milestone 4I.1 does NOT change
 
-- Staff-facing `/ask` remains disabled — RAG is still governed-off
+- Staff-facing `/ask` remains disabled - RAG is still governed-off
 - Real Thumhara/QCS documents must not be embedded until human review and governance approval
-- No SQL migration required — all changes are code-only
+- No SQL migration required - all changes are code-only
 - No change to the audit events table schema
 
 ### Governance readiness endpoint
@@ -1157,9 +1157,9 @@ The following rules were audited in Milestone 4I.1 and confirmed as correctly im
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | /documents/{id}/governance-readiness | **Admin/debug** — governance readiness summary with blocked reasons and next actions (Milestone 4I.1) |
+| GET | /documents/{id}/governance-readiness | **Admin/debug** - governance readiness summary with blocked reasons and next actions (Milestone 4I.1) |
 
-## Milestone 4I.4: Governance blocking proof — AC32 first controlled real document
+## Milestone 4I.4: Governance blocking proof - AC32 first controlled real document
 
 ### What Milestone 4I.4 proves
 
@@ -1191,9 +1191,9 @@ No governance approvals were changed during the proof.
 
 ### What the proof confirmed
 
-- `POST /documents/search-vector` retrieves AC32 chunks — admin-only vector retrieval works for real embedded documents.
-- `POST /documents/answer-debug` is blocked for AC32 — `approved_for_source_grounded_answers=false` prevents source-grounded answer testing.
-- `GET /policies` (staff) does not include AC32 — `approved_for_staff_visibility=false` keeps it off the staff-facing policy library.
+- `POST /documents/search-vector` retrieves AC32 chunks - admin-only vector retrieval works for real embedded documents.
+- `POST /documents/answer-debug` is blocked for AC32 - `approved_for_source_grounded_answers=false` prevents source-grounded answer testing.
+- `GET /policies` (staff) does not include AC32 - `approved_for_staff_visibility=false` keeps it off the staff-facing policy library.
 - Staff-facing `/ask` remains a placeholder and does not use AC32 in any way.
 - The three approval gates operate independently: embedding approval, answer approval, and staff visibility each require a separate explicit decision.
 
@@ -1204,7 +1204,7 @@ No governance approvals were changed during the proof.
 - AC32 remains draft, staff-invisible, and answer-blocked.
 - Staff `/ask` is unchanged.
 
-## Milestone 4I.5: Answer-debug approval fix — AC32 source-grounded answer test passed
+## Milestone 4I.5: Answer-debug approval fix - AC32 source-grounded answer test passed
 
 ### What Milestone 4I.5 proves
 
@@ -1212,7 +1212,7 @@ AC32 Mobile Phone and Portable Device Use Policy (`approved_for_source_grounded_
 
 ### The bug and fix
 
-**Bug:** After AC32 governance was updated to `approved_for_source_grounded_answers=true`, `POST /documents/answer-debug` still returned `confidence: blocked_safety` with `sources: []` — even though `GET /documents/{id}/governance-readiness` correctly reported `can_use_for_answer_debug_now: true`.
+**Bug:** After AC32 governance was updated to `approved_for_source_grounded_answers=true`, `POST /documents/answer-debug` still returned `confidence: blocked_safety` with `sources: []` - even though `GET /documents/{id}/governance-readiness` correctly reported `can_use_for_answer_debug_now: true`.
 
 **Root cause:** The answer-debug route was filtering retrieved chunks using the stale chunk-level `approved_for_ai_answers` flag. For AC32, all chunks carried `approved_for_ai_answers=false` (inherited from the document's state at upload time, before governance approval was granted). The document-level `approved_for_source_grounded_answers=true` was never consulted.
 
@@ -1242,7 +1242,7 @@ AC32 Mobile Phone and Portable Device Use Policy (`approved_for_source_grounded_
 
 - No SQL changes were made.
 - No frontend changes were made.
-- Staff-facing `/ask` is unchanged — staff cannot see AC32.
+- Staff-facing `/ask` is unchanged - staff cannot see AC32.
 - AC32 remains draft and staff-invisible.
 - Staff visibility was not approved.
 
@@ -1309,11 +1309,11 @@ Review answer quality and safety in admin/debug mode before any staff-facing rel
 
 ### What Milestone 4L.1 adds
 
-- New backend helper `_clean_extracted_text(text)` — applied to all extracted page text before storage and chunking on future uploads
+- New backend helper `_clean_extracted_text(text)` - applied to all extracted page text before storage and chunking on future uploads
 - Common PDF mojibake artefacts are cleaned from all returned previews and context:
-  - `Â ` (non-breaking space misread as `Â `) → single space
-  - `ÂWill`-style prefix artefacts → stripped
-  - Copyright mojibake `Â©` → `©` (U+00A9)
+  - `Â ` (non-breaking space misread as `Â `) -> single space
+  - `ÂWill`-style prefix artefacts -> stripped
+  - Copyright mojibake `Â©` -> `©` (U+00A9)
   - Other common Windows-1252-decoded-as-UTF-8 artefacts
 - `/documents/search-vector` returns cleaner `chunk_preview` output
 - `/documents/answer-debug` returns cleaner `source_preview` and `context` output
@@ -1321,7 +1321,7 @@ Review answer quality and safety in admin/debug mode before any staff-facing rel
 
 ### What Milestone 4L.1 does NOT do
 
-- Existing `document_chunks`, `document_extractions`, and `document_registry` rows in Supabase are **not rewritten** — stored text in the DB may still contain original artefacts from before this milestone
+- Existing `document_chunks`, `document_extractions`, and `document_registry` rows in Supabase are **not rewritten** - stored text in the DB may still contain original artefacts from before this milestone
 - The live API cleans returned previews and context; it does not modify stored rows in place
 - No SQL migration required
 - No frontend changes
@@ -1333,7 +1333,7 @@ Review answer quality and safety in admin/debug mode before any staff-facing rel
 
 The copyright symbol fix was verified using a Python UTF-8 check against the live API:
 
-- Live API returned `"Copyright © Quality"` with character code `0xa9` — correct UTF-8
+- Live API returned `"Copyright © Quality"` with character code `0xa9` - correct UTF-8
 - PowerShell `Invoke-RestMethod` displayed `©` misleadingly, but Python UTF-8 decoding confirmed the API response was correct
 
 ### Commits
@@ -1353,12 +1353,12 @@ The copyright symbol fix was verified using a Python UTF-8 check against the liv
   - "the nominated manager"
   - "the responsible lead"
   - "the appropriate senior staff member"
-- The exception is where the name is purely informational — for example a document author, document title, or source citation.
+- The exception is where the name is purely informational - for example a document author, document title, or source citation.
 
 ### What Milestone 4M proved
 
 - Admin-only `POST /documents/answer-debug` still returns `confidence: source_grounded`.
-- The lost/stolen work phone answer no longer repeated the named internal contact ("Shagufta Akhtar" in AC32) — the answer used "the nominated manager" instead.
+- The lost/stolen work phone answer no longer repeated the named internal contact ("Shagufta Akhtar" in AC32) - the answer used "the nominated manager" instead.
 - Admin `source_preview` still shows the raw source text for audit and review purposes.
 - Staff-facing `/ask` still returns the placeholder response and does not use AC32 or RAG in any way.
 
@@ -1370,7 +1370,7 @@ The copyright symbol fix was verified using a Python UTF-8 check against the liv
 - No SQL changes.
 - No frontend changes.
 - No governance flag changes.
-- Escalation contacts are not a DB-backed feature in this milestone — the anonymisation is prompt-only.
+- Escalation contacts are not a DB-backed feature in this milestone - the anonymisation is prompt-only.
 
 ### Future note
 
@@ -1386,7 +1386,7 @@ A later milestone should design proper DB-backed escalation contacts and role-ba
 
 ### What Milestone 4N adds
 
-- `driving` and `vehicle` added to `_ESCALATION_TOPICS_RE` — queries involving driving or vehicle use are now detected as escalation topics.
+- `driving` and `vehicle` added to `_ESCALATION_TOPICS_RE` - queries involving driving or vehicle use are now detected as escalation topics.
 - `_generate_source_grounded_answer` prompt extended: driving and vehicle use are listed alongside safeguarding, medication, HR, legal, wellbeing, and named-individual queries as topics that require escalation guidance.
 - Prompt wording added covering statutory obligations, legal duties, road safety, driving, vehicle use, and potential criminal liability.
 
@@ -1411,7 +1411,7 @@ A later milestone should design proper DB-backed escalation contacts and role-ba
 ### What Milestone 4N.1 adds
 
 - In the `/documents/answer-debug` successful answer path: if `safety_note` is present and not already contained in `answer_text`, it is appended to `answer_text` with two newlines.
-- This makes the core escalation caution deterministic — it is no longer left to the LLM to include it.
+- This makes the core escalation caution deterministic - it is no longer left to the LLM to include it.
 
 ### What this proved
 
@@ -1433,7 +1433,7 @@ A later milestone should design proper DB-backed escalation contacts and role-ba
 
 ### Future note
 
-When staff-facing `/ask` is built, the same deterministic safety-note pattern should be applied server-side from day one — not left to prompt-only behaviour.
+When staff-facing `/ask` is built, the same deterministic safety-note pattern should be applied server-side from day one - not left to prompt-only behaviour.
 
 ### Commits
 
@@ -1441,23 +1441,23 @@ When staff-facing `/ask` is built, the same deterministic safety-note pattern sh
 |--------|-------------|
 | `9b7d831` | Append safety note to answer-debug responses |
 
-## Milestone 4O.1: Stale wording cleanup — admin-only RAG status
+## Milestone 4O.1: Stale wording cleanup - admin-only RAG status
 
 ### What Milestone 4O.1 changes
 
 Wording-only corrections in two files. No backend logic, no frontend logic, no SQL, no governance flags, and no `/ask` behaviour were changed.
 
-**`backend/app/main.py` — embedding-readiness note**
+**`backend/app/main.py` - embedding-readiness note**
 
 Previous wording implied vector search and AI answers were not enabled at all.
 Updated to state: admin-only vector search is active; `answer-debug` is available for approved documents; staff-facing RAG is not enabled.
 
-**`backend/app/main.py` — chunk endpoint `embedding_note`**
+**`backend/app/main.py` - chunk endpoint `embedding_note`**
 
 Previous wording: `"Embeddings and AI answers are not enabled yet."`
 Updated to state: embeddings are stored; admin-only vector search and `answer-debug` are available for approved documents; staff-facing RAG is not enabled.
 
-**`frontend/app/ask/page.tsx` — /ask connected notice**
+**`frontend/app/ask/page.tsx` - /ask connected notice**
 
 Updated to say explicitly that answers on that page are not sourced from organisation documents and that staff-facing document-grounded answers are not yet enabled.
 
@@ -1465,7 +1465,7 @@ Updated to say explicitly that answers on that page are not sourced from organis
 
 - Admin-only vector search is active (`POST /documents/search-vector`).
 - Admin-only source-grounded answer testing is available via `POST /documents/answer-debug` for approved/governed documents.
-- Staff-facing `/ask` remains placeholder only — no RAG, no document-grounded answers.
+- Staff-facing `/ask` remains placeholder only - no RAG, no document-grounded answers.
 - AC32 remains draft and staff-invisible (`approved_for_staff_visibility=false`).
 
 ### What was proved live
@@ -1488,7 +1488,7 @@ Updated to say explicitly that answers on that page are not sourced from organis
 
 ### Important note on existing chunk previews
 
-Existing AC32 chunk previews may still show old stored PDF extraction artefacts — Milestone 4L.1 cleaned returned previews and future extractions but did not rewrite existing Supabase rows.
+Existing AC32 chunk previews may still show old stored PDF extraction artefacts - Milestone 4L.1 cleaned returned previews and future extractions but did not rewrite existing Supabase rows.
 
 ### Commit
 
@@ -1506,7 +1506,7 @@ All admin and debug endpoints now require an `Authorization: Bearer <token>` hea
 
 ### Protected endpoints (require Bearer token)
 
-All `/documents` routes except where noted below — including upload, registry, chunking, embeddings, vector search, answer-debug, governance, and governance-readiness.
+All `/documents` routes except where noted below - including upload, registry, chunking, embeddings, vector search, answer-debug, governance, and governance-readiness.
 
 ### Public endpoints (no token required)
 
@@ -1522,12 +1522,12 @@ All `/documents` routes except where noted below — including upload, registry,
 | Variable | Set in | Description |
 |----------|--------|-------------|
 | `ADMIN_TOKEN` | Render (backend) | Secret token. Never log or return in API responses. |
-| ~~`NEXT_PUBLIC_ADMIN_TOKEN`~~ | ~~Vercel (frontend)~~ | Removed in Milestone 4S.2A — superseded by the server-side proxy. |
+| ~~`NEXT_PUBLIC_ADMIN_TOKEN`~~ | ~~Vercel (frontend)~~ | Removed in Milestone 4S.2A - superseded by the server-side proxy. |
 
 ### What Milestone 4P does NOT do
 
 - No SQL migration required.
-- No changes to `/ask` — staff-facing endpoint remains a placeholder.
+- No changes to `/ask` - staff-facing endpoint remains a placeholder.
 - No changes to governance flags.
 - AC32 remains draft and staff-invisible (`approved_for_staff_visibility=false`).
 - Staff-facing RAG is not enabled.
@@ -1586,7 +1586,7 @@ Design investigation only. No code, SQL, governance flags, or endpoints were cha
 - `/ask` is currently a placeholder only. No RAG is active.
 - Staff-facing RAG must not be enabled until a real, clean, fully governed, staff-visible document exists in the system. No such document exists yet.
 - AC32 must not be used for staff `/ask` yet: it is staff-invisible (`approved_for_staff_visibility=false`) and its stored chunks contain pre-4L.1 extraction artefacts.
-- Dummy and sample documents must never be served to staff `/ask` — they may not be returned as citations or source previews under any circumstances.
+- Dummy and sample documents must never be served to staff `/ask` - they may not be returned as citations or source previews under any circumstances.
 - Staff `/ask` must apply stricter gates than admin `answer-debug`. The `allow_dummy_override` bypass that is permitted for admin testing must not exist in the staff path.
 
 ### Required document gates for staff /ask
@@ -1612,10 +1612,10 @@ All gates are AND conditions. Failing any single gate must exclude the document 
 
 ### Staff response privacy rules
 
-- Responses must return citations and source previews only — no raw chunk text beyond a short preview.
+- Responses must return citations and source previews only - no raw chunk text beyond a short preview.
 - Must not return: `document_id`, `chunk_id`, similarity scores, storage keys, governance flags, embedding status, raw vectors, or full chunk text.
 - Audit logging must not store raw staff query text, `user_id`, staff name or email, or private transcript content.
-- Employer dashboard, if built, must show aggregated and anonymised trends only — never individual staff behaviour.
+- Employer dashboard, if built, must show aggregated and anonymised trends only - never individual staff behaviour.
 
 ### Recommended scope for Milestone 4S
 
@@ -1672,14 +1672,14 @@ Prepare and index one real, clean, fully governed, staff-visible test policy doc
 - Registry saved
 - Chunks prepared (2)
 - Embedding records prepared (2)
-- Embeddings generated — `failed_count=0`, `embedding_status=indexed`
+- Embeddings generated - `failed_count=0`, `embedding_status=indexed`
 - `GET /policies` returns Visitor Sign-In and Identification Procedure
 - AC32 does not appear in `GET /policies`
 - `POST /ask` still returns placeholder only and does not cite the visitor SOP
 
 ### Known gap
 
-`governance_reviewed_by` and `governance_reviewed_at` are still `null` — the current API cannot set them via `PATCH /documents/{id}/governance`. These two fields are required by the Milestone 4R gate list before the document can be used in staff `/ask`. They must be set (manually or via a new API capability) in Milestone 4S before true staff-facing RAG goes live.
+`governance_reviewed_by` and `governance_reviewed_at` are still `null` - the current API cannot set them via `PATCH /documents/{id}/governance`. These two fields are required by the Milestone 4R gate list before the document can be used in staff `/ask`. They must be set (manually or via a new API capability) in Milestone 4S before true staff-facing RAG goes live.
 
 ### Decision
 
@@ -1706,7 +1706,7 @@ Prepare and index one real, clean, fully governed, staff-visible test policy doc
 - The proxy reads `API_BASE_URL` from server-side environment variables to locate the Render backend.
 - The browser sends requests to the Vercel proxy, not directly to Render. The Render admin token never reaches browser JavaScript.
 
-### Public endpoints — unchanged
+### Public endpoints - unchanged
 
 `/ask`, `/policies`, and `/health` still use `NEXT_PUBLIC_API_URL` directly and do not use the admin token.
 
@@ -1726,7 +1726,7 @@ Prepare and index one real, clean, fully governed, staff-visible test policy doc
 - Admin documents page loaded the live registry after `NEXT_PUBLIC_ADMIN_TOKEN` was removed from Vercel.
 - Visitor Sign-In and Identification Procedure appeared in the admin registry.
 - AC32 appeared only in the admin registry as Draft.
-- Staff-facing Ask WorkTwin remains disabled from RAG — `/ask` returned placeholder only.
+- Staff-facing Ask WorkTwin remains disabled from RAG - `/ask` returned placeholder only.
 
 ### Important caveat
 
@@ -1735,14 +1735,14 @@ This milestone hides the backend `ADMIN_TOKEN` from browser JavaScript. It does 
 ### Decision
 
 - 4S.2A passed.
-- Next milestone: **4S.3** — ensure `/policies` enforces `approved_for_staff_visibility`, then **4S.4** set governance reviewer metadata, then **4S.5** staff `/ask` RAG foundation.
+- Next milestone: **4S.3** - ensure `/policies` enforces `approved_for_staff_visibility`, then **4S.4** set governance reviewer metadata, then **4S.5** staff `/ask` RAG foundation.
 
 ## Milestone 4S.3: Staff policy visibility filter
 
 ### What changed
 
-- `backend/app/main.py` — `_can_show_document_to_staff` tightened to require all six flags: `is_sensitive=false`, `escalation_required=false`, `real_document=true`, `dummy_document=false`, `status=approved`, and `approved_for_staff_visibility=true`.
-- `GET /policies` now filters every result — both the Supabase DB path and the in-memory fallback — through `_can_show_document_to_staff`. Role access still applies after this gate.
+- `backend/app/main.py` - `_can_show_document_to_staff` tightened to require all six flags: `is_sensitive=false`, `escalation_required=false`, `real_document=true`, `dummy_document=false`, `status=approved`, and `approved_for_staff_visibility=true`.
+- `GET /policies` now filters every result - both the Supabase DB path and the in-memory fallback - through `_can_show_document_to_staff`. Role access still applies after this gate.
 
 ### Required gate for /policies (all conditions AND)
 
@@ -1773,7 +1773,7 @@ Role filtering (`access_roles`) applies after the above gate.
 
 - 4S.3 passed.
 - Public `/policies` is now aligned with the staff visibility governance model.
-- Next milestone: **4S.4** — set `governance_reviewed_by` and `governance_reviewed_at` on the Visitor SOP. After 4S.4, the Visitor SOP will pass the full Milestone 4R gate list and the staff `/ask` RAG build can proceed.
+- Next milestone: **4S.4** - set `governance_reviewed_by` and `governance_reviewed_at` on the Visitor SOP. After 4S.4, the Visitor SOP will pass the full Milestone 4R gate list and the staff `/ask` RAG build can proceed.
 
 ### What Milestone 4S.3 does NOT do
 
@@ -1793,29 +1793,29 @@ Role filtering (`access_roles`) applies after the above gate.
 - Embeddings can be generated for dummy/sample documents (Milestone 4F)
 - Admin-only vector search works (Milestone 4G)
 - Admin-only source-grounded answer testing works (Milestone 4H)
-- **Governance gate active — real documents cannot be embedded without explicit approval (Milestone 4I)**
-- **Governance hardened — clearer blocked reasons, human-readable audit summaries, readiness endpoint, readiness checklist (Milestone 4I.1)**
-- **Governance blocking proof passed — AC32 is the first controlled real document; embedding/answer/staff-visibility gates confirmed independent (Milestone 4I.4)**
-- **Answer-debug approval fix shipped — chunk-level flag no longer blocks document-level approved real documents; AC32 source-grounded answer test passed (Milestone 4I.5)**
-- **AC32 answer quality and safety review completed in admin/debug mode — four test queries passed; pre-release issues identified (Milestone 4J)**
-- **Backend text-cleaning added — `_clean_extracted_text` applied before storage/chunking; search-vector, answer-debug, and chunks previews are cleaner; existing DB rows not rewritten (Milestone 4L.1)**
-- **Named-contact anonymisation added — source-grounded answers replace named individuals with role phrases; prompt-only change; AC32 answer-debug confirmed working (Milestone 4M)**
-- **Driving and safety-critical topic caution added — `driving` and `vehicle` added to escalation detection; prompt extended for road safety, statutory obligations, and potential criminal liability (Milestone 4N)**
-- **Safety note made deterministic — appended server-side to answer-debug answers when `safety_note` is present; two-run proof confirms caution appears on every driving query (Milestone 4N.1)**
-- **Stale wording corrected — embedding-readiness note, chunk `embedding_note`, and `/ask` connected notice now accurately reflect that admin-only vector search and answer-debug are active while staff-facing RAG remains disabled (Milestone 4O.1)**
-- **Admin bearer-token protection added — all admin/debug endpoints require `Authorization: Bearer <token>`; public endpoints (`/`, `/health`, `/ask`, `/policies`) remain open; no SQL required (Milestone 4P)**
-- **AC32 stored chunk reprocess investigated — existing rows contain pre-4L.1 artefacts; no reprocess endpoint exists; re-upload rejected as cleanup method; rebuild deferred until before staff-facing RAG (Milestone 4Q)**
-- **Staff-facing /ask RAG safety design completed — document gates, response privacy rules, and 4S-prep scope defined; no document currently qualifies for staff RAG; AC32 excluded; no code or SQL changes (Milestone 4R)**
-- **4S-prep passed — Visitor Sign-In and Identification Procedure uploaded, chunked, embedded (2 chunks, failed_count=0), governance set to approved_for_staff; appears in /policies; AC32 excluded; /ask still placeholder (Milestone 4S-prep)**
-- **Server-side admin API proxy shipped — NEXT_PUBLIC_ADMIN_TOKEN removed from Vercel; admin calls proxied through /api/admin/... on Vercel; browser never sees admin bearer token; public endpoints unchanged (Milestone 4S.2A)**
-- **Staff policy visibility filter enforced — `_can_show_document_to_staff` requires is_sensitive=false, escalation_required=false, real_document=true, dummy_document=false, status=approved, approved_for_staff_visibility=true; both DB and in-memory fallback paths use the same gate; /policies returned only Visitor Sign-In and Identification Procedure; AC32 and dummy documents excluded (Milestone 4S.3)**
-- Staff-facing `/ask` remains a placeholder — RAG is governed-disabled
-- `governance_reviewed_by` and `governance_reviewed_at` are null on the visitor SOP — must be set before staff RAG goes live
+- **Governance gate active - real documents cannot be embedded without explicit approval (Milestone 4I)**
+- **Governance hardened - clearer blocked reasons, human-readable audit summaries, readiness endpoint, readiness checklist (Milestone 4I.1)**
+- **Governance blocking proof passed - AC32 is the first controlled real document; embedding/answer/staff-visibility gates confirmed independent (Milestone 4I.4)**
+- **Answer-debug approval fix shipped - chunk-level flag no longer blocks document-level approved real documents; AC32 source-grounded answer test passed (Milestone 4I.5)**
+- **AC32 answer quality and safety review completed in admin/debug mode - four test queries passed; pre-release issues identified (Milestone 4J)**
+- **Backend text-cleaning added - `_clean_extracted_text` applied before storage/chunking; search-vector, answer-debug, and chunks previews are cleaner; existing DB rows not rewritten (Milestone 4L.1)**
+- **Named-contact anonymisation added - source-grounded answers replace named individuals with role phrases; prompt-only change; AC32 answer-debug confirmed working (Milestone 4M)**
+- **Driving and safety-critical topic caution added - `driving` and `vehicle` added to escalation detection; prompt extended for road safety, statutory obligations, and potential criminal liability (Milestone 4N)**
+- **Safety note made deterministic - appended server-side to answer-debug answers when `safety_note` is present; two-run proof confirms caution appears on every driving query (Milestone 4N.1)**
+- **Stale wording corrected - embedding-readiness note, chunk `embedding_note`, and `/ask` connected notice now accurately reflect that admin-only vector search and answer-debug are active while staff-facing RAG remains disabled (Milestone 4O.1)**
+- **Admin bearer-token protection added - all admin/debug endpoints require `Authorization: Bearer <token>`; public endpoints (`/`, `/health`, `/ask`, `/policies`) remain open; no SQL required (Milestone 4P)**
+- **AC32 stored chunk reprocess investigated - existing rows contain pre-4L.1 artefacts; no reprocess endpoint exists; re-upload rejected as cleanup method; rebuild deferred until before staff-facing RAG (Milestone 4Q)**
+- **Staff-facing /ask RAG safety design completed - document gates, response privacy rules, and 4S-prep scope defined; no document currently qualifies for staff RAG; AC32 excluded; no code or SQL changes (Milestone 4R)**
+- **4S-prep passed - Visitor Sign-In and Identification Procedure uploaded, chunked, embedded (2 chunks, failed_count=0), governance set to approved_for_staff; appears in /policies; AC32 excluded; /ask still placeholder (Milestone 4S-prep)**
+- **Server-side admin API proxy shipped - NEXT_PUBLIC_ADMIN_TOKEN removed from Vercel; admin calls proxied through /api/admin/... on Vercel; browser never sees admin bearer token; public endpoints unchanged (Milestone 4S.2A)**
+- **Staff policy visibility filter enforced - `_can_show_document_to_staff` requires is_sensitive=false, escalation_required=false, real_document=true, dummy_document=false, status=approved, approved_for_staff_visibility=true; both DB and in-memory fallback paths use the same gate; /policies returned only Visitor Sign-In and Identification Procedure; AC32 and dummy documents excluded (Milestone 4S.3)**
+- Staff-facing `/ask` remains a placeholder - RAG is governed-disabled
+- `governance_reviewed_by` and `governance_reviewed_at` are null on the visitor SOP - must be set before staff RAG goes live
 - No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a human reviewer
 
 ## Next steps (Milestone 4S+)
 
-- **4S.4:** Set `governance_reviewed_by` and `governance_reviewed_at` on the Visitor Sign-In and Identification Procedure — required by the Milestone 4R gate list before staff RAG can go live. After this the Visitor SOP passes all 4R gates.
+- **4S.4:** Set `governance_reviewed_by` and `governance_reviewed_at` on the Visitor Sign-In and Identification Procedure - required by the Milestone 4R gate list before staff RAG can go live. After this the Visitor SOP passes all 4R gates.
 - **4S.5:** Build the staff `/ask` RAG foundation using the Milestone 4R gate list and the Visitor Sign-In and Identification Procedure as the first qualifying staff-visible test document.
 - Governance sign-off and safety review of real Thumhara/QCS policy documents, then set `real_document=true`, `approved_for_embedding=true`, `approved_for_source_grounded_answers=true`, `approved_for_staff_visibility=true` for approved documents.
 - Authentication and organisation membership verification.

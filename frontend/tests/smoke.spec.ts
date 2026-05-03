@@ -136,4 +136,20 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByRole('heading', { name: 'Admin demo disabled' })).toBeVisible()
     await expect(page.getByText('This public deployment does not expose admin demo screens')).toBeVisible()
   })
+
+  test('/login shows magic link request form', async ({ page }) => {
+    await page.goto('/login')
+    await expect(page.getByRole('heading', { name: 'Sign in to WorkTwin' })).toBeVisible()
+    await expect(page.getByLabel('Work email address')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Send sign-in link' })).toBeVisible()
+    await expect(page.getByText(/WorkTwin Care Pilot is in controlled preparation/i)).toBeVisible()
+  })
+
+  test('/login/sent shows check-your-email confirmation', async ({ page }) => {
+    await page.goto('/login/sent')
+    await expect(page.getByRole('heading', { name: 'Check your email' })).toBeVisible()
+    await expect(page.getByText(/secure sign-in link/i).first()).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Back to sign in' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'WorkTwin home' })).toBeVisible()
+  })
 })

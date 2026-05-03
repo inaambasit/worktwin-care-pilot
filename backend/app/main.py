@@ -3144,6 +3144,7 @@ def list_policies(
     vertical: Optional[str] = None,
     category: Optional[str] = None,
     language: Optional[str] = None,
+    authorization: Optional[str] = Header(default=None),
 ):
     """
     Staff-safe policy library.
@@ -3164,12 +3165,17 @@ def list_policies(
       are still listed here so staff can read the policy, but the frontend
       must block the "Ask WorkTwin" CTA for those documents.
     """
-    _pilot_org_id, _pilot_user_id, pilot_role = _get_pilot_staff_context()
+    if os.getenv("PILOT_AUTH_MODE", "") == "true":
+        ctx = staff_context_from_header(authorization)
+        organisation_id = ctx.organisation_id
+        pilot_role = ctx.role
+    else:
+        organisation_id, _, pilot_role = _get_pilot_staff_context()
 
     if _DB_CONFIGURED:
         try:
             db_docs = _list_registry_records(
-                organisation_id=_pilot_org_id,
+                organisation_id=organisation_id,
                 status="approved",
             )
             docs: List[Dict[str, Any]] = [
@@ -3192,7 +3198,7 @@ def list_policies(
 
     docs_mem = [
         d for d in _documents
-        if d.get("organisation_id") == _pilot_org_id and _can_show_document_to_staff(d)[0]
+        if d.get("organisation_id") == organisation_id and _can_show_document_to_staff(d)[0]
     ]
     docs_mem = [
         d for d in docs_mem

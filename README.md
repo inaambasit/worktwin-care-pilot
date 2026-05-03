@@ -1,130 +1,97 @@
 # WorkTwin Care Pilot
 
-A privacy-first AI onboarding, policy and learning assistant for regulated SMEs, starting with care providers.
+A privacy-first AI staff support and policy assistant prototype for regulated care settings.
 
-## Platform and vertical strategy
+This is a working pilot and demo prototype. It is not production-ready.
 
-WorkTwin is the core platform: a privacy-first AI work, onboarding, policy, workflow and learning companion for employees in regulated SMEs.
+## What it is
 
-WorkTwin Care Pilot is the first vertical test of that platform. The care version adapts the core WorkTwin model to UK care provider workflows, language, escalation routes and training scenarios.
+WorkTwin Care Pilot lets care staff ask questions about workplace policies, practise scenarios, and access onboarding guidance through a private AI assistant. Staff conversations are not visible to employers. The system is designed to use approved, source-cited documents as its knowledge base.
 
-Thumhara Centre and care providers are being used to test the first version because care teams have high policy load, high compliance pressure, repeated operational questions and a strong need for safe human escalation.
+The first test client is Thumhara Centre (sample data only -- no real staff or service-user data).
 
-Future verticals may include financial advice firms, property management companies, recruitment agencies, healthcare admin providers, training providers and other regulated service SMEs.
+## Live demo
 
-The product boundary stays the same across verticals: private employee support, source-cited answers from approved documents, and anonymised employer insights only.
+- Staff-facing app is deployed on Vercel
+- Backend API is deployed on Render
+- Admin demo screens are disabled publicly; the public admin API proxy returns 403 when disabled
 
-## First product promise
+The staff app is mobile-responsive with drawer navigation on mobile and a fixed sidebar on desktop.
 
-Turn your staff handbook, policies, SOPs and onboarding documents into a private AI assistant that helps employees:
+## Staff-facing features
 
-- understand company policies
-- follow procedures
-- onboard faster
-- practise realistic scenarios
-- build role confidence
-- ask questions safely
+- Landing page
+- Employee dashboard
+- Ask WorkTwin (placeholder safe assistant flow -- document-grounded RAG is not yet enabled)
+- Policy library
+- Onboarding hub
+- Practice scenarios
+- Access-refusal scenario
+- Private notes
+- Escalation contacts
 
-The employer sees anonymised trends, not private employee conversations.
+## Backend and governance
 
-## First niche
+- Admin-only vector search and answer-debug endpoints exist for governed documents
+- Staff-facing /ask remains a placeholder and does not use document-grounded RAG
+- AC32 is excluded from staff visibility
+- Visitor Sign-In and Identification Procedure is the first safe staff-visible test policy in /policies
+- Staff-facing RAG must not be enabled until full governance and authentication are in place
 
-Care providers with 20-250 staff.
+## Tech stack
 
-## First pilot offer
+- Next.js 14, TypeScript, Tailwind CSS
+- FastAPI, Python
+- Supabase / PostgreSQL / pgvector
+- OpenAI embeddings and source-grounded admin answer testing
+- Vercel (frontend)
+- Render (backend API)
 
-"We'll build a private AI staff assistant around your care policies and onboarding documents in 14 days."
+## Running locally
 
-Suggested pilot:
-- GBP 1,500-GBP 3,000 setup
-- GBP 500-GBP 1,000 per month
-- 60-90 day pilot
-- up to 25-50 users
-- 10-30 approved company documents
+**Backend**
 
-## MVP modules
+```
+cd backend
+uvicorn app.main:app --reload
+```
 
-1. Employee chat assistant
-2. Company document upload
-3. Source-cited answers
-4. Role-based access
-5. Escalation-safe answers
-6. Micro-learning quizzes
-7. Scenario practice
-8. Private development notes
-9. Anonymous employer insights
-10. Audit logs
+Runs at http://localhost:8000
 
-## Build approach
+**Frontend**
 
-Start with a clickable demo and customer discovery before overbuilding.
+```
+cd frontend
+npm install
+npm run dev
+```
 
-Then build a real MVP using:
+Runs at http://localhost:3000
 
-- Next.js frontend
-- FastAPI backend
-- PostgreSQL + pgvector
-- Supabase or AWS storage
-- OpenAI or Claude API
-- Role-based access control
-- Source-cited RAG answers
+Create `frontend/.env.local` with:
 
----
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
-## Milestone 4A: Document Registry
+## Key safety principles
 
-### What was built
+- No surveillance, sentiment tracking or productivity monitoring
+- Private notes are not visible to employers
+- High-risk topics (safeguarding, medication, HR, payroll, legal) escalate to humans -- no AI answers
+- Staff-facing document-grounded RAG is controlled and currently off
+- No service-user records, MAR charts, care plans, HR/payroll files or private case files should be uploaded
 
-**Policy Library (`/policies`)** - Staff-facing page showing only approved documents. Staff can search, filter by category, open a policy detail card, and see a "Ask WorkTwin about this policy" CTA. Only approved documents appear here.
+## Documentation
 
-**Document Registry (`/admin/documents`)** - Admin power-user view of all documents across all statuses. Shows the full metadata schema including vertical, category, status, role access, sensitive flag, escalation flag, AI-approved flag, primary and available languages, review due date, and embedding status. Admins can approve draft/under-review documents or archive any document.
+- [docs/README.md](docs/README.md) -- documentation index
+- [docs/staff-demo-walkthrough.md](docs/staff-demo-walkthrough.md) -- staff demo guide
+- [docs/documentation-maintenance-plan.md](docs/documentation-maintenance-plan.md) -- documentation maintenance plan
 
-**Backend document registry (`GET|POST /documents`, `GET|PATCH /documents/{id}`, `POST /documents/{id}/approve|archive`)** - FastAPI endpoints backed by an in-memory registry with 12 sample documents. No real storage yet - that comes in Milestone 4B.
+## Known gaps
 
-### Document Registry schema fields
-
-| Field | Purpose |
-|---|---|
-| `vertical` | `care \| finance \| property \| recruitment \| healthcare_admin \| training_provider \| general \| custom` |
-| `category` | Safeguarding, Medication, HR, Health and Safety, Complaints, Onboarding, Training |
-| `status` | `draft \| approved \| under_review \| archived` |
-| `access_roles` | Which roles can see this document |
-| `is_sensitive` | True for HR, safeguarding, disciplinary content |
-| `escalation_required` | True when AI must not answer and staff must speak to a human |
-| `approved_for_embedding` | Real documents require this before chunks can be embedded or retrieved via vector search |
-| `approved_for_source_grounded_answers` | Required for AI answer generation (answer-debug endpoint); not required for vector retrieval alone |
-| `approved_for_staff_visibility` | Required before documents appear to staff; independent of embedding and answer approval |
-| `approved_for_ai_answers` | Legacy chunk-level flag (no longer used as a vector search gate; superseded by document-level governance) |
-| `contains_personal_data_warning` | Document contains identifiable data (should not be uploaded) |
-| `primary_language` | ISO 639-1 code (e.g. `en`) |
-| `available_languages` | Languages this policy is available in: en, ur, pa, ar, bn, gu |
-| `translation_status` | `not_required \| pending \| in_progress \| complete` |
-| `embedding_status` | `not_started \| pending \| processing \| indexed \| failed` |
-| `review_due_date` | ISO date - when the document next needs human review |
-| `version` | Semantic version string |
-| `metadata` | Extensible dict for future fields |
-
-### What does NOT happen here
-
-- No real file storage (S3/Supabase - Milestone 4B)
-- No text extraction or chunking (Milestone 4B)
-- No embeddings or pgvector indexing (Milestone 4B)
-- No RAG retrieval (Milestone 4C)
-- No OpenAI/Claude API calls (Milestone 4C)
-- No real Thumhara documents - all sample demo data only
-- No real personal data
-
-### Privacy guarantees preserved
-
-- Approved English policies are the source of truth until a translation is formally approved
-- Sensitive documents (`is_sensitive: true`) are not approved for AI answers
-- Safeguarding and similar topics (`escalation_required: true`) always route to human escalation
-- No service-user records, care plans, MAR charts, HR files, payroll records or named case notes should ever be uploaded
-
-### What comes in Milestone 4B
-
-- Real file upload (S3 / Supabase Storage)
-- Text extraction (PyMuPDF for PDF, python-docx for DOCX)
-- Chunking with metadata (organisation_id, document_id, role access, section)
-- Embedding generation and pgvector storage
-- Update `embedding_status` on completion
+- Authentication is not implemented
+- "Book a pilot" CTA on the landing page needs a destination or action
+- Private Notes mobile layout needs improvement
+- Staff-facing document-grounded RAG is not enabled
+- A real pilot would require approved policy governance and role-based access control

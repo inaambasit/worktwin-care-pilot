@@ -13,3 +13,4 @@
 | [07 Technical architecture](07-technical-architecture.md) | System design, tech stack decisions and infrastructure notes |
 | [08 First pilot offer](08-first-pilot-offer.md) | Pricing and terms for the first pilot client offer |
 | [Staff demo walkthrough](staff-demo-walkthrough.md) | Staff-facing pilot journey, safety controls, live proof checks and known limitations |
+| [Documentation maintenance plan](documentation-maintenance-plan.md) | Plan for keeping project documentation consistent and up to date |

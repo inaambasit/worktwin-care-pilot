@@ -6,9 +6,9 @@
 // ACTIVE (conditional): path/method guard tests -- skip unless ADMIN_PROXY_ENABLED=true in dev server.
 // ACTIVE (conditional): 401 session guard test -- skip unless ADMIN_PROXY_ENABLED=true in dev server.
 // ACTIVE (conditional): CSRF guard tests -- skip unless ADMIN_PROXY_ENABLED=true in dev server.
-// SKIPPED: upload guards (not yet implemented).
+// ACTIVE (conditional): upload safety guards -- skip unless ADMIN_PROXY_ENABLED=true in dev server (4S.85G-8).
 import { test, expect } from '@playwright/test'
-import { classifyPath, ADMIN_ALLOWLIST } from '../lib/admin-proxy-allowlist'
+import { classifyPath, ADMIN_ALLOWLIST, isDebugToolingRoute } from '../lib/admin-proxy-allowlist'
 
 // ---------------------------------------------------------------------------
 // Disabled-proxy baseline -- no env changes needed, runs in dev environment
@@ -42,6 +42,11 @@ test.describe('Admin proxy -- disabled baseline', () => {
     expect(response.status()).toBe(403)
     const body = await response.json()
     expect(body.detail).toBe('Admin proxy is disabled for this deployment.')
+  })
+
+  test('all admin proxy responses include Cache-Control: no-store', async ({ request }) => {
+    const response = await request.get('/api/admin/documents')
+    expect(response.headers()['cache-control']).toBe('no-store')
   })
 })
 
@@ -106,12 +111,62 @@ test.describe('Admin proxy -- allowlist classification (unit-style)', () => {
     const result = classifyPath(['documents', 'upload', 'extra'])
     expect(result.match).toBe('not_found')
   })
+
+  test('organisation_admin is not in allowed roles for documents/answer-debug', () => {
+    const result = classifyPath(['documents', 'answer-debug'])
+    expect(result.match).toBe('found')
+    if (result.match === 'found') {
+      expect(ADMIN_ALLOWLIST[result.routeKey].roles).not.toContain('organisation_admin')
+    }
+  })
+
+  test('organisation_admin is not in allowed roles for debug/storage-config', () => {
+    const result = classifyPath(['debug', 'storage-config'])
+    expect(result.match).toBe('found')
+    if (result.match === 'found') {
+      expect(ADMIN_ALLOWLIST[result.routeKey].roles).not.toContain('organisation_admin')
+    }
+  })
+
+  test('worktwin_dev_admin is allowed for documents/answer-debug', () => {
+    const result = classifyPath(['documents', 'answer-debug'])
+    expect(result.match).toBe('found')
+    if (result.match === 'found') {
+      expect(ADMIN_ALLOWLIST[result.routeKey].roles).toContain('worktwin_dev_admin')
+    }
+  })
+
+  test('worktwin_dev_admin is allowed for debug/storage-config', () => {
+    const result = classifyPath(['debug', 'storage-config'])
+    expect(result.match).toBe('found')
+    if (result.match === 'found') {
+      expect(ADMIN_ALLOWLIST[result.routeKey].roles).toContain('worktwin_dev_admin')
+    }
+  })
+
+  test('isDebugToolingRoute returns true for documents/search-vector', () => {
+    expect(isDebugToolingRoute('documents/search-vector')).toBe(true)
+  })
+
+  test('isDebugToolingRoute returns true for documents/answer-debug', () => {
+    expect(isDebugToolingRoute('documents/answer-debug')).toBe(true)
+  })
+
+  test('isDebugToolingRoute returns true for debug/storage-config', () => {
+    expect(isDebugToolingRoute('debug/storage-config')).toBe(true)
+  })
+
+  test('isDebugToolingRoute returns false for non-debug routes', () => {
+    expect(isDebugToolingRoute('documents')).toBe(false)
+    expect(isDebugToolingRoute('documents/upload')).toBe(false)
+    expect(isDebugToolingRoute('documents/{id}')).toBe(false)
+  })
 })
 
 // ---------------------------------------------------------------------------
 // Authentication & authorisation
 // 401 session guard is now active (conditional on ADMIN_PROXY_ENABLED=true).
-// Role/CSRF/upload guards remain TODO.
+// Role, CSRF, and upload guards are all active (conditional on ADMIN_PROXY_ENABLED=true).
 // ---------------------------------------------------------------------------
 
 test.describe('Admin proxy -- authentication and authorisation (TODO)', () => {
@@ -234,6 +289,69 @@ test.describe('Admin proxy -- authentication and authorisation (TODO)', () => {
         'x-worktwin-test-admin-role': 'worktwin_dev_admin',
         'x-worktwin-test-admin-active': 'true',
         'x-worktwin-test-csrf': 'test',
+      },
+    })
+    expect(response.status()).not.toBe(403)
+  })
+
+  test('organisation_admin POST /api/admin/documents/answer-debug is blocked by route-role guard', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    // organisation_admin is NOT in documents/answer-debug.roles (worktwin_dev_admin only)
+    const response = await request.post('/api/admin/documents/answer-debug', {
+      data: { query: 'test' },
+      headers: {
+        'x-worktwin-test-admin-role': 'organisation_admin',
+        'x-worktwin-test-admin-active': 'true',
+      },
+    })
+    expect(response.status()).toBe(403)
+  })
+
+  test('organisation_admin GET /api/admin/debug/storage-config is blocked by route-role guard', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    // organisation_admin is NOT in debug/storage-config.roles (worktwin_dev_admin only)
+    const response = await request.get('/api/admin/debug/storage-config', {
+      headers: {
+        'x-worktwin-test-admin-role': 'organisation_admin',
+        'x-worktwin-test-admin-active': 'true',
+      },
+    })
+    expect(response.status()).toBe(403)
+  })
+
+  test('worktwin_dev_admin POST /api/admin/documents/answer-debug passes route-role guard', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    // worktwin_dev_admin is in documents/answer-debug.roles; 503 expected when ADMIN_TOKEN/BACKEND_URL absent
+    const response = await request.post('/api/admin/documents/answer-debug', {
+      data: { query: 'test' },
+      headers: {
+        'x-worktwin-test-admin-role': 'worktwin_dev_admin',
+        'x-worktwin-test-admin-active': 'true',
+        'x-worktwin-test-csrf': 'test',
+      },
+    })
+    expect(response.status()).not.toBe(403)
+  })
+
+  test('worktwin_dev_admin GET /api/admin/debug/storage-config passes route-role guard', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    // GET bypasses CSRF; worktwin_dev_admin in debug/storage-config.roles; 503 expected when ADMIN_TOKEN/BACKEND_URL absent
+    const response = await request.get('/api/admin/debug/storage-config', {
+      headers: {
+        'x-worktwin-test-admin-role': 'worktwin_dev_admin',
+        'x-worktwin-test-admin-active': 'true',
       },
     })
     expect(response.status()).not.toBe(403)

@@ -68,6 +68,18 @@ export type ClassifyResult =
   | { match: 'found'; routeKey: RouteKey }
   | { match: 'not_found' }
 
+// Routes restricted to worktwin_dev_admin only -- used by tests/helper classification
+// for debug/tooling route identification.
+const DEBUG_TOOLING_ROUTE_KEYS = new Set<RouteKey>([
+  'documents/search-vector',
+  'documents/answer-debug',
+  'debug/storage-config',
+])
+
+export function isDebugToolingRoute(routeKey: RouteKey): boolean {
+  return DEBUG_TOOLING_ROUTE_KEYS.has(routeKey)
+}
+
 // Maps raw URL path segments to an allowlist route key.
 // Returns not_found for any path not in the allowlist.
 // Document ID segments are validated conservatively before matching.

@@ -83,7 +83,7 @@ function getAdminProxySessionContext(
   return null
 }
 
-async function proxyHandler(
+async function proxyHandlerCore(
   request: NextRequest,
   { params }: { params: { path: string[] } },
 ): Promise<NextResponse> {
@@ -200,6 +200,17 @@ async function proxyHandler(
       'Content-Type': upstream.headers.get('content-type') ?? 'application/json',
     },
   })
+}
+
+// 4S.85G-10: Response-hardening wrapper -- adds Cache-Control: no-store to every admin proxy
+// response, including guard denials, to prevent caching of sensitive admin metadata.
+async function proxyHandler(
+  request: NextRequest,
+  ctx: { params: { path: string[] } },
+): Promise<NextResponse> {
+  const response = await proxyHandlerCore(request, ctx)
+  response.headers.set('Cache-Control', 'no-store')
+  return response
 }
 
 export const GET = proxyHandler

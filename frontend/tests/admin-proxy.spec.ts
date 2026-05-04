@@ -3,7 +3,8 @@
 //
 // ACTIVE: disabled-proxy baseline (ADMIN_PROXY_ENABLED absent/false -> 403).
 // ACTIVE: allowlist classification unit-style tests (import helper directly, no HTTP).
-// SKIPPED: all hardening cases that need implementation not yet written.
+// ACTIVE (conditional): path/method guard tests -- skip unless ADMIN_PROXY_ENABLED=true in dev server.
+// SKIPPED: auth/session/role/CSRF/upload guards (not yet implemented).
 import { test, expect } from '@playwright/test'
 import { classifyPath, ADMIN_ALLOWLIST } from '../lib/admin-proxy-allowlist'
 
@@ -132,16 +133,32 @@ test.describe('Admin proxy -- authentication and authorisation (TODO)', () => {
 })
 
 // ---------------------------------------------------------------------------
-// Path and method validation -- requires proxy enabled or route-level guards (TODO)
+// Path and method validation -- proxy-enabled local/test mode
+// Run with ADMIN_PROXY_ENABLED=true in the dev-server environment to activate.
+// Each test skips itself when ADMIN_PROXY_ENABLED is not set (safe for CI).
 // ---------------------------------------------------------------------------
 
-test.describe('Admin proxy -- path and method validation (TODO)', () => {
-  test.skip('unknown path returns 404 when proxy enabled', async () => {
-    // Needs: proxy enabled + route allow-list enforcement wired into handler
+test.describe('Admin proxy -- path and method validation', () => {
+  test('unknown path returns 404 when proxy enabled', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true in dev server',
+    )
+    const response = await request.get('/api/admin/completely-unknown-resource')
+    expect(response.status()).toBe(404)
+    const body = await response.json()
+    expect(body).toHaveProperty('detail')
   })
 
-  test.skip('disallowed method DELETE returns 405', async () => {
-    // Needs: proxy enabled; DELETE is not exported by the route -- Next.js returns 405
+  test('DELETE /api/admin/documents returns 405 when proxy enabled', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true in dev server',
+    )
+    const response = await request.delete('/api/admin/documents')
+    expect(response.status()).toBe(405)
+    const body = await response.json()
+    expect(body).toHaveProperty('detail')
   })
 })
 

@@ -8,12 +8,10 @@
 // - This is not a replacement for real admin session auth; a later milestone
 //   must add proper session protection before real users access the admin area.
 //
-// Milestone 4S.85G-2 -- Typed allowlist scaffold (not yet enforced in handler).
+// Milestone 4S.85G-3 -- Deny-by-default path/method guard.
 // ADMIN_ALLOWLIST and classifyPath live in lib/admin-proxy-allowlist.ts so that
 // Playwright tests can import them without pulling in Next.js server modules.
 import { NextRequest, NextResponse } from 'next/server'
-// Allowlist imported for scaffold; enforcement wired in a later slice.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ADMIN_ALLOWLIST, classifyPath } from '@/lib/admin-proxy-allowlist'
 
 // Allow up to 120 s on Vercel -- generate-embeddings can take that long
@@ -36,6 +34,16 @@ async function proxyHandler(
       { detail: 'Admin proxy is disabled for this deployment.' },
       { status: 403 },
     )
+  }
+
+  const classified = classifyPath(params.path)
+  if (classified.match === 'not_found') {
+    return NextResponse.json({ detail: 'Not found.' }, { status: 404 })
+  }
+
+  const allowedMethods = ADMIN_ALLOWLIST[classified.routeKey].methods as readonly string[]
+  if (!allowedMethods.includes(request.method)) {
+    return NextResponse.json({ detail: 'Method not allowed.' }, { status: 405 })
   }
 
   if (!ADMIN_TOKEN || !BACKEND_URL) {
@@ -79,3 +87,5 @@ async function proxyHandler(
 export const GET = proxyHandler
 export const POST = proxyHandler
 export const PATCH = proxyHandler
+// DELETE is exported so method-guard tests can reach the 405 path; it never forwards.
+export const DELETE = proxyHandler

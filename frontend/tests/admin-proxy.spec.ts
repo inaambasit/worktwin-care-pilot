@@ -362,19 +362,73 @@ test.describe('Admin proxy -- CSRF guard', () => {
 })
 
 // ---------------------------------------------------------------------------
-// Upload safety -- requires proxy-layer guards not yet implemented (TODO)
+// Upload safety guards (4S.85G-8)
+// Run with ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server.
 // ---------------------------------------------------------------------------
 
-test.describe('Admin proxy -- upload safety (TODO)', () => {
-  test.skip('upload with wrong Content-Type returns 415', async () => {
-    // Needs: Content-Type allow-list guard in route (PDF-only enforcement at proxy layer)
+test.describe('Admin proxy -- upload safety', () => {
+  test('POST /api/admin/documents/upload with wrong Content-Type returns 415', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.post('/api/admin/documents/upload', {
+      data: '{}',
+      headers: {
+        'x-worktwin-test-admin-role': 'organisation_admin',
+        'x-worktwin-test-admin-active': 'true',
+        'x-worktwin-test-csrf': 'test',
+        'content-type': 'application/json',
+      },
+    })
+    expect(response.status()).toBe(415)
+    const body = await response.json()
+    expect(body.detail).toBe('Unsupported media type.')
   })
 
-  test.skip('upload exceeding size limit returns 413', async () => {
-    // Needs: request body size cap added to route or Next.js config bodyParser limit
+  test('POST /api/admin/documents/upload exceeding size limit returns 413', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    // Body exceeds ADMIN_PROXY_UPLOAD_MAX_BYTES (1024); Node.js sets content-length automatically.
+    const response = await request.post('/api/admin/documents/upload', {
+      data: 'x'.repeat(1025),
+      headers: {
+        'x-worktwin-test-admin-role': 'organisation_admin',
+        'x-worktwin-test-admin-active': 'true',
+        'x-worktwin-test-csrf': 'test',
+        'content-type': 'multipart/form-data; boundary=----TestBoundary',
+      },
+    })
+    expect(response.status()).toBe(413)
+    const body = await response.json()
+    expect(body.detail).toBe('Upload too large.')
   })
 
-  test.skip('PATCH without CSRF token returns 403', async () => {
-    // Needs: CSRF double-submit or header-check middleware added to route handler
+  test('POST /api/admin/documents/upload with multipart/form-data passes upload guards', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.post('/api/admin/documents/upload', {
+      multipart: {
+        file: {
+          name: 'test.pdf',
+          mimeType: 'application/pdf',
+          buffer: Buffer.from('test'),
+        },
+      },
+      headers: {
+        'x-worktwin-test-admin-role': 'organisation_admin',
+        'x-worktwin-test-admin-active': 'true',
+        'x-worktwin-test-csrf': 'test',
+      },
+    })
+    // Upload guards passed; 503 expected when ADMIN_TOKEN/BACKEND_URL absent
+    const status = response.status()
+    expect(status).not.toBe(415)
+    expect(status).not.toBe(413)
+    expect(status).not.toBe(403)
   })
 })

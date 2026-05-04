@@ -28,6 +28,9 @@ const BACKEND_URL =
 // Others (staff, registered_manager, unknown) are denied before ADMIN_TOKEN/BACKEND_URL checks.
 const ADMIN_CAPABLE_ROLES: readonly string[] = ['organisation_admin', 'worktwin_dev_admin']
 
+// 4S.85G-8: Proxy-layer cap for upload requests -- checked via Content-Length before reading body.
+const ADMIN_PROXY_UPLOAD_MAX_BYTES = 1024
+
 type AdminSessionContext = {
   userId: string
   role: string
@@ -105,6 +108,21 @@ async function proxyHandler(
     const csrfValid = isTestMode && request.headers.get('x-worktwin-test-csrf') === 'test'
     if (!csrfValid) {
       return NextResponse.json({ detail: 'CSRF check failed.' }, { status: 403 })
+    }
+  }
+
+  // 4S.85G-8: Upload content-type and size guards -- after CSRF, before ADMIN_TOKEN/BACKEND_URL and fetch().
+  if (classified.routeKey === 'documents/upload' && request.method === 'POST') {
+    const ct = request.headers.get('content-type') ?? ''
+    if (!ct.startsWith('multipart/form-data')) {
+      return NextResponse.json({ detail: 'Unsupported media type.' }, { status: 415 })
+    }
+    const clHeader = request.headers.get('content-length')
+    if (clHeader !== null) {
+      const cl = parseInt(clHeader, 10)
+      if (!isNaN(cl) && cl > ADMIN_PROXY_UPLOAD_MAX_BYTES) {
+        return NextResponse.json({ detail: 'Upload too large.' }, { status: 413 })
+      }
     }
   }
 

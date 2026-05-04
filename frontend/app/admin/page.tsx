@@ -2,6 +2,8 @@ import AppLayout from '@/components/AppLayout'
 import Link from 'next/link'
 import { Users, FileText, BarChart2, Shield, Phone, AlertTriangle, TrendingUp, BookOpen, Lock } from 'lucide-react'
 
+const ADMIN_CHIPS = ['Admin host', 'Demo mode', 'Sample data only', 'Not staff-facing']
+
 const summaryCards = [
   { label: 'Pilot participants', value: '24', sub: 'Organisation usage', icon: Users, colour: 'teal' },
   { label: 'Approved documents', value: '18', sub: '2 under review', icon: FileText, colour: 'blue' },
@@ -46,10 +48,33 @@ const topTrends = [
 export default function AdminOverviewPage() {
   return (
     <AppLayout>
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Admin Overview</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Thumhara Centre · WorkTwin Care Pilot</p>
+      <div className="max-w-4xl mx-auto px-4 pt-4 pb-8 space-y-6">
+
+        {/* Hero card */}
+        <div className="bg-gradient-to-br from-slate-700 via-slate-800 to-teal-900 rounded-3xl p-7 text-white relative overflow-hidden shadow-lg">
+          <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full bg-white/5 pointer-events-none" />
+          <div className="absolute right-6 -bottom-14 w-40 h-40 rounded-full bg-teal-600/25 pointer-events-none" />
+          <div className="absolute -left-6 bottom-4 w-24 h-24 rounded-full bg-slate-800/40 pointer-events-none" />
+          <div className="relative">
+            <span className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1 rounded-full text-xs font-semibold mb-5">
+              <Lock size={11} />
+              Admin host area
+            </span>
+            <h1 className="text-3xl font-bold mb-2.5 leading-snug">Admin Overview</h1>
+            <p className="text-slate-200 text-sm leading-relaxed max-w-lg mb-5">
+              Demo and product-owner configuration area — Thumhara Centre pilot. Sample data only. This area is not visible to staff in a real deployment.
+            </p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {ADMIN_CHIPS.map(chip => (
+                <span key={chip} className="bg-white/15 text-white text-xs px-3 py-1.5 rounded-full font-medium">
+                  {chip}
+                </span>
+              ))}
+            </div>
+            <p className="text-slate-300 text-xs">
+              Individual staff conversations, private notes and personal data are never shown here — this is a product-level privacy guarantee.
+            </p>
+          </div>
         </div>
 
         {/* Admin containment banner */}
@@ -81,7 +106,7 @@ export default function AdminOverviewPage() {
         {/* Summary cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {summaryCards.map(({ label, value, sub, icon: Icon }) => (
-            <div key={label} className="bg-white border border-slate-200 rounded-2xl p-4">
+            <div key={label} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
               <div className="flex items-start justify-between mb-3">
                 <div className="w-9 h-9 rounded-xl bg-teal-50 flex items-center justify-center">
                   <Icon size={18} className="text-teal-700" />

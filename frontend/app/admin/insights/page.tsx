@@ -1,6 +1,8 @@
 import AppLayout from '@/components/AppLayout'
 import { Shield, BarChart2, AlertCircle, TrendingUp, FileText, HelpCircle } from 'lucide-react'
 
+const INSIGHTS_CHIPS = ['Anonymised data only', 'No individual records', 'Sample figures', 'Admin view']
+
 const topQuestions = [
   { topic: 'Medication administration', pct: 34, count: 47 },
   { topic: 'Safeguarding procedures', pct: 22, count: 30 },
@@ -53,12 +55,32 @@ const priorityColour: Record<string, string> = {
 export default function InsightsPage() {
   return (
     <AppLayout>
-      <div className="max-w-3xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Anonymous Insights</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Anonymised trends only. No individual staff names, conversations or private data are shown here.
-          </p>
+      <div className="max-w-3xl mx-auto px-4 pt-4 pb-8 space-y-6">
+
+        {/* Hero card */}
+        <div className="bg-gradient-to-br from-slate-700 via-slate-800 to-teal-900 rounded-3xl p-7 text-white relative overflow-hidden shadow-lg">
+          <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full bg-white/5 pointer-events-none" />
+          <div className="absolute right-6 -bottom-14 w-40 h-40 rounded-full bg-teal-600/25 pointer-events-none" />
+          <div className="relative">
+            <span className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1 rounded-full text-xs font-semibold mb-5">
+              <BarChart2 size={11} />
+              Anonymous Insights
+            </span>
+            <h1 className="text-3xl font-bold mb-2.5 leading-snug">Staff Question Insights</h1>
+            <p className="text-slate-200 text-sm leading-relaxed max-w-lg mb-5">
+              Anonymised, aggregated question trends across the organisation. No individual staff names, conversations or private data are shown here.
+            </p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {INSIGHTS_CHIPS.map(chip => (
+                <span key={chip} className="bg-white/15 text-white text-xs px-3 py-1.5 rounded-full font-medium">
+                  {chip}
+                </span>
+              ))}
+            </div>
+            <p className="text-slate-300 text-xs">
+              All figures are illustrative — this is sample data, not real Thumhara Centre usage.
+            </p>
+          </div>
         </div>
 
         {/* Sample data banner */}

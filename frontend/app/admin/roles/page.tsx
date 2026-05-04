@@ -1,6 +1,8 @@
 import AppLayout from '@/components/AppLayout'
 import { Shield, Check, Minus, Info, AlertTriangle } from 'lucide-react'
 
+const ROLES_CHIPS = ['Intended model', 'RBAC not enforced', 'Demo only', 'Admin view']
+
 const roles = ['Care Worker', 'Senior Carer', 'Nurse', 'Manager', 'HR Coordinator', 'Admin']
 
 const permissions: { label: string; description: string; access: (boolean | 'partial')[] }[] = [
@@ -83,12 +85,32 @@ function AccessCell({ value }: { value: boolean | 'partial' }) {
 export default function RolesPage() {
   return (
     <AppLayout>
-      <div className="max-w-5xl mx-auto space-y-5">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Roles &amp; Permissions</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            What each role can access in WorkTwin. Permissions are set at the organisational level.
-          </p>
+      <div className="max-w-5xl mx-auto px-4 pt-4 pb-8 space-y-5">
+
+        {/* Hero card */}
+        <div className="bg-gradient-to-br from-slate-700 via-slate-800 to-teal-900 rounded-3xl p-7 text-white relative overflow-hidden shadow-lg">
+          <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full bg-white/5 pointer-events-none" />
+          <div className="absolute right-6 -bottom-14 w-40 h-40 rounded-full bg-teal-600/25 pointer-events-none" />
+          <div className="relative">
+            <span className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1 rounded-full text-xs font-semibold mb-5">
+              <Shield size={11} />
+              Permission model
+            </span>
+            <h1 className="text-3xl font-bold mb-2.5 leading-snug">Roles &amp; Permissions</h1>
+            <p className="text-slate-200 text-sm leading-relaxed max-w-lg mb-5">
+              Planned permission structure for WorkTwin. Role-based access control is not active in this demo — any user can navigate to any area. Do not treat this as live RBAC.
+            </p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {ROLES_CHIPS.map(chip => (
+                <span key={chip} className="bg-white/15 text-white text-xs px-3 py-1.5 rounded-full font-medium">
+                  {chip}
+                </span>
+              ))}
+            </div>
+            <p className="text-slate-300 text-xs">
+              No role can view individual employee conversations or private notes — this is a product-level privacy guarantee.
+            </p>
+          </div>
         </div>
 
         {/* Admin containment banner */}
@@ -116,7 +138,7 @@ export default function RolesPage() {
         {/* Role overview cards */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {roles.map(role => (
-            <div key={role} className="bg-white border border-slate-200 rounded-xl p-4">
+            <div key={role} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
               <div className="flex items-center gap-2 mb-1.5">
                 <div className="w-7 h-7 rounded-full bg-teal-100 flex items-center justify-center">
                   <span className="text-teal-700 text-xs font-bold">{role[0]}</span>

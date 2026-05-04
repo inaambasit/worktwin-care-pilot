@@ -2,6 +2,8 @@ import AppLayout from '@/components/AppLayout'
 import { Phone, Mail, AlertTriangle, Heart, Scale, Shield, Users, Activity, Clock } from 'lucide-react'
 import Link from 'next/link'
 
+const ESCALATION_CHIPS = ['Visible to all staff', 'Always escalate to a person', 'Demo contacts only', 'Admin-managed']
+
 interface EscalationContact {
   name: string
   role: string
@@ -187,12 +189,32 @@ const iconColourMap: Record<string, string> = {
 export default function EscalationPage() {
   return (
     <AppLayout>
-      <div className="max-w-3xl mx-auto space-y-5">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Escalation Contacts</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            For sensitive concerns, always escalate to a person. WorkTwin does not provide final guidance on these topics.
-          </p>
+      <div className="max-w-3xl mx-auto px-4 pt-4 pb-8 space-y-5">
+
+        {/* Hero card */}
+        <div className="bg-gradient-to-br from-teal-800 via-slate-800 to-slate-900 rounded-3xl p-7 text-white relative overflow-hidden shadow-lg">
+          <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full bg-white/5 pointer-events-none" />
+          <div className="absolute right-6 -bottom-14 w-40 h-40 rounded-full bg-teal-600/25 pointer-events-none" />
+          <div className="relative">
+            <span className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1 rounded-full text-xs font-semibold mb-5">
+              <Phone size={11} />
+              Escalation contacts
+            </span>
+            <h1 className="text-3xl font-bold mb-2.5 leading-snug">Who to contact for support</h1>
+            <p className="text-slate-200 text-sm leading-relaxed max-w-lg mb-5">
+              For sensitive concerns, always contact a person first. WorkTwin provides approved guidance only — it does not replace human expert judgement in safeguarding, medical, HR or legal matters.
+            </p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {ESCALATION_CHIPS.map(chip => (
+                <span key={chip} className="bg-white/15 text-white text-xs px-3 py-1.5 rounded-full font-medium">
+                  {chip}
+                </span>
+              ))}
+            </div>
+            <p className="text-slate-300 text-xs">
+              If someone is in immediate danger, call <span className="font-bold">999</span> immediately — do not wait.
+            </p>
+          </div>
         </div>
 
         {/* Important reminder */}

@@ -82,6 +82,9 @@ export default function LandingPage() {
             <Link href="/dashboard" className="text-sm text-slate-600 hover:text-slate-900 font-medium">
               Explore demo
             </Link>
+            <Link href="/login" className="text-sm text-slate-600 hover:text-slate-900 font-medium">
+              Staff sign in
+            </Link>
             <Link
               href="/book-pilot"
               className="text-sm bg-teal-700 hover:bg-teal-800 text-white font-semibold px-4 py-2 rounded-lg transition-colors"

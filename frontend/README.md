@@ -39,6 +39,8 @@ Admin demo pages are controlled by `NEXT_PUBLIC_ADMIN_DEMO_ENABLED`. The live Ve
 
 `ADMIN_PROXY_ENABLED` is a separate server-side variable controlling whether the admin API proxy forwards requests to the backend. These are distinct controls and must not be conflated. The public admin API actions remain fail-closed. `ADMIN_PROXY_ENABLED` must not be set to `true` publicly until authentication, CSRF protection, and admin RBAC are deliberately implemented and reviewed.
 
+The admin API proxy route has been partially hardened: disabled proxy guard, typed path allowlist, method guard, unauthenticated guard, role/membership guard placeholder, route-specific role allowlist, CSRF fail-closed guard for POST/PATCH, upload content-type/size guards, safe audit logging, and no-store caching are active. The proxy is not yet production-ready: real Supabase Auth session validation, real organisation_memberships lookup, and production CSRF/same-site controls remain outstanding.
+
 ---
 
 ## Key components
@@ -59,6 +61,11 @@ Admin demo pages are controlled by `NEXT_PUBLIC_ADMIN_DEMO_ENABLED`. The live Ve
 | `API_BASE_URL` | Server only | Base URL used by the admin API proxy route |
 | `ADMIN_TOKEN` | Server only | Auth token used by the admin API proxy route; never exposed to the browser |
 | `ADMIN_PROXY_ENABLED` | Server only | Set to `true` to enable the admin API proxy; must not be set publicly until auth/CSRF/RBAC are in place |
+| `NEXT_PUBLIC_PILOT_AUTH_MODE` | Client (public) | Set to `false`; auth mode flag; real pilot auth is not yet active |
+| `NEXT_PUBLIC_SUPABASE_URL` | Client (public) | Supabase project URL; in `.env.example` for future auth integration |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Client (public) | Supabase anon key; in `.env.example` for future auth integration |
+| `SUPABASE_JWT_SECRET` | Server only | JWT secret for Supabase session validation; in `.env.example`; not yet active |
+| `PILOT_AUTH_MODE` | Server only | Set to `false`; server-side auth mode flag; real pilot auth is not yet active |
 
 `NEXT_PUBLIC_ADMIN_TOKEN` is no longer used and must not be set. Admin credentials must not be exposed to the browser.
 
@@ -97,5 +104,5 @@ npx playwright test tests/smoke.spec.ts
 ## Known frontend gaps
 
 - **Private Notes mobile layout** - the `/notes` page works on mobile but layout polish is incomplete
-- **Authentication** - `/login` and `/login/sent` exist as preparation and demo pages only; employee and admin routes remain accessible without a real authenticated session
+- **Authentication** - auth configuration scaffolding is in place (`PILOT_AUTH_MODE=false`, Supabase env vars in `.env.example`); `/login` and `/login/sent` exist as preparation and demo pages only; real Supabase Auth session validation and organisation membership lookup are not yet active; employee and admin routes remain accessible without an authenticated session
 - **Staff-facing document-grounded RAG** - the `/ask` page uses the backend `/ask` endpoint; the backend has a governed RAG path but requires configured infrastructure and a qualifying governed document to return source-grounded answers; the product is not pilot-ready without authentication and RBAC

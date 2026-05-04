@@ -1,7 +1,7 @@
 # WorkTwin Care Pilot - External Review Pack
 
-Version: 2026-05-03
-Milestone: 4S.74
+Version: 2026-05-05
+Milestone: 4S.87C
 
 ---
 
@@ -31,10 +31,18 @@ persistent sidebar on desktop.
 **Backend:** Python / FastAPI, deployed on Render. Document registry backed by
 Supabase (PostgreSQL + private storage bucket).
 
-**Admin access:** Admin demo screens are disabled publicly by default. All
-admin and debug API endpoints are protected by bearer token. Browser admin
-calls are routed through a server-side Vercel proxy so the token is never
-exposed in the browser bundle.
+**Admin access:** Admin demo screen visibility is controlled by
+`NEXT_PUBLIC_ADMIN_DEMO_ENABLED`; the live Vercel deployment may have this set
+to `true`, making admin demo screens visible. They are not intended for real
+end-user access. `NEXT_PUBLIC_ADMIN_DEMO_ENABLED` controls UI visibility only
+and does not grant admin API access. All admin and debug API endpoints are
+protected by bearer token. Browser admin calls are routed through a
+server-side Vercel proxy so the token is never exposed in the browser bundle.
+The proxy has been partially hardened (typed path allowlist, method guard,
+CSRF fail-closed guard for POST/PATCH, upload content-type/size guards, safe
+audit logging, no-store caching); it is not yet production-ready — real
+Supabase Auth session validation, real organisation_memberships lookup, and
+production CSRF/same-site controls remain outstanding.
 
 **Demo status:** The app is a working pilot/demo prototype. The backend contains
 a governed staff /ask RAG path, but it requires OpenAI, the database, and a
@@ -280,15 +288,22 @@ Reviewers should score each area out of 10 and include brief notes.
 The following issues are already known. Reviewers do not need to flag these
 as new findings, but they are welcome to comment on severity or priority.
 
-1. **Book a Pilot CTA has no destination.** The landing page CTA button does
-   not link to a form, calendar, or contact flow. It is a placeholder.
+1. **Book a Pilot is a session-only enquiry page.** `/book-pilot` now exists
+   and the landing page links to it. It is a controlled demo enquiry page only.
+   It is session-only and does not yet submit to a backend, CRM, email workflow
+   or database. No real enquiries are captured or stored.
 
 2. **Private notes mobile layout needs polish.** The notes screen layout on
    small screens requires further work before it would meet a production bar.
 
-3. **Authentication is not implemented.** There is no login, session
-   management, or role-based access control. The server-side proxy protects the
-   admin token but there is no staff authentication at all.
+3. **Authentication scaffolding exists but is not active.** `/login` and
+   `/login/sent` exist as preparation and demo pages only. Auth configuration
+   (`PILOT_AUTH_MODE=false`, `NEXT_PUBLIC_PILOT_AUTH_MODE=false`,
+   `SUPABASE_JWT_SECRET`, `NEXT_PUBLIC_SUPABASE_URL`,
+   `NEXT_PUBLIC_SUPABASE_ANON_KEY`) is represented in `.env.example`, but real
+   Supabase Auth session validation and organisation membership lookup are not
+   yet active. There is no active/enforced session protection or role-based access control for real pilot use.
+   Employee and admin routes remain accessible without an authenticated session.
 
 4. **Staff-facing document-grounded RAG is governed and not fully active for
    the public demo.** The backend contains a governed staff /ask RAG path with

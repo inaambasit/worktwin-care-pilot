@@ -1782,6 +1782,62 @@ Role filtering (`access_roles`) applies after the above gate.
 - No governance flag changes.
 - AC32 is not approved for staff visibility.
 
+## Milestone 4S.5: Governed staff /ask RAG path
+
+*(Complete — referenced in the Next steps section below.)*
+
+The staff-facing `/ask` endpoint now contains a governed RAG path in the backend code. It attempts a source-grounded answer only when OpenAI, the database, and a qualifying governed document all pass the strict Milestone 4R gate list. When any gate fails — unavailable infrastructure, no qualifying source, or a high-risk topic — the endpoint returns a safe fallback. Dummy and sample documents cannot be served to staff under any circumstances. The `allow_dummy_override` bypass available in admin `answer-debug` does not exist in the staff path. High-risk topics (safeguarding, medication, HR, payroll, legal, driving, vehicle) always short-circuit to human escalation.
+
+### What Milestone 4S.5 does NOT do
+
+- No real pilot auth active — `/login` and `/login/sent` are preparation/demo pages only.
+- No real organisation_memberships lookup active for real pilot users.
+- No RBAC or session protection on admin or staff routes.
+- A real staff pilot still requires authentication, RBAC, admin session protection, persistent rate limiting, upload hardening, full safety tests, DPA/legal review, and governance sign-off.
+
+## Milestone 4S.74–4S.87C: Admin proxy hardening and auth config alignment
+
+### Admin proxy hardening (partial)
+
+The server-side admin API proxy at `frontend/app/api/admin/[...path]/route.ts` has been partially hardened. The following guards are now in place:
+
+| Guard | Status |
+|-------|--------|
+| Disabled proxy guard — returns 403 when `ADMIN_PROXY_ENABLED=false` | Active |
+| Typed path allowlist — only explicitly listed path prefixes forwarded; others rejected 403 | Active |
+| Method guard — only `GET`, `POST`, `PATCH`, `DELETE` forwarded; others rejected | Active |
+| Unauthenticated guard — rejects requests without an accepted admin session/test context | Active |
+| Role/membership guard — placeholder structure in place | Active (placeholder) |
+| Route-specific role allowlist — individual routes can require specific roles | Active |
+| CSRF fail-closed guard for `POST`/`PATCH` — fails closed when CSRF cannot be confirmed | Active |
+| Upload content-type and size guards — validates before forwarding upload requests | Active |
+| Safe audit logging — request metadata logged without exposing secrets | Active |
+| No-store caching — `Cache-Control: no-store` on all responses | Active |
+
+**The proxy is not yet production-ready.** The following remain outstanding before any real pilot use:
+
+- Real Supabase Auth session validation (not yet wired)
+- Real `organisation_memberships` lookup (not yet wired)
+- Production CSRF/same-site controls
+- Staff and admin route protection for real pilot users
+
+### Auth config alignment (Milestone 4S.87B) and documentation alignment (Milestone 4S.87C)
+
+- `PILOT_AUTH_MODE=false` and `NEXT_PUBLIC_PILOT_AUTH_MODE=false` are now represented in `.env.example`
+- `SUPABASE_JWT_SECRET`, `NEXT_PUBLIC_SUPABASE_URL`, and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are represented in `.env.example`
+- Backend identity behaviour has tests, but real Supabase Auth and real organisation membership lookup are not yet active
+- `/login` and `/login/sent` are preparation and demo pages only; they do not yet protect employee or admin routes
+
+### What this milestone range does NOT do
+
+- No real Supabase Auth session validation
+- No real `organisation_memberships` lookup
+- No production CSRF/same-site controls
+- No staff or admin route protection for real pilot users
+- No changes to the governed `/ask` RAG path or fallback behaviour
+- No governance flag changes
+- No SQL migration required
+
 ## Current milestone status
 
 - PDF upload works (Milestone 4B)
@@ -1807,16 +1863,22 @@ Role filtering (`access_roles`) applies after the above gate.
 - **4S-prep passed - Visitor Sign-In and Identification Procedure uploaded, chunked, embedded (2 chunks, failed_count=0), governance set to approved_for_staff; appears in /policies; AC32 excluded; /ask still placeholder (Milestone 4S-prep)**
 - **Server-side admin API proxy shipped - NEXT_PUBLIC_ADMIN_TOKEN removed from Vercel; admin calls proxied through /api/admin/... on Vercel; browser never sees admin bearer token; public endpoints unchanged (Milestone 4S.2A)**
 - **Staff policy visibility filter enforced - `_can_show_document_to_staff` requires is_sensitive=false, escalation_required=false, real_document=true, dummy_document=false, status=approved, approved_for_staff_visibility=true; both DB and in-memory fallback paths use the same gate; /policies returned only Visitor Sign-In and Identification Procedure; AC32 and dummy documents excluded (Milestone 4S.3)**
+- **Governed staff /ask RAG path built - strict document gates enforced, safe fallback when unconfigured or no qualifying source, high-risk topic escalation, no dummy/sample document bypass in the staff path; real auth and organisation membership lookup not yet active (Milestone 4S.5)**
+- **Partial admin proxy hardening shipped - disabled proxy guard, typed path allowlist, method guard, unauthenticated guard, role/membership guard placeholder, route-specific role allowlist, CSRF fail-closed guard for POST/PATCH, upload content-type/size guards, safe audit logging, no-store caching; real Supabase Auth, production CSRF, and organisation_memberships lookup remain outstanding (Milestones 4S.74–4S.87)**
+- **Auth config alignment completed and documentation state aligned - PILOT_AUTH_MODE=false, NEXT_PUBLIC_PILOT_AUTH_MODE=false, SUPABASE_JWT_SECRET, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY represented in .env.example; real Supabase Auth not active; /login and /login/sent are preparation/demo pages only; README/current-state docs aligned in 4S.87C (Milestones 4S.87B-4S.87C)**
 - Staff-facing `/ask` has a governed RAG path in the backend code; it requires OpenAI, a configured database, and a qualifying governed document to return source-grounded answers; it falls back safely when not configured, when no qualifying source exists, or when a topic is high risk
-- `governance_reviewed_by` and `governance_reviewed_at` are null on the visitor SOP - must be set before staff RAG goes live
+- `governance_reviewed_by` and `governance_reviewed_at` are null on the visitor SOP — must be set before staff RAG goes live
 - No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a human reviewer
 
 ## Next steps (Milestone 4S+)
 
-- **4S.4:** Set `governance_reviewed_by` and `governance_reviewed_at` on the Visitor Sign-In and Identification Procedure - required by the Milestone 4R gate list before staff RAG can go live. After this the Visitor SOP passes all 4R gates.
+- **4S.4:** Set `governance_reviewed_by` and `governance_reviewed_at` on the Visitor Sign-In and Identification Procedure — required by the Milestone 4R gate list before staff RAG can go live. After this the Visitor SOP passes all 4R gates.
 - **4S.5 (complete):** The governed staff `/ask` RAG path is built using the Milestone 4R gate list; a real staff pilot still requires authentication, RBAC, admin session protection, full safety tests, and pilot governance sign-off.
+- **4S.74–4S.87C (complete):** Partial admin proxy hardening shipped; auth config scaffolding aligned in `.env.example`. Real Supabase Auth, organisation membership lookup, and production CSRF/same-site controls remain outstanding.
+- Real Supabase Auth session validation — wire real session validation into the proxy and staff routes.
+- Real `organisation_memberships` lookup — replace the placeholder guard with a live DB lookup.
+- Production CSRF/same-site controls — replace the fail-closed placeholder with a proper implementation.
+- Staff and admin RBAC — role-based access control for both staff and admin routes.
 - Governance sign-off and safety review of real Thumhara/QCS policy documents, then set `real_document=true`, `approved_for_embedding=true`, `approved_for_source_grounded_answers=true`, `approved_for_staff_visibility=true` for approved documents.
-- Authentication and organisation membership verification.
-- Rate limiting and anonymised query logging (no user-level data, no raw query text stored).
-- Role-based access control on admin endpoints.
+- Persistent rate limiting and anonymised query logging (no user-level data, no raw query text stored).
 - AC32 rebuild (reprocess endpoint) before staff-facing RAG if AC32 is later approved for staff visibility.

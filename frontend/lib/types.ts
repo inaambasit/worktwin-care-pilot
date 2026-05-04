@@ -13,11 +13,12 @@ export interface AskSource {
 
 export type RiskCategory =
   | 'standard'
-  | 'medication'
-  | 'safeguarding'
+  | 'policy'
   | 'hr'
   | 'legal'
   | 'wellbeing'
+  | 'compliance'
+  | 'vertical_sensitive'
 
 export interface AskRequest {
   question: string

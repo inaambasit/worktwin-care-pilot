@@ -3151,8 +3151,10 @@ def list_policies(
 
     Safety guarantees enforced here (pre-RAG):
     - Only approved documents are returned.
-    - Organisation and role are derived server-side from pilot env vars —
-      the caller cannot supply or override these values.
+    - In demo mode, organisation and role are derived server-side from pilot
+      environment variables. In pilot-auth mode, they are taken from the
+      verified StaffContext in the Authorization Bearer token. In both cases
+      the caller cannot supply or override organisation_id, user_id or role.
     - Tenant scoping is enforced by passing the server-derived organisation ID
       directly into the registry query; no cross-tenant documents can leak
       through this endpoint even if other organisations have approved records.

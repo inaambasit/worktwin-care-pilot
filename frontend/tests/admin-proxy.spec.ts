@@ -62,6 +62,14 @@ test.describe('Admin proxy -- allowlist classification (unit-style)', () => {
     }
   })
 
+  test('organisation_admin is in allowed roles for documents', () => {
+    const result = classifyPath(['documents'])
+    expect(result.match).toBe('found')
+    if (result.match === 'found') {
+      expect(ADMIN_ALLOWLIST[result.routeKey].roles).toContain('organisation_admin')
+    }
+  })
+
   test('organisation_admin is not in allowed roles for documents/search-vector', () => {
     const result = classifyPath(['documents', 'search-vector'])
     expect(result.match).toBe('found')
@@ -117,16 +125,68 @@ test.describe('Admin proxy -- authentication and authorisation (TODO)', () => {
     expect(body.detail).toBe('Authentication required.')
   })
 
-  test.skip('staff role returns 403 when proxy enabled', async () => {
-    // Needs: session auth + role check; staff role must be denied at proxy layer
+  test('staff role returns 403 when proxy enabled', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.get('/api/admin/documents', {
+      headers: { 'x-worktwin-test-admin-role': 'staff', 'x-worktwin-test-admin-active': 'true' },
+    })
+    expect(response.status()).toBe(403)
   })
 
-  test.skip('registered_manager role returns 403 when proxy enabled', async () => {
-    // Needs: session auth + role check; registered_manager must be denied
+  test('registered_manager role returns 403 when proxy enabled', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.get('/api/admin/documents', {
+      headers: { 'x-worktwin-test-admin-role': 'registered_manager', 'x-worktwin-test-admin-active': 'true' },
+    })
+    expect(response.status()).toBe(403)
   })
 
-  test.skip('inactive membership returns 403 when proxy enabled', async () => {
-    // Needs: is_active membership status check added to route handler
+  test('inactive membership returns 403 when proxy enabled', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.get('/api/admin/documents', {
+      headers: { 'x-worktwin-test-admin-role': 'organisation_admin', 'x-worktwin-test-admin-active': 'false' },
+    })
+    expect(response.status()).toBe(403)
+  })
+
+  test('organisation_admin role is recognised as admin-capable (passes role guard)', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    // 503 expected when ADMIN_TOKEN/BACKEND_URL absent; any status except 403 proves role guard passed
+    const response = await request.get('/api/admin/documents', {
+      headers: {
+        'x-worktwin-test-admin-role': 'organisation_admin',
+        'x-worktwin-test-admin-active': 'true',
+      },
+    })
+    expect(response.status()).not.toBe(403)
+  })
+
+  test('worktwin_dev_admin role is recognised as admin-capable (passes role guard)', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    // 503 expected when ADMIN_TOKEN/BACKEND_URL absent; any status except 403 proves role guard passed
+    const response = await request.post('/api/admin/documents/search-vector', {
+      data: { query: 'test' },
+      headers: {
+        'x-worktwin-test-admin-role': 'worktwin_dev_admin',
+        'x-worktwin-test-admin-active': 'true',
+      },
+    })
+    expect(response.status()).not.toBe(403)
   })
 
   test.skip('organisation_admin GET /api/admin/documents is allowed', async () => {

@@ -92,6 +92,11 @@ async function proxyHandler(
     return NextResponse.json({ detail: 'Access denied.' }, { status: 403 })
   }
 
+  // 4S.85G-6: Route-specific role allowlist -- before ADMIN_TOKEN/BACKEND_URL checks and before fetch().
+  if (!(ADMIN_ALLOWLIST[classified.routeKey].roles as readonly string[]).includes(session.role)) {
+    return NextResponse.json({ detail: 'Access denied.' }, { status: 403 })
+  }
+
   if (!ADMIN_TOKEN || !BACKEND_URL) {
     return NextResponse.json({ detail: 'Admin proxy not configured.' }, { status: 503 })
   }

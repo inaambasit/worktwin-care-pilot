@@ -189,16 +189,51 @@ test.describe('Admin proxy -- authentication and authorisation (TODO)', () => {
     expect(response.status()).not.toBe(403)
   })
 
-  test.skip('organisation_admin GET /api/admin/documents is allowed', async () => {
-    // Needs: session auth + role check; organisation_admin allowed on GET
+  test('organisation_admin GET /api/admin/documents passes route-role guard', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    // organisation_admin is in documents.roles; 503 expected when ADMIN_TOKEN/BACKEND_URL absent
+    const response = await request.get('/api/admin/documents', {
+      headers: {
+        'x-worktwin-test-admin-role': 'organisation_admin',
+        'x-worktwin-test-admin-active': 'true',
+      },
+    })
+    expect(response.status()).not.toBe(403)
   })
 
-  test.skip('organisation_admin POST /api/admin/documents/search-vector is denied', async () => {
-    // Needs: per-method + per-path ACL; organisation_admin blocked on search-vector POST
+  test('organisation_admin POST /api/admin/documents/search-vector is blocked by route-role guard', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    // organisation_admin is NOT in documents/search-vector.roles (worktwin_dev_admin only)
+    const response = await request.post('/api/admin/documents/search-vector', {
+      data: { query: 'test' },
+      headers: {
+        'x-worktwin-test-admin-role': 'organisation_admin',
+        'x-worktwin-test-admin-active': 'true',
+      },
+    })
+    expect(response.status()).toBe(403)
   })
 
-  test.skip('worktwin_dev_admin POST /api/admin/documents/search-vector is allowed', async () => {
-    // Needs: worktwin_dev_admin role check; this role is allowed on search-vector POST
+  test('worktwin_dev_admin POST /api/admin/documents/search-vector passes route-role guard', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    // worktwin_dev_admin is in documents/search-vector.roles; 503 expected when ADMIN_TOKEN/BACKEND_URL absent
+    const response = await request.post('/api/admin/documents/search-vector', {
+      data: { query: 'test' },
+      headers: {
+        'x-worktwin-test-admin-role': 'worktwin_dev_admin',
+        'x-worktwin-test-admin-active': 'true',
+      },
+    })
+    expect(response.status()).not.toBe(403)
   })
 })
 

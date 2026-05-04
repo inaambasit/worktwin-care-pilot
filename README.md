@@ -12,9 +12,10 @@ The first test client is Thumhara Centre (sample data only -- no real staff or s
 
 ## Live demo
 
-- Staff-facing app is deployed on Vercel
-- Backend API is deployed on Render
-- Admin demo screens are disabled publicly; the public admin API proxy returns 403 when disabled
+- Staff-facing app: https://worktwin-care-pilot.vercel.app (Vercel)
+- Backend API: https://worktwin-care-pilot-api.onrender.com (Render)
+- `NEXT_PUBLIC_ADMIN_DEMO_ENABLED` controls admin UI visibility; the live demo currently has this set to `true`, so admin demo screens are visible in the deployed app
+- `ADMIN_PROXY_ENABLED` is a separate server-side control governing whether the admin API proxy forwards requests to the backend; these are distinct — do not conflate them; public admin API actions remain fail-closed; `ADMIN_PROXY_ENABLED` must not be set to `true` publicly until authentication, CSRF protection, and admin RBAC are deliberately implemented and reviewed
 
 The staff app is mobile-responsive with drawer navigation on mobile and a fixed sidebar on desktop.
 
@@ -91,8 +92,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ## Known gaps
 
-- Authentication is not implemented
-- "Book a pilot" CTA on the landing page needs a destination or action
+- Authentication: `/login` and `/login/sent` exist as preparation and demo pages, and Staff sign in is linked from the landing page — but these do not yet protect employee or admin routes; all pages remain accessible without a real authenticated session
 - Private Notes mobile layout needs improvement
 - Staff-facing document-grounded answers require a qualifying governed document, configured infrastructure, authentication, and RBAC before real staff use
-- A real pilot would require approved policy governance and role-based access control
+- A real pilot still requires authentication, RBAC, admin session protection, full safety tests, governance sign-off, DPA/legal review, persistent rate limiting, and upload hardening

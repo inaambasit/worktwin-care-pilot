@@ -14,3 +14,14 @@
 | [08 First pilot offer](08-first-pilot-offer.md) | Pricing and terms for the first pilot client offer |
 | [Staff demo walkthrough](staff-demo-walkthrough.md) | Staff-facing pilot journey, safety controls, live proof checks and known limitations |
 | [Documentation maintenance plan](documentation-maintenance-plan.md) | Plan for keeping project documentation consistent and up to date |
+
+## Engineering and design reviews
+
+The following are historical review snapshots taken at a point in time. Some findings have since been addressed in subsequent milestones.
+
+| Document | Notes |
+|---|---|
+| [Engineering review (Claude Code)](reviews/claude-code-engineering-review.md) | Code quality and architecture assessment |
+| [Strict technical review (Codex)](reviews/codex-strict-technical-review.md) | Strict technical audit |
+| [Design and UX mobile review (Claude)](reviews/claude-design-ux-mobile-review.md) | Mobile UX and design assessment |
+| [Consolidated 10-10 roadmap](reviews/consolidated-10-10-roadmap.md) | Consolidated roadmap from review findings |

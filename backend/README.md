@@ -94,12 +94,10 @@ Multiple origins are comma-separated. No wildcard `*` is used in production.
 
 | Variable | Value | Notes |
 |----------|-------|-------|
-| `NEXT_PUBLIC_API_URL` | `https://<your-render-service-name>.onrender.com` | Public - used by `/ask`, `/policies`, `/health` |
-| `API_BASE_URL` | `https://<your-render-service-name>.onrender.com` | Server-side only - used by the `/api/admin/...` proxy (Milestone 4S.2A) |
+| `NEXT_PUBLIC_API_URL` | `https://worktwin-care-pilot-api.onrender.com` | Public - used by `/ask`, `/policies`, `/health` |
+| `API_BASE_URL` | `https://worktwin-care-pilot-api.onrender.com` | Server-side only - used by the `/api/admin/...` proxy (Milestone 4S.2A) |
 | `ADMIN_TOKEN` | Must match `ADMIN_TOKEN` set in Render | Server-side only - used by the proxy; never exposed to the browser (Milestone 4S.2A) |
 | ~~`NEXT_PUBLIC_ADMIN_TOKEN`~~ | ~~Removed~~ | Removed in Milestone 4S.2A - admin token is no longer sent from the browser |
-
-Replace `<your-render-service-name>` with the subdomain Render assigns when you create the service.
 
 ## Milestone 4B: Safe PDF upload
 
@@ -158,7 +156,7 @@ The backend will return HTTP 503 with a JSON body including `storage_status: "no
 - **Role-based visibility** - `user_role` query param filters by `access_roles`.
 - **No AI answers from unapproved documents** - `approved_for_ai_answers=False` documents are listed but the frontend blocks the "Ask WorkTwin" CTA.
 - **No embeddings or RAG pipeline active** - embedding status is tracked per document but no pipeline runs yet.
-- **No real file upload** - `/documents/upload` returns a placeholder response.
+- **No real file upload** - `/documents/upload` returned a placeholder response at this milestone; full upload, storage, and chunking were implemented in Milestones 4B–4D.
 - **No personal data in demo store** - all in-memory documents are sample policy metadata only.
 
 ## Milestone 4C: Persistent document registry
@@ -1502,7 +1500,7 @@ Existing AC32 chunk previews may still show old stored PDF extraction artefacts 
 
 ### What Milestone 4P adds
 
-All admin and debug endpoints now require an `Authorization: Bearer <token>` header. The token is set via the `ADMIN_TOKEN` environment variable on Render. The frontend admin UI reads the matching `NEXT_PUBLIC_ADMIN_TOKEN` variable and includes it in every admin request.
+All admin and debug endpoints now require an `Authorization: Bearer <token>` header. The token is set via the `ADMIN_TOKEN` environment variable on Render. At this milestone, the frontend admin UI read the matching `NEXT_PUBLIC_ADMIN_TOKEN` variable and included it in every admin request — this was the initial implementation. That browser-exposed approach was superseded in Milestone 4S.2A: `NEXT_PUBLIC_ADMIN_TOKEN` was removed from Vercel, and admin calls now go through the server-side `/api/admin/...` proxy on Vercel, which reads `ADMIN_TOKEN` server-side and forwards the token to Render. `NEXT_PUBLIC_ADMIN_TOKEN` must not be re-added.
 
 ### Protected endpoints (require Bearer token)
 

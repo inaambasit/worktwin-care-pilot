@@ -10,7 +10,10 @@ This is a working pilot/demo prototype, not a production-ready application.
 
 | Route | Description |
 |---|---|
-| `/` | Landing page with product overview and Book a Pilot CTA |
+| `/` | Landing page with product overview, Book a Pilot CTA, and Staff sign in link |
+| `/book-pilot` | Book a Pilot enquiry page |
+| `/login` | Staff sign-in — preparation/demo page only; does not yet protect routes |
+| `/login/sent` | Sign-in link confirmation — preparation/demo page only |
 | `/dashboard` | Staff dashboard with quick-access cards |
 | `/ask` | Ask WorkTwin - AI-assisted query interface |
 | `/policies` | Policy reference browser |
@@ -32,7 +35,9 @@ This is a working pilot/demo prototype, not a production-ready application.
 | `/admin/roles` | Role and permission management |
 | `/admin/escalation` | Escalation review and audit |
 
-Admin demo pages are disabled publicly by default. They must be explicitly enabled for a given demo environment. They are not intended for end-user access.
+Admin demo pages are controlled by `NEXT_PUBLIC_ADMIN_DEMO_ENABLED`. The live Vercel deployment currently has this set to `true`, so admin demo screens are visible. They are not intended for real end-user access.
+
+`ADMIN_PROXY_ENABLED` is a separate server-side variable controlling whether the admin API proxy forwards requests to the backend. These are distinct controls and must not be conflated. The public admin API actions remain fail-closed. `ADMIN_PROXY_ENABLED` must not be set to `true` publicly until authentication, CSRF protection, and admin RBAC are deliberately implemented and reviewed.
 
 ---
 
@@ -50,8 +55,10 @@ Admin demo pages are disabled publicly by default. They must be explicitly enabl
 | Variable | Side | Purpose |
 |---|---|---|
 | `NEXT_PUBLIC_API_URL` | Client (public) | Base URL for staff-facing backend API calls |
+| `NEXT_PUBLIC_ADMIN_DEMO_ENABLED` | Client (public) | Set to `true` to show admin demo UI; controls UI visibility only, not API access |
 | `API_BASE_URL` | Server only | Base URL used by the admin API proxy route |
-| `ADMIN_TOKEN` | Server only | Auth token used by the admin API proxy route |
+| `ADMIN_TOKEN` | Server only | Auth token used by the admin API proxy route; never exposed to the browser |
+| `ADMIN_PROXY_ENABLED` | Server only | Set to `true` to enable the admin API proxy; must not be set publicly until auth/CSRF/RBAC are in place |
 
 `NEXT_PUBLIC_ADMIN_TOKEN` is no longer used and must not be set. Admin credentials must not be exposed to the browser.
 
@@ -89,7 +96,6 @@ npx playwright test tests/smoke.spec.ts
 
 ## Known frontend gaps
 
-- **Book a Pilot CTA** - the call-to-action on the landing page has no destination or form action yet
 - **Private Notes mobile layout** - the `/notes` page works on mobile but layout polish is incomplete
-- **Authentication** - auth is not implemented; all pages are accessible without login
+- **Authentication** - `/login` and `/login/sent` exist as preparation and demo pages only; employee and admin routes remain accessible without a real authenticated session
 - **Staff-facing document-grounded RAG** - the `/ask` page uses the backend `/ask` endpoint; the backend has a governed RAG path but requires configured infrastructure and a qualifying governed document to return source-grounded answers; the product is not pilot-ready without authentication and RBAC

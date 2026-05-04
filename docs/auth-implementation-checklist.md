@@ -54,8 +54,10 @@ until later sub-milestones specifically permit them.
   defaults are not to be changed.
 - **No real staff or real documents.** No Thumhara Centre staff accounts, no Thumhara
   Centre policy documents, and no live pilot access.
-- **No changes to NEXT_PUBLIC_ADMIN_DEMO_ENABLED or ADMIN_PROXY_ENABLED.** Both remain
-  false on all public deployments.
+- **ADMIN_PROXY_ENABLED remains false on all public deployments.** `NEXT_PUBLIC_ADMIN_DEMO_ENABLED`
+  controls admin UI visibility only; it has since been enabled on the live Vercel demo
+  for managed walkthroughs and does not grant API access. ADMIN_PROXY_ENABLED must
+  remain false.
 
 ---
 
@@ -386,9 +388,18 @@ not use the anon key for JWT validation.
 
 ### 4S.85G -- Admin proxy session guard and allowlist
 
-**Goal:** Implement all controls from docs/admin-proxy-hardening-plan.md before
-ADMIN_PROXY_ENABLED can be set to true on any deployment. This sub-milestone is the
-most directly security-critical change in the 4S.85 sequence.
+**Partial implementation status:** Several fail-closed hardening controls have been
+implemented in 4S.85G slices: typed path allowlist, method guard (405), unauthenticated
+guard (401), global role and membership guard (403), route-specific role allowlist,
+CSRF fail-closed guard for POST/PATCH, upload content-type guard (415), upload size
+guard (413), safe structured audit logging, and `Cache-Control: no-store`. Outstanding:
+real Supabase Auth session validation (currently stub/test-mode based), real
+`organisation_memberships` lookup, and production CSRF token and same-site
+implementation. ADMIN_PROXY_ENABLED must remain false until these are complete.
+
+**Goal:** Complete all remaining controls from docs/admin-proxy-hardening-plan.md
+before ADMIN_PROXY_ENABLED can be set to true on any deployment. This sub-milestone
+is the most directly security-critical change in the 4S.85 sequence.
 
 **Files likely to change:**
 - frontend/app/api/admin/[...path]/route.ts (add: session extraction from httpOnly
@@ -688,10 +699,13 @@ enforcement, size limits, response minimisation, and audit logging -- must be im
 in full before ADMIN_PROXY_ENABLED is set to true on any deployment.
 
 **No enabling ADMIN_PROXY_ENABLED until all controls exist.**
-ADMIN_PROXY_ENABLED remains false on all public deployments until 4S.85G is complete,
-all proxy tests from docs/admin-proxy-hardening-plan.md Section 13 are passing, and
-the implementation has been verified in a developer-controlled environment. This sequence
-is not optional.
+ADMIN_PROXY_ENABLED remains false on all public deployments. Fail-closed hardening
+controls have been partially implemented in 4S.85G slices, but real Supabase Auth
+session validation, real organisation_memberships lookup, and production CSRF are not
+yet complete. ADMIN_PROXY_ENABLED must not be set to true until 4S.85G is fully
+complete, all proxy tests from docs/admin-proxy-hardening-plan.md Section 13 are
+passing, and the implementation has been verified in a developer-controlled
+environment. This sequence is not optional.
 
 The four conditions that must all be true before ADMIN_PROXY_ENABLED=true is set on any
 environment:

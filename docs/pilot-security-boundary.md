@@ -6,6 +6,15 @@
 
 ---
 
+> **Current state note (post-4S.83):** This document was written as a design-only
+> milestone. Since then, `NEXT_PUBLIC_ADMIN_DEMO_ENABLED` has been set to `true` on
+> the live Vercel demo, so admin demo screens are now visible there. This is a UI
+> visibility change only. `ADMIN_PROXY_ENABLED` remains `false` on all public
+> deployments; the proxy continues to fail closed. Visible admin demo screens do
+> not equal admin API access.
+
+---
+
 ## 1. Purpose
 
 This document defines the minimum viable authentication and role-based access model
@@ -17,9 +26,15 @@ role-based access control, and no admin session protection. As the consolidated
 10/10 roadmap (4S.78) states plainly: the product's privacy guarantees - individual
 conversations private from managers, staff identity not shared - are aspirations,
 not technical facts, until an authentication layer exists. Any HTTP client can
-currently submit a question as any user, in any role, for any organisation. The
-admin proxy, if enabled, would allow any visitor to the public URL to trigger admin
-operations using the server-held bearer token.
+currently submit a question as any user, in any role, for any organisation.
+
+At the time this document was written, enabling the admin proxy without
+further controls would have allowed public visitors to trigger admin
+operations using the server-held bearer token. Since then, fail-closed
+proxy hardening has been partially implemented, but real Supabase Auth
+session validation, real organisation_memberships lookup and production
+CSRF remain outstanding, so ADMIN_PROXY_ENABLED must remain false
+publicly.
 
 This document answers three questions:
 
@@ -58,8 +73,11 @@ The following are explicitly out of scope for this milestone.
 - **No AI inside Private Notes.** Private Notes remain session-only, client-side,
   and outside any AI processing path.
 
-- **No changes to `NEXT_PUBLIC_ADMIN_DEMO_ENABLED` or `ADMIN_PROXY_ENABLED`.**
-  Both remain false on all public deployments.
+- **`ADMIN_PROXY_ENABLED` remains false on all public deployments.** No admin proxy
+  changes are made in this milestone. `NEXT_PUBLIC_ADMIN_DEMO_ENABLED` controls
+  admin UI visibility only; it has since been enabled on the live Vercel demo for
+  managed walkthroughs (UI visibility only, no API access). See current state note
+  above.
 
 ---
 
@@ -432,20 +450,27 @@ any circumstances, regardless of governance gate settings:
 
 ## 10. Admin Boundary
 
-### 10.1 Admin demo remains disabled publicly
+### 10.1 Admin demo visibility is separate from admin API access
 
-`NEXT_PUBLIC_ADMIN_DEMO_ENABLED=false` must remain the default on all public
-deployments. The admin interface must not be accessible to any unauthenticated
-visitor or any staff-role user via the public URL.
+`NEXT_PUBLIC_ADMIN_DEMO_ENABLED` controls whether admin demo screens are shown in
+the UI. It has since been set to `true` on the live Vercel demo for managed
+walkthroughs. This is a UI visibility change only; it does not grant API access.
+`ADMIN_PROXY_ENABLED` remains `false` on all public deployments. No admin operation
+can be triggered via the public URL.
 
-### 10.2 Admin proxy remains disabled until 4S.84/4S.85 controls exist
+### 10.2 Admin proxy remains disabled until real auth controls are complete
 
-`ADMIN_PROXY_ENABLED=false` must remain the default until the controls designed in
-4S.84 (admin proxy hardening) are implemented in 4S.85. As the Codex review
-identifies, the proxy at `frontend/app/api/admin/[...path]/route.ts` becomes a
-privileged backend-to-backend tunnel when enabled. Without an authenticated admin
-session and a route allowlist, any visitor who can reach `/api/admin/...` can
-trigger admin operations through the server-held token.
+`ADMIN_PROXY_ENABLED=false` must remain the default on all public deployments.
+Fail-closed hardening controls have since been partially implemented in 4S.85G
+slices (path allowlist, method guard, CSRF fail-closed guard, upload guards, and
+audit logging), but the proxy session context remains stub/test-mode based. Real
+Supabase Auth session validation, real `organisation_memberships` lookup, and
+production CSRF are not yet in place. Until those controls are complete
+and verified, ADMIN_PROXY_ENABLED must not be enabled on any public
+deployment. The current fail-closed guards reduce
+accidental forwarding risk, but they are not a production access-control model
+because real Supabase Auth session validation, real organisation_memberships
+lookup and production CSRF are still missing.
 
 ### 10.3 Admin proxy must later validate admin session before forwarding
 
@@ -654,21 +679,24 @@ to the Thumhara Centre organisation, and every protected route derives identity
 from the server-side session. The current environment-variable identity approach
 is acceptable only for internal demos.
 
-**No admin upload access publicly until admin auth and proxy hardening exist.**
-`ADMIN_PROXY_ENABLED=false` must remain the default on all public deployments until
-the controls designed in 4S.84 and implemented in 4S.85 are in place. Uploading
-real Thumhara Centre documents must not happen until admin authentication is
-enforced both on the Next.js proxy and at the backend endpoint level.
+**No admin upload access publicly until real admin auth is complete.**
+`ADMIN_PROXY_ENABLED=false` must remain the default on all public deployments.
+Fail-closed proxy hardening controls have since been partially implemented in
+4S.85G slices, but real Supabase Auth session validation, real organisation_memberships
+lookup, and production CSRF remain outstanding. Uploading real Thumhara Centre
+documents must not happen until admin authentication is fully enforced at both the
+Next.js proxy and the backend endpoint level.
 
 **No real documents before governance and legal checks.** Before any Thumhara
 Centre policy document is uploaded, the nominated governance reviewer must be
 confirmed, the document review process must be agreed, and the Data Processing
 Agreement must be in place with Supabase and OpenAI.
 
-**4S.84 must design admin proxy hardening next.** The admin proxy at
-`frontend/app/api/admin/[...path]/route.ts` requires a path allowlist, method
-allowlist, CSRF protection, and session validation before it can be safely enabled
-on any public deployment. This design work is the subject of milestone 4S.84.
+**4S.84 designed admin proxy hardening.** The admin proxy at
+`frontend/app/api/admin/[...path]/route.ts` required a path allowlist, method
+allowlist, CSRF protection, and session validation. These controls were designed in
+4S.84 and partially implemented in 4S.85G slices. Real session validation and real
+membership lookup remain outstanding.
 
 **4S.85 implements staff and admin authentication based on this boundary.** The
 implementation milestone must follow the identity model, roles, access matrix, and

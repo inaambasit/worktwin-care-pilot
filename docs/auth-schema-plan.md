@@ -648,8 +648,13 @@ membership row is the only identity source.
 
 ## 12. Admin Proxy Usage Plan
 
-The admin proxy at `frontend/app/api/admin/[...path]/route.ts` will be hardened
-in 4S.85G. Its membership table usage follows the same pattern as the backend.
+The admin proxy at `frontend/app/api/admin/[...path]/route.ts` has been partially
+hardened in 4S.85G slices. Several fail-closed controls are now in place (typed
+path allowlist, method guard, CSRF fail-closed guard for POST/PATCH, upload guards,
+and audit logging), but the session context remains stub/test-mode based. Real
+Supabase Auth session validation and real `organisation_memberships` lookup — both
+described in the steps below — remain outstanding. Its membership table usage will
+follow the same pattern as the backend once real session validation is implemented.
 
 ### Session and membership lookup
 

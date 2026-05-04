@@ -6,6 +6,36 @@
 
 ---
 
+## Current Implementation State (post-4S.84)
+
+This document was a design-only milestone. The following fail-closed hardening
+controls have since been implemented in 4S.85G slices:
+
+- Disabled proxy guard (returns 403 when `ADMIN_PROXY_ENABLED=false`)
+- Typed path allowlist via `ADMIN_ALLOWLIST` / `classifyPath`
+- Method guard returning 405 for disallowed methods
+- Unauthenticated guard returning 401
+- Global role and membership guard returning 403
+- Route-specific role allowlist
+- CSRF fail-closed guard for POST and PATCH
+- Upload content-type guard returning 415
+- Upload size guard returning 413
+- Safe structured audit logging
+- `Cache-Control: no-store` on admin proxy responses
+
+The following controls remain outstanding:
+
+- Real Supabase Auth session validation (current session context is stub/test-mode based)
+- Real `organisation_memberships` lookup
+- Production CSRF token and same-site implementation
+- Staff and admin route protection for real pilot users
+
+**`ADMIN_PROXY_ENABLED` must remain `false` on all public deployments until the
+outstanding controls above are complete and verified. The proxy is not
+production-ready.**
+
+---
+
 ## 1. Purpose
 
 The admin proxy at `frontend/app/api/admin/[...path]/route.ts` was introduced in
@@ -13,14 +43,14 @@ milestone 4S.2A to keep the backend bearer token server-side. While
 `ADMIN_PROXY_ENABLED=false`, this goal is met: all requests to `/api/admin/...`
 return a 403 response before any forwarding logic runs.
 
-The proxy is safe only while it is disabled. The moment `ADMIN_PROXY_ENABLED=true`
-is set on a public deployment, the proxy becomes a privileged backend-to-backend
-tunnel. In that state, any HTTP client that can reach the public Next.js URL can
-forward arbitrary requests to the backend, authenticated as the server-held
-`ADMIN_TOKEN`, without providing any user credential. There is no admin session
-validation, no path allowlist, no method restriction, and no CSRF protection
-standing between an unauthenticated visitor and a full-permission admin operation
-on the Thumhara Centre document registry.
+At the time this document was written, the proxy was safe only while
+disabled: if `ADMIN_PROXY_ENABLED` had been set to true on a public
+deployment, it would have acted as a privileged backend-to-backend
+tunnel using the server-held `ADMIN_TOKEN`. Since then, fail-closed
+proxy controls have been partially implemented, but the proxy is still
+not production-ready because real Supabase Auth session validation, real
+`organisation_memberships` lookup and production CSRF remain outstanding.
+`ADMIN_PROXY_ENABLED` must remain false on all public deployments.
 
 The consolidated roadmap (4S.78) and the Codex strict review (4S.76) both identify
 this as a critical gap. The pilot security boundary design (4S.83) commits to
@@ -80,40 +110,48 @@ segment. Every matched request goes through the single `proxyHandler` function.
 
 `BACKEND_URL` is resolved from `API_BASE_URL` first, then `NEXT_PUBLIC_API_URL`.
 
-### Current risks
+### Risks at the time of 4S.84
 
-The following risks exist if `ADMIN_PROXY_ENABLED` were set to true on a public
-deployment without further changes.
+The following risks existed when this document was written, describing the state
+of the proxy if `ADMIN_PROXY_ENABLED` were set to true on a public deployment.
 
-**Unauthenticated admin access.** There is no admin session validation. Any visitor
-to the public URL who constructs a request to `/api/admin/<any-path>` is forwarded
-to the backend as the bearer-token holder. The proxy grants full backend admin
-access to the general public.
+Several of these risks have since been addressed by fail-closed controls implemented
+in 4S.85G slices (see Current Implementation State above). The outstanding risks
+are: real Supabase Auth session validation is not yet in place (the session context
+is stub/test-mode based); real `organisation_memberships` lookup is not implemented;
+and production CSRF token and same-site implementation are not yet in place.
+`ADMIN_PROXY_ENABLED` must not be enabled publicly until those controls are complete.
 
-**No path allowlist.** `backendPath` is constructed directly from the URL path
-segments with no validation. An attacker can target any backend endpoint, not only
-intended admin endpoints.
+**Unauthenticated admin access.** At time of 4S.84, there was no admin session
+validation. An unauthenticated guard returning 401 has since been implemented, but
+the session context it validates against is stub/test-mode based, not real Supabase
+Auth. Real Supabase Auth session validation remains outstanding.
 
-**No method/path pair restriction.** The same function handles GET, POST, and
-PATCH for every path. A path that should only accept GET can also be called with
-a state-changing PATCH or POST request.
+**No path allowlist.** At time of 4S.84, `backendPath` was constructed directly
+from URL path segments with no validation. A typed path allowlist via
+`ADMIN_ALLOWLIST` / `classifyPath` has since been implemented.
 
-**No CSRF protection.** There are no same-site session controls, CSRF tokens, or
-origin checks on state-changing methods. A malicious page could trigger a
-cross-origin admin request if the proxy were enabled.
+**No method/path pair restriction.** At time of 4S.84, the same handler accepted
+all methods for every path. A method guard returning 405 for disallowed methods
+has since been implemented.
 
-**No request size limits.** There is no cap on the request body size forwarded to
-the backend. A large POST or multipart upload is forwarded without restriction.
+**No CSRF protection.** At time of 4S.84, there were no same-site session controls,
+CSRF tokens, or origin checks. A CSRF fail-closed guard for POST and PATCH has since
+been implemented, but production CSRF token and same-site implementation remain
+outstanding.
 
-**No content-type restriction.** Any content type is forwarded. An upload route
-intended only for multipart/form-data can receive JSON or arbitrary binary.
+**No request size limits.** At time of 4S.84, there was no cap on request body
+size. An upload size guard returning 413 has since been implemented.
 
-**No audit logging.** No record is made of which paths are called, which methods
-are used, who called them, or what happened.
+**No content-type restriction.** At time of 4S.84, any content type was forwarded.
+An upload content-type guard returning 415 has since been implemented.
+
+**No audit logging.** At time of 4S.84, no structured audit record was produced.
+Safe structured audit logging has since been implemented.
 
 **No response minimisation.** Debug responses containing chunk IDs, similarity
-scores, storage keys, or internal document metadata are returned in full to whoever
-calls the proxy.
+scores, storage keys, or internal document metadata are still returned in full to
+whoever calls the proxy. Response minimisation remains outstanding.
 
 ---
 

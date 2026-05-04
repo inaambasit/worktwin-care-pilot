@@ -6,7 +6,7 @@ const features = [
     icon: MessageCircle,
     title: 'Ask questions safely',
     description:
-      'Employees get instant, policy-grounded answers to work, policy and workflow questions without feeling embarrassed or interrupting managers.',
+      'Employees can get guided, policy-grounded support for work, policy and workflow questions without feeling embarrassed or interrupting managers.',
   },
   {
     icon: BookOpen,
@@ -42,7 +42,7 @@ const features = [
 
 const trustItems = [
   'Employee chat content is not shown on manager pages in this demo',
-  'All answers are grounded in your approved documents',
+  'Designed for answers grounded in approved documents',
   'Sensitive topics are escalated to a human - never answered automatically',
   'No performance scoring, surveillance or sentiment tracking',
   'Designed around UK GDPR principles',
@@ -57,7 +57,7 @@ const steps = [
   {
     step: '2',
     title: 'Employees ask questions',
-    description: 'Staff ask questions in plain English. WorkTwin answers from approved documents and cites the source.',
+    description: 'Staff ask questions in plain English. WorkTwin is designed to answer from approved documents and show the source when the required document and governance checks are in place.',
   },
   {
     step: '3',

@@ -5,7 +5,8 @@
 // ACTIVE: allowlist classification unit-style tests (import helper directly, no HTTP).
 // ACTIVE (conditional): path/method guard tests -- skip unless ADMIN_PROXY_ENABLED=true in dev server.
 // ACTIVE (conditional): 401 session guard test -- skip unless ADMIN_PROXY_ENABLED=true in dev server.
-// SKIPPED: role/CSRF/upload guards (not yet implemented).
+// ACTIVE (conditional): CSRF guard tests -- skip unless ADMIN_PROXY_ENABLED=true in dev server.
+// SKIPPED: upload guards (not yet implemented).
 import { test, expect } from '@playwright/test'
 import { classifyPath, ADMIN_ALLOWLIST } from '../lib/admin-proxy-allowlist'
 
@@ -184,6 +185,7 @@ test.describe('Admin proxy -- authentication and authorisation (TODO)', () => {
       headers: {
         'x-worktwin-test-admin-role': 'worktwin_dev_admin',
         'x-worktwin-test-admin-active': 'true',
+        'x-worktwin-test-csrf': 'test',
       },
     })
     expect(response.status()).not.toBe(403)
@@ -231,6 +233,7 @@ test.describe('Admin proxy -- authentication and authorisation (TODO)', () => {
       headers: {
         'x-worktwin-test-admin-role': 'worktwin_dev_admin',
         'x-worktwin-test-admin-active': 'true',
+        'x-worktwin-test-csrf': 'test',
       },
     })
     expect(response.status()).not.toBe(403)
@@ -264,6 +267,97 @@ test.describe('Admin proxy -- path and method validation', () => {
     expect(response.status()).toBe(405)
     const body = await response.json()
     expect(body).toHaveProperty('detail')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// CSRF/same-site guard (4S.85G-7)
+// GET bypasses CSRF; POST and PATCH require a valid same-site proof.
+// Test-only proof: x-worktwin-test-csrf: test, accepted only when PLAYWRIGHT_TEST is set.
+// ---------------------------------------------------------------------------
+
+test.describe('Admin proxy -- CSRF guard', () => {
+  test('GET /api/admin/documents with organisation_admin does not require CSRF (passes to 503)', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.get('/api/admin/documents', {
+      headers: {
+        'x-worktwin-test-admin-role': 'organisation_admin',
+        'x-worktwin-test-admin-active': 'true',
+      },
+    })
+    // GET bypasses CSRF; no ADMIN_TOKEN/BACKEND_URL in test → 503
+    expect(response.status()).toBe(503)
+  })
+
+  test('POST /api/admin/documents/search-vector with worktwin_dev_admin and no CSRF returns 403', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.post('/api/admin/documents/search-vector', {
+      data: { query: 'test' },
+      headers: {
+        'x-worktwin-test-admin-role': 'worktwin_dev_admin',
+        'x-worktwin-test-admin-active': 'true',
+      },
+    })
+    expect(response.status()).toBe(403)
+    const body = await response.json()
+    expect(body.detail).toBe('CSRF check failed.')
+  })
+
+  test('POST /api/admin/documents/search-vector with worktwin_dev_admin and valid test CSRF passes CSRF guard', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.post('/api/admin/documents/search-vector', {
+      data: { query: 'test' },
+      headers: {
+        'x-worktwin-test-admin-role': 'worktwin_dev_admin',
+        'x-worktwin-test-admin-active': 'true',
+        'x-worktwin-test-csrf': 'test',
+      },
+    })
+    // CSRF guard passed; 503 expected when ADMIN_TOKEN/BACKEND_URL absent
+    expect(response.status()).not.toBe(403)
+  })
+
+  test('PATCH /api/admin/documents/123/governance with organisation_admin and no CSRF returns 403', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.patch('/api/admin/documents/123/governance', {
+      data: {},
+      headers: {
+        'x-worktwin-test-admin-role': 'organisation_admin',
+        'x-worktwin-test-admin-active': 'true',
+      },
+    })
+    expect(response.status()).toBe(403)
+    const body = await response.json()
+    expect(body.detail).toBe('CSRF check failed.')
+  })
+
+  test('PATCH /api/admin/documents/123/governance with organisation_admin and valid test CSRF passes CSRF guard', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.patch('/api/admin/documents/123/governance', {
+      data: {},
+      headers: {
+        'x-worktwin-test-admin-role': 'organisation_admin',
+        'x-worktwin-test-admin-active': 'true',
+        'x-worktwin-test-csrf': 'test',
+      },
+    })
+    // CSRF guard passed; 503 expected when ADMIN_TOKEN/BACKEND_URL absent
+    expect(response.status()).not.toBe(403)
   })
 })
 

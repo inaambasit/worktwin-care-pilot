@@ -97,6 +97,17 @@ async function proxyHandler(
     return NextResponse.json({ detail: 'Access denied.' }, { status: 403 })
   }
 
+  // 4S.85G-7: CSRF/same-site guard -- POST and PATCH only; GET bypasses.
+  // Test-only: x-worktwin-test-csrf: test accepted when NODE_ENV=test or PLAYWRIGHT_TEST is set.
+  // Production/non-test mode fails closed -- a real CSRF mechanism must be added before go-live.
+  if (request.method === 'POST' || request.method === 'PATCH') {
+    const isTestMode = process.env.NODE_ENV === 'test' || !!process.env.PLAYWRIGHT_TEST
+    const csrfValid = isTestMode && request.headers.get('x-worktwin-test-csrf') === 'test'
+    if (!csrfValid) {
+      return NextResponse.json({ detail: 'CSRF check failed.' }, { status: 403 })
+    }
+  }
+
   if (!ADMIN_TOKEN || !BACKEND_URL) {
     return NextResponse.json({ detail: 'Admin proxy not configured.' }, { status: 503 })
   }

@@ -4,7 +4,8 @@
 // ACTIVE: disabled-proxy baseline (ADMIN_PROXY_ENABLED absent/false -> 403).
 // ACTIVE: allowlist classification unit-style tests (import helper directly, no HTTP).
 // ACTIVE (conditional): path/method guard tests -- skip unless ADMIN_PROXY_ENABLED=true in dev server.
-// SKIPPED: auth/session/role/CSRF/upload guards (not yet implemented).
+// ACTIVE (conditional): 401 session guard test -- skip unless ADMIN_PROXY_ENABLED=true in dev server.
+// SKIPPED: role/CSRF/upload guards (not yet implemented).
 import { test, expect } from '@playwright/test'
 import { classifyPath, ADMIN_ALLOWLIST } from '../lib/admin-proxy-allowlist'
 
@@ -99,12 +100,21 @@ test.describe('Admin proxy -- allowlist classification (unit-style)', () => {
 })
 
 // ---------------------------------------------------------------------------
-// Authentication & authorisation -- requires session auth middleware (TODO)
+// Authentication & authorisation
+// 401 session guard is now active (conditional on ADMIN_PROXY_ENABLED=true).
+// Role/CSRF/upload guards remain TODO.
 // ---------------------------------------------------------------------------
 
 test.describe('Admin proxy -- authentication and authorisation (TODO)', () => {
-  test.skip('unauthenticated request returns 401 when proxy enabled', async () => {
-    // Needs: ADMIN_PROXY_ENABLED=true + Supabase session check added to route handler
+  test('unauthenticated request returns 401 when proxy enabled', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true in dev server',
+    )
+    const response = await request.get('/api/admin/documents')
+    expect(response.status()).toBe(401)
+    const body = await response.json()
+    expect(body.detail).toBe('Authentication required.')
   })
 
   test.skip('staff role returns 403 when proxy enabled', async () => {

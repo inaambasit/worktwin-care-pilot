@@ -24,6 +24,15 @@ const BACKEND_URL =
   process.env.NEXT_PUBLIC_API_URL ??
   ''
 
+// 4S.85G-4: Placeholder session seam — returns null (unauthenticated) until real Supabase
+// session validation is added in a later 4S.85G slice.
+// Never derive user_id, organisation_id, or role from client headers, body, or query string.
+function getAdminProxySessionContext(
+  _request: NextRequest,
+): { userId: string } | null {
+  return null
+}
+
 async function proxyHandler(
   request: NextRequest,
   { params }: { params: { path: string[] } },
@@ -44,6 +53,13 @@ async function proxyHandler(
   const allowedMethods = ADMIN_ALLOWLIST[classified.routeKey].methods as readonly string[]
   if (!allowedMethods.includes(request.method)) {
     return NextResponse.json({ detail: 'Method not allowed.' }, { status: 405 })
+  }
+
+  // 4S.85G-4: Session guard — must come before ADMIN_TOKEN/BACKEND_URL checks and before fetch().
+  // Real Supabase session validation and membership lookup will replace this in later 4S.85G slices.
+  const session = getAdminProxySessionContext(request)
+  if (!session) {
+    return NextResponse.json({ detail: 'Authentication required.' }, { status: 401 })
   }
 
   if (!ADMIN_TOKEN || !BACKEND_URL) {

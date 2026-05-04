@@ -1,4 +1,4 @@
-// Milestone 4S.2A — Server-side proxy for admin/document endpoints.
+// Milestone 4S.2A -- Server-side proxy for admin/document endpoints.
 // ADMIN_TOKEN stays server-side; the browser never receives or sends it.
 // Proxy is disabled unless ADMIN_PROXY_ENABLED=true in the deployment environment.
 //
@@ -7,9 +7,16 @@
 // - Proxy is disabled unless ADMIN_PROXY_ENABLED=true.
 // - This is not a replacement for real admin session auth; a later milestone
 //   must add proper session protection before real users access the admin area.
+//
+// Milestone 4S.85G-2 -- Typed allowlist scaffold (not yet enforced in handler).
+// ADMIN_ALLOWLIST and classifyPath live in lib/admin-proxy-allowlist.ts so that
+// Playwright tests can import them without pulling in Next.js server modules.
 import { NextRequest, NextResponse } from 'next/server'
+// Allowlist imported for scaffold; enforcement wired in a later slice.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { ADMIN_ALLOWLIST, classifyPath } from '@/lib/admin-proxy-allowlist'
 
-// Allow up to 120 s on Vercel — generate-embeddings can take that long
+// Allow up to 120 s on Vercel -- generate-embeddings can take that long
 export const maxDuration = 120
 
 const ADMIN_PROXY_ENABLED = process.env.ADMIN_PROXY_ENABLED === 'true'
@@ -23,6 +30,7 @@ async function proxyHandler(
   request: NextRequest,
   { params }: { params: { path: string[] } },
 ): Promise<NextResponse> {
+  // Disabled guard must remain first -- all active Playwright tests depend on this 403.
   if (!ADMIN_PROXY_ENABLED) {
     return NextResponse.json(
       { detail: 'Admin proxy is disabled for this deployment.' },
@@ -40,7 +48,7 @@ async function proxyHandler(
   const forwardHeaders: Record<string, string> = {
     Authorization: `Bearer ${ADMIN_TOKEN}`,
   }
-  // Forward Content-Type verbatim — multipart/form-data must include its boundary
+  // Forward Content-Type verbatim -- multipart/form-data must include its boundary
   const contentType = request.headers.get('content-type')
   if (contentType) forwardHeaders['Content-Type'] = contentType
 

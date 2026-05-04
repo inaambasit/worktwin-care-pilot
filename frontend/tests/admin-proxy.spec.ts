@@ -1,15 +1,17 @@
-// Milestone 4S.85G — Admin proxy test foundation.
+// Milestone 4S.85G -- Admin proxy test foundation.
 // Tests the catch-all route at /api/admin/[...path].
 //
-// ACTIVE: disabled-proxy baseline (ADMIN_PROXY_ENABLED absent/false → 403).
+// ACTIVE: disabled-proxy baseline (ADMIN_PROXY_ENABLED absent/false -> 403).
+// ACTIVE: allowlist classification unit-style tests (import helper directly, no HTTP).
 // SKIPPED: all hardening cases that need implementation not yet written.
 import { test, expect } from '@playwright/test'
+import { classifyPath, ADMIN_ALLOWLIST } from '../lib/admin-proxy-allowlist'
 
 // ---------------------------------------------------------------------------
-// Disabled-proxy baseline — no env changes needed, runs in dev environment
+// Disabled-proxy baseline -- no env changes needed, runs in dev environment
 // ---------------------------------------------------------------------------
 
-test.describe('Admin proxy — disabled baseline', () => {
+test.describe('Admin proxy -- disabled baseline', () => {
   test('GET /api/admin/documents returns 403 when proxy disabled', async ({ request }) => {
     const response = await request.get('/api/admin/documents')
     expect(response.status()).toBe(403)
@@ -28,7 +30,7 @@ test.describe('Admin proxy — disabled baseline', () => {
     expect(body.detail).toMatch(/disabled/i)
   })
 
-  test('disabled proxy returns exact detail message — confirms no forwarding attempted', async ({
+  test('disabled proxy returns exact detail message -- confirms no forwarding attempted', async ({
     request,
   }) => {
     // Any message other than this exact string (e.g. "Backend unreachable" or a real
@@ -41,10 +43,65 @@ test.describe('Admin proxy — disabled baseline', () => {
 })
 
 // ---------------------------------------------------------------------------
-// Authentication & authorisation — requires session auth middleware (TODO)
+// Allowlist classification -- unit-style, no HTTP, safe while proxy is disabled
 // ---------------------------------------------------------------------------
 
-test.describe('Admin proxy — authentication and authorisation (TODO)', () => {
+test.describe('Admin proxy -- allowlist classification (unit-style)', () => {
+  test('unknown path is classified as not found (would be 404)', () => {
+    const result = classifyPath(['completely-unknown-resource'])
+    expect(result.match).toBe('not_found')
+  })
+
+  test('DELETE on documents is not in allowed methods (would be 405)', () => {
+    const result = classifyPath(['documents'])
+    expect(result.match).toBe('found')
+    if (result.match === 'found') {
+      expect(ADMIN_ALLOWLIST[result.routeKey].methods).not.toContain('DELETE')
+    }
+  })
+
+  test('organisation_admin is not in allowed roles for documents/search-vector', () => {
+    const result = classifyPath(['documents', 'search-vector'])
+    expect(result.match).toBe('found')
+    if (result.match === 'found') {
+      expect(ADMIN_ALLOWLIST[result.routeKey].roles).not.toContain('organisation_admin')
+    }
+  })
+
+  test('worktwin_dev_admin is allowed for documents/search-vector', () => {
+    const result = classifyPath(['documents', 'search-vector'])
+    expect(result.match).toBe('found')
+    if (result.match === 'found') {
+      expect(ADMIN_ALLOWLIST[result.routeKey].roles).toContain('worktwin_dev_admin')
+    }
+  })
+
+  test('extra segment after documents/{id}/governance is rejected', () => {
+    const result = classifyPath(['documents', '123', 'governance', 'extra'])
+    expect(result.match).toBe('not_found')
+  })
+
+  test('extra segment after documents/{id}/generate-embeddings is rejected', () => {
+    const result = classifyPath(['documents', '123', 'generate-embeddings', 'extra'])
+    expect(result.match).toBe('not_found')
+  })
+
+  test('extra segment after debug/storage-config is rejected', () => {
+    const result = classifyPath(['debug', 'storage-config', 'extra'])
+    expect(result.match).toBe('not_found')
+  })
+
+  test('extra segment after documents/upload is rejected', () => {
+    const result = classifyPath(['documents', 'upload', 'extra'])
+    expect(result.match).toBe('not_found')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Authentication & authorisation -- requires session auth middleware (TODO)
+// ---------------------------------------------------------------------------
+
+test.describe('Admin proxy -- authentication and authorisation (TODO)', () => {
   test.skip('unauthenticated request returns 401 when proxy enabled', async () => {
     // Needs: ADMIN_PROXY_ENABLED=true + Supabase session check added to route handler
   })
@@ -75,24 +132,24 @@ test.describe('Admin proxy — authentication and authorisation (TODO)', () => {
 })
 
 // ---------------------------------------------------------------------------
-// Path and method validation — requires proxy enabled or route-level guards (TODO)
+// Path and method validation -- requires proxy enabled or route-level guards (TODO)
 // ---------------------------------------------------------------------------
 
-test.describe('Admin proxy — path and method validation (TODO)', () => {
+test.describe('Admin proxy -- path and method validation (TODO)', () => {
   test.skip('unknown path returns 404 when proxy enabled', async () => {
-    // Needs: proxy enabled + route allow-list or backend passes 404 back through proxy
+    // Needs: proxy enabled + route allow-list enforcement wired into handler
   })
 
   test.skip('disallowed method DELETE returns 405', async () => {
-    // Needs: proxy enabled; DELETE is not exported by the route — Next.js returns 405
+    // Needs: proxy enabled; DELETE is not exported by the route -- Next.js returns 405
   })
 })
 
 // ---------------------------------------------------------------------------
-// Upload safety — requires proxy-layer guards not yet implemented (TODO)
+// Upload safety -- requires proxy-layer guards not yet implemented (TODO)
 // ---------------------------------------------------------------------------
 
-test.describe('Admin proxy — upload safety (TODO)', () => {
+test.describe('Admin proxy -- upload safety (TODO)', () => {
   test.skip('upload with wrong Content-Type returns 415', async () => {
     // Needs: Content-Type allow-list guard in route (PDF-only enforcement at proxy layer)
   })

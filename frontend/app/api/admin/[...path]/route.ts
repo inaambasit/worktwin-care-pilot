@@ -31,6 +31,31 @@ const ADMIN_CAPABLE_ROLES: readonly string[] = ['organisation_admin', 'worktwin_
 // 4S.85G-8: Proxy-layer cap for upload requests -- checked via Content-Length before reading body.
 const ADMIN_PROXY_UPLOAD_MAX_BYTES = 1024
 
+// 4S.85G-9: Safe structured audit logging -- never logs secrets, bodies, paths, or personal data.
+type AuditEvent = {
+  component: 'admin_proxy'
+  event_type: string
+  method: string
+  status: number
+  decision: 'deny' | 'allow'
+  reason: string
+  route_key?: string
+  role?: string
+  active?: boolean
+}
+
+function auditAdminProxyEvent(event: AuditEvent): void {
+  try {
+    if (event.decision === 'deny') {
+      console.warn(JSON.stringify(event))
+    } else {
+      console.info(JSON.stringify(event))
+    }
+  } catch {
+    // swallow -- logging must never break request handling
+  }
+}
+
 type AdminSessionContext = {
   userId: string
   role: string
@@ -64,6 +89,7 @@ async function proxyHandler(
 ): Promise<NextResponse> {
   // Disabled guard must remain first -- all active Playwright tests depend on this 403.
   if (!ADMIN_PROXY_ENABLED) {
+    auditAdminProxyEvent({ component: 'admin_proxy', event_type: 'proxy_guard', method: request.method, status: 403, decision: 'deny', reason: 'proxy_disabled' })
     return NextResponse.json(
       { detail: 'Admin proxy is disabled for this deployment.' },
       { status: 403 },
@@ -72,11 +98,13 @@ async function proxyHandler(
 
   const classified = classifyPath(params.path)
   if (classified.match === 'not_found') {
+    auditAdminProxyEvent({ component: 'admin_proxy', event_type: 'proxy_guard', method: request.method, status: 404, decision: 'deny', reason: 'path_not_found' })
     return NextResponse.json({ detail: 'Not found.' }, { status: 404 })
   }
 
   const allowedMethods = ADMIN_ALLOWLIST[classified.routeKey].methods as readonly string[]
   if (!allowedMethods.includes(request.method)) {
+    auditAdminProxyEvent({ component: 'admin_proxy', event_type: 'proxy_guard', method: request.method, status: 405, decision: 'deny', reason: 'method_not_allowed', route_key: classified.routeKey })
     return NextResponse.json({ detail: 'Method not allowed.' }, { status: 405 })
   }
 
@@ -84,19 +112,23 @@ async function proxyHandler(
   // Real Supabase session validation and membership lookup will replace this in later 4S.85G slices.
   const session = getAdminProxySessionContext(request)
   if (!session) {
+    auditAdminProxyEvent({ component: 'admin_proxy', event_type: 'proxy_guard', method: request.method, status: 401, decision: 'deny', reason: 'unauthenticated', route_key: classified.routeKey })
     return NextResponse.json({ detail: 'Authentication required.' }, { status: 401 })
   }
 
   // 4S.85G-5: Role/membership guard -- before ADMIN_TOKEN/BACKEND_URL checks and before fetch().
   if (!ADMIN_CAPABLE_ROLES.includes(session.role)) {
+    auditAdminProxyEvent({ component: 'admin_proxy', event_type: 'proxy_guard', method: request.method, status: 403, decision: 'deny', reason: 'role_denied', route_key: classified.routeKey, role: session.role, active: session.active })
     return NextResponse.json({ detail: 'Access denied.' }, { status: 403 })
   }
   if (!session.active) {
+    auditAdminProxyEvent({ component: 'admin_proxy', event_type: 'proxy_guard', method: request.method, status: 403, decision: 'deny', reason: 'inactive_membership', route_key: classified.routeKey, role: session.role, active: session.active })
     return NextResponse.json({ detail: 'Access denied.' }, { status: 403 })
   }
 
   // 4S.85G-6: Route-specific role allowlist -- before ADMIN_TOKEN/BACKEND_URL checks and before fetch().
   if (!(ADMIN_ALLOWLIST[classified.routeKey].roles as readonly string[]).includes(session.role)) {
+    auditAdminProxyEvent({ component: 'admin_proxy', event_type: 'proxy_guard', method: request.method, status: 403, decision: 'deny', reason: 'route_role_denied', route_key: classified.routeKey, role: session.role, active: session.active })
     return NextResponse.json({ detail: 'Access denied.' }, { status: 403 })
   }
 
@@ -107,6 +139,7 @@ async function proxyHandler(
     const isTestMode = process.env.NODE_ENV === 'test' || !!process.env.PLAYWRIGHT_TEST
     const csrfValid = isTestMode && request.headers.get('x-worktwin-test-csrf') === 'test'
     if (!csrfValid) {
+      auditAdminProxyEvent({ component: 'admin_proxy', event_type: 'proxy_guard', method: request.method, status: 403, decision: 'deny', reason: 'csrf_failed', route_key: classified.routeKey, role: session.role, active: session.active })
       return NextResponse.json({ detail: 'CSRF check failed.' }, { status: 403 })
     }
   }
@@ -115,18 +148,21 @@ async function proxyHandler(
   if (classified.routeKey === 'documents/upload' && request.method === 'POST') {
     const ct = request.headers.get('content-type') ?? ''
     if (!ct.startsWith('multipart/form-data')) {
+      auditAdminProxyEvent({ component: 'admin_proxy', event_type: 'proxy_guard', method: request.method, status: 415, decision: 'deny', reason: 'unsupported_media_type', route_key: classified.routeKey, role: session.role, active: session.active })
       return NextResponse.json({ detail: 'Unsupported media type.' }, { status: 415 })
     }
     const clHeader = request.headers.get('content-length')
     if (clHeader !== null) {
       const cl = parseInt(clHeader, 10)
       if (!isNaN(cl) && cl > ADMIN_PROXY_UPLOAD_MAX_BYTES) {
+        auditAdminProxyEvent({ component: 'admin_proxy', event_type: 'proxy_guard', method: request.method, status: 413, decision: 'deny', reason: 'upload_too_large', route_key: classified.routeKey, role: session.role, active: session.active })
         return NextResponse.json({ detail: 'Upload too large.' }, { status: 413 })
       }
     }
   }
 
   if (!ADMIN_TOKEN || !BACKEND_URL) {
+    auditAdminProxyEvent({ component: 'admin_proxy', event_type: 'proxy_guard', method: request.method, status: 503, decision: 'deny', reason: 'not_configured', route_key: classified.routeKey, role: session.role, active: session.active })
     return NextResponse.json({ detail: 'Admin proxy not configured.' }, { status: 503 })
   }
 
@@ -152,9 +188,11 @@ async function proxyHandler(
       body: requestBody,
     })
   } catch {
+    auditAdminProxyEvent({ component: 'admin_proxy', event_type: 'proxy_guard', method: request.method, status: 502, decision: 'deny', reason: 'backend_unreachable', route_key: classified.routeKey, role: session.role, active: session.active })
     return NextResponse.json({ detail: 'Backend unreachable.' }, { status: 502 })
   }
 
+  auditAdminProxyEvent({ component: 'admin_proxy', event_type: 'proxy_guard', method: request.method, status: upstream.status, decision: 'allow', reason: 'forwarded', route_key: classified.routeKey, role: session.role, active: session.active })
   const responseBlob = await upstream.blob()
   return new NextResponse(responseBlob, {
     status: upstream.status,

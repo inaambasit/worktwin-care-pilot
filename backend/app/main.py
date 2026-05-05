@@ -2305,7 +2305,23 @@ def ask_worktwin(payload: AskRequest, authorization: Optional[str] = Header(defa
 
     answer_text = answer_result["answer"]
     confidence = _validate_grounded_answer_result(answer_text, sources)
-    is_grounded = confidence == "source_grounded"
+
+    # ------------------------------------------------------------------
+    # Fail-closed: ungrounded model answers must never reach staff.
+    # Audit event — no raw query text, no user_id.
+    # ------------------------------------------------------------------
+    if confidence != "source_grounded":
+        _create_audit_event(
+            organisation_id=organisation_id,
+            event_type="staff_ask_ungrounded",
+            metadata={
+                "query_length": len(query_clean),
+                "result_count": len(filtered_rows),
+                "confidence": confidence,
+                "user_role": user_role,
+            },
+        )
+        return _staff_fallback_response()
 
     # ------------------------------------------------------------------
     # Audit event — no raw query text, no user_id
@@ -2339,15 +2355,11 @@ def ask_worktwin(payload: AskRequest, authorization: Optional[str] = Header(defa
 
     return AskResponse(
         answer=answer_text,
-        next_steps=(
-            ["Review the cited policy for full details."]
-            if is_grounded
-            else ["Please speak to your line manager or designated lead."]
-        ),
+        next_steps=["Review the cited policy for full details."],
         sources=staff_sources,
         escalate_if=_STANDARD_ESCALATE_IF,
-        requires_escalation=not is_grounded,
-        allowed_to_answer=is_grounded,
+        requires_escalation=False,
+        allowed_to_answer=True,
         risk_category="standard",
         learning_option=None,
     )

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, MessageCircle, ClipboardList, PlayCircle,
   Lock, FileText, BarChart2, Shield, Phone, ChevronRight,
-  Users, AlertTriangle, BookOpen, Menu, X,
+  Users, AlertTriangle, BookOpen, Menu, X, LogOut,
 } from 'lucide-react'
 
 const ADMIN_DEMO_ENABLED = process.env.NEXT_PUBLIC_ADMIN_DEMO_ENABLED === 'true'
@@ -149,10 +149,18 @@ function SidebarContent({
           <div className="w-8 h-8 rounded-full bg-teal-700 text-white text-xs font-bold flex items-center justify-center shrink-0">
             DU
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-slate-800 truncate">Demo User</p>
             <p className="text-xs text-slate-500">{isAdmin ? 'Admin' : 'Care Worker'}</p>
           </div>
+          <Link
+            href="/logout"
+            title="Sign out"
+            aria-label="Sign out"
+            className="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors shrink-0"
+          >
+            <LogOut size={14} />
+          </Link>
         </div>
       </div>
     </div>

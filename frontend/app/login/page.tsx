@@ -4,6 +4,21 @@ import Link from 'next/link'
 import { Shield } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 
+const ALLOWED_NEXT_PATHS = new Set([
+  '/dashboard',
+  '/ask',
+  '/policies',
+  '/onboarding',
+  '/scenarios',
+  '/notes',
+  '/escalation',
+])
+
+function safeNext(raw: string | null | undefined): string {
+  if (raw && ALLOWED_NEXT_PATHS.has(raw)) return raw
+  return '/dashboard'
+}
+
 async function requestMagicLink(formData: FormData) {
   'use server'
   const email = (formData.get('email') as string | null)?.trim() ?? ''
@@ -11,10 +26,12 @@ async function requestMagicLink(formData: FormData) {
     redirect('/login?error=invalid')
   }
 
+  const next = safeNext(formData.get('next') as string | null)
+
   const h = headers()
   const host = h.get('host') ?? 'localhost:3000'
   const proto = h.get('x-forwarded-proto') ?? 'http'
-  const callbackUrl = `${proto}://${host}/auth/callback`
+  const callbackUrl = `${proto}://${host}/auth/callback?next=${encodeURIComponent(next)}`
 
   try {
     const supabase = createServerSupabaseClient()
@@ -33,9 +50,10 @@ async function requestMagicLink(formData: FormData) {
 export default function LoginPage({
   searchParams,
 }: {
-  searchParams?: { error?: string }
+  searchParams?: { error?: string; next?: string }
 }) {
   const hasError = Boolean(searchParams?.error)
+  const next = safeNext(searchParams?.next)
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4 py-12">
@@ -65,6 +83,7 @@ export default function LoginPage({
         )}
 
         <form action={requestMagicLink} className="space-y-4">
+          <input type="hidden" name="next" value={next} />
           <div>
             <label
               htmlFor="email"

@@ -1,6 +1,7 @@
 // WorkTwin API helper — calls the FastAPI backend at NEXT_PUBLIC_API_URL.
 
 import type { AskRequest, AskResponse, DocumentRecord, StaffPolicyRecord, DocumentListResponse, UploadDocumentResult, GenerateEmbeddingsResult, VectorSearchResponse, AnswerDebugResponse, GovernanceUpdateRequest } from './types'
+import { getSupabaseAccessToken } from './supabase-browser'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
@@ -10,9 +11,13 @@ export async function askWorktwin(question: string): Promise<AskResponse> {
     question,
   }
 
+  const token = await getSupabaseAccessToken()
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
   const response = await fetch(`${API_BASE_URL}/ask`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify(payload),
     signal: AbortSignal.timeout(10_000),
   })
@@ -77,7 +82,10 @@ export async function fetchPolicies(params?: {
   if (params?.category) qs.set('category', params.category)
   if (params?.language) qs.set('language', params.language)
   const url = `${API_BASE_URL}/policies${qs.toString() ? `?${qs}` : ''}`
-  const response = await fetch(url, { signal: AbortSignal.timeout(5_000) })
+  const token = await getSupabaseAccessToken()
+  const headers: Record<string, string> = {}
+  if (token) headers['Authorization'] = `Bearer ${token}`
+  const response = await fetch(url, { headers, signal: AbortSignal.timeout(5_000) })
   if (!response.ok) throw new Error(`API error: ${response.status}`)
   return response.json() as Promise<StaffPolicyRecord[]>
 }

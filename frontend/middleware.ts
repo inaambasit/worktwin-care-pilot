@@ -39,10 +39,11 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   })
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
 
-  if (!session) {
+  if (error || !user) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('next', pathname)
     return NextResponse.redirect(loginUrl)

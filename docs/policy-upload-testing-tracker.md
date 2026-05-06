@@ -73,6 +73,7 @@ Based on current registry proof as of 2026-05-06.
 | PM11 Raising Concerns / Freedom to Speak Up / Whistleblowing | **C** | — | No | No | HR concern route; human-only; never AI-answerable |
 | CR07 Data Protection and Confidentiality Policy and Procedure (English) | **B pending upload** | No | No | No | Useful for confidentiality, UK GDPR, data protection and staff responsibilities; admin-test only first because it touches legal/compliance/confidential information duties |
 | CR07 Data Protection and Confidentiality Policy and Procedure (Urdu) | Pending multilingual review | No | No | No | Do not upload yet until bilingual/multilingual document strategy is agreed |
+| QQ03 Complaints, Suggestions and Compliments Policy and Procedure | **B — admin-test only** | Yes | No | No | Fully indexed for admin-only vector retrieval; retrieval QA passed; complaints may involve safeguarding, named people, legal/compliance or disciplinary issues, so not approved for AI answers or staff visibility yet |
 
 ### Gate Summary per Document
 
@@ -85,6 +86,7 @@ Based on current registry proof as of 2026-05-06.
 | PM11 Whistleblowing | No | No | No |
 | CR07 Data Protection and Confidentiality (English) | No | No | No |
 | CR07 Data Protection and Confidentiality (Urdu) | No | No | No |
+| QQ03 Complaints, Suggestions and Compliments | Yes | No | No |
 
 ---
 
@@ -183,6 +185,82 @@ AC32 remains approved for controlled internal staff-style Ask testing only. It i
 
 ---
 
+## QQ03 Upload and Vector Retrieval Findings — 2026-05-06
+
+QQ03 Complaints, Suggestions and Compliments Policy and Procedure was uploaded through the direct local backend route for controlled internal admin-only testing.
+
+### Upload and Extraction Summary
+
+| Field | Value |
+|-------|-------|
+| document_id | `dff29050-2dbf-45d4-b413-c81c1e165f4d` |
+| HTTP status | 200 |
+| upload_status | success |
+| extraction_status | success |
+| extracted_page_count | 20 |
+| extracted_character_count | 55,813 |
+| chunk_count | 54 |
+| embedding_record_count | 54 |
+| personal_data_risk | low |
+| personal_data_warnings | none |
+| extraction_warnings | none |
+
+### Governance State
+
+| Field | Value |
+|-------|-------|
+| real_document | true |
+| dummy_document | false |
+| governance_status | pilot_approved |
+| approved_for_embedding | Yes |
+| approved_for_source_grounded_answers | No |
+| approved_for_staff_visibility | No |
+| governance_reviewed_by | Inaam Basit |
+| governance_reviewed_at | 2026-05-06T19:12:36 UTC |
+| source_owner | Quality Compliance Systems / Thumhara Centre licensed policy |
+| source_licence_notes | Thumhara Centre has a QCS licence; confirm the licence permits this specific AI/RAG use case before wider production deployment |
+
+### Embedding and Indexing Summary
+
+Embeddings were generated in batches. Final embedding-readiness state:
+
+| Field | Value |
+|-------|-------|
+| chunk_count | 54 |
+| embedding_record_count | 54 |
+| not_started_count | 0 |
+| embedded_count | 54 |
+| failed_count | 0 |
+| is_ready_for_vector_search | true |
+| is_ready_for_ai_answers | false |
+
+All 54 chunks were embedded successfully with no failures.
+
+### Vector Retrieval QA
+
+Three admin-only vector searches were run after indexing was confirmed complete.
+
+| # | Question | Result |
+|---|----------|--------|
+| 1 | What should staff do when receiving a complaint? | Pass |
+| 2 | What should happen if a complaint suggests possible abuse or safeguarding concerns? | Pass |
+| 3 | Can complaints be shared for learning and improvement? | Pass |
+
+**Quality notes:**
+
+- Retrieval returned QQ03 chunks correctly across all three searches.
+- Complaint-handling steps were retrieved as expected.
+- Safeguarding-related complaint wording was retrieved, including that safeguarding policies, local authority, and regulatory notifications should be followed where complaints indicate potential abuse.
+- Learning and improvement wording was retrieved, including anonymisation for learning, trend tracking, annual reporting, and quality improvement.
+- AI answers remain disabled (`approved_for_source_grounded_answers: false`).
+- Staff visibility remains disabled (`approved_for_staff_visibility: false`).
+
+### Conclusion
+
+QQ03 remains **Lane B — admin-test only**. All 54 chunks are indexed and vector retrieval QA passed. However, complaints can involve safeguarding, named individuals, legal and compliance matters, or disciplinary issues. Do not approve QQ03 for AI answers or staff visibility until dedicated governance review and escalation/routing checks have been completed.
+
+---
+
 ## Recommended Next Upload Batch
 
 The following document types are recommended for the next testing cycle, subject to availability and content review before upload.
@@ -191,7 +269,7 @@ The following document types are recommended for the next testing cycle, subject
 |----------|-----------------|--------|
 | PPE Policy | A/B candidate — pending receipt from Shagufta | Practical daily-use information; low sensitivity — PDF not yet available |
 | Incident Reporting Procedure | B | Useful for staff, but test carefully for escalation triggers |
-| Complaints Procedure (general) | B | Exclude any named complaint records; procedure only |
+| QQ03 Complaints, Suggestions and Compliments Policy and Procedure | B — admin-test only (uploaded) | Uploaded, extracted, and fully indexed for admin-only vector retrieval; retrieval QA passed; not pending upload — do not re-upload |
 | Visitor and Contractor Access (if separate from current) | A candidate | Companion to existing visitor policy |
 | Health and Safety General Policy | B | Broad scope; chunk quality will need careful checking |
 | Infection Control companion documents | B | Companion to CC34; check for overlap and duplication |
@@ -233,6 +311,7 @@ Use this template to record each policy decision. Add a new row each time a docu
 | 2026-05-06 | CR07 Data Protection and Confidentiality Policy and Procedure (English) | B pending upload | Internal | Useful policy candidate, but only DOCX uploaded so far and PDF export is required before backend upload | None | Not started | Export English DOCX to PDF before upload |
 | 2026-05-06 | CR07 Data Protection and Confidentiality Policy and Procedure (Urdu) | Pending multilingual review | Internal | Uploaded for awareness only; multilingual strategy not yet agreed | None | Not started | Do not upload until bilingual/trilingual approach is agreed |
 | 2026-05-06 | AC32 Mobile Phone and Portable Device Use Policy | A — controlled internal testing only | Internal QA | Mini QA completed across 8 realistic mobile-phone/portable-device questions | No new flags changed | Pass with issues — 6 pass, 2 partial fail, 1 answer too long/truncated | Keep controlled testing only; improve driving/photo-video routing and long-answer control before wider rollout |
+| 2026-05-06 | QQ03 Complaints, Suggestions and Compliments Policy and Procedure | B — admin-test only | Inaam Basit | Uploaded, extracted, fully indexed and vector retrieval QA passed, but complaints can involve safeguarding, named people, legal/compliance or disciplinary issues | `approved_for_embedding` | Pass — 54/54 chunks embedded; 3/3 vector retrieval checks passed | Keep AI answers and staff visibility disabled; only consider answer-debug after deliberate governance review and escalation/routing checks |
 
 ---
 

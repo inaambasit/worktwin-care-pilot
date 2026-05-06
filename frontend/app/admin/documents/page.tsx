@@ -654,7 +654,7 @@ export default function DocumentRegistryPage() {
           <div>
             <h1 className="text-xl font-bold text-slate-900">Document Registry</h1>
             <p className="text-sm text-slate-500 mt-0.5">
-              All approved policies, SOPs and training materials. Governed documents are available for admin-only vector search and source-grounded answer testing. Staff-facing Ask WorkTwin does not use RAG.
+              Controlled internal registry for policy upload, embedding, retrieval and source-grounded answer testing. Documents remain admin and testing only unless all pilot auth, document governance and staff-visibility gates are deliberately enabled.
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap justify-end">
@@ -687,11 +687,13 @@ export default function DocumentRegistryPage() {
         <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl px-5 py-4 flex items-start gap-3">
           <ShieldAlert size={18} className="text-amber-600 shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-bold text-amber-900">Admin document tools — demo and testing only</p>
+            <p className="text-sm font-bold text-amber-900">Admin document tools — controlled internal testing only</p>
             <p className="text-sm text-amber-800 mt-0.5 leading-relaxed">
-              These tools are for controlled demo and product-owner use. Do not upload real staff, service-user,
-              safeguarding, medication, HR or payroll records. The document list below is sample data only and
-              does not reflect real Thumhara Centre documents.
+              These tools are for controlled internal testing by product owners and admins only. No real staff are
+              using this system yet. Approved policy, SOP and training PDFs may be uploaded for embedding and AI
+              answer testing. Do not upload service-user records, care plans, MAR charts with names, staff HR or
+              payroll files, safeguarding case notes, named complaints, or confidential third-party content unless
+              licence and use is confirmed.
             </p>
           </div>
         </div>
@@ -704,8 +706,12 @@ export default function DocumentRegistryPage() {
               <p className="text-sm font-semibold text-amber-900">Upload safety notice</p>
               <p className="text-xs text-amber-800 mt-1 leading-relaxed">
                 Only upload <strong>approved policies, SOPs, onboarding documents and training materials</strong>.
-                Do <strong>not</strong> upload: service-user records, care plans, MAR charts with names, staff HR files, payroll records,
-                safeguarding case notes, complaints involving named people, or any other private personal data.
+                Do <strong>not</strong> upload: service-user records, care plans, MAR charts with names, staff HR or payroll files,
+                safeguarding case notes, named complaints, or confidential third-party/QCS content unless licence and use is confirmed.
+              </p>
+              <p className="text-xs text-amber-700 mt-1">
+                Uploading a document does <strong>not</strong> make it staff-visible or AI-answerable.
+                Embedding approval, AI answer approval and staff visibility are separate gates that must be deliberately enabled.
               </p>
               <p className="text-xs text-amber-700 mt-1">
                 <strong>PDF only in Milestone 4B.</strong> DOCX and TXT will be added later after tracked-changes and metadata safety checks.
@@ -1185,7 +1191,7 @@ export default function DocumentRegistryPage() {
         {!usingFallback && registrySource === 'database' && (
           <div className="flex items-center gap-2 bg-teal-50 border border-teal-100 rounded-xl px-4 py-2 text-xs text-teal-700">
             <CheckCircle2 size={12} className="shrink-0" />
-            <span>Live registry mode — showing documents saved in Supabase. Admin-only vector search and source-grounded answer testing available. Staff-facing Ask WorkTwin remains disabled from RAG.</span>
+            <span>Live registry mode — showing documents saved in Supabase. Admin-only vector search and source-grounded answer testing available. Staff-facing Ask only uses governed, approved, staff-visible, indexed documents when pilot auth and document gates are deliberately enabled; otherwise documents remain admin and testing only.</span>
           </div>
         )}
 
@@ -1248,7 +1254,7 @@ export default function DocumentRegistryPage() {
               <Brain size={13} className="text-teal-600 mt-0.5 shrink-0" />
               <div>
                 <p className="font-semibold text-slate-700">Approved for AI answers</p>
-                <p className="text-slate-400 mt-0.5">Enables this document for admin-only vector search and source-grounded answer testing. Staff-facing Ask WorkTwin remains disabled from RAG.</p>
+                <p className="text-slate-400 mt-0.5">Enables this document for admin-only vector search and source-grounded answer testing. Staff-facing Ask only uses documents that also have staff visibility, embedding approval and pilot auth gates enabled.</p>
               </div>
             </div>
             <div className="flex items-start gap-2 bg-slate-50 rounded-xl p-3">
@@ -1754,7 +1760,8 @@ export default function DocumentRegistryPage() {
                     Real documents must be explicitly approved before embedding or AI answer testing.
                     Sensitive and escalation-required documents remain blocked from AI use.
                     Governance-approved documents can be embedded and used for admin-only vector search and answer testing.
-                    Staff-facing <code className="font-mono">/ask</code> remains disabled from RAG.
+                    Uploading a document does not make it staff-visible or AI-answerable — embedding approval, AI answer approval and staff visibility are separate gates.
+                    Staff-facing <code className="font-mono">/ask</code> only uses documents that are approved, indexed, staff-visible and governance-reviewed, and only when pilot auth gates are deliberately enabled.
                     Staff policy visibility requires <code className="font-mono">approved_for_staff_visibility=true</code>.
                   </p>
                 </div>

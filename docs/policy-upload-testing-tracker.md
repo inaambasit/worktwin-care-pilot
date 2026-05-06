@@ -306,6 +306,37 @@ QQ03 remains **Lane B — admin answer-debug only**. It is not approved for staf
 
 ---
 
+## Policy QA Routing Backlog — 2026-05-06
+
+### AC32 — Mobile Phone and Portable Device Use Policy
+
+- Remains approved for controlled internal staff-style testing only.
+- Mini QA overall result: **PASS with issues**.
+- Mobile-phone-while-driving question over-escalated as a legal matter; AC32 contains policy-guided driving wording that should have been applied.
+- Photo/video/voice-recording consent question fell back to a generic response; AC32 contains relevant consent, camera, and recording wording.
+- Some security-step answers were useful but too long and risked truncation.
+- Follow-up required: improve routing, prompt, and answer responsibility handling before wider rollout.
+
+### QQ03 — Complaints, Suggestions and Compliments Policy and Procedure
+
+- Remains **Lane B — admin answer-debug only**. Not approved for staff visibility.
+- Admin-only answer-debug result: **PASS with caution**.
+- General complaint-handling answer was useful and source-grounded but slightly over-cautious — it appended a sensitive-topic escalation note that was not required.
+- Staff-facing `/ask` did not expose QQ03 — correct behaviour confirmed.
+- Staff-facing `/ask` routed a general complaints question as HR — safe, but not precise.
+- Follow-up: consider a separate complaints/care-complaints routing slice in a later iteration.
+- Do not approve QQ03 for staff visibility.
+
+### Next-Document Decision
+
+- Do not upload another document without a deliberate content review.
+- PPE upload remains paused — PDF not yet received from Shagufta.
+- CC34 extended QA is the best immediate next testing step if continuing without a new upload.
+- CR07 remains parked — English DOCX must be exported to PDF, and a data-protection escalation strategy must be agreed before upload.
+- Urdu/multilingual documents remain parked — no upload until a multilingual strategy is agreed.
+
+---
+
 ## Recommended Next Upload Batch
 
 The following document types are recommended for the next testing cycle, subject to availability and content review before upload.

@@ -5,6 +5,19 @@ import { getSupabaseAccessToken } from './supabase-browser'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
+export class AskTimeoutError extends Error {
+  constructor() {
+    super('WorkTwin request timed out')
+    this.name = 'AskTimeoutError'
+  }
+}
+
+export class AskApiError extends Error {
+  constructor(public readonly status: number) {
+    super(`WorkTwin API error: ${status}`)
+    this.name = 'AskApiError'
+  }
+}
 
 export async function askWorktwin(question: string): Promise<AskResponse> {
   const payload: AskRequest = {
@@ -15,15 +28,23 @@ export async function askWorktwin(question: string): Promise<AskResponse> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (token) headers['Authorization'] = `Bearer ${token}`
 
-  const response = await fetch(`${API_BASE_URL}/ask`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(payload),
-    signal: AbortSignal.timeout(10_000),
-  })
+  let response: Response
+  try {
+    response = await fetch(`${API_BASE_URL}/ask`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(30_000),
+    })
+  } catch (err) {
+    if (err instanceof DOMException && (err.name === 'TimeoutError' || err.name === 'AbortError')) {
+      throw new AskTimeoutError()
+    }
+    throw err
+  }
 
   if (!response.ok) {
-    throw new Error(`WorkTwin API error: ${response.status}`)
+    throw new AskApiError(response.status)
   }
 
   return response.json() as Promise<AskResponse>

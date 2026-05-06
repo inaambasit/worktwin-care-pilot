@@ -8,7 +8,7 @@ import {
   UserCheck, ClipboardList, Building2, Briefcase, BadgeCheck, Heart, Pill,
 } from 'lucide-react'
 import Link from 'next/link'
-import { askWorktwin } from '@/lib/api'
+import { askWorktwin, AskTimeoutError } from '@/lib/api'
 import type { AskResponse } from '@/lib/types'
 
 const MEDICATION_Q = 'A service user missed medication. What should I do?'
@@ -168,6 +168,7 @@ export default function AskPage() {
   const [currentAnswer, setCurrentAnswer] = useState<DisplayAnswer | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [apiError, setApiError] = useState<string | null>(null)
+  const [apiErrorKind, setApiErrorKind] = useState<'timeout' | 'service' | null>(null)
   const [isDemoFallback, setIsDemoFallback] = useState(false)
   const [showChecklist, setShowChecklist] = useState(false)
   const [showQuiz, setShowQuiz] = useState(false)
@@ -182,6 +183,7 @@ export default function AskPage() {
     setShowQuiz(false)
     setSelectedOption(null)
     setApiError(null)
+    setApiErrorKind(null)
     setCurrentAnswer(null)
     setIsDemoFallback(false)
     setIsLoading(true)
@@ -190,16 +192,22 @@ export default function AskPage() {
       const response = await askWorktwin(prompt)
       setCurrentAnswer(mapApiResponse(prompt, response))
       window.scrollTo({ top: 0, behavior: 'smooth' })
-    } catch {
-      // Backend unreachable — use demo answers for known questions, error otherwise
+    } catch (err) {
+      // On error: use demo fallback for known safe questions; show timeout or service wording otherwise
       const demo = getDemoFallback(prompt)
       if (demo) {
         setCurrentAnswer(demo)
         setIsDemoFallback(true)
         window.scrollTo({ top: 0, behavior: 'smooth' })
-      } else {
+      } else if (err instanceof AskTimeoutError) {
+        setApiErrorKind('timeout')
         setApiError(
-          'WorkTwin could not connect to the knowledge base. Please try again or speak to your manager.',
+          'The WorkTwin knowledge service may be starting up. Please try again in a few seconds, or speak to your manager if the question is urgent.',
+        )
+      } else {
+        setApiErrorKind('service')
+        setApiError(
+          'WorkTwin could not complete this request. Please try again, or speak to your manager if the question is urgent.',
         )
       }
     } finally {
@@ -211,6 +219,7 @@ export default function AskPage() {
     setCurrentAnswer(null)
     setInput('')
     setApiError(null)
+    setApiErrorKind(null)
     setIsDemoFallback(false)
     setShowChecklist(false)
     setShowQuiz(false)
@@ -468,8 +477,12 @@ export default function AskPage() {
                   <AlertTriangle size={16} className="text-red-500" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-800">Could not reach WorkTwin</p>
-                  <p className="text-xs text-slate-400 mt-0.5">Connection issue</p>
+                  <p className="text-sm font-semibold text-slate-800">
+                    {apiErrorKind === 'timeout' ? 'WorkTwin is waking up' : 'WorkTwin is temporarily unavailable'}
+                  </p>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    {apiErrorKind === 'timeout' ? 'This can happen on the public demo' : 'Knowledge service issue'}
+                  </p>
                 </div>
               </div>
               <p className="text-sm text-slate-600 leading-relaxed bg-red-50 border border-red-100 rounded-xl px-4 py-3">

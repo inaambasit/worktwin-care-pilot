@@ -73,7 +73,7 @@ Based on current registry proof as of 2026-05-06.
 | PM11 Raising Concerns / Freedom to Speak Up / Whistleblowing | **C** | — | No | No | HR concern route; human-only; never AI-answerable |
 | CR07 Data Protection and Confidentiality Policy and Procedure (English) | **B pending upload** | No | No | No | Useful for confidentiality, UK GDPR, data protection and staff responsibilities; admin-test only first because it touches legal/compliance/confidential information duties |
 | CR07 Data Protection and Confidentiality Policy and Procedure (Urdu) | Pending multilingual review | No | No | No | Do not upload yet until bilingual/multilingual document strategy is agreed |
-| QQ03 Complaints, Suggestions and Compliments Policy and Procedure | **B — admin-test only** | Yes | No | No | Fully indexed for admin-only vector retrieval; retrieval QA passed; complaints may involve safeguarding, named people, legal/compliance or disciplinary issues, so not approved for AI answers or staff visibility yet |
+| QQ03 Complaints, Suggestions and Compliments Policy and Procedure | **B — admin answer-debug only** | Yes | Yes (admin/debug only) | No | Source-grounded answers approved for admin answer-debug only; answer-debug test passed with caution; staff visibility remains disabled; not approved for staff use |
 
 ### Gate Summary per Document
 
@@ -86,7 +86,7 @@ Based on current registry proof as of 2026-05-06.
 | PM11 Whistleblowing | No | No | No |
 | CR07 Data Protection and Confidentiality (English) | No | No | No |
 | CR07 Data Protection and Confidentiality (Urdu) | No | No | No |
-| QQ03 Complaints, Suggestions and Compliments | Yes | No | No |
+| QQ03 Complaints, Suggestions and Compliments | Yes | Yes (admin/debug only) | No |
 
 ---
 
@@ -252,12 +252,57 @@ Three admin-only vector searches were run after indexing was confirmed complete.
 - Complaint-handling steps were retrieved as expected.
 - Safeguarding-related complaint wording was retrieved, including that safeguarding policies, local authority, and regulatory notifications should be followed where complaints indicate potential abuse.
 - Learning and improvement wording was retrieved, including anonymisation for learning, trend tracking, annual reporting, and quality improvement.
-- AI answers remain disabled (`approved_for_source_grounded_answers: false`).
+- At this earlier vector-retrieval checkpoint, AI answers remained disabled (`approved_for_source_grounded_answers: false`).
 - Staff visibility remains disabled (`approved_for_staff_visibility: false`).
 
 ### Conclusion
 
-QQ03 remains **Lane B — admin-test only**. All 54 chunks are indexed and vector retrieval QA passed. However, complaints can involve safeguarding, named individuals, legal and compliance matters, or disciplinary issues. Do not approve QQ03 for AI answers or staff visibility until dedicated governance review and escalation/routing checks have been completed.
+At this checkpoint, QQ03 remained **Lane B — admin-test only**. All 54 chunks were indexed and vector retrieval QA passed. Because complaints can involve safeguarding, named individuals, legal/compliance matters, or disciplinary issues, the next step required a deliberate governance review before any source-grounded answer-debug testing. Staff visibility remained disabled.
+
+---
+
+## QQ03 Admin-Only Answer-Debug Testing — 2026-05-06
+
+After QQ03 was approved for source-grounded admin answer-debug only (`approved_for_source_grounded_answers=true`, `approved_for_staff_visibility=false`), a controlled internal admin-only answer-debug test was run. Staff visibility remained disabled throughout. The staff-facing `/ask` endpoint did not use QQ03.
+
+### Governance State at Time of Test
+
+| Field | Value |
+|-------|-------|
+| document_id | `dff29050-2dbf-45d4-b413-c81c1e165f4d` |
+| approved_for_source_grounded_answers | Yes (admin/debug only) |
+| approved_for_staff_visibility | No |
+
+### Answer-Debug Test Questions and Results
+
+| # | Question | Result |
+|---|----------|--------|
+| 1 | What should staff do when receiving a complaint? | Pass (with caution — see below) |
+| 2 | What should happen if a complaint suggests possible abuse or safeguarding concerns? | Pass |
+| 3 | Can complaints be shared for learning and improvement? | Pass |
+
+### Overall Result: PASS with caution
+
+**Pass criteria met:**
+
+- All three responses were source-grounded to QQ03 sources only.
+- Sources were cited in each response.
+- Endpoint note confirmed staff AI answers are still disabled.
+
+**Notable quality:**
+
+- Safeguarding-related complaint answer correctly included safeguarding, local authority, and regulatory notification direction and escalation wording.
+- Learning/improvement answer correctly mentioned anonymisation and quality improvement.
+
+**Caution:** The general complaint-handling question (question 1) produced a useful and grounded answer but appended a sensitive-topic escalation note that was slightly over-cautious.
+
+### Staff-Facing Safety Proof
+
+A local `/ask` query — "What should I do if someone makes a complaint?" — returned `no sources`, `allowed_to_answer=false`, `requires_escalation=true`, `risk_category=hr`. This confirms QQ03 was not exposed to staff. The routing is safe; complaints-routing improvement can be considered as a separate future slice.
+
+### Conclusion
+
+QQ03 remains **Lane B — admin answer-debug only**. It is not approved for staff use and must not be represented as such. Do not promote to staff visibility without dedicated governance review.
 
 ---
 
@@ -269,7 +314,7 @@ The following document types are recommended for the next testing cycle, subject
 |----------|-----------------|--------|
 | PPE Policy | A/B candidate — pending receipt from Shagufta | Practical daily-use information; low sensitivity — PDF not yet available |
 | Incident Reporting Procedure | B | Useful for staff, but test carefully for escalation triggers |
-| QQ03 Complaints, Suggestions and Compliments Policy and Procedure | B — admin-test only (uploaded) | Uploaded, extracted, and fully indexed for admin-only vector retrieval; retrieval QA passed; not pending upload — do not re-upload |
+| QQ03 Complaints, Suggestions and Compliments Policy and Procedure | B — admin answer-debug only (uploaded) | Uploaded, extracted, fully indexed, vector retrieval QA passed, and admin-only answer-debug passed with caution; not pending upload — do not re-upload; do not approve for staff visibility. |
 | Visitor and Contractor Access (if separate from current) | A candidate | Companion to existing visitor policy |
 | Health and Safety General Policy | B | Broad scope; chunk quality will need careful checking |
 | Infection Control companion documents | B | Companion to CC34; check for overlap and duplication |
@@ -312,6 +357,7 @@ Use this template to record each policy decision. Add a new row each time a docu
 | 2026-05-06 | CR07 Data Protection and Confidentiality Policy and Procedure (Urdu) | Pending multilingual review | Internal | Uploaded for awareness only; multilingual strategy not yet agreed | None | Not started | Do not upload until bilingual/trilingual approach is agreed |
 | 2026-05-06 | AC32 Mobile Phone and Portable Device Use Policy | A — controlled internal testing only | Internal QA | Mini QA completed across 8 realistic mobile-phone/portable-device questions | No new flags changed | Pass with issues — 6 pass, 2 partial fail, 1 answer too long/truncated | Keep controlled testing only; improve driving/photo-video routing and long-answer control before wider rollout |
 | 2026-05-06 | QQ03 Complaints, Suggestions and Compliments Policy and Procedure | B — admin-test only | Inaam Basit | Uploaded, extracted, fully indexed and vector retrieval QA passed, but complaints can involve safeguarding, named people, legal/compliance or disciplinary issues | `approved_for_embedding` | Pass — 54/54 chunks embedded; 3/3 vector retrieval checks passed | Keep AI answers and staff visibility disabled; only consider answer-debug after deliberate governance review and escalation/routing checks |
+| 2026-05-06 | QQ03 Complaints, Suggestions and Compliments Policy and Procedure | B — admin answer-debug only | Inaam Basit | Approved for source-grounded admin answer-debug only after retrieval QA passed; staff visibility remains disabled | `approved_for_source_grounded_answers` (admin/debug only) | Pass with caution — 3/3 answer-debug questions passed; all responses source-grounded to QQ03 only, sources cited, staff answers confirmed disabled; safeguarding escalation wording correct; learning/improvement anonymisation wording correct; Q1 slightly over-cautious with sensitive-topic note; local /ask confirmed QQ03 not exposed to staff | Keep staff visibility disabled; do not imply staff approval; consider complaints-routing improvement as a separate slice |
 
 ---
 

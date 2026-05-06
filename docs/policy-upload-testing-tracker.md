@@ -67,7 +67,7 @@ Based on current registry proof as of 2026-05-06.
 | Document | Lane | Indexed | Source-Grounded Approved | Staff-Visible | Notes |
 |----------|------|---------|--------------------------|---------------|-------|
 | Visitor Sign-In and Identification Procedure | **A** | Yes | Yes | Yes | Fully approved; first live lane A policy |
-| AC32 Mobile Phone and Portable Device Use Policy | **A — controlled internal testing only** | Yes | Yes | Yes | Live source-grounded Ask confirmed for controlled internal Thumhara Centre staff-style testing only; QCS licence/use still needs confirmation before wider rollout or production staff deployment |
+| AC32 Mobile Phone and Portable Device Use Policy | **A — controlled internal testing only** | Yes | Yes | Yes | Live source-grounded Ask confirmed for controlled internal Thumhara Centre staff-style testing only; Thumhara Centre has a QCS licence — confirm the licence permits this specific AI/RAG use case (extracting policy text, storing in WorkTwin/Supabase, vector search, and AI-generated staff answers outside the QCS platform) before wider production deployment |
 | CC34 Infection Control Policy and Procedure | **B → A candidate** | Yes | Yes | No | Answer quality good; more test questions needed before promotion |
 | CR100 Safeguarding Adults Policy and Procedure | **C** | — | No | No | Sensitive; AI must escalate all related questions to a person |
 | PM11 Raising Concerns / Freedom to Speak Up / Whistleblowing | **C** | — | No | No | HR concern route; human-only; never AI-answerable |
@@ -172,7 +172,7 @@ A mini QA set was run locally against `/ask` after AC32 was approved for control
 
 ### Conclusion
 
-AC32 remains approved for controlled internal staff-style Ask testing only. It is not ready for wider rollout. QCS licence/use still needs confirmation before wider rollout or production staff deployment.
+AC32 remains approved for controlled internal staff-style Ask testing only. It is not ready for wider rollout. Thumhara Centre has a QCS licence — confirm the licence permits this specific AI/RAG use case (extracting policy text, storing in WorkTwin/Supabase, vector search, and AI-generated staff answers outside the QCS platform) before wider production deployment.
 
 ### Follow-Up Actions
 
@@ -224,8 +224,8 @@ Use this template to record each policy decision. Add a new row each time a docu
 | Date | Policy | Lane | Reviewer | Reason | Flags Approved | Test Result | Follow-Up Action |
 |------|--------|------|----------|--------|----------------|-------------|-----------------|
 | 2026-05-06 | Visitor Sign-In and Identification Procedure | A | Internal | First lane A proof; low sensitivity; extraction and QA passed | `approved_for_embedding`, `approved_for_source_grounded_answers`, `approved_for_staff_visibility` | Pass | None outstanding |
-| 2026-05-06 | AC32 Mobile Phone and Portable Device Use Policy | B | Internal | QCS licence not yet confirmed | `approved_for_embedding`, `approved_for_source_grounded_answers` | Pass (quality testing) | QCS licence review before staff-visible approval |
-| 2026-05-06 | AC32 Mobile Phone and Portable Device Use Policy | A — controlled internal testing only | Inaam Basit | Low-sensitivity operational staff policy; status approved and staff visibility governance approved for controlled internal staff-style Ask testing only | `approved_for_embedding`, `approved_for_source_grounded_answers`, `approved_for_staff_visibility` | Pass — local and live Ask returned source-grounded AC32 answer | Confirm QCS licence/use before wider rollout or production staff deployment |
+| 2026-05-06 | AC32 Mobile Phone and Portable Device Use Policy | B | Internal | Thumhara Centre has a QCS licence; AI/RAG use case confirmation required before wider production deployment | `approved_for_embedding`, `approved_for_source_grounded_answers` | Pass (quality testing) | Confirm the licence permits this specific AI/RAG use case before wider production deployment |
+| 2026-05-06 | AC32 Mobile Phone and Portable Device Use Policy | A — controlled internal testing only | Inaam Basit | Low-sensitivity operational staff policy; status approved and staff visibility governance approved for controlled internal staff-style Ask testing only | `approved_for_embedding`, `approved_for_source_grounded_answers`, `approved_for_staff_visibility` | Pass — local and live Ask returned source-grounded AC32 answer | Confirm the licence permits this specific AI/RAG use case before wider production deployment |
 | 2026-05-06 | CC34 Infection Control Policy and Procedure | B | Internal | Answer quality good; additional test questions needed | `approved_for_embedding`, `approved_for_source_grounded_answers` | Pass (initial) | Run extended question bank before promotion to A |
 | 2026-05-06 | CR100 Safeguarding Adults Policy and Procedure | C | Internal | Sensitive by nature; never AI-answerable | None | Not applicable | Review escalation wording in AI system |
 | 2026-05-06 | PM11 Raising Concerns / Whistleblowing | C | Internal | HR concern route; human-only | None | Not applicable | Ensure escalation route is clear in UI |

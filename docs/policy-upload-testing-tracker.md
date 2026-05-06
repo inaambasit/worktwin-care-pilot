@@ -155,6 +155,34 @@ Grouped by policy area. Use these during AI answer quality testing. Add new ques
 
 ---
 
+## AC32 Mini QA Findings — 2026-05-06
+
+A mini QA set was run locally against `/ask` after AC32 was approved for controlled internal Thumhara Centre staff-style Ask testing. Overall score: **7.5 / 10**.
+
+| # | Question | Result |
+|---|----------|--------|
+| 1 | Can staff use their mobile phone while working? | Pass |
+| 2 | Can I use my personal phone to send a quick personal text during my shift? | Pass |
+| 3 | Can staff use a mobile phone while driving for work? | Partial fail — escalated as a legal matter instead of giving an AC32 policy-guided answer |
+| 4 | Can I take a photo or video of a service user if they say it is okay? | Partial fail — fallback response despite AC32 containing camera and voice-recording consent wording |
+| 5 | Can I use my own phone for work if I have not been given a work phone? | Pass |
+| 6 | What should I do if my work mobile phone or portable device is lost or stolen? | Pass |
+| 7 | Can I use a tablet, smart watch, USB device or other portable device for work? | Pass |
+| 8 | What security steps should staff follow when using a mobile phone or portable device for work? | Pass — answer was too long and appeared truncated |
+
+### Conclusion
+
+AC32 remains approved for controlled internal staff-style Ask testing only. It is not ready for wider rollout. QCS licence/use still needs confirmation before wider rollout or production staff deployment.
+
+### Follow-Up Actions
+
+- Improve policy-guided handling for mobile-phone-while-driving questions so AC32 wording can be applied safely instead of defaulting to blanket legal escalation.
+- Improve handling for photo, video, and voice-recording consent questions so the system gives a policy-guided answer or escalation based on AC32 rather than a generic fallback.
+- Tighten long security-step answers to avoid overly broad or truncated output.
+- Re-test AC32 after answer responsibility model, prompt, and routing improvements have been made.
+
+---
+
 ## Recommended Next Upload Batch
 
 The following document types are recommended for the next testing cycle, subject to availability and content review before upload.
@@ -204,6 +232,7 @@ Use this template to record each policy decision. Add a new row each time a docu
 | 2026-05-06 | PPE Policy | Pending | Internal | Companion policy referenced by CC34 but PDF not yet available | None | Not started | Request PDF from Shagufta |
 | 2026-05-06 | CR07 Data Protection and Confidentiality Policy and Procedure (English) | B pending upload | Internal | Useful policy candidate, but only DOCX uploaded so far and PDF export is required before backend upload | None | Not started | Export English DOCX to PDF before upload |
 | 2026-05-06 | CR07 Data Protection and Confidentiality Policy and Procedure (Urdu) | Pending multilingual review | Internal | Uploaded for awareness only; multilingual strategy not yet agreed | None | Not started | Do not upload until bilingual/trilingual approach is agreed |
+| 2026-05-06 | AC32 Mobile Phone and Portable Device Use Policy | A — controlled internal testing only | Internal QA | Mini QA completed across 8 realistic mobile-phone/portable-device questions | No new flags changed | Pass with issues — 6 pass, 2 partial fail, 1 answer too long/truncated | Keep controlled testing only; improve driving/photo-video routing and long-answer control before wider rollout |
 
 ---
 

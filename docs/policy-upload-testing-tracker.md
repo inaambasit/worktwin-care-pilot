@@ -306,6 +306,52 @@ QQ03 remains **Lane B — admin answer-debug only**. It is not approved for staf
 
 ---
 
+## CC34 Extended Admin-Only QA — 2026-05-06
+
+After CC34 Infection Control Policy and Procedure was approved for source-grounded admin answer-debug only (`approved_for_source_grounded_answers=true`, `approved_for_staff_visibility=false`), an extended controlled internal admin-only answer-debug test was run across eight questions. Staff visibility remained disabled throughout. Governance-readiness confirmed CC34 remained not staff-visible (`approved_for_staff_visibility=false`, `can_show_to_staff_now=false`). No staff-facing `/ask` promotion or staff-visibility test was run in this slice.
+
+### Governance State at Time of Test
+
+| Field | Value |
+|-------|-------|
+| document_id | `c8a9e7d0-2448-47fe-a3a0-6dcf342f6235` |
+| approved_for_source_grounded_answers | Yes (admin/debug only) |
+| approved_for_staff_visibility | No |
+
+### Answer-Debug Test Questions and Results
+
+| # | Question | Result |
+|---|----------|--------|
+| 1 | When should staff wash their hands? | Pass |
+| 2 | What PPE should staff use when supporting someone with personal care? | Pass with caution |
+| 3 | What should staff do if a service user has diarrhoea or vomiting? | Pass with caution |
+| 4 | What should staff do if they think there is an infection outbreak? | Pass with caution |
+| 5 | How should staff clean high-touch surfaces? | Pass |
+| 6 | What should staff do if they have symptoms of infection before a shift? | Pass |
+| 7 | Who is responsible for infection control audits? | Partial Pass |
+| 8 | Can staff come to work if they feel unwell but symptoms are mild? | Pass with caution |
+
+### Quality Notes
+
+- Answers were source-grounded to CC34.
+- Hand hygiene and high-touch surface cleaning answers were strong.
+- PPE answer was useful but points to the separate PPE policy — the PPE PDF is still needed before relying on PPE-specific staff answers.
+- Diarrhoea/vomiting and outbreak answers were useful, but should have clearer escalation wording before any staff-facing release.
+- Audit responsibility answer should mention both the Infection Prevention Lead for audit programme responsibilities and the Registered Manager for cleaning schedule oversight/countersigning where relevant.
+- Mild illness answer was safe but should advise staff to contact their line manager or Thumhara Centre if unsure before attending work.
+
+### Conclusion
+
+CC34 remains **Lane B → A candidate**. Admin answer-debug approved only. Do not approve staff visibility yet.
+
+**Follow-up required:**
+
+- Tighten escalation wording for outbreak and diarrhoea/vomiting scenarios.
+- Improve audit responsibility answer to cover both the Infection Prevention Lead and the Registered Manager roles clearly.
+- Upload and review the PPE Policy when Shagufta provides the PDF — CC34 answers that reference PPE cannot be fully relied upon until the companion policy is available.
+
+---
+
 ## Policy QA Routing Backlog — 2026-05-06
 
 ### AC32 — Mobile Phone and Portable Device Use Policy
@@ -331,7 +377,7 @@ QQ03 remains **Lane B — admin answer-debug only**. It is not approved for staf
 
 - Do not upload another document without a deliberate content review.
 - PPE upload remains paused — PDF not yet received from Shagufta.
-- CC34 extended QA is the best immediate next testing step if continuing without a new upload.
+- CC34 extended QA has now been completed; follow-up work is to tighten outbreak/diarrhoea-vomiting escalation wording, improve audit-responsibility wording, and wait for the PPE PDF before any staff-visibility decision.
 - CR07 remains parked — English DOCX must be exported to PDF, and a data-protection escalation strategy must be agreed before upload.
 - Urdu/multilingual documents remain parked — no upload until a multilingual strategy is agreed.
 

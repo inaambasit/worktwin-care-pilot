@@ -9,6 +9,7 @@
 | Pending review | Shagufta review may occur later; not scheduled |
 | Document visibility | Admin/testing only unless gates are deliberately enabled |
 | Last updated | 2026-05-06 |
+| PPE upload | Paused — PPE Policy PDF not yet available; will be requested from Shagufta |
 
 Documents remain in testing state until all required gates are explicitly approved. Enabling a gate is a deliberate act — it does not happen automatically upon upload.
 
@@ -70,6 +71,8 @@ Based on current registry proof as of 2026-05-06.
 | CC34 Infection Control Policy and Procedure | **B → A candidate** | Yes | Yes | No | Answer quality good; more test questions needed before promotion |
 | CR100 Safeguarding Adults Policy and Procedure | **C** | — | No | No | Sensitive; AI must escalate all related questions to a person |
 | PM11 Raising Concerns / Freedom to Speak Up / Whistleblowing | **C** | — | No | No | HR concern route; human-only; never AI-answerable |
+| CR07 Data Protection and Confidentiality Policy and Procedure (English) | **B pending upload** | No | No | No | Useful for confidentiality, UK GDPR, data protection and staff responsibilities; admin-test only first because it touches legal/compliance/confidential information duties |
+| CR07 Data Protection and Confidentiality Policy and Procedure (Urdu) | Pending multilingual review | No | No | No | Do not upload yet until bilingual/multilingual document strategy is agreed |
 
 ### Gate Summary per Document
 
@@ -80,6 +83,8 @@ Based on current registry proof as of 2026-05-06.
 | CC34 Infection Control | Yes | Yes | No |
 | CR100 Safeguarding | No | No | No |
 | PM11 Whistleblowing | No | No | No |
+| CR07 Data Protection and Confidentiality (English) | No | No | No |
+| CR07 Data Protection and Confidentiality (Urdu) | No | No | No |
 
 ---
 
@@ -138,6 +143,16 @@ Grouped by policy area. Use these during AI answer quality testing. Add new ques
 18. I want to raise a concern about a colleague's behaviour — what are my options? *(expected AI response: direct to manager or the raising concerns procedure; provide escalation contact)*
 19. Can I raise a concern anonymously? *(expected AI response: escalate to HR or the designated person; AI cannot advise on this)*
 
+### Data Protection and Confidentiality
+
+20. What should staff do to keep service user information confidential?
+21. Can staff discuss service user information with family members?
+22. What should I do if I accidentally share confidential information with the wrong person?
+23. Can I access a service user's record if I am not involved in their care?
+24. What should I do if I think there has been a data breach?
+
+> **Note:** Questions about data breaches, serious confidentiality incidents, or legal/compliance concerns must escalate to a manager or appropriate data protection lead and must not be answered freely by AI.
+
 ---
 
 ## Recommended Next Upload Batch
@@ -146,12 +161,14 @@ The following document types are recommended for the next testing cycle, subject
 
 | Document | Recommended Lane | Reason |
 |----------|-----------------|--------|
-| PPE Policy | A/B candidate | Practical daily-use information; low sensitivity |
+| PPE Policy | A/B candidate — pending receipt from Shagufta | Practical daily-use information; low sensitivity — PDF not yet available |
 | Incident Reporting Procedure | B | Useful for staff, but test carefully for escalation triggers |
 | Complaints Procedure (general) | B | Exclude any named complaint records; procedure only |
 | Visitor and Contractor Access (if separate from current) | A candidate | Companion to existing visitor policy |
 | Health and Safety General Policy | B | Broad scope; chunk quality will need careful checking |
 | Infection Control companion documents | B | Companion to CC34; check for overlap and duplication |
+| CR07 Data Protection and Confidentiality Policy and Procedure (English) | B — PDF export required | Useful for confidentiality and data protection questions; needs careful escalation handling for breaches, incidents, or legal/compliance concerns |
+| CR07 Data Protection and Confidentiality Policy and Procedure (Urdu) | Do not upload yet | Multilingual strategy required before upload |
 
 Do not upload named complaint records, incident records with service-user names, or HR disciplinary files as part of this batch.
 
@@ -183,6 +200,9 @@ Use this template to record each policy decision. Add a new row each time a docu
 | 2026-05-06 | CC34 Infection Control Policy and Procedure | B | Internal | Answer quality good; additional test questions needed | `approved_for_embedding`, `approved_for_source_grounded_answers` | Pass (initial) | Run extended question bank before promotion to A |
 | 2026-05-06 | CR100 Safeguarding Adults Policy and Procedure | C | Internal | Sensitive by nature; never AI-answerable | None | Not applicable | Review escalation wording in AI system |
 | 2026-05-06 | PM11 Raising Concerns / Whistleblowing | C | Internal | HR concern route; human-only | None | Not applicable | Ensure escalation route is clear in UI |
+| 2026-05-06 | PPE Policy | Pending | Internal | Companion policy referenced by CC34 but PDF not yet available | None | Not started | Request PDF from Shagufta |
+| 2026-05-06 | CR07 Data Protection and Confidentiality Policy and Procedure (English) | B pending upload | Internal | Useful policy candidate, but only DOCX uploaded so far and PDF export is required before backend upload | None | Not started | Export English DOCX to PDF before upload |
+| 2026-05-06 | CR07 Data Protection and Confidentiality Policy and Procedure (Urdu) | Pending multilingual review | Internal | Uploaded for awareness only; multilingual strategy not yet agreed | None | Not started | Do not upload until bilingual/trilingual approach is agreed |
 
 ---
 

@@ -29,7 +29,7 @@ const BACKEND_URL =
 const ADMIN_CAPABLE_ROLES: readonly string[] = ['organisation_admin', 'worktwin_dev_admin']
 
 // 4S.85G-8: Proxy-layer cap for upload requests -- checked via Content-Length before reading body.
-const ADMIN_PROXY_UPLOAD_MAX_BYTES = 1024
+const ADMIN_PROXY_UPLOAD_MAX_BYTES = 10 * 1024 * 1024
 
 // 4S.85G-9: Safe structured audit logging -- never logs secrets, bodies, paths, or personal data.
 type AuditEvent = {

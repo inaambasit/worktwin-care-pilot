@@ -1473,7 +1473,7 @@ DocumentVertical = Literal[
     "care", "finance", "property", "recruitment",
     "healthcare_admin", "training_provider", "general", "custom",
 ]
-EmbeddingStatus = Literal["not_started", "pending", "processing", "indexed", "failed"]
+EmbeddingStatus = Literal["not_started", "pending", "processing", "partial", "indexed", "failed"]
 TranslationStatus = Literal["not_required", "pending", "in_progress", "complete"]
 
 

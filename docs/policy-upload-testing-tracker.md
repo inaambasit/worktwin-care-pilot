@@ -383,6 +383,37 @@ CC34 remains **Lane B → A candidate**. Admin answer-debug approved only. Do no
 
 ---
 
+## Policy Testing Scope Decision — 2026-05-06
+
+The heavy QA process used to date — upload, vector retrieval check, admin answer-debug, routing verification, staff-visibility gate decision — was designed to prove the governance model, the answer-debug flow, the staff-visibility boundary, and the quality of source-grounded answers. That proof is now substantially complete.
+
+Not every policy needs to go through the same depth of QA. Future documents should be classified into a lane before upload or testing begins.
+
+**Lane summary for upload decisions:**
+
+| Lane | Approach |
+|------|----------|
+| **A** | Shorter QA process — extraction check, basic retrieval spot-check, and a small answer-debug set sufficient |
+| **B** | Full admin answer-debug and escalation/routing checks required before any staff-visibility decision |
+| **C** | Human-only; may be uploaded for context indexing but must never be made AI-answerable |
+| **D** | Do not upload |
+
+**Current representative evidence set:**
+
+| Document | Role in Evidence Set |
+|----------|----------------------|
+| Visitor Sign-In | Simple Lane A proof — extraction, indexing, and staff-visible answer confirmed |
+| AC32 Mobile Phone | Controlled staff-visible operational policy proof — QA completed, routing gaps identified |
+| CC34 Infection Control | B → A candidate — admin QA complete; not staff-visible yet; PPE companion still needed |
+| QQ03 Complaints | Admin answer-debug only — routing and escalation behaviour confirmed; staff visibility disabled |
+| PPE Policy | Practical operational candidate — paused until PDF arrives from Shagufta |
+| CR07 Data Protection | Parked — requires PDF export and a deliberate data-protection escalation strategy before upload |
+| Health & Safety / Incident Reporting | One future document in this area may be sufficient to prove another practical workflow pattern |
+
+**Conclusion:** The immediate goal is to prove a representative evidence set, not to upload the whole policy library. Process documents selectively. Do not upload or deeply QA a policy unless it supports a clear product, governance, demo, or pilot-readiness purpose.
+
+---
+
 ## Recommended Next Upload Batch
 
 The following document types are recommended for the next testing cycle, subject to availability and content review before upload.

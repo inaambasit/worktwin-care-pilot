@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import AppLayout from '@/components/AppLayout'
 import {
   Send, BookOpen, PlayCircle, List, Zap,
@@ -8,7 +8,7 @@ import {
   UserCheck, ClipboardList, Building2, Briefcase, BadgeCheck, Heart, Pill,
 } from 'lucide-react'
 import Link from 'next/link'
-import { askWorktwin, AskTimeoutError } from '@/lib/api'
+import { askWorktwin, AskTimeoutError, checkHealth } from '@/lib/api'
 import type { AskResponse } from '@/lib/types'
 
 const MEDICATION_Q = 'A service user missed medication. What should I do?'
@@ -174,6 +174,16 @@ export default function AskPage() {
   const [showQuiz, setShowQuiz] = useState(false)
   const [selectedOption, setSelectedOption] = useState<number | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const [backendWarmupStatus, setBackendWarmupStatus] = useState<'idle' | 'warming' | 'ready' | 'unavailable'>('idle')
+
+  useEffect(() => {
+    let cancelled = false
+    setBackendWarmupStatus('warming')
+    checkHealth()
+      .then((ok) => { if (!cancelled) setBackendWarmupStatus(ok ? 'ready' : 'unavailable') })
+      .catch(() => { if (!cancelled) setBackendWarmupStatus('unavailable') })
+    return () => { cancelled = true }
+  }, [])
 
   const showAnswer = currentAnswer !== null && !isLoading
 
@@ -286,6 +296,13 @@ export default function AskPage() {
                       High-risk topics are not answered by AI and should be escalated.
                     </li>
                   </ul>
+                  {backendWarmupStatus !== 'idle' && (
+                    <p className="mt-3 text-xs text-amber-700">
+                      {backendWarmupStatus === 'warming' && 'Knowledge service warming up'}
+                      {backendWarmupStatus === 'ready' && 'Knowledge service ready'}
+                      {backendWarmupStatus === 'unavailable' && 'Knowledge service may wake on first question'}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

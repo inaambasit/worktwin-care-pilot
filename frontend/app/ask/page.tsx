@@ -179,7 +179,7 @@ export default function AskPage() {
   useEffect(() => {
     let cancelled = false
     setBackendWarmupStatus('warming')
-    checkHealth()
+    checkHealth(30_000)
       .then((ok) => { if (!cancelled) setBackendWarmupStatus(ok ? 'ready' : 'unavailable') })
       .catch(() => { if (!cancelled) setBackendWarmupStatus('unavailable') })
     return () => { cancelled = true }

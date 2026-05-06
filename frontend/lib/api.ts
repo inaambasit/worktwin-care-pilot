@@ -50,10 +50,10 @@ export async function askWorktwin(question: string): Promise<AskResponse> {
   return response.json() as Promise<AskResponse>
 }
 
-export async function checkHealth(): Promise<boolean> {
+export async function checkHealth(timeoutMs = 5_000): Promise<boolean> {
   try {
     const response = await fetch(`${API_BASE_URL}/health`, {
-      signal: AbortSignal.timeout(5_000),
+      signal: AbortSignal.timeout(timeoutMs),
     })
     return response.ok
   } catch {

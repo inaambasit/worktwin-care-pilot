@@ -138,3 +138,40 @@ The following rules apply to every milestone in this plan.
 - Plain ASCII punctuation only. No smart quotes, no em dashes, no non-breaking spaces.
 - If an encoding issue is found during any milestone other than 4S.69, fix it in that file at that
   milestone rather than deferring it.
+
+---
+
+## 6. 2026-05-07 alignment log -- 4S.89F to 4S.89L
+
+Documentation drift after `1e75756 Align current-state documentation` was reviewed and addressed
+across the current documentation set.
+
+- The active truth layer now starts with `docs/current-state.md`. All other docs should be read
+  against it, not instead of it.
+- `docs/policy-upload-testing-tracker.md` is the policy and document governance source of truth.
+- `docs/4s88g-auth-e2e-proof-blocker.md` is the current auth E2E blocker record.
+- Root README, backend README, frontend README, staff demo walkthrough, external review pack,
+  auth docs (`auth-readiness-review.md`, `auth-schema-plan.md`, `supabase-auth-configuration-checklist.md`,
+  `auth-dependencies.md`, `auth-implementation-checklist.md`), and `docs/README.md` index have been
+  aligned to the current state as of this log entry.
+- Historical Claude Code, Codex, and Claude Design review snapshots under `docs/reviews/` remain
+  useful for understanding earlier decisions but must be read as dated snapshots, not current truth.
+  Some findings have been addressed in subsequent milestones; check `docs/current-state.md` first.
+- Future technical changes should update `docs/current-state.md` first if they alter any of:
+  readiness scores or blockers, auth state or PILOT_AUTH_MODE, admin proxy real session/CSRF/RBAC,
+  policy governance or document lane assignments, staff visibility or RAG behaviour, or pilot
+  readiness posture.
+- Do not claim production readiness unless auth E2E proof (4S.88G), DPA/legal sign-off, QCS
+  AI/RAG confirmation, governance gate tests, and admin proxy real session/CSRF/RBAC are all
+  complete.
+
+### Maintenance rules
+
+- Every milestone that changes truth must update `docs/current-state.md`.
+- Every policy or document governance change must update `docs/policy-upload-testing-tracker.md`.
+- Every auth blocker or resolution must update `docs/4s88g-auth-e2e-proof-blocker.md` or the
+  relevant auth doc.
+- Review docs under `docs/reviews/` are snapshots and must not be silently rewritten to match
+  later state; add a dated note if a finding has been addressed.
+- README files should point to `docs/current-state.md` for current state rather than duplicating
+  every detail.

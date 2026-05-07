@@ -15,10 +15,16 @@ export async function getSupabaseAccessToken(): Promise<string | null> {
     const client = getBrowserClient()
     if (!client) return null
 
-    const { data, error } = await client.auth.getSession()
-    if (error || !data.session?.access_token) return null
+    // getSession() reads localStorage without server verification; pass the token to
+    // getUser() so Supabase Auth validates it server-side before we forward it.
+    const { data: sessionData } = await client.auth.getSession()
+    const token = sessionData.session?.access_token
+    if (!token) return null
 
-    return data.session.access_token
+    const { error: userError } = await client.auth.getUser(token)
+    if (userError) return null
+
+    return token
   } catch {
     return null
   }

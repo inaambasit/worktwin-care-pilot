@@ -2,6 +2,37 @@
 
 FastAPI backend for WorkTwin MVP.
 
+## Current backend status — 2026-05-07
+
+The backend is a **controlled prototype, not production-ready** and is **not approved for unsupervised use by real staff**.
+
+### What the backend now includes
+
+PDF upload, text extraction, chunking, embedding preparation, embedding generation, admin-only vector search, admin-only answer-debug, governed staff `/ask`, staff `/policies`, governance gates, JWT validation, and audit/safety controls.
+
+### Constraints and open blockers
+
+- `openai` is pinned to `openai==2.33.0` — do not change without running the full backend test suite.
+- JWT validation supports Supabase ES256/JWKS and HS256 legacy/test mode (`backend/app/jwt_auth.py`).
+- `backend/sql/008_organisation_memberships.sql` exists, but **4S.88G remains blocked** — this migration has not been safely applied or proved in an approved Supabase target.
+- **Public pilot auth remains disabled.** `PILOT_AUTH_MODE` and `NEXT_PUBLIC_PILOT_AUTH_MODE` are `false` and must not be changed until 4S.88G is resolved.
+- **Admin/debug endpoints must remain protected by backend `ADMIN_TOKEN`.** The frontend admin proxy remains disabled publicly (`ADMIN_PROXY_ENABLED` not set) and is not production-ready.
+- **No real staff, service-user, resident, care-plan, HR, safeguarding case-note or named complaint personal data should be uploaded.**
+- **QCS AI/RAG use not yet confirmed.** Thumhara Centre holds a QCS licence, but use of QCS content inside an external AI/RAG pipeline has not been confirmed as permitted. Do not expand AI answer or staff visibility for QCS-derived policies (AC32, CC34, QQ03) until confirmed.
+
+### Current document governance state
+
+- **Visitor Sign-In and Identification Procedure** — Lane A; first clean Lane A proof; staff-visible.
+- **AC32 Mobile Phone and Portable Device Use Policy** — Lane A, controlled internal Thumhara staff-style testing only; not wider rollout; QCS AI/RAG use must be confirmed before wider production deployment.
+- **CC34 Infection Control Policy and Procedure** — Lane B → A candidate; admin answer-debug only; not staff-visible.
+- **QQ03 Complaints, Suggestions and Compliments Policy** — Lane B; admin answer-debug only; not staff-visible.
+- **CR100 Safeguarding Adults Policy and Procedure** — Lane C; human-only escalation; not approved for embedding or AI answers.
+- **PM11 Raising Concerns / Whistleblowing** — Lane C; human-only escalation; not approved for embedding or AI answers.
+- **PPE Policy** — Pending; PDF not yet received.
+- **CR07 Data Protection** — Parked; PDF export and data-protection escalation strategy required before upload.
+
+Older milestone sections in this file are historical snapshots of when features were added. Where they say "no RAG", "no embeddings", "no real documents", or "/ask placeholder", read those as true for that milestone only — not the current backend state.
+
 ## Run locally
 
 ```bash
@@ -47,7 +78,7 @@ curl "http://localhost:8000/policies?category=Medication"
 | GET | / | Root - service identity and status |
 | GET | /health | Health check |
 | POST | /ask | Governed staff answer endpoint -- source-grounded when OpenAI and DB are configured and a qualifying governed document exists; falls back safely otherwise |
-| GET | /policies | Staff-safe policy library (Milestone 4A.1) - reads from Supabase DB when configured |
+| GET | /policies | Staff-safe policy library — DB-backed when configured |
 | GET | /documents | Admin document registry - reads from Supabase DB when configured (Milestone 4C) |
 | GET | /documents/{id} | Single document - DB first, in-memory fallback |
 | POST | /documents | Create document record (in-memory) |
@@ -59,7 +90,7 @@ curl "http://localhost:8000/policies?category=Medication"
 | GET | /documents/{id}/embedding-readiness | Admin - embedding readiness counts and flags (Milestones 4E-4F) |
 | POST | /documents/{id}/generate-embeddings | **Admin-only** - controlled embedding generation for dummy/sample docs (Milestone 4F) |
 | POST | /documents/search-vector | **Admin/debug** - vector similarity search, no AI answer (Milestone 4G) |
-| POST | /documents/answer-debug | **Admin/debug** - source-grounded answer test from retrieved chunks only (Milestone 4H) |
+| POST | /documents/answer-debug | **Admin/debug** - source-grounded answer test only (Milestone 4H) |
 | PATCH | /documents/{id}/governance | **Admin-only** - update governance fields with safety enforcement (Milestone 4I) |
 | GET | /documents/{id}/governance-readiness | **Admin/debug** - governance readiness summary with blocked reasons (Milestone 4I.1) |
 
@@ -98,6 +129,10 @@ Multiple origins are comma-separated. No wildcard `*` is used in production.
 | `API_BASE_URL` | `https://worktwin-care-pilot-api.onrender.com` | Server-side only - used by the `/api/admin/...` proxy (Milestone 4S.2A) |
 | `ADMIN_TOKEN` | Must match `ADMIN_TOKEN` set in Render | Server-side only - used by the proxy; never exposed to the browser (Milestone 4S.2A) |
 | ~~`NEXT_PUBLIC_ADMIN_TOKEN`~~ | ~~Removed~~ | Removed in Milestone 4S.2A - admin token is no longer sent from the browser |
+
+---
+
+The milestone sections below are retained as implementation history.
 
 ## Milestone 4B: Safe PDF upload
 

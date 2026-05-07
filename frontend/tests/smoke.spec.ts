@@ -105,7 +105,7 @@ test.describe('WorkTwin smoke tests', () => {
     await page.goto('/dashboard')
     const drawer = page.locator('#mobile-nav-drawer')
     await expect(drawer).toHaveAttribute('aria-hidden', 'true')
-    await page.getByRole('button', { name: 'Open menu' }).click()
+    await page.locator('[aria-controls="mobile-nav-drawer"]').click()
     await expect(drawer).toHaveAttribute('aria-hidden', 'false')
     await page.getByRole('button', { name: 'Close menu' }).click()
     await expect(drawer).toHaveAttribute('aria-hidden', 'true')

@@ -197,7 +197,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         }`}
         aria-label="Navigation menu"
         role="dialog"
-        aria-modal="true"
+        aria-modal={drawerOpen ? true : undefined}
         aria-hidden={!drawerOpen}
       >
         <div className="flex items-center justify-end px-3 py-3 border-b border-slate-200 shrink-0">

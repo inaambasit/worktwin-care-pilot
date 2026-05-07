@@ -4,28 +4,14 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { AlertTriangle, CheckCircle } from 'lucide-react'
 
-interface FormState {
-  name: string
-  organisation: string
-  role: string
-  exploration: string
-}
-
 export default function BookPilotPage() {
-  const [form, setForm] = useState<FormState>({
-    name: '',
-    organisation: '',
-    role: '',
-    exploration: '',
-  })
+  const [submittedName, setSubmittedName] = useState('')
   const [submitted, setSubmitted] = useState(false)
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
-  }
-
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    const fd = new FormData(e.currentTarget)
+    setSubmittedName((fd.get('name') as string) || '')
     setSubmitted(true)
   }
 
@@ -45,7 +31,7 @@ export default function BookPilotPage() {
               <CheckCircle size={28} className="text-teal-700" />
             </div>
             <h2 className="text-2xl font-bold text-slate-900 mb-3">
-              {form.name ? `Thank you, ${form.name}` : 'Thank you for your interest'}
+              {submittedName ? `Thank you, ${submittedName}` : 'Thank you for your interest'}
             </h2>
             <p className="text-slate-600 text-sm leading-relaxed mb-4">
               Your pilot enquiry has been noted. The next step is a brief human conversation to understand your
@@ -120,8 +106,6 @@ export default function BookPilotPage() {
               id="name"
               name="name"
               type="text"
-              value={form.name}
-              onChange={handleChange}
               placeholder="e.g. Alex Sharma"
               required
               className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent"
@@ -136,8 +120,6 @@ export default function BookPilotPage() {
               id="organisation"
               name="organisation"
               type="text"
-              value={form.organisation}
-              onChange={handleChange}
               placeholder="e.g. Riverside Care Ltd"
               required
               className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent"
@@ -152,8 +134,6 @@ export default function BookPilotPage() {
               id="role"
               name="role"
               type="text"
-              value={form.role}
-              onChange={handleChange}
               placeholder="e.g. Registered Manager, HR Lead, Operations Director"
               required
               className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent"
@@ -167,8 +147,6 @@ export default function BookPilotPage() {
             <textarea
               id="exploration"
               name="exploration"
-              value={form.exploration}
-              onChange={handleChange}
               placeholder="e.g. Better onboarding for new care staff, reducing repeated policy questions, supporting staff confidence in safeguarding procedures..."
               required
               rows={4}

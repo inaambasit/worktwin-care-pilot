@@ -8,6 +8,18 @@
 
 ---
 
+## Update — 2026-05-07
+
+The following changes have occurred since this document was written (4S.85C):
+
+- **This document originally stated that no SQL migration file had been created** (see Section 2 Non-Goals and Section 17 Decision Summary). Since then, `backend/sql/008_organisation_memberships.sql` has been created.
+- **The migration has not been safely applied or proved for pilot use.** The available Supabase project is labelled `worktwin-care-pilot / main / PRODUCTION`; running the migration there has not been approved.
+- **4S.88G remains blocked** pending either a separate Supabase development branch/project being made available, or explicit approval to use the production-labelled project as the controlled test environment.
+- **Do not run the migration against any shared or production-labelled Supabase project without explicit approval.**
+- The role model and `organisation_memberships` design described in this document remain the basis for the current auth E2E blocker (see `docs/4s88g-auth-e2e-proof-blocker.md`).
+
+---
+
 ## 1. Purpose
 
 This document turns the identity model agreed in milestone 4S.83

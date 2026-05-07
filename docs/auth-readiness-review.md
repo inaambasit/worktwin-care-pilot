@@ -5,6 +5,20 @@
 
 ---
 
+## Update — 2026-05-07
+
+The following changes have occurred since this review was written (4S.88A):
+
+- **The original review correctly identified missing frontend Bearer forwarding as the main readiness gap at that time.** That gap has since been addressed: Bearer forwarding is now implemented for `askWorktwin()` and `fetchPolicies()` in `frontend/lib/api.ts`.
+- **Browser token retrieval is now partially hardened:** `getSupabaseAccessToken()` in `frontend/lib/supabase-browser.ts` calls `getSession()` to obtain the local token, then passes it to `getUser(token)` for server-side validation before forwarding.
+- **Backend JWT validation now supports Supabase ES256/JWKS** as well as HS256 legacy/test mode (see `backend/app/jwt_auth.py`).
+- **`backend/sql/008_organisation_memberships.sql` now exists.** It was created in a subsequent implementation milestone.
+- **The current blocker is not missing Bearer forwarding.** The blocker is **4S.88G**: `organisation_memberships` has not been safely applied or proved in an approved Supabase target. The available Supabase project is labelled `worktwin-care-pilot / main / PRODUCTION`; the migration has not been approved to run there.
+- **`PILOT_AUTH_MODE` and `NEXT_PUBLIC_PILOT_AUTH_MODE` remain disabled publicly** and must not be enabled until 4S.88G is unblocked.
+- **This document should not be read as current activation approval.** It remains a historical planning document for milestone 4S.88A.
+
+---
+
 ## Purpose
 
 This review checks whether the existing auth scaffolding is structurally sound and ready for controlled activation planning — not for public activation. Its purpose is to establish a clear baseline of what exists, what gaps remain, and what steps are needed before any auth flag is turned on.

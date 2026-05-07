@@ -14,6 +14,7 @@
 | [08 First pilot offer](08-first-pilot-offer.md) | Pricing and terms for the first pilot client offer |
 | [Staff demo walkthrough](staff-demo-walkthrough.md) | Staff-facing pilot journey, safety controls, live proof checks and known limitations |
 | [Documentation maintenance plan](documentation-maintenance-plan.md) | Plan for keeping project documentation consistent and up to date |
+| [Current state](current-state.md) | Current project truth state: latest checkpoint, policy/document state, blockers, demo posture, scores, next sequence and do-not-touch list |
 
 ## Engineering and design reviews
 

@@ -6,6 +6,36 @@ This is a working pilot/demo prototype, not a production-ready application.
 
 ---
 
+## Current frontend status — 2026-05-07
+
+> This section supersedes older milestone wording in the "Known frontend gaps" section below. Where there is a conflict, the status here is current.
+
+The frontend is a **controlled prototype**, not production-ready and not approved for unsupervised real staff use.
+
+- Staff-facing routes exist for dashboard, Ask WorkTwin, Policy Library, onboarding, scenarios, private notes and escalation.
+- Login/magic-link scaffolding exists, including callback/logout/next destination preservation, but public pilot auth remains disabled (`NEXT_PUBLIC_PILOT_AUTH_MODE=false`).
+- Bearer forwarding exists for `askWorktwin()` and `fetchPolicies()`.
+- Browser token retrieval is partially hardened: `getSession()` obtains the local token, then `getUser(token)` validates it before forwarding.
+- Middleware route protection is partial and currently covers `/ask` and `/policies` only.
+- Staff sign out control exists (`/logout` route).
+- Ask WorkTwin includes honesty/mode wording, safe fallback handling, timeout/warm-up improvements and source/citation framing.
+- Private Notes are session-only and not a production privacy implementation.
+- Book a Pilot has a basic enquiry flow / destination, but is not the final commercial onboarding workflow.
+- Admin UI visibility is controlled by `NEXT_PUBLIC_ADMIN_DEMO_ENABLED`.
+- Admin API/proxy remains disabled publicly unless `ADMIN_PROXY_ENABLED` is deliberately enabled; it must not be enabled before real auth/session/CSRF/RBAC.
+- Admin proxy upload cap is 10 MB.
+- No real staff, service-user, resident, care-plan, HR, safeguarding case-note or named complaint personal data should be used.
+
+### Current blockers
+
+- **4S.88G** — `organisation_memberships` not safely applied/proved; `PILOT_AUTH_MODE` cannot be activated until this is resolved.
+- **Middleware expansion needed** — `/dashboard`, `/notes`, `/escalation`, `/onboarding`, `/scenarios` and all `/admin/*` routes are unprotected at the middleware layer even when auth mode is on.
+- **Real admin proxy Supabase session validation and production CSRF/same-site controls needed** — both guards are test-only stubs; `ADMIN_PROXY_ENABLED` must not be set in any non-local environment until they are replaced.
+- **DPA/legal and QCS AI/RAG confirmation required** before real pilot begins.
+- **Mobile/private-notes/accessibility polish** still needed before wider demo confidence.
+
+---
+
 ## Staff-facing pages
 
 | Route | Description |
@@ -102,6 +132,8 @@ npx playwright test tests/smoke.spec.ts
 ---
 
 ## Known frontend gaps
+
+> The "Current frontend status — 2026-05-07" section above supersedes this section. The points below record earlier milestone wording and remain for historical context only.
 
 - **Private Notes mobile layout** - the `/notes` page works on mobile but layout polish is incomplete
 - **Authentication** - auth configuration scaffolding is in place (`PILOT_AUTH_MODE=false`, Supabase env vars in `.env.example`); `/login` and `/login/sent` exist as preparation and demo pages only; real Supabase Auth session validation and organisation membership lookup are not yet active; employee and admin routes remain accessible without an authenticated session

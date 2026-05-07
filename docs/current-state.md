@@ -203,6 +203,7 @@ A sandbox Supabase auth E2E setup plan has been created at `docs/4s90i-sandbox-a
 |---|---|---|
 | Governance gate unit tests | Added `backend/tests/test_governance_gates.py`; 39 tests covering all four gate functions; no runtime code changed | 4S.90A (`336335f`) |
 | Expanded pilot-auth middleware staff route coverage | `frontend/middleware.ts` now protects all seven staff routes in pilot-auth mode; added `frontend/tests/middleware-pilot-auth.spec.ts`; focused middleware test: 3 passed, 6 skipped in public-demo mode; `npm run build` passed; full smoke has unrelated/stale failures and was not used as the pass gate for this slice | 4S.90C (`5acf430`) |
+| CI baseline (4S.90J) | `.github/workflows/ci.yml` added: GitHub Actions CI runs frontend smoke tests, middleware-pilot-auth tests, and `npm run build` plus backend `pytest` automatically on push and pull request to main. No secrets, no deployment, demo/public-safe mode only. | 4S.90J |
 
 ### External decisions required
 

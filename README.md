@@ -37,8 +37,8 @@ The staff app is mobile-responsive with drawer navigation on mobile and a fixed 
 - Admin-only vector search and answer-debug endpoints exist for governed documents
 - The backend contains a governed staff /ask RAG path with strict document gates; it falls back safely when OpenAI, the database, or a qualifying governed document is unavailable, or when a topic is high risk
 - High-risk topics (safeguarding, medication, HR, payroll, legal) always short-circuit to human escalation -- no AI answer is returned
-- AC32 is excluded from staff visibility
-- Visitor Sign-In and Identification Procedure is the first safe staff-visible test policy in /policies
+- AC32 is approved only for controlled internal Thumhara Centre staff-style testing; QCS licence/AI-RAG use is not confirmed before wider rollout
+- Visitor Sign-In and Identification Procedure was the first clean Lane A proof in /policies; AC32, CC34, and QQ03 have also been through controlled governance and testing states (AC32 controlled internal staff-visible; CC34 and QQ03 admin answer-debug only)
 - A real staff pilot must not proceed until authentication, RBAC, admin session protection, full safety tests, and pilot governance are in place
 - Partial admin proxy hardening is in place (disabled proxy guard, typed path allowlist, method guard, unauthenticated guard, role/membership guard placeholder, route-specific role allowlist, CSRF fail-closed guard for POST/PATCH, upload content-type/size guards, safe audit logging, no-store caching); real Supabase Auth session validation, real organisation_memberships lookup, and production CSRF/same-site controls remain outstanding
 
@@ -89,8 +89,15 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 ## Documentation
 
 - [docs/README.md](docs/README.md) -- documentation index
+- [docs/current-state.md](docs/current-state.md) -- current checkpoint, blockers, and pilot-readiness status
 - [docs/staff-demo-walkthrough.md](docs/staff-demo-walkthrough.md) -- staff demo guide
 - [docs/documentation-maintenance-plan.md](docs/documentation-maintenance-plan.md) -- documentation maintenance plan
+
+## Recent hardening (checkpoint 918a020)
+
+- Admin proxy upload cap corrected from 1 KB to 10 MB
+- Browser Supabase token is now validated with `getUser()` before forwarding (partial hardening; admin proxy real session validation remains outstanding)
+- OpenAI dependency pinned to `openai==2.33.0` in backend requirements
 
 ## Known gaps
 

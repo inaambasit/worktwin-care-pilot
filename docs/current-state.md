@@ -1,6 +1,6 @@
 # WorkTwin Care Pilot - Current State
 
-> Generated: 2026-05-06. Source of truth for checkpoint `a8cf2aa` on branch `main`.
+> Generated: 2026-05-07. Source of truth for checkpoint `918a020` on branch `main`.
 > Update this file whenever a milestone changes the status of any item below.
 > Do not edit other files to reconcile with this document - fix those files instead.
 
@@ -10,7 +10,7 @@
 
 | Item | Value |
 |---|---|
-| Commit | `a8cf2aa` |
+| Commit | `918a020` |
 | Branch | `main` |
 | Repo path | `C:\Projects\worktwin-care-pilot\worktwin-care-pilot-starter` |
 | Backend | FastAPI / `backend/app/main.py` |
@@ -87,11 +87,10 @@ The pilot client is **Thumhara Centre**. No real staff, service-user, resident, 
 | Admin proxy | Disabled (`ADMIN_PROXY_ENABLED` not set) | Session guard and CSRF guard are test-only stubs; not safe to expose in production |
 | Session guard | Test stub only | `getAdminProxySessionContext` returns `null` for all non-test requests |
 | CSRF guard | Test stub only | Production always returns 403 for POST/PATCH through proxy |
-| `ADMIN_PROXY_UPLOAD_MAX_BYTES` | `1024` (1 KB) | Bug - blocks all real PDF uploads through the proxy when it is enabled |
 | Real staff use | Not approved | No DPA, no QCS licence AI/RAG confirmation, auth not activated |
 | `008_organisation_memberships.sql` | Not applied | 4S.88G blocker - safe dev branch required before applying |
 | `middleware.ts` route protection | Partial | Matcher covers `/ask` and `/policies` only; `/dashboard`, `/notes`, admin routes unprotected even when auth mode is on |
-| `supabase-browser.ts` token extraction | Uses `getSession()` | Should use `getUser()` for security-sensitive token extraction |
+| `supabase-browser.ts` token extraction | Hardened (partial) | `getSession()` obtains the local token; `getUser(token)` validates it server-side before forwarding; admin proxy real Supabase session validation remains outstanding |
 
 ---
 
@@ -128,13 +127,9 @@ The pilot client is **Thumhara Centre**. No real staff, service-user, resident, 
 
 4. **Admin proxy session and CSRF guards are test-only stubs** - The proxy cannot be safely enabled in production in this state. Both guards must be replaced with real implementations before `ADMIN_PROXY_ENABLED` is set in any non-local environment.
 
-5. **`ADMIN_PROXY_UPLOAD_MAX_BYTES = 1024`** - 1 KB cap at `frontend/app/api/admin/[...path]/route.ts:30` will silently block all real PDF uploads the moment the proxy is enabled. Must be raised (10 MB recommended) before enabling.
+5. **`middleware.ts` matcher is incomplete** - Auth middleware only covers `/ask` and `/policies`. `/dashboard`, `/notes`, `/escalation`, `/onboarding`, `/scenarios`, and all `/admin/*` routes are unprotected at the middleware layer even if `PILOT_AUTH_MODE` were activated.
 
-6. **`supabase-browser.ts` uses `getSession()`** - Line 18 reads the session from local storage rather than verifying server-side via `getUser()`. Weak security posture for token extraction used in Bearer forwarding.
-
-7. **`middleware.ts` matcher is incomplete** - Auth middleware only covers `/ask` and `/policies`. `/dashboard`, `/notes`, `/escalation`, `/onboarding`, `/scenarios`, and all `/admin/*` routes are unprotected at the middleware layer even if `PILOT_AUTH_MODE` were activated.
-
-8. **`openai` not version-pinned** - `backend/requirements.txt` specifies `openai` without a version constraint. A breaking change on the next deploy could silently break the entire RAG pipeline.
+6. **`supabase-browser.ts` token validation (partial hardening)** - `getSession()` is used to obtain the local access token, and `getUser(token)` now validates it server-side before forwarding. Real Supabase Auth session validation inside the admin proxy and production CSRF/same-site controls remain outstanding and are prerequisites before `ADMIN_PROXY_ENABLED` can be set in any non-local environment.
 
 ---
 
@@ -146,7 +141,7 @@ WorkTwin is **credible for a controlled stakeholder demo** with the following co
 - All questions must use the demo identity mode (`PILOT_AUTH_MODE=false`)
 - Escalation demos are safe - deterministic, no LLM
 - RAG answers from Visitor SOP and AC32 are available for controlled internal demonstration
-- Do not demonstrate the admin proxy upload flow - the 1 KB cap will cause it to fail for any real file
+- Do not demonstrate the admin proxy upload flow - the proxy is disabled and the session/CSRF guards are test-only stubs
 - Do not represent the system as production-ready or as having passed any regulatory review
 
 The system demonstrates the intended architecture convincingly: governance gates, fail-closed grounding, escalation short-circuit, source citation. The gaps are infrastructure and compliance, not design.
@@ -185,10 +180,9 @@ The system demonstrates the intended architecture convincingly: governance gates
 
 | Item | Description | File(s) to change | Prerequisite |
 |---|---|---|---|
-| Upload cap | Raise `ADMIN_PROXY_UPLOAD_MAX_BYTES` from 1 KB to 10 MB | `frontend/app/api/admin/[...path]/route.ts:30` | None |
-| getUser fix | Replace `getSession()` with `getUser()` in `supabase-browser.ts:18` | `frontend/lib/supabase-browser.ts` | None |
+| Admin proxy session guard | Replace test-only session stub with real Supabase Auth session validation | `frontend/app/api/admin/[...path]/route.ts` | None |
+| Admin proxy CSRF guard | Replace test-only CSRF stub with production same-site/CSRF mechanism | `frontend/app/api/admin/[...path]/route.ts` | None |
 | Middleware expansion | Expand `middleware.ts` matcher to cover all staff and admin routes | `frontend/middleware.ts` | None |
-| OpenAI pin | Pin `openai` to a specific version in `requirements.txt` | `backend/requirements.txt` | None |
 | 4S.88G | Resolve `organisation_memberships` migration blocker (dev Supabase branch or explicit approval) | `backend/sql/008_organisation_memberships.sql` | Decision required |
 
 ### External decisions required
@@ -222,4 +216,4 @@ The system demonstrates the intended architecture convincingly: governance gates
 
 9. **Embedding dimension or model** - do not change `text-embedding-3-small` (1,536 dims) without truncating or rebuilding the entire `document_chunks` vector index. Dimension mismatch silently returns wrong results.
 
-10. **`backend/requirements.txt` `openai` entry** - do not upgrade `openai` without running the full backend test suite and checking for breaking changes in the embeddings and chat completion APIs.
+10. **`backend/requirements.txt` `openai` entry** - `openai` is pinned to `openai==2.33.0`. Do not change this version without running the full backend test suite and checking for breaking changes in the embeddings and chat completion APIs.

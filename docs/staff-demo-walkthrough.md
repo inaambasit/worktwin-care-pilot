@@ -1,9 +1,9 @@
-# 4S.66 - Staff Demo Final Walkthrough Notes
+# Staff Demo Walkthrough
 
-**Date:** 2 May 2026  
-**Milestone:** 4S.66  
-**Status:** Pilot prototype -- not production-ready  
-**Pilot client:** Thumhara Centre (sample/fictional data throughout)
+**Updated:** 7 May 2026  
+**Milestone:** 4S.89H  
+**Status:** Controlled pilot prototype — not production-ready; not approved for unsupervised real staff use  
+**Pilot client:** Thumhara Centre
 
 ---
 
@@ -13,7 +13,7 @@ This demo shows a working pilot of the WorkTwin staff-facing interface for a dom
 
 - Staff can navigate a clean, credible front-end from a browser.
 - Core features are functional: policy lookup, guided onboarding, practice scenarios, private notes and escalation contacts.
-- The admin console is appropriately locked down and not publicly accessible.
+- Admin UI visibility is controlled by `NEXT_PUBLIC_ADMIN_DEMO_ENABLED`; admin API/proxy actions remain disabled/fail-closed publicly unless `ADMIN_PROXY_ENABLED` is deliberately enabled, which must not happen before real auth/session/CSRF/RBAC are in place.
 - High-risk topics route staff to a human, not to autonomous AI advice.
 
 This is a prototype built for pilot discovery, stakeholder review and future client validation. It is not approved for live use with real staff or real service users.
@@ -26,33 +26,40 @@ This is a prototype built for pilot discovery, stakeholder review and future cli
 |---|---|
 | Landing page | Yes |
 | Staff dashboard | Yes |
-| Ask WorkTwin (AI assistant) | Yes - controlled, limited RAG |
-| Policy library | Yes - sample policies |
-| Onboarding hub | Yes - sample content |
-| Practice scenarios | Yes - fictional scenarios |
-| Private notes | Yes - local to session |
-| Escalation contacts | Yes - sample contacts |
-| Admin dashboard | No - disabled publicly |
-| Admin API | No - proxy returns 403 |
-| High-risk autonomous advice | No - escalates to human |
+| Ask WorkTwin (AI assistant) | Yes — governed RAG pipeline; source-grounded where document gate state permits |
+| Policy library | Yes — Visitor Sign-In (Lane A, staff-visible); AC32 (controlled internal only) |
+| Onboarding hub | Yes — sample content |
+| Practice scenarios | Yes — fictional scenarios |
+| Private notes | Yes — session-only; not a persistent production implementation |
+| Escalation contacts | Yes — sample contacts |
+| Admin dashboard | Visibility controlled by NEXT_PUBLIC_ADMIN_DEMO_ENABLED; may be visible in deployed demo; not for real end-user access |
+| Admin API / proxy | Disabled/fail-closed publicly (ADMIN_PROXY_ENABLED not set); must not be enabled before real auth/session/CSRF/RBAC |
+| High-risk autonomous advice | No — escalates to human |
 
-Staff-facing RAG has not been expanded as part of this milestone. The knowledge base contains only the controlled sample documents already in place.
+**Current document state:**
+
+- **Visitor Sign-In and Identification Procedure** — Lane A; the first clean proof. Approved for staff-visible source-grounded answers.
+- **AC32 (Mobile Phone and Portable Device Use Policy)** — Lane A, controlled internal Thumhara Centre staff-style testing only. QCS AI/RAG use not confirmed before wider rollout.
+- **CC34 (Infection Control)** and **QQ03 (Complaints)** — admin answer-debug only; not visible to staff.
+- **CR100 (Safeguarding)** and **PM11 (Whistleblowing)** — human-only escalation; never AI-answerable.
+- **PPE Policy** — pending; PDF not yet received.
+- **CR07 (Data Protection)** — parked; PDF export and data-protection escalation strategy required before upload.
 
 ---
 
 ## 3. The staff journey
 
 ### Landing page
-Staff arrive at the root URL and see the WorkTwin Care landing page. It introduces the product clearly, with a call to action to enter the staff area. No login is required for this demo; access is open for demonstration purposes only.
+Staff arrive at the root URL and see the WorkTwin Care landing page. It introduces the product clearly, with a call to action to enter the staff area. No login is required for this demo; access is open for demonstration purposes only. Auth scaffolding exists but is not activated publicly — the E2E proof (4S.88G) is blocked.
 
 ### Dashboard
 After entering, staff land on a personal dashboard. It shows their name, a welcome message, and quick links to all main features. The layout is calm and uncluttered, appropriate for care staff who may be accessing this between shifts.
 
 ### Ask WorkTwin
-Staff can type a free-text question into the AI assistant. The assistant answers from the approved sample policy set, cites its source, and recommends escalation where the topic is sensitive or outside its scope. It does not give final employment, legal, medical or disciplinary advice. Safeguarding, medication concerns and anything ambiguous are flagged for human review.
+Staff can type a free-text question into the AI assistant. The assistant answers from approved governing documents where the source and gate state permit, cites its source, and recommends escalation where the topic is sensitive or outside its scope. It does not give final employment, legal, medical or disciplinary advice. Safeguarding, medication concerns and anything ambiguous are flagged for human review. AI answers are only returned from documents that have passed all governance gates.
 
 ### Policy library
-Staff can browse and search sample care policies. Policies are displayed in plain English with section headings. This is read-only. No policies have been approved for real-world use at this stage.
+Staff can browse and search approved policy documents. Visitor Sign-In and Identification Procedure is currently approved and staff-visible. AC32 (Mobile Phone and Portable Device Use Policy) is visible in controlled internal testing only. Documents in admin-debug or human-only lanes are not visible here. This is read-only. No policies have been approved for unsupervised real-world use at this stage.
 
 ### Onboarding hub
 New staff or those in their first weeks can follow a structured onboarding path. This includes key policies to read, short tasks to acknowledge, and links to relevant practice scenarios. Content is sample/fictional.
@@ -61,10 +68,10 @@ New staff or those in their first weeks can follow a structured onboarding path.
 Staff can select from a set of scenario-based exercises (e.g. medication refusal, safeguarding concern, incident report). Each scenario asks how they would respond, then provides structured feedback. No results are stored or shared with the employer. This feature is for self-directed learning only.
 
 ### Private notes
-Staff can write personal notes - reflections, reminders, questions to raise with a manager. These are private to the individual session. They are not visible to the employer, the admin panel or the AI assistant. They exist solely to support the staff member.
+Staff can write personal notes — reflections, reminders, questions to raise with a manager. These are private to the individual session. They are not visible to the employer, the admin panel or the AI assistant. They exist solely to support the staff member. Private notes are session-only and are not a real production privacy implementation; a persistent notes feature would require authentication and a purpose-built privacy-safe storage design.
 
 ### Escalation contacts
-Staff can view a list of escalation contacts relevant to their role - safeguarding lead, HR, on-call manager, and so on. Contacts are sample/fictional in this demo. The sidebar highlights the active contact clearly.
+Staff can view a list of escalation contacts relevant to their role — safeguarding lead, HR, on-call manager, and so on. Contacts are sample/fictional in this demo. The sidebar highlights the active contact clearly.
 
 ---
 
@@ -72,25 +79,33 @@ Staff can view a list of escalation contacts relevant to their role - safeguardi
 
 | Point | Status |
 |---|---|
-| Admin demo screens | Disabled publicly - not reachable without direct internal access |
-| Public admin API proxy | Blocked - returns 403 for all unauthenticated requests |
-| High-risk topics | Routed to human escalation - no autonomous AI advice |
-| Sample/fictional data | Used throughout - no real staff, service users or policies |
-| Staff-facing RAG | Controlled and not expanded in this milestone |
+| Admin demo screens | Visibility controlled by NEXT_PUBLIC_ADMIN_DEMO_ENABLED; may be visible in deployed demo; not for real end-user access |
+| Admin API / proxy | Disabled/fail-closed publicly (ADMIN_PROXY_ENABLED not set); must not be enabled before real auth, session, CSRF, and RBAC are in place |
+| High-risk topics | Routed to human escalation — no autonomous AI advice |
+| Personal data | No real staff, service-user, resident, care-plan, HR, safeguarding case-note or named complaint personal data has been introduced; some controlled internal policy testing has used Thumhara Centre/QCS policy documents under governance restrictions |
+| Staff-facing RAG | Governed pipeline; Visitor Sign-In is staff-visible (Lane A); AC32 is controlled internal only; CC34 and QQ03 are admin-debug only; CR100 and PM11 are human-only escalation |
 | Individual staff data | Not shared with employer in any form |
-| Surveillance behaviours | Not built - see privacy principles |
+| Surveillance behaviours | Not built — see privacy principles |
+| Auth | Not activated publicly; auth scaffolding (JWT ES256/JWKS, Bearer forwarding, Supabase SSR) is wired but E2E proof (4S.88G) is blocked |
 
 ---
 
-## 5. Proof completed
+## 5. Demo posture
 
-The following checks were completed at the c58a16f checkpoint:
+Current posture at checkpoint `4437415`:
 
-- Local build passed (Next.js, no errors or warnings)
-- Playwright smoke tests passed: **10/10**
-- Live staff pages returned **HTTP 200** for all core routes
-- Live admin demo confirmed **disabled** (page not reachable publicly)
-- Live admin API proxy confirmed returning **HTTP 403** for unauthenticated requests
+- Local build passes (Next.js, no errors or warnings)
+- Playwright smoke tests: 15 staff route tests cover all major staff routes
+- Live staff pages return HTTP 200 for all core routes
+- Admin demo screen visibility: controlled by `NEXT_PUBLIC_ADMIN_DEMO_ENABLED`; may be visible in the live deployed demo
+- Admin API proxy: disabled (`ADMIN_PROXY_ENABLED` not set); returns fail-closed for all proxy requests
+- Auth: not activated publicly (`PILOT_AUTH_MODE=false`); scaffolding is wired but E2E proof (4S.88G) is blocked
+
+**Demo posture summary:**
+- Credible for a controlled stakeholder demo.
+- Not production-ready.
+- Not approved for unsupervised real staff use.
+- Do not demonstrate admin upload/proxy as production-ready — the proxy is disabled and session/CSRF guards are test-only stubs.
 
 ---
 
@@ -98,27 +113,29 @@ The following checks were completed at the c58a16f checkpoint:
 
 Use natural language. Do not read from slides.
 
-> "This is WorkTwin - it's designed to sit alongside a care worker during their working day, not replace their manager or their judgement.
+> "This is WorkTwin — it's designed to sit alongside a care worker during their working day, not replace their manager or their judgement.
 >
-> From the dashboard they can look up a policy quickly, practise a tricky scenario in private, or find out who to escalate to if something comes up they're not sure about.
+> Staff can see the whole product journey here — from the landing page through the dashboard, policy lookup, onboarding, practice scenarios, private notes, and escalation contacts.
 >
-> The AI only answers from documents the employer has approved. If something touches safeguarding or anything sensitive, it tells the worker to speak to a person - it doesn't try to handle it.
+> The AI only answers from documents the employer has approved and that have passed our governance gates. Where a document has been approved, answers are source-grounded and the source is always cited. If something touches safeguarding, medication, HR or anything sensitive, the system tells the worker to speak to a person — it doesn't try to handle it.
 >
-> Private notes are visible only to the worker - we don't track what they write, and the employer never sees it.
+> Private notes are visible only to the worker — we don't track what they write, and the employer never sees it. Right now notes are session-only; before going live, persistent private notes would need proper authentication and privacy-safe storage.
 >
-> The admin side is completely separate. I'll show you that briefly but it's behind a separate access layer and not part of what staff see at all.
+> The admin side is completely separate. Admin screens may be visible in this demo environment depending on the configuration, but the admin API and proxy are locked down and not part of what staff see at all. Do not treat admin upload or proxy as production-ready.
 >
-> This is a working pilot. The policies shown are sample content. Before going live with a real team we'd work with you to load your own approved documents and go through the governance steps."
+> This is a working controlled prototype. Before going live with a real team we would need: staff authentication — which is scaffolded but not yet activated — DPA and legal review, confirmation that the QCS licence permits AI/RAG use for the relevant documents, governance sign-off, and full safety tests. We'd also work with you to load your own approved documents under a proper governance process."
 
 ---
 
 ## 7. Known limitations and next steps
 
-- **Still a pilot.** The product is not approved for live use with real staff or service users.
-- **Policies not approved.** Before real use, policies must be reviewed, approved and uploaded by the employer under a proper governance process.
+- **Still a controlled prototype.** The product is not approved for live use with real staff or service users.
+- **Policies not approved for production.** Before real use, policies must be reviewed, approved and uploaded by the employer under a proper governance process. Visitor Sign-In is the first clean Lane A proof. AC32 is controlled internal only. Other documents are admin-debug only, human-only, or pending.
 - **No high-risk autonomous advice.** The system intentionally does not give autonomous advice on safeguarding, legal or disciplinary matters. This is by design and will not change.
-- **RAG not expanded.** The knowledge base is limited to the controlled sample set. Expanding it requires explicit governance sign-off.
-- **Auth not implemented.** The demo is open-access. Real deployment would require staff authentication.
+- **Auth scaffolded but not activated.** Auth scaffolding (JWT ES256/JWKS, Supabase SSR, Bearer forwarding, membership resolution) is wired and in place. Public pilot auth is not activated because the E2E proof (4S.88G) is blocked pending a safe migration path for the `organisation_memberships` table. `PILOT_AUTH_MODE` remains `false`.
+- **Admin proxy disabled.** The admin proxy is disabled (`ADMIN_PROXY_ENABLED` not set). Session and CSRF guards are test-only stubs. Do not represent admin upload/proxy as production-ready.
+- **QCS AI/RAG use not confirmed.** AC32, CC34, and QQ03 are QCS-licensed content. Use inside an AI/RAG pipeline has not been confirmed as permitted. No further expansion of staff visibility or AI use for these documents until confirmed.
+- **No DPA.** A data processing agreement with Thumhara Centre is required before any real personal data is introduced.
 - **Future work may include:**
   - More granular staff role journeys (senior carer, team leader, coordinator)
   - Bilingual support (e.g. English/Urdu for community care settings)

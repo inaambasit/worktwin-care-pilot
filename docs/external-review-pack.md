@@ -1,7 +1,7 @@
 # WorkTwin Care Pilot - External Review Pack
 
-Version: 2026-05-05
-Milestone: 4S.87C
+Version: 2026-05-07
+Milestone: 4S.89H
 
 ---
 
@@ -19,6 +19,12 @@ sensitive HR data, or live care operations.
 
 Feedback will be used to decide what must be fixed, what should be deferred,
 and what must never be built.
+
+**Current sources of truth:** `docs/current-state.md` is the authoritative
+record of checkpoint, blockers, and pilot-readiness status.
+`docs/policy-upload-testing-tracker.md` is the authoritative record of
+policy/document testing state. This review pack reflects the position as of
+7 May 2026; refer to those documents for the latest updates.
 
 ---
 
@@ -65,9 +71,13 @@ The following screens are accessible in the live staff demo:
   or when a topic is high risk. The public demo must be treated as non-production
   and fallback-safe unless its live configuration and qualifying source state
   have been explicitly verified.
-- **Policy library** - browse and search approved policy documents. Currently
-  shows the Visitor Sign-In and Identification Procedure as the safe visible
-  test document.
+- **Policy library** - browse and search approved policy documents. Visitor
+  Sign-In and Identification Procedure is the first clean Lane A proof —
+  approved for staff-visible source-grounded answers. AC32 (Mobile Phone and
+  Portable Device Use Policy) has controlled internal Thumhara Centre
+  staff-style testing status; QCS AI/RAG permission still requires
+  confirmation before wider rollout. CC34 (Infection Control) and QQ03
+  (Complaints) remain admin answer-debug only and are not staff-visible.
 - **Onboarding hub** - structured onboarding checklist and guidance for new
   staff.
 - **Practice scenarios** - learning scenarios to build staff confidence.
@@ -93,13 +103,27 @@ The following screens are accessible in the live staff demo:
 - The product is not pilot-ready. Authentication, RBAC, admin session protection,
   full safety tests, and pilot governance must be in place before any real staff
   use or real documents are uploaded.
-- AC32 (Mobile Phone and Portable Device Use Policy) is excluded from staff
-  visibility by design. It is not surfaced on the /policies page and will not
-  be used in any staff-facing AI answer.
-- The Visitor Sign-In and Identification Procedure is the only document
-  currently approved as the safe staff-visible test policy.
+- AC32 (Mobile Phone and Portable Device Use Policy) has been approved only
+  for controlled internal Thumhara Centre staff-style testing; it is not
+  approved for wider rollout. QCS AI/RAG permission (for extracting policy
+  text, storing in WorkTwin/Supabase, vector search, and AI-generated answers
+  outside the QCS platform) still requires confirmation before any wider
+  deployment.
+- Visitor Sign-In and Identification Procedure is the first clean Lane A
+  policy — approved for staff-visible source-grounded answers. AC32 has
+  controlled internal testing status. CC34 (Infection Control) and QQ03
+  (Complaints) remain admin answer-debug only and are not staff-visible.
+  CR100 (Safeguarding) and PM11 (Whistleblowing) are human-only escalation
+  and are never AI-answerable.
 - No real service-user records, MAR charts, care plans, HR/payroll files or
   private case files should be uploaded to the system under any circumstances.
+- No real staff, service-user, resident, care-plan, HR, safeguarding
+  case-note or named complaint personal data has been introduced. Some
+  controlled internal policy testing has used Thumhara Centre/QCS policy
+  documents under governance restrictions.
+- A data processing agreement (DPA) with Thumhara Centre is required before
+  any real personal data is introduced. QCS AI/RAG use for AC32, CC34, and
+  QQ03 has not been confirmed as permitted before wider rollout.
 - Employee conversations are private by design. The product direction is that
   any future employer dashboards should show anonymised trends only. Individual
   chat transcripts should not be visible to managers.
@@ -297,13 +321,16 @@ as new findings, but they are welcome to comment on severity or priority.
    small screens requires further work before it would meet a production bar.
 
 3. **Authentication scaffolding exists but is not active.** `/login` and
-   `/login/sent` exist as preparation and demo pages only. Auth configuration
-   (`PILOT_AUTH_MODE=false`, `NEXT_PUBLIC_PILOT_AUTH_MODE=false`,
-   `SUPABASE_JWT_SECRET`, `NEXT_PUBLIC_SUPABASE_URL`,
-   `NEXT_PUBLIC_SUPABASE_ANON_KEY`) is represented in `.env.example`, but real
-   Supabase Auth session validation and organisation membership lookup are not
-   yet active. There is no active/enforced session protection or role-based access control for real pilot use.
-   Employee and admin routes remain accessible without an authenticated session.
+   `/login/sent` exist as preparation and demo pages only. Auth scaffolding
+   is wired: JWT validation supporting ES256 (JWKS) and HS256, Bearer token
+   forwarding from frontend to backend, Supabase SSR client, and membership
+   resolution code are all present. However, public pilot auth is not
+   activated because 4S.88G (E2E auth proof) remains blocked — the
+   `organisation_memberships` table cannot be applied to the
+   production-labelled Supabase environment without a safe migration path.
+   `PILOT_AUTH_MODE` remains `false`. There is no active/enforced session
+   protection or role-based access control for real pilot use. Employee and
+   admin routes remain accessible without an authenticated session.
 
 4. **Staff-facing document-grounded RAG is governed and not fully active for
    the public demo.** The backend contains a governed staff /ask RAG path with

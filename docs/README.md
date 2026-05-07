@@ -10,6 +10,7 @@
 | [Policy upload and AI testing tracker](policy-upload-testing-tracker.md) | Source of truth for policy and document governance, upload testing scope and results |
 | [Clean-corpus policy approval template](clean-corpus-policy-approval-template.md) | Reusable approval template — complete before uploading any document to WorkTwin |
 | [Auth E2E proof blocker (4S.88G)](4s88g-auth-e2e-proof-blocker.md) | Current auth E2E blocker record — blocked pending safe migration path |
+| [Sandbox auth E2E setup plan (4S.90I)](4s90i-sandbox-auth-e2e-plan.md) | Plan to prove auth E2E in a separate sandbox Supabase project without touching the production-labelled Thumhara project |
 
 ## Product and planning
 

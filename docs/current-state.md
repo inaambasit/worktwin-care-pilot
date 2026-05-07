@@ -125,7 +125,7 @@ The pilot client is **Thumhara Centre**. No real staff, service-user, resident, 
 
 1. **4S.88G** - `organisation_memberships` table not applied to the Thumhara Centre Supabase project. Cannot activate `PILOT_AUTH_MODE` or demonstrate real auth E2E without either a separate Supabase dev branch or explicit approval to run `008_organisation_memberships.sql` against the named project. See `docs/4s88g-auth-e2e-proof-blocker.md`.
 
-2. **Third-party content and QCS restriction (recorded 2026-05-07)** — WorkTwin must not ingest, upload, embed, vectorise, answer-debug, or staff-serve QCS Documentation or any other third-party copyrighted compliance-library content unless explicit written permission exists for this specific AI/RAG use case. AC32, CC34, and QQ03 are QCS-licensed content. Thumhara Centre has a QCS licence; however, WorkTwin must not use QCS Documentation in any AI/RAG workflow unless written permission confirms that the licence permits this specific use case. No further expansion of staff visibility, AI answer access, or embedding scope for these documents until written permission is obtained. This is a content-source restriction, not a WorkTwin architecture failure. See Section 11.
+2. **Third-party content and QCS restriction (recorded 2026-05-07)** — WorkTwin must not ingest, upload, embed, vectorise, answer-debug, or staff-serve QCS Documentation or any other third-party copyrighted compliance-library content unless explicit written permission exists for this specific AI/RAG use case. AC32, CC34, and QQ03 are QCS-licensed content. Thumhara Centre has a QCS licence; however, WorkTwin must not use QCS Documentation in any AI/RAG workflow unless written permission confirms that the licence permits this specific use case. No further expansion of staff visibility, AI answer access, or embedding scope for these documents until written permission is obtained. This is a content-source restriction, not a WorkTwin architecture failure. See Section 12.
 
 3. **No DPA or data processing agreement** - WorkTwin does not yet have a signed DPA or data processing addendum covering the Thumhara Centre relationship. Required before any real personal data is introduced.
 
@@ -167,7 +167,15 @@ The system demonstrates the intended architecture convincingly: governance gates
 
 ---
 
-## 9. Next Recommended Sequence
+## 9. Sandbox Auth E2E Plan (4S.90I)
+
+A sandbox Supabase auth E2E setup plan has been created at `docs/4s90i-sandbox-auth-e2e-plan.md`. This plan documents how to prove auth E2E using a separate sandbox Supabase project without touching the production-labelled Thumhara Centre project. It covers sandbox setup, database seeding with fake memberships, the full E2E proof flow, evidence capture, and pass/fail criteria. Next slices: 4S.90J (create sandbox project), 4S.90K (apply migrations and seed), 4S.90L (local auth E2E proof), 4S.90M (RLS), 4S.90N (admin proxy real session guard).
+
+**QCS DB cleanup deliberately deferred:** AC32, CC34, and QQ03 remain in their current dev/internal registry state. They must not be expanded, demoed, staff-served, or used as the future clean corpus. QCS cleanup is a separate future slice, not part of the sandbox auth proof track.
+
+---
+
+## 10. Next Recommended Sequence
 
 ### Immediate documentation track
 
@@ -207,13 +215,13 @@ The system demonstrates the intended architecture convincingly: governance gates
 
 ---
 
-## 10. Do-Not-Touch List
+## 11. Do-Not-Touch List
 
 1. **Thumhara Centre Supabase project** - do not run any migrations, schema changes, or data operations against the named production-labelled project until 4S.88G is resolved with a safe dev branch or explicit written approval.
 
 2. **`008_organisation_memberships.sql`** - do not apply to any shared or Thumhara Centre database. The file carries a header warning that must be honoured.
 
-3. **QCS Documentation and third-party copyrighted compliance-library content (including AC32, CC34, QQ03)** - do not ingest, upload, embed, vectorise, answer-debug, or staff-serve any QCS Documentation or third-party copyrighted compliance-library content. Do not expand staff visibility, AI answer access, or embedding scope for existing QCS-derived documents until written permission confirms that the QCS licence (or relevant third-party licence) permits this specific AI/RAG use case. See Section 11.
+3. **QCS Documentation and third-party copyrighted compliance-library content (including AC32, CC34, QQ03)** - do not ingest, upload, embed, vectorise, answer-debug, or staff-serve any QCS Documentation or third-party copyrighted compliance-library content. Do not expand staff visibility, AI answer access, or embedding scope for existing QCS-derived documents until written permission confirms that the QCS licence (or relevant third-party licence) permits this specific AI/RAG use case. See Section 12.
 
 4. **`PILOT_AUTH_MODE`** - do not set to `true` in any deployed environment until 4S.88G is resolved and E2E auth proof is demonstrated.
 
@@ -231,7 +239,7 @@ The system demonstrates the intended architecture convincingly: governance gates
 
 ---
 
-## 11. Third-Party Content and QCS Restriction
+## 12. Third-Party Content and QCS Restriction
 
 **Recorded: 2026-05-07**
 

@@ -1,7 +1,21 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 
-const PROTECTED_PATHS = ['/ask', '/policies']
+const STAFF_ROOTS = [
+  '/dashboard',
+  '/ask',
+  '/policies',
+  '/onboarding',
+  '/scenarios',
+  '/notes',
+  '/escalation',
+]
+
+function isProtectedStaffPath(pathname: string): boolean {
+  return STAFF_ROOTS.some(
+    (root) => pathname === root || pathname.startsWith(root + '/')
+  )
+}
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   if (process.env.NEXT_PUBLIC_PILOT_AUTH_MODE !== 'true') {
@@ -10,7 +24,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   const { pathname } = request.nextUrl
 
-  if (!PROTECTED_PATHS.includes(pathname)) {
+  if (!isProtectedStaffPath(pathname)) {
     return NextResponse.next()
   }
 
@@ -53,5 +67,13 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 }
 
 export const config = {
-  matcher: ['/ask', '/policies'],
+  matcher: [
+    '/dashboard/:path*',
+    '/ask/:path*',
+    '/policies/:path*',
+    '/onboarding/:path*',
+    '/scenarios/:path*',
+    '/notes/:path*',
+    '/escalation/:path*',
+  ],
 }

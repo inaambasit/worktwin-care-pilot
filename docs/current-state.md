@@ -1,6 +1,6 @@
 # WorkTwin Care Pilot - Current State
 
-> Generated: 2026-05-07. Source of truth for checkpoint `336335f` on branch `main`.
+> Generated: 2026-05-07. Source of truth for checkpoint `5acf430` on branch `main`.
 > Update this file whenever a milestone changes the status of any item below.
 > Do not edit other files to reconcile with this document - fix those files instead.
 
@@ -10,7 +10,7 @@
 
 | Item | Value |
 |---|---|
-| Commit | `336335f` |
+| Commit | `5acf430` |
 | Branch | `main` |
 | Repo path | `C:\Projects\worktwin-care-pilot\worktwin-care-pilot-starter` |
 | Backend | FastAPI / `backend/app/main.py` |
@@ -91,7 +91,7 @@ The pilot client is **Thumhara Centre**. No real staff, service-user, resident, 
 | CSRF guard | Test stub only | Production always returns 403 for POST/PATCH through proxy |
 | Real staff use | Not approved | No DPA, no QCS licence AI/RAG confirmation, auth not activated |
 | `008_organisation_memberships.sql` | Not applied | 4S.88G blocker - safe dev branch required before applying |
-| `middleware.ts` route protection | Partial | Matcher covers `/ask` and `/policies` only; `/dashboard`, `/notes`, admin routes unprotected even when auth mode is on |
+| `middleware.ts` route protection | Staff routes covered in pilot-auth mode (4S.90C) | In pilot-auth mode, middleware protects `/dashboard`, `/ask`, `/policies`, `/onboarding`, `/scenarios`, `/scenarios/*`, `/notes`, `/escalation`; public demo behaviour remains fail-open when `NEXT_PUBLIC_PILOT_AUTH_MODE` is not `true`; admin routes are deliberately not protected by this middleware slice — admin auth/RBAC/proxy session is a separate concern |
 | `supabase-browser.ts` token extraction | Hardened (partial) | `getSession()` obtains the local token; `getUser(token)` validates it server-side before forwarding; admin proxy real Supabase session validation remains outstanding |
 
 ---
@@ -129,7 +129,7 @@ The pilot client is **Thumhara Centre**. No real staff, service-user, resident, 
 
 4. **Admin proxy session and CSRF guards are test-only stubs** - The proxy cannot be safely enabled in production in this state. Both guards must be replaced with real implementations before `ADMIN_PROXY_ENABLED` is set in any non-local environment.
 
-5. **`middleware.ts` matcher is incomplete** - Auth middleware only covers `/ask` and `/policies`. `/dashboard`, `/notes`, `/escalation`, `/onboarding`, `/scenarios`, and all `/admin/*` routes are unprotected at the middleware layer even if `PILOT_AUTH_MODE` were activated.
+5. **Admin routes not protected by this middleware slice** - Staff routes (`/dashboard`, `/ask`, `/policies`, `/onboarding`, `/scenarios`, `/notes`, `/escalation`) are now covered in pilot-auth mode (4S.90C). Admin routes (`/admin/*`) are deliberately outside this middleware slice; admin auth, RBAC, and proxy session design remain outstanding and are prerequisites before `ADMIN_PROXY_ENABLED` can be set in any non-local environment.
 
 6. **`supabase-browser.ts` token validation (partial hardening)** - `getSession()` is used to obtain the local access token, and `getUser(token)` now validates it server-side before forwarding. Real Supabase Auth session validation inside the admin proxy and production CSRF/same-site controls remain outstanding and are prerequisites before `ADMIN_PROXY_ENABLED` can be set in any non-local environment.
 
@@ -184,7 +184,7 @@ The system demonstrates the intended architecture convincingly: governance gates
 |---|---|---|---|
 | Admin proxy session guard | Replace test-only session stub with real Supabase Auth session validation | `frontend/app/api/admin/[...path]/route.ts` | None |
 | Admin proxy CSRF guard | Replace test-only CSRF stub with production same-site/CSRF mechanism | `frontend/app/api/admin/[...path]/route.ts` | None |
-| Middleware expansion | Expand `middleware.ts` matcher to cover all staff and admin routes | `frontend/middleware.ts` | None |
+| Admin middleware / RBAC | Design and implement admin route protection (admin auth, RBAC, proxy session) — staff routes already covered by 4S.90C | `frontend/middleware.ts`, `frontend/app/api/admin/[...path]/route.ts` | None |
 | 4S.88G | Resolve `organisation_memberships` migration blocker (dev Supabase branch or explicit approval) | `backend/sql/008_organisation_memberships.sql` | Decision required |
 
 #### Completed technical backlog items
@@ -192,6 +192,7 @@ The system demonstrates the intended architecture convincingly: governance gates
 | Item | Description | Completed in |
 |---|---|---|
 | Governance gate unit tests | Added `backend/tests/test_governance_gates.py`; 39 tests covering all four gate functions; no runtime code changed | 4S.90A (`336335f`) |
+| Expanded pilot-auth middleware staff route coverage | `frontend/middleware.ts` now protects all seven staff routes in pilot-auth mode; added `frontend/tests/middleware-pilot-auth.spec.ts`; focused middleware test: 3 passed, 6 skipped in public-demo mode; `npm run build` passed; full smoke has unrelated/stale failures and was not used as the pass gate for this slice | 4S.90C (`5acf430`) |
 
 ### External decisions required
 

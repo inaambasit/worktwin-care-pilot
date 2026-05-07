@@ -8,7 +8,7 @@
 | Real staff use | None — no staff have access |
 | Pending review | Shagufta review may occur later; not scheduled |
 | Document visibility | Admin/testing only unless gates are deliberately enabled |
-| Last updated | 2026-05-06 |
+| Last updated | 2026-05-07 |
 | PPE upload | Paused — PPE Policy PDF not yet available; will be requested from Shagufta |
 
 Documents remain in testing state until all required gates are explicitly approved. Enabling a gate is a deliberate act — it does not happen automatically upon upload.
@@ -27,6 +27,36 @@ Do not upload any of the following unless licence or use has been confirmed in w
 - Confidential third-party content (e.g. QCS policies) unless licence permits embedding
 
 When in doubt, assign lane **D** and escalate before uploading.
+
+---
+
+## QCS and Third-Party Content Restriction
+
+**Recorded: 2026-05-07**
+
+WorkTwin may use organisation-owned, original, commissioned, or properly licensed source material.
+
+WorkTwin must not ingest, upload, embed, vectorise, answer-debug, or staff-serve QCS Documentation or any other third-party copyrighted compliance-library content unless explicit written permission exists for this specific AI/RAG use case.
+
+Thumhara Centre has a QCS licence; however, WorkTwin must not use QCS Documentation in any AI/RAG workflow unless written permission confirms that the licence permits this specific use case. This is a content-source restriction, not a WorkTwin architecture failure.
+
+**Blocked operations for QCS Documentation (until written permission is obtained):**
+
+| Operation | Status |
+|-----------|--------|
+| Document upload (new QCS documents) | Blocked |
+| Text extraction | Blocked |
+| Chunking | Blocked |
+| Embedding / vector-indexing | Blocked — existing QCS embeddings must not be expanded |
+| Admin answer-debug | Blocked — existing QCS answer-debug access must not be expanded |
+| Source-grounded staff answers | Blocked |
+| Staff visibility | Blocked |
+| Use in demo / pilot / production | Blocked |
+| Derivative rewriting preserving protected third-party wording or structure | Blocked |
+
+**Existing QCS documents in the registry (AC32, CC34, QQ03):** Their recorded database flag state is historical/current registry state only — no database flags are being changed in this docs-only record. Operationally, AC32, CC34, and QQ03 are blocked/frozen from further use in WorkTwin AI/RAG workflows from 2026-05-07. They must not be used for staff-style Ask, staff-visible answers, answer-debug expansion, embedding expansion, demo, pilot, or production use unless written permission confirms the specific AI/RAG use case is permitted. A later data-governance cleanup slice should review whether the DB flags or embeddings need to be disabled, hidden, archived, or removed. See document notes and decision log entries dated 2026-05-07.
+
+**Clean corpus direction:** Future demo and pilot documents must be clean-corpus documents — Thumhara-original documents, commissioned or internally produced content, organisation-owned procedures, or public guidance (e.g. CQC, NHS England, Skills for Care) where the licence explicitly permits the intended use, checked source-by-source, with attribution where required.
 
 ---
 
@@ -67,13 +97,13 @@ Based on current registry proof as of 2026-05-06.
 | Document | Lane | Indexed | Source-Grounded Approved | Staff-Visible | Notes |
 |----------|------|---------|--------------------------|---------------|-------|
 | Visitor Sign-In and Identification Procedure | **A** | Yes | Yes | Yes | Fully approved; first live lane A policy |
-| AC32 Mobile Phone and Portable Device Use Policy | **A — controlled internal testing only** | Yes | Yes | Yes | Live source-grounded Ask confirmed for controlled internal Thumhara Centre staff-style testing only; Thumhara Centre has a QCS licence — confirm the licence permits this specific AI/RAG use case (extracting policy text, storing in WorkTwin/Supabase, vector search, and AI-generated staff answers outside the QCS platform) before wider production deployment |
-| CC34 Infection Control Policy and Procedure | **B → A candidate** | Yes | Yes | No | Answer quality good; more test questions needed before promotion |
+| AC32 Mobile Phone and Portable Device Use Policy | **A — controlled internal testing only** | Yes | Yes | Yes | BLOCKED (2026-05-07) — QCS content restriction applies; DB flag state is historical registry state only, no database flags changed in this docs-only record; must not be used for staff-style Ask, staff-visible answers, answer-debug expansion, embedding expansion, demo, pilot, or production use unless written permission obtained; a later data-governance cleanup slice should review whether DB flags/embeddings need to be disabled, hidden, archived, or removed; see QCS and Third-party Content Restriction section |
+| CC34 Infection Control Policy and Procedure | **B → A candidate** | Yes | Yes | No | BLOCKED (2026-05-07) — QCS content restriction applies; extended admin QA complete; not for staff visibility or further AI-RAG expansion until written permission obtained |
 | CR100 Safeguarding Adults Policy and Procedure | **C** | — | No | No | Sensitive; AI must escalate all related questions to a person |
 | PM11 Raising Concerns / Freedom to Speak Up / Whistleblowing | **C** | — | No | No | HR concern route; human-only; never AI-answerable |
 | CR07 Data Protection and Confidentiality Policy and Procedure (English) | **B pending upload** | No | No | No | Useful for confidentiality, UK GDPR, data protection and staff responsibilities; admin-test only first because it touches legal/compliance/confidential information duties |
 | CR07 Data Protection and Confidentiality Policy and Procedure (Urdu) | Pending multilingual review | No | No | No | Do not upload yet until bilingual/multilingual document strategy is agreed |
-| QQ03 Complaints, Suggestions and Compliments Policy and Procedure | **B — admin answer-debug only** | Yes | Yes (admin/debug only) | No | Source-grounded answers approved for admin answer-debug only; answer-debug test passed with caution; staff visibility remains disabled; not approved for staff use |
+| QQ03 Complaints, Suggestions and Compliments Policy and Procedure | **B — admin answer-debug only** | Yes | Yes (admin/debug only) | No | BLOCKED (2026-05-07) — QCS content restriction applies; DB flag state is historical registry state only, no database flags changed in this docs-only record; must not be used for staff-style Ask, staff-visible answers, answer-debug expansion, embedding expansion, demo, pilot, or production use unless written permission obtained; a later data-governance cleanup slice should review whether DB flags/embeddings need to be disabled, hidden, archived, or removed |
 
 ### Gate Summary per Document
 
@@ -174,7 +204,9 @@ A mini QA set was run locally against `/ask` after AC32 was approved for control
 
 ### Conclusion
 
-AC32 remains approved for controlled internal staff-style Ask testing only. It is not ready for wider rollout. Thumhara Centre has a QCS licence — confirm the licence permits this specific AI/RAG use case (extracting policy text, storing in WorkTwin/Supabase, vector search, and AI-generated staff answers outside the QCS platform) before wider production deployment.
+Historical controlled internal staff-style Ask testing was completed before 2026-05-07 (mini QA results above). **BLOCKED from 2026-05-07:** AC32 is now frozen. QCS content restriction applies — AC32 must not be used for further staff-style Ask, staff-visible answers, answer-debug expansion, embedding expansion, demo, pilot, or production use unless written permission confirms that the QCS licence permits this specific AI/RAG use case (extracting policy text, storing in WorkTwin/Supabase, vector search, and AI-generated staff answers outside the QCS platform). Thumhara Centre has a QCS licence; however, written permission for this specific AI/RAG use case has not been obtained. See QCS and Third-Party Content Restriction section.
+
+**Follow-up (data-governance cleanup slice):** Review whether existing QCS-derived database flags or embeddings for AC32, CC34, and QQ03 need to be disabled, hidden, archived, or removed. This must be handled in a dedicated controlled data-governance cleanup slice — no database flags are changed in this docs-only record.
 
 ### Follow-Up Actions
 
@@ -218,7 +250,7 @@ QQ03 Complaints, Suggestions and Compliments Policy and Procedure was uploaded t
 | governance_reviewed_by | Inaam Basit |
 | governance_reviewed_at | 2026-05-06T19:12:36 UTC |
 | source_owner | Quality Compliance Systems / Thumhara Centre licensed policy |
-| source_licence_notes | Thumhara Centre has a QCS licence; confirm the licence permits this specific AI/RAG use case before wider production deployment |
+| source_licence_notes | Thumhara Centre has a QCS licence; BLOCKED (2026-05-07) — written permission required to confirm this specific AI/RAG use case is permitted before any further ingestion, expansion, or staff serving |
 
 ### Embedding and Indexing Summary
 
@@ -356,8 +388,8 @@ CC34 remains **Lane B → A candidate**. Admin answer-debug approved only. Do no
 
 ### AC32 — Mobile Phone and Portable Device Use Policy
 
-- Remains approved for controlled internal staff-style testing only.
-- Mini QA overall result: **PASS with issues**.
+- Historical controlled internal staff-style testing was completed before 2026-05-07. **AC32 is now blocked/frozen** from further staff-style Ask, staff-visible answers, answer-debug expansion, or any AI/RAG use until written permission is obtained (see QCS and Third-Party Content Restriction section).
+- Mini QA overall result: **PASS with issues** (historical, completed before 2026-05-07 content restriction was formally recorded).
 - Mobile-phone-while-driving question over-escalated as a legal matter; AC32 contains policy-guided driving wording that should have been applied.
 - Photo/video/voice-recording consent question fell back to a generic response; AC32 contains relevant consent, camera, and recording wording.
 - Some security-step answers were useful but too long and risked truncation.
@@ -456,7 +488,7 @@ Use this template to record each policy decision. Add a new row each time a docu
 |------|--------|------|----------|--------|----------------|-------------|-----------------|
 | 2026-05-06 | Visitor Sign-In and Identification Procedure | A | Internal | First lane A proof; low sensitivity; extraction and QA passed | `approved_for_embedding`, `approved_for_source_grounded_answers`, `approved_for_staff_visibility` | Pass | None outstanding |
 | 2026-05-06 | AC32 Mobile Phone and Portable Device Use Policy | B | Internal | Thumhara Centre has a QCS licence; AI/RAG use case confirmation required before wider production deployment | `approved_for_embedding`, `approved_for_source_grounded_answers` | Pass (quality testing) | Confirm the licence permits this specific AI/RAG use case before wider production deployment |
-| 2026-05-06 | AC32 Mobile Phone and Portable Device Use Policy | A — controlled internal testing only | Inaam Basit | Low-sensitivity operational staff policy; status approved and staff visibility governance approved for controlled internal staff-style Ask testing only | `approved_for_embedding`, `approved_for_source_grounded_answers`, `approved_for_staff_visibility` | Pass — local and live Ask returned source-grounded AC32 answer | Confirm the licence permits this specific AI/RAG use case before wider production deployment |
+| 2026-05-06 | AC32 Mobile Phone and Portable Device Use Policy | A — controlled internal testing only | Inaam Basit | Historical pre-2026-05-07 decision: low-sensitivity operational staff policy; status approved and staff visibility governance approved for controlled internal staff-style Ask testing only at the time. Superseded by 2026-05-07 QCS content restriction; AC32 is now blocked/frozen from further WorkTwin AI/RAG use unless written permission is obtained. | `approved_for_embedding`, `approved_for_source_grounded_answers`, `approved_for_staff_visibility` | Pass — local and live Ask returned source-grounded AC32 answer | Confirm the licence permits this specific AI/RAG use case before wider production deployment |
 | 2026-05-06 | CC34 Infection Control Policy and Procedure | B | Internal | Answer quality good; additional test questions needed | `approved_for_embedding`, `approved_for_source_grounded_answers` | Pass (initial) | Run extended question bank before promotion to A |
 | 2026-05-06 | CR100 Safeguarding Adults Policy and Procedure | C | Internal | Sensitive by nature; never AI-answerable | None | Not applicable | Review escalation wording in AI system |
 | 2026-05-06 | PM11 Raising Concerns / Whistleblowing | C | Internal | HR concern route; human-only | None | Not applicable | Ensure escalation route is clear in UI |
@@ -466,6 +498,9 @@ Use this template to record each policy decision. Add a new row each time a docu
 | 2026-05-06 | AC32 Mobile Phone and Portable Device Use Policy | A — controlled internal testing only | Internal QA | Mini QA completed across 8 realistic mobile-phone/portable-device questions | No new flags changed | Pass with issues — 6 pass, 2 partial fail, 1 answer too long/truncated | Keep controlled testing only; improve driving/photo-video routing and long-answer control before wider rollout |
 | 2026-05-06 | QQ03 Complaints, Suggestions and Compliments Policy and Procedure | B — admin-test only | Inaam Basit | Uploaded, extracted, fully indexed and vector retrieval QA passed, but complaints can involve safeguarding, named people, legal/compliance or disciplinary issues | `approved_for_embedding` | Pass — 54/54 chunks embedded; 3/3 vector retrieval checks passed | Keep AI answers and staff visibility disabled; only consider answer-debug after deliberate governance review and escalation/routing checks |
 | 2026-05-06 | QQ03 Complaints, Suggestions and Compliments Policy and Procedure | B — admin answer-debug only | Inaam Basit | Approved for source-grounded admin answer-debug only after retrieval QA passed; staff visibility remains disabled | `approved_for_source_grounded_answers` (admin/debug only) | Pass with caution — 3/3 answer-debug questions passed; all responses source-grounded to QQ03 only, sources cited, staff answers confirmed disabled; safeguarding escalation wording correct; learning/improvement anonymisation wording correct; Q1 slightly over-cautious with sensitive-topic note; local /ask confirmed QQ03 not exposed to staff | Keep staff visibility disabled; do not imply staff approval; consider complaints-routing improvement as a separate slice |
+| 2026-05-07 | AC32 Mobile Phone and Portable Device Use Policy | BLOCKED — QCS content restriction | Inaam Basit | Content-source review established that WorkTwin must not use QCS Documentation in any AI/RAG workflow unless written permission confirms the licence permits this specific use case. AC32 is QCS-licensed content. DB flag state is historical registry state only; no database flags changed in this docs-only record. Must not be used for staff-style Ask, staff-visible answers, answer-debug expansion, embedding expansion, demo, pilot, or production use unless written permission obtained. A later data-governance cleanup slice should review whether DB flags/embeddings need to be disabled, hidden, archived, or removed. | No flags changed | N/A — restriction recorded; no new testing | Obtain written permission from QCS / legal confirming AI/RAG use case is permitted before any further use |
+| 2026-05-07 | CC34 Infection Control Policy and Procedure | BLOCKED — QCS content restriction | Inaam Basit | CC34 is QCS-licensed content. QCS content restriction applies. Extended admin QA previously completed; not for staff visibility or further AI-RAG expansion until written permission obtained. DB flag state is historical registry state only; no database flags changed in this docs-only record. Must not be used for staff-style Ask, staff-visible answers, answer-debug expansion, embedding expansion, demo, pilot, or production use unless written permission obtained. A later data-governance cleanup slice should review whether DB flags/embeddings need to be disabled, hidden, archived, or removed. | No flags changed | N/A — restriction recorded | Obtain written permission from QCS / legal confirming AI/RAG use case is permitted before any further use |
+| 2026-05-07 | QQ03 Complaints, Suggestions and Compliments Policy and Procedure | BLOCKED — QCS content restriction | Inaam Basit | QQ03 is QCS-licensed content. QCS content restriction applies. DB flag state is historical registry state only; no database flags changed in this docs-only record. Must not be used for staff-style Ask, staff-visible answers, answer-debug expansion, embedding expansion, demo, pilot, or production use unless written permission obtained. A later data-governance cleanup slice should review whether DB flags/embeddings need to be disabled, hidden, archived, or removed. | No flags changed | N/A — restriction recorded | Obtain written permission from QCS / legal confirming AI/RAG use case is permitted before any further use |
 
 ---
 

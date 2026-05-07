@@ -1,6 +1,6 @@
 # WorkTwin Care Pilot - Current State
 
-> Generated: 2026-05-07. Source of truth for checkpoint `5acf430` on branch `main`.
+> Generated: 2026-05-07. Source of truth for checkpoint `33fc207` on branch `main`.
 > Update this file whenever a milestone changes the status of any item below.
 > Do not edit other files to reconcile with this document - fix those files instead.
 
@@ -32,7 +32,7 @@ The system currently demonstrates:
 - An admin document registry with upload, embedding generation, vector search, and answer-debug tooling
 - Authentication scaffolding (Supabase Auth + JWT validation + membership resolution) that is wired but not activated
 
-The pilot client is **Thumhara Centre**. No real staff, service-user, resident, care-plan, HR, safeguarding case-note or named complaint personal data has been introduced. Some controlled internal policy testing has used Thumhara Centre/QCS policy documents under governance restrictions.
+The pilot client is **Thumhara Centre**. No real staff, service-user, resident, care-plan, HR, safeguarding case-note or named complaint personal data has been introduced. Some controlled internal policy testing has used Thumhara Centre/QCS policy documents under governance restrictions. A content-source review completed on 2026-05-07 established a formal QCS and third-party content restriction; see Section 11.
 
 ---
 
@@ -98,12 +98,14 @@ The pilot client is **Thumhara Centre**. No real staff, service-user, resident, 
 
 ## 5. Current Policy and Document State
 
+> **Note on QCS-derived document DB flag state (AC32, CC34, QQ03):** The table below records historical/current database flag state as it exists in the registry. These flags have not been changed in this slice. However, AC32, CC34, and QQ03 are frozen/blocked from 2026-05-07 by the QCS content restriction (see Section 11). The "Staff-visible" and "AI answer" states shown for AC32 reflect the historical DB flags set during controlled internal testing before this restriction was formally recorded — they do not represent an approved continuing state. A future data-governance cleanup slice should review whether existing QCS-derived DB flags or embeddings need to be disabled, hidden, archived, or removed.
+
 | Document | Lane | Uploaded | Extracted | Embedded | Staff-visible | AI answer | Notes |
 |---|---|---|---|---|---|---|---|
 | Visitor Sign-In and Identification Procedure | A | Yes | Yes | Yes (indexed) | Yes | Yes | Clean baseline policy proof; approved for staff-visible pathway testing |
-| AC32 Mobile Phone and Portable Device Use Policy | A - controlled internal only | Yes | Yes | Yes (indexed) | Yes - controlled internal only | Yes - controlled internal only | QCS licence/AI-RAG use not confirmed before wider rollout |
-| CC34 Infection Control Policy and Procedure | B -> A candidate | Yes | Yes | Yes (indexed) | No | Admin answer-debug only | Extended admin-only QA complete; PPE companion needed before staff-visibility decision; QCS licence/AI-RAG use not confirmed |
-| QQ03 Complaints, Suggestions and Compliments Policy | B | Yes | Yes | Yes (indexed) | No | Admin answer-debug only | Admin answer-debug passed with caution; QCS licence/AI-RAG use not confirmed |
+| AC32 Mobile Phone and Portable Device Use Policy | A - controlled internal only | Yes | Yes | Yes (indexed) | Yes - controlled internal only | Yes - controlled internal only | BLOCKED (2026-05-07) — QCS content restriction applies; no further expansion of embedding, AI answers, or staff serving until written permission obtained; see Section 11 |
+| CC34 Infection Control Policy and Procedure | B -> A candidate | Yes | Yes | Yes (indexed) | No | Admin answer-debug only | BLOCKED (2026-05-07) — QCS content restriction applies; extended admin-only QA complete; not for staff visibility or further AI-RAG expansion until written permission obtained; see Section 11 |
+| QQ03 Complaints, Suggestions and Compliments Policy | B | Yes | Yes | Yes (indexed) | No | Admin answer-debug only | BLOCKED (2026-05-07) — QCS content restriction applies; not for staff visibility or further AI-RAG expansion until written permission obtained; see Section 11 |
 | CR100 Safeguarding Adults Policy and Procedure | C - human-only | Yes (human-only reference) | Yes | No | No | No - human escalation required | Not approved for embedding or AI answers; must trigger human escalation |
 | PM11 Raising Concerns / Freedom to Speak Up / Whistleblowing | C - human-only | Yes (human-only reference) | Yes | No | No | No - human escalation required | Not approved for embedding or AI answers; must trigger human escalation |
 | PPE Policy | Pending | No | No | No | No | No | PDF not yet received from Shagufta |
@@ -123,7 +125,7 @@ The pilot client is **Thumhara Centre**. No real staff, service-user, resident, 
 
 1. **4S.88G** - `organisation_memberships` table not applied to the Thumhara Centre Supabase project. Cannot activate `PILOT_AUTH_MODE` or demonstrate real auth E2E without either a separate Supabase dev branch or explicit approval to run `008_organisation_memberships.sql` against the named project. See `docs/4s88g-auth-e2e-proof-blocker.md`.
 
-2. **QCS licence / AI-RAG use not confirmed** - AC32, CC34, and QQ03 are QCS-licensed content. Thumhara Centre holds a QCS licence but use of that content inside an external AI/RAG pipeline has not been confirmed as permitted. No further expansion of visibility or AI use for these documents until confirmed.
+2. **Third-party content and QCS restriction (recorded 2026-05-07)** — WorkTwin must not ingest, upload, embed, vectorise, answer-debug, or staff-serve QCS Documentation or any other third-party copyrighted compliance-library content unless explicit written permission exists for this specific AI/RAG use case. AC32, CC34, and QQ03 are QCS-licensed content. Thumhara Centre has a QCS licence; however, WorkTwin must not use QCS Documentation in any AI/RAG workflow unless written permission confirms that the licence permits this specific use case. No further expansion of staff visibility, AI answer access, or embedding scope for these documents until written permission is obtained. This is a content-source restriction, not a WorkTwin architecture failure. See Section 11.
 
 3. **No DPA or data processing agreement** - WorkTwin does not yet have a signed DPA or data processing addendum covering the Thumhara Centre relationship. Required before any real personal data is introduced.
 
@@ -142,7 +144,7 @@ WorkTwin is **credible for a controlled stakeholder demo** with the following co
 - Demo must use the dev/local environment or Vercel preview - not the Thumhara Centre production-labelled project with real credentials
 - All questions must use the demo identity mode (`PILOT_AUTH_MODE=false`)
 - Escalation demos are safe - deterministic, no LLM
-- RAG answers from Visitor SOP and AC32 are available for controlled internal demonstration
+- RAG answers from Visitor SOP are available for controlled internal demonstration (AC32 is blocked — QCS content restriction applies from 2026-05-07; must not be used in demo, pilot, or staff-style Ask until written permission obtained; see Section 11)
 - Do not demonstrate the admin proxy upload flow - the proxy is disabled and the session/CSRF guards are test-only stubs
 - Do not represent the system as production-ready or as having passed any regulatory review
 
@@ -198,7 +200,7 @@ The system demonstrates the intended architecture convincingly: governance gates
 
 | Item | Owner |
 |---|---|
-| Confirm QCS licence permits AI/RAG use for AC32, CC34, QQ03 | Legal / QCS |
+| Obtain written permission confirming QCS licence permits this specific AI/RAG use case (text extraction, storage in WorkTwin/Supabase, chunking, vectorisation, AI-generated answers, staff-facing serving) for AC32, CC34, QQ03 and any other QCS content | Legal / QCS |
 | DPA / data processing addendum with Thumhara Centre | Legal |
 | PPE Policy PDF delivery | Shagufta |
 | CR07 data-protection escalation strategy | Legal / governance |
@@ -211,7 +213,7 @@ The system demonstrates the intended architecture convincingly: governance gates
 
 2. **`008_organisation_memberships.sql`** - do not apply to any shared or Thumhara Centre database. The file carries a header warning that must be honoured.
 
-3. **QCS-licensed content (AC32, CC34, QQ03)** - do not expand staff visibility, AI answer access, or embedding scope for these documents until QCS AI/RAG use is confirmed in writing.
+3. **QCS Documentation and third-party copyrighted compliance-library content (including AC32, CC34, QQ03)** - do not ingest, upload, embed, vectorise, answer-debug, or staff-serve any QCS Documentation or third-party copyrighted compliance-library content. Do not expand staff visibility, AI answer access, or embedding scope for existing QCS-derived documents until written permission confirms that the QCS licence (or relevant third-party licence) permits this specific AI/RAG use case. See Section 11.
 
 4. **`PILOT_AUTH_MODE`** - do not set to `true` in any deployed environment until 4S.88G is resolved and E2E auth proof is demonstrated.
 
@@ -226,3 +228,62 @@ The system demonstrates the intended architecture convincingly: governance gates
 9. **Embedding dimension or model** - do not change `text-embedding-3-small` (1,536 dims) without truncating or rebuilding the entire `document_chunks` vector index. Dimension mismatch silently returns wrong results.
 
 10. **`backend/requirements.txt` `openai` entry** - `openai` is pinned to `openai==2.33.0`. Do not change this version without running the full backend test suite and checking for breaking changes in the embeddings and chat completion APIs.
+
+---
+
+## 11. Third-Party Content and QCS Restriction
+
+**Recorded: 2026-05-07**
+
+### Rule
+
+WorkTwin may use organisation-owned, original, commissioned, or properly licensed source material.
+
+WorkTwin must not ingest, upload, embed, vectorise, answer-debug, or staff-serve QCS Documentation or any other third-party copyrighted compliance-library content unless explicit written permission exists for this specific AI/RAG use case.
+
+### Why this restriction exists
+
+Holding a QCS licence permits the licensed organisation to read, use, and follow QCS Documentation for care governance purposes. It does not automatically permit:
+
+- extracting QCS text and storing it in a third-party platform (WorkTwin / Supabase)
+- chunking and vectorising QCS content
+- using QCS wording to generate AI answers
+- surfacing QCS-derived answers to staff via a WorkTwin interface
+- using QCS content in any RAG pipeline, admin debug workflow, or demo
+
+Thumhara Centre has a QCS licence; however, WorkTwin must not use QCS Documentation in any AI/RAG workflow unless written permission confirms that the licence permits this specific use case.
+
+This is a content-source restriction, not a WorkTwin architecture failure. The WorkTwin governance model, RAG pipeline, and three-gate document approval process are working as designed. The issue is that QCS-licensed content is not currently confirmed as permitted source material for an AI/RAG workflow.
+
+### What is blocked until written permission is obtained
+
+| Operation | Status |
+|-----------|--------|
+| Document upload | Blocked for new QCS documents |
+| Text extraction | Blocked for new QCS documents |
+| Chunking | Blocked for new QCS documents |
+| Embeddings / vector search | Blocked for new QCS documents; existing QCS embeddings must not be expanded |
+| Admin answer-debug | Blocked — existing QCS answer-debug access must not be expanded |
+| Source-grounded staff answers | Blocked — QCS documents must not serve staff answers |
+| Staff visibility | Blocked — QCS document sources must not be visible to staff |
+| Use in demo / pilot / production | Blocked unless written permission obtained |
+| Derivative rewriting preserving protected third-party wording or structure | Blocked |
+
+### Current QCS-derived documents in the registry
+
+AC32, CC34, and QQ03 are QCS-licensed content. Their current states are recorded in Section 5. None of these documents may have their staff visibility, AI answer access, or embedding scope expanded until written permission is obtained.
+
+### Clean corpus direction
+
+WorkTwin's clean-corpus direction is bring-your-own approved documents:
+
+- Thumhara-original documents (procedures, SOPs, and policies owned and written by Thumhara Centre)
+- Commissioned or internally produced documents
+- Organisation-owned procedures
+- Public guidance (e.g. CQC, NHS England, Skills for Care) only where the licence or terms of use explicitly permit the intended use, with attribution where required, checked source-by-source
+
+### What to do next
+
+- Obtain written confirmation from QCS (or via legal review) that the Thumhara Centre QCS licence permits: text extraction, storage in a third-party platform, chunking, vectorisation, AI-generated answers, and staff-facing answer serving.
+- Until that confirmation is received, AC32, CC34, and QQ03 are blocked/frozen from further use in WorkTwin AI/RAG workflows (from 2026-05-07). They must not be used for staff-style Ask, staff-visible answers, answer-debug expansion, embedding expansion, demo, pilot, or production use. Their recorded database flag states are historical/current registry state only — no flags are being changed in this docs-only record. A later data-governance cleanup slice should review whether existing QCS-derived DB flags or embeddings need to be disabled, hidden, archived, or removed.
+- For demo and pilot documents, use clean-corpus sources only.

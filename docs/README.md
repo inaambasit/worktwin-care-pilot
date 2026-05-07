@@ -8,6 +8,7 @@
 |---|---|
 | [Current state](current-state.md) | **Main source of truth.** Current checkpoint, feature state, blockers, demo posture and do-not-touch list |
 | [Policy upload and AI testing tracker](policy-upload-testing-tracker.md) | Source of truth for policy and document governance, upload testing scope and results |
+| [Clean-corpus policy approval template](clean-corpus-policy-approval-template.md) | Reusable approval template — complete before uploading any document to WorkTwin |
 | [Auth E2E proof blocker (4S.88G)](4s88g-auth-e2e-proof-blocker.md) | Current auth E2E blocker record — blocked pending safe migration path |
 
 ## Product and planning

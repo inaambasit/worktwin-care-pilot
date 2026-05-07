@@ -1,6 +1,6 @@
 # WorkTwin Care Pilot - Current State
 
-> Generated: 2026-05-07. Source of truth for checkpoint `918a020` on branch `main`.
+> Generated: 2026-05-07. Source of truth for checkpoint `336335f` on branch `main`.
 > Update this file whenever a milestone changes the status of any item below.
 > Do not edit other files to reconcile with this document - fix those files instead.
 
@@ -10,7 +10,7 @@
 
 | Item | Value |
 |---|---|
-| Commit | `918a020` |
+| Commit | `336335f` |
 | Branch | `main` |
 | Repo path | `C:\Projects\worktwin-care-pilot\worktwin-care-pilot-starter` |
 | Backend | FastAPI / `backend/app/main.py` |
@@ -73,7 +73,9 @@ The pilot client is **Thumhara Centre**. No real staff, service-user, resident, 
 - Admin proxy route with path allowlist, method guard, role guard, audit logging
 
 ### Test coverage
-- 8 backend test files (JWT auth, membership, staff context, ask identity, policies identity, grounding safety, document registry models, test_app_import.py)
+- 9 backend test files (JWT auth, membership, staff context, ask identity, policies identity, grounding safety, document registry models, governance gates, test_app_import.py)
+- `backend/tests/test_governance_gates.py` added in 4S.90A: 39 governance gate unit tests passed (8 test classes covering embedding gate, answer-debug gate, staff visibility gate, staff Ask gate, sensitive/escalation/dummy document blocking, role matching, and fully approved document pass-all verification) — no DB, no HTTP, plain dict fixtures only
+- Related tests also passed in 4S.90A: `test_ask_grounding_safety.py` and `test_document_registry_models.py`, 17 passed — no runtime code changed
 - Playwright smoke tests (15 tests, all major staff routes)
 - Admin proxy spec (30+ tests, 5 describe blocks)
 
@@ -184,6 +186,12 @@ The system demonstrates the intended architecture convincingly: governance gates
 | Admin proxy CSRF guard | Replace test-only CSRF stub with production same-site/CSRF mechanism | `frontend/app/api/admin/[...path]/route.ts` | None |
 | Middleware expansion | Expand `middleware.ts` matcher to cover all staff and admin routes | `frontend/middleware.ts` | None |
 | 4S.88G | Resolve `organisation_memberships` migration blocker (dev Supabase branch or explicit approval) | `backend/sql/008_organisation_memberships.sql` | Decision required |
+
+#### Completed technical backlog items
+
+| Item | Description | Completed in |
+|---|---|---|
+| Governance gate unit tests | Added `backend/tests/test_governance_gates.py`; 39 tests covering all four gate functions; no runtime code changed | 4S.90A (`336335f`) |
 
 ### External decisions required
 

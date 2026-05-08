@@ -10,6 +10,8 @@
 
 > **4S.90M-B (2026-05-08):** RLS strategy decision recorded. WorkTwin will remain backend-gated for the controlled pilot. No direct authenticated Supabase table access or new RLS policies are being introduced. The backend continues to enforce all policy checks (JWT validation, membership lookup, organisation boundary, role checks, governance gates) using `service_role`. Decision doc at `docs/4s90m-b-rls-strategy-decision.md`. Latest checkpoint remains `b33fb71` until this docs commit is made.
 
+> **4S.90N-A (2026-05-08):** Admin proxy real session guard design recorded. Decision: keep the frontend/Vercel environment free of SUPABASE_SERVICE_ROLE_KEY; backend remains the membership and role authority; the proxy will call a future backend /admin/session-check endpoint using the user Supabase access token before forwarding any admin request. Admin proxy remains disabled publicly (ADMIN_PROXY_ENABLED not set). No code or database changes made. Design doc at `docs/4s90n-admin-proxy-real-session-guard-design.md`. Next slice is 4S.90N-B (backend /admin/session-check tests and implementation). Latest checkpoint remains `002a6dd` until this docs commit is made.
+
 ---
 
 ## 1. Current Checkpoint

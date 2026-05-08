@@ -406,7 +406,7 @@ test.describe('Admin proxy -- CSRF guard', () => {
         'x-worktwin-test-admin-active': 'true',
       },
     })
-    // GET bypasses CSRF; no ADMIN_TOKEN/BACKEND_URL in test → 503
+    // GET bypasses CSRF; no ADMIN_TOKEN/BACKEND_URL in test -> 503
     expect(response.status()).toBe(503)
   })
 
@@ -509,9 +509,10 @@ test.describe('Admin proxy -- upload safety', () => {
       !process.env.ADMIN_PROXY_ENABLED,
       'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
     )
-    // Body exceeds ADMIN_PROXY_UPLOAD_MAX_BYTES (1024); Node.js sets content-length automatically.
+    // Body exceeds ADMIN_PROXY_UPLOAD_MAX_BYTES (10 * 1024 * 1024); Node.js sets content-length automatically.
+    const oversizedBody = 'x'.repeat(10 * 1024 * 1024 + 1)
     const response = await request.post('/api/admin/documents/upload', {
-      data: 'x'.repeat(1025),
+      data: oversizedBody,
       headers: {
         'x-worktwin-test-admin-role': 'organisation_admin',
         'x-worktwin-test-admin-active': 'true',

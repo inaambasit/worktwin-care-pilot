@@ -6,6 +6,8 @@
 
 > **4S.90L (2026-05-08):** Sandbox auth E2E proof passed. Full E2E sign-in, JWT validation, membership resolution, and organisation-boundary enforcement proven locally using the `worktwin-sandbox-dev` sandbox Supabase project. A `/policies` wrong-org boundary gap was found and fixed; regression tests added; `pytest` passed 117/117. Fix committed in `23632a4`. Public auth remains disabled; this is a sandbox-only proof.
 
+> **4S.90M (2026-05-08):** Sandbox RLS baseline proof passed. All six tables (`document_registry`, `document_chunks`, `document_extractions`, `document_embeddings`, `document_audit_events`, `organisation_memberships`) confirmed `rls_enabled=true`, `policy_count=0` in the sandbox. `anon` direct REST access to all six tables returned 401 blocked. Authenticated sandbox staff direct REST access returned 403 blocked. `service_role` direct REST access returned 200 allowed. No RLS policies are yet implemented; current safe posture remains backend-gated with service_role as the controlled gatekeeper. No database changes were made. No code changes were made. Latest checkpoint remains `2506e6c` until this docs commit is made.
+
 ---
 
 ## 1. Current Checkpoint

@@ -3186,6 +3186,9 @@ def list_policies(
     else:
         organisation_id, _, pilot_role = _get_pilot_staff_context()
 
+    if organisation_id not in _ALLOWED_ORGANISATION_IDS:
+        raise HTTPException(status_code=403, detail="Organisation is not allowed.")
+
     if _DB_CONFIGURED:
         try:
             db_docs = _list_registry_records(

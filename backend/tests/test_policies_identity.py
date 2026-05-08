@@ -122,3 +122,30 @@ def test_query_param_identity_ignored_in_pilot_auth_mode(monkeypatch):
         )
     assert resp.status_code == 200
     mock_ctx.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# (f) 4S.90L-6E — organisation boundary enforcement in PILOT_AUTH_MODE
+# ---------------------------------------------------------------------------
+
+def test_wrong_org_returns_403_in_pilot_auth_mode(monkeypatch):
+    monkeypatch.setenv("PILOT_AUTH_MODE", "true")
+    wrong_org_ctx = StaffContext(user_id="user-xyz", organisation_id="sandbox-wrong-org", role="Care Worker")
+    with patch("app.main.staff_context_from_header", return_value=wrong_org_ctx):
+        resp = client.get("/policies", headers={"Authorization": "Bearer fake.jwt.token"})
+    assert resp.status_code == 403
+
+
+def test_allowed_org_still_returns_200_in_pilot_auth_mode(monkeypatch):
+    monkeypatch.setenv("PILOT_AUTH_MODE", "true")
+    allowed_ctx = StaffContext(user_id="user-abc", organisation_id="demo-org", role="Care Worker")
+    with patch("app.main.staff_context_from_header", return_value=allowed_ctx):
+        resp = client.get("/policies", headers={"Authorization": "Bearer fake.jwt.token"})
+    assert resp.status_code == 200
+
+
+def test_demo_mode_unaffected_by_org_boundary(monkeypatch):
+    monkeypatch.delenv("PILOT_AUTH_MODE", raising=False)
+    with patch("app.main._get_pilot_staff_context", return_value=("demo-org", "demo-user", "Care Worker")):
+        resp = client.get("/policies")
+    assert resp.status_code == 200

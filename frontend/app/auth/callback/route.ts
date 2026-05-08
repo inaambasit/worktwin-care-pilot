@@ -33,5 +33,22 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // token_hash flow used by sandbox admin magic links.
+  const tokenHash = searchParams.get('token_hash')
+  const type = searchParams.get('type')
+
+  if (tokenHash && type === 'magiclink') {
+    try {
+      const supabase = createServerSupabaseClient()
+      const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'magiclink' })
+      if (!error) {
+        const next = safeNext(searchParams.get('next'))
+        return NextResponse.redirect(`${origin}${next}`)
+      }
+    } catch {
+      // Fall through to error redirect below.
+    }
+  }
+
   return NextResponse.redirect(`${origin}/login?error=auth`)
 }

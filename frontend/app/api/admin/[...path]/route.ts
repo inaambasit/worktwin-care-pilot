@@ -13,6 +13,7 @@
 // Playwright tests can import them without pulling in Next.js server modules.
 import { NextRequest, NextResponse } from 'next/server'
 import { ADMIN_ALLOWLIST, classifyPath } from '@/lib/admin-proxy-allowlist'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 
 // Allow up to 120 s on Vercel -- generate-embeddings can take that long
 export const maxDuration = 120
@@ -58,18 +59,18 @@ function auditAdminProxyEvent(event: AuditEvent): void {
 
 type AdminSessionContext = {
   userId: string
+  organisationId: string
   role: string
   active: boolean
 }
 
-// 4S.85G-5: Session seam -- returns null (unauthenticated) until real Supabase
-// session validation is added in a later 4S.85G slice.
+// 4S.90N-C: Session guard -- validates via Supabase SSR + backend /admin/session-check.
 // Never derive user_id, organisation_id, or role from client headers in production.
 // Test-only: x-worktwin-test-admin-role / x-worktwin-test-admin-active are accepted
 // only when NODE_ENV=test or PLAYWRIGHT_TEST is set. Never active in production.
-function getAdminProxySessionContext(
+async function getAdminProxySessionContext(
   request: NextRequest,
-): AdminSessionContext | null {
+): Promise<AdminSessionContext | null> {
   const isTestMode =
     process.env.NODE_ENV === 'test' || !!process.env.PLAYWRIGHT_TEST
   if (isTestMode) {
@@ -77,10 +78,57 @@ function getAdminProxySessionContext(
     if (role) {
       const activeHeader = request.headers.get('x-worktwin-test-admin-active')
       const active = activeHeader !== 'false'
-      return { userId: 'test-user', role, active }
+      return { userId: 'test-user', organisationId: 'test-org', role, active }
     }
   }
-  return null
+
+  // Non-test mode: validate Supabase session then call backend session-check.
+  try {
+    if (!BACKEND_URL) return null
+
+    const supabase = createServerSupabaseClient()
+
+    // getSession to obtain the access token; validate it with getUser before trusting it.
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) return null
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser(session.access_token)
+    if (userError || !user) return null
+
+    const accessToken = session.access_token
+
+    // Backend verifies organisation membership and role; ADMIN_TOKEN is not sent here.
+    const checkResponse = await fetch(`${BACKEND_URL}/admin/session-check`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+    if (!checkResponse.ok) return null
+
+    const body: unknown = await checkResponse.json()
+    if (
+      typeof body !== 'object' ||
+      body === null ||
+      (body as Record<string, unknown>).allowed !== true
+    ) return null
+
+    const { user_id, organisation_id, role, active } =
+      body as Record<string, unknown>
+    if (
+      typeof user_id !== 'string' || !user_id ||
+      typeof organisation_id !== 'string' || !organisation_id ||
+      typeof role !== 'string' || !role ||
+      typeof active !== 'boolean'
+    ) return null
+
+    return {
+      userId: user_id,
+      organisationId: organisation_id,
+      role,
+      active,
+    }
+  } catch {
+    return null
+  }
 }
 
 async function proxyHandlerCore(
@@ -108,9 +156,8 @@ async function proxyHandlerCore(
     return NextResponse.json({ detail: 'Method not allowed.' }, { status: 405 })
   }
 
-  // 4S.85G-5: Session guard -- must come before ADMIN_TOKEN/BACKEND_URL checks and before fetch().
-  // Real Supabase session validation and membership lookup will replace this in later 4S.85G slices.
-  const session = getAdminProxySessionContext(request)
+  // 4S.90N-C: Session guard -- must come before ADMIN_TOKEN/BACKEND_URL checks and before fetch().
+  const session = await getAdminProxySessionContext(request)
   if (!session) {
     auditAdminProxyEvent({ component: 'admin_proxy', event_type: 'proxy_guard', method: request.method, status: 401, decision: 'deny', reason: 'unauthenticated', route_key: classified.routeKey })
     return NextResponse.json({ detail: 'Authentication required.' }, { status: 401 })

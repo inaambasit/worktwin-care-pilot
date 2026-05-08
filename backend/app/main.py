@@ -101,6 +101,12 @@ _ALLOWED_ORGANISATION_IDS: frozenset = frozenset(
 ) or frozenset({"demo-org"})
 del _raw_allowed_orgs
 
+# ---------------------------------------------------------------------------
+# Milestone 4S.90N -- Admin session check: roles permitted to use admin proxy
+# Never logged, returned in non-admin responses, or used to confirm role existence.
+# ---------------------------------------------------------------------------
+_ADMIN_SESSION_ALLOWED_ROLES: frozenset = frozenset({"organisation_admin", "worktwin_dev_admin"})
+
 
 def _get_pilot_staff_context() -> tuple:
     """Return (organisation_id, user_id, user_role) derived from server-side env vars."""
@@ -3958,4 +3964,52 @@ def get_document_governance_readiness(doc_id: str, _: None = Depends(_require_ad
         "blocked_reasons": blocked_reasons,
         "next_required_actions": next_required_actions,
         "note": "Governance readiness only. Staff-facing AI answers remain disabled.",
+    }
+
+
+# ---------------------------------------------------------------------------
+# Milestone 4S.90N -- GET /admin/session-check
+# Called by the Next.js admin proxy to validate whether the bearer token holder
+# is permitted to use admin proxy routes.
+# Returns only minimal identity fields. Never returns tokens, secrets,
+# document data, membership rows, admin token, or service role key.
+# ---------------------------------------------------------------------------
+
+@app.get("/admin/session-check")
+def admin_session_check(authorization: Optional[str] = Header(default=None)):
+    ctx = staff_context_from_header(authorization)
+
+    if ctx.organisation_id not in _ALLOWED_ORGANISATION_IDS:
+        return JSONResponse(
+            status_code=403,
+            content={
+                "allowed": False,
+                "user_id": ctx.user_id,
+                "organisation_id": ctx.organisation_id,
+                "role": ctx.role,
+                "active": True,
+                "reason": "organisation_not_allowed",
+            },
+        )
+
+    if ctx.role not in _ADMIN_SESSION_ALLOWED_ROLES:
+        return JSONResponse(
+            status_code=403,
+            content={
+                "allowed": False,
+                "user_id": ctx.user_id,
+                "organisation_id": ctx.organisation_id,
+                "role": ctx.role,
+                "active": True,
+                "reason": "role_not_allowed",
+            },
+        )
+
+    return {
+        "allowed": True,
+        "user_id": ctx.user_id,
+        "organisation_id": ctx.organisation_id,
+        "role": ctx.role,
+        "active": True,
+        "reason": "admin_session_allowed",
     }

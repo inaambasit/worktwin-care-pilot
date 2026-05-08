@@ -1,8 +1,10 @@
 # WorkTwin Care Pilot - Current State
 
-> Generated: 2026-05-07. Source of truth for checkpoint `33fc207` on branch `main`.
+> Generated: 2026-05-07. Updated: 2026-05-08. Source of truth for checkpoint `23632a4` on branch `main`.
 > Update this file whenever a milestone changes the status of any item below.
 > Do not edit other files to reconcile with this document - fix those files instead.
+
+> **4S.90L (2026-05-08):** Sandbox auth E2E proof passed. Full E2E sign-in, JWT validation, membership resolution, and organisation-boundary enforcement proven locally using the `worktwin-sandbox-dev` sandbox Supabase project. A `/policies` wrong-org boundary gap was found and fixed; regression tests added; `pytest` passed 117/117. Fix committed in `23632a4`. Public auth remains disabled; this is a sandbox-only proof.
 
 ---
 
@@ -204,6 +206,7 @@ A sandbox Supabase auth E2E setup plan has been created at `docs/4s90i-sandbox-a
 | Governance gate unit tests | Added `backend/tests/test_governance_gates.py`; 39 tests covering all four gate functions; no runtime code changed | 4S.90A (`336335f`) |
 | Expanded pilot-auth middleware staff route coverage | `frontend/middleware.ts` now protects all seven staff routes in pilot-auth mode; added `frontend/tests/middleware-pilot-auth.spec.ts`; focused middleware test: 3 passed, 6 skipped in public-demo mode; `npm run build` passed; full smoke has unrelated/stale failures and was not used as the pass gate for this slice | 4S.90C (`5acf430`) |
 | CI baseline (4S.90J) | `.github/workflows/ci.yml` added: GitHub Actions CI runs frontend smoke tests, middleware-pilot-auth tests, and `npm run build` plus backend `pytest` automatically on push and pull request to main. No secrets, no deployment, demo/public-safe mode only. | 4S.90J |
+| Sandbox auth E2E proof (4S.90L) | Full local E2E proof using `worktwin-sandbox-dev` sandbox Supabase project: sign-in, JWT validation, membership resolution, positive and negative boundary checks. `/policies` wrong-org boundary gap found and fixed; `_ALLOWED_ORGANISATION_IDS` guard added; regression tests added to `backend/tests/test_policies_identity.py`; `pytest` 117/117. Public auth remains disabled. Checkpoint: `23632a4`. | 4S.90L (`23632a4`) |
 
 ### External decisions required
 

@@ -8,6 +8,8 @@
 
 > **4S.90M (2026-05-08):** Sandbox RLS baseline proof passed. All six tables (`document_registry`, `document_chunks`, `document_extractions`, `document_embeddings`, `document_audit_events`, `organisation_memberships`) confirmed `rls_enabled=true`, `policy_count=0` in the sandbox. `anon` direct REST access to all six tables returned 401 blocked. Authenticated sandbox staff direct REST access returned 403 blocked. `service_role` direct REST access returned 200 allowed. No RLS policies are yet implemented; current safe posture remains backend-gated with service_role as the controlled gatekeeper. No database changes were made. No code changes were made. Latest checkpoint remains `2506e6c` until this docs commit is made.
 
+> **4S.90M-B (2026-05-08):** RLS strategy decision recorded. WorkTwin will remain backend-gated for the controlled pilot. No direct authenticated Supabase table access or new RLS policies are being introduced. The backend continues to enforce all policy checks (JWT validation, membership lookup, organisation boundary, role checks, governance gates) using `service_role`. Decision doc at `docs/4s90m-b-rls-strategy-decision.md`. Latest checkpoint remains `b33fb71` until this docs commit is made.
+
 ---
 
 ## 1. Current Checkpoint

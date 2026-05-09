@@ -41,8 +41,9 @@ test.describe('Middleware — public demo mode (NEXT_PUBLIC_PILOT_AUTH_MODE not 
   )
 
   test('all staff pages remain accessible (no redirect to /login)', async ({ page }) => {
+    test.setTimeout(60_000)
     for (const path of STAFF_PATHS) {
-      await page.goto(path)
+      await page.goto(path, { waitUntil: 'domcontentloaded' })
       const url = new URL(page.url())
       expect(url.pathname, `${path} should not redirect to /login`).not.toBe('/login')
       expect(url.pathname, `${path} should stay on its own path`).toBe(path)

@@ -477,6 +477,145 @@ test.describe('Admin proxy -- CSRF guard', () => {
     // CSRF guard passed; 503 expected when ADMIN_TOKEN/BACKEND_URL absent
     expect(response.status()).not.toBe(403)
   })
+
+  // 4S.90N-E: Real Sec-Fetch-Site / Origin checks
+
+  test('POST with Sec-Fetch-Site: same-origin passes CSRF guard (reaches 503 not_configured)', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.post('/api/admin/documents/search-vector', {
+      data: { query: 'test' },
+      headers: {
+        'x-worktwin-test-admin-role': 'worktwin_dev_admin',
+        'x-worktwin-test-admin-active': 'true',
+        'Sec-Fetch-Site': 'same-origin',
+      },
+    })
+    expect(response.status()).toBe(503)
+  })
+
+  test('POST with Sec-Fetch-Site: cross-site returns 403 CSRF check failed', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.post('/api/admin/documents/search-vector', {
+      data: { query: 'test' },
+      headers: {
+        'x-worktwin-test-admin-role': 'worktwin_dev_admin',
+        'x-worktwin-test-admin-active': 'true',
+        'Sec-Fetch-Site': 'cross-site',
+      },
+    })
+    expect(response.status()).toBe(403)
+    const body = await response.json()
+    expect(body.detail).toBe('CSRF check failed.')
+  })
+
+  test('POST with Sec-Fetch-Site: same-site returns 403 CSRF check failed', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.post('/api/admin/documents/search-vector', {
+      data: { query: 'test' },
+      headers: {
+        'x-worktwin-test-admin-role': 'worktwin_dev_admin',
+        'x-worktwin-test-admin-active': 'true',
+        'Sec-Fetch-Site': 'same-site',
+      },
+    })
+    expect(response.status()).toBe(403)
+    const body = await response.json()
+    expect(body.detail).toBe('CSRF check failed.')
+  })
+
+  test('POST with Sec-Fetch-Site: none returns 403 CSRF check failed', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.post('/api/admin/documents/search-vector', {
+      data: { query: 'test' },
+      headers: {
+        'x-worktwin-test-admin-role': 'worktwin_dev_admin',
+        'x-worktwin-test-admin-active': 'true',
+        'Sec-Fetch-Site': 'none',
+      },
+    })
+    expect(response.status()).toBe(403)
+    const body = await response.json()
+    expect(body.detail).toBe('CSRF check failed.')
+  })
+
+  test('POST with matching Origin fallback passes CSRF guard (reaches 503 not_configured)', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.post('/api/admin/documents/search-vector', {
+      data: { query: 'test' },
+      headers: {
+        'x-worktwin-test-admin-role': 'worktwin_dev_admin',
+        'x-worktwin-test-admin-active': 'true',
+        'Origin': 'http://localhost:3000',
+      },
+    })
+    expect(response.status()).toBe(503)
+  })
+
+  test('POST with mismatching Origin returns 403 CSRF check failed', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.post('/api/admin/documents/search-vector', {
+      data: { query: 'test' },
+      headers: {
+        'x-worktwin-test-admin-role': 'worktwin_dev_admin',
+        'x-worktwin-test-admin-active': 'true',
+        'Origin': 'http://evil.example.com',
+      },
+    })
+    expect(response.status()).toBe(403)
+    const body = await response.json()
+    expect(body.detail).toBe('CSRF check failed.')
+  })
+
+  test('POST with no Sec-Fetch-Site, no Origin, and no test CSRF header returns 403 CSRF check failed', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.post('/api/admin/documents/search-vector', {
+      data: { query: 'test' },
+      headers: {
+        'x-worktwin-test-admin-role': 'worktwin_dev_admin',
+        'x-worktwin-test-admin-active': 'true',
+      },
+    })
+    expect(response.status()).toBe(403)
+    const body = await response.json()
+    expect(body.detail).toBe('CSRF check failed.')
+  })
+
+  test('PATCH with Sec-Fetch-Site: same-origin passes CSRF guard (reaches 503 not_configured)', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.patch('/api/admin/documents/123/governance', {
+      data: {},
+      headers: {
+        'x-worktwin-test-admin-role': 'organisation_admin',
+        'x-worktwin-test-admin-active': 'true',
+        'Sec-Fetch-Site': 'same-origin',
+      },
+    })
+    expect(response.status()).toBe(503)
+  })
 })
 
 // ---------------------------------------------------------------------------

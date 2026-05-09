@@ -131,6 +131,36 @@ async function getAdminProxySessionContext(
   }
 }
 
+// 4S.90N-E: Same-origin / fetch-metadata CSRF check.
+// Priority: (1) test seam, (2) Sec-Fetch-Site, (3) Origin fallback, (4) fail closed.
+// Sec-Fetch-Site present: only same-origin is accepted; cross-site, same-site, none, or any
+// other present value is rejected. Sec-Fetch-Site absent: Origin fallback is used and must
+// exactly equal new URL(request.url).origin. Invalid or malformed URL fails closed.
+// Never logs raw header values.
+function isSameOriginAdminProxyRequest(request: NextRequest): boolean {
+  const isTestMode = process.env.NODE_ENV === 'test' || !!process.env.PLAYWRIGHT_TEST
+  if (isTestMode && request.headers.get('x-worktwin-test-csrf') === 'test') {
+    return true
+  }
+
+  const secFetchSite = request.headers.get('Sec-Fetch-Site')
+  if (secFetchSite !== null) {
+    return secFetchSite === 'same-origin'
+  }
+
+  const originHeader = request.headers.get('Origin')
+  if (!originHeader) {
+    return false
+  }
+
+  try {
+    const requestOrigin = new URL(request.url).origin
+    return originHeader === requestOrigin
+  } catch {
+    return false
+  }
+}
+
 async function proxyHandlerCore(
   request: NextRequest,
   { params }: { params: { path: string[] } },
@@ -179,13 +209,9 @@ async function proxyHandlerCore(
     return NextResponse.json({ detail: 'Access denied.' }, { status: 403 })
   }
 
-  // 4S.85G-7: CSRF/same-site guard -- POST and PATCH only; GET bypasses.
-  // Test-only: x-worktwin-test-csrf: test accepted when NODE_ENV=test or PLAYWRIGHT_TEST is set.
-  // Production/non-test mode fails closed -- a real CSRF mechanism must be added before go-live.
+  // 4S.90N-E: CSRF guard -- POST and PATCH only; GET bypasses.
   if (request.method === 'POST' || request.method === 'PATCH') {
-    const isTestMode = process.env.NODE_ENV === 'test' || !!process.env.PLAYWRIGHT_TEST
-    const csrfValid = isTestMode && request.headers.get('x-worktwin-test-csrf') === 'test'
-    if (!csrfValid) {
+    if (!isSameOriginAdminProxyRequest(request)) {
       auditAdminProxyEvent({ component: 'admin_proxy', event_type: 'proxy_guard', method: request.method, status: 403, decision: 'deny', reason: 'csrf_failed', route_key: classified.routeKey, role: session.role, active: session.active })
       return NextResponse.json({ detail: 'CSRF check failed.' }, { status: 403 })
     }

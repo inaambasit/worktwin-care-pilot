@@ -18,6 +18,7 @@
 | [Admin proxy sandbox E2E proof (4S.90N-D)](4s90n-d-admin-proxy-sandbox-e2e-proof.md) | Proof record -- sandbox E2E passed for admin proxy session-check flow; real sandbox organisation_admin session verified; backend `/admin/session-check` returned 200 OK; proxy returned 503 "not_configured" (expected pass - ADMIN_TOKEN intentionally empty); proxy remains disabled publicly; CSRF still a stub |
 | [Admin proxy CSRF / same-origin guard proof (4S.90N-E)](4s90n-e-admin-proxy-csrf-proof.md) | Proof record -- real same-origin / fetch-metadata CSRF guard implemented; POST and PATCH protected; GET CSRF-bypassed; 13 CSRF tests passed; full E2E 40 passed, 0 failed; admin response minimisation (4S.90N-F) outstanding |
 | [Admin response minimisation proof (4S.90N-F)](4s90n-f-admin-response-minimisation-proof.md) | Proof record -- upload error sanitisation, answer-debug field minimisation, and per-role admin proxy response stripping complete; organisation_admin responses stripped; worktwin_dev_admin passthrough unchanged; ADMIN_PROXY_ENABLED remains disabled publicly |
+| [Public deployment safety proof (4S.90P)](4s90p-public-deployment-safety-proof.md) | Proof record -- admin proxy disabled in public Vercel deployment; admin and debug endpoints return 403 with safe static message; no data exposed; all public demo pages load; current demo posture confirmed safe; does not activate production auth; real staff use, DPA/content permissions, pilot governance, QCS permissions, and final controlled pilot sign-off remain outstanding |
 
 ## Product and planning
 

@@ -1,6 +1,6 @@
 # WorkTwin Care Pilot - Current State
 
-> Generated: 2026-05-07. Updated: 2026-05-09. Source of truth for checkpoint `02f64ea` on branch `main`.
+> Generated: 2026-05-07. Updated: 2026-05-09. Source of truth for checkpoint `3513f2a` on branch `main`.
 > Update this file whenever a milestone changes the status of any item below.
 > Do not edit other files to reconcile with this document - fix those files instead.
 
@@ -22,13 +22,15 @@
 
 > **4S.90N-F (2026-05-09):** Admin response minimisation complete. Three commits across backend and frontend: raw upload exception text no longer leaks from backend upload paths (6416c37); answer-debug no longer returns the real ANSWER_MODEL or estimated_cost_note (80e9124); a per-role strip helper now removes internal document fields, upload internals, registry_warning, and embedding model/token/cost fields from organisation_admin proxy responses before forwarding (02f64ea); worktwin_dev_admin passthrough remains unchanged. Backend pytest 138 passed (F1A), 150 passed (F1B); frontend build passed; admin proxy grep tests 21 passed, 31 skipped, 0 failed; strip helper tests 29 passed. ADMIN_PROXY_ENABLED remains disabled publicly. No production admin rollout is active. Remaining blockers are production rollout controls, public env safety, DPA/content permissions, pilot governance, and final deployment proof. Proof doc at `docs/4s90n-f-admin-response-minimisation-proof.md`. Checkpoint: `02f64ea`.
 
+> **4S.90P (2026-05-09):** Public deployment safety proof passed for current public demo posture. Tested against https://worktwin-care-pilot.vercel.app at commit `3513f2a`. Repo was clean. Admin proxy endpoints (`/api/admin/documents`, `/api/admin/debug/storage-config`) both returned 403 with a safe static message only - `{"detail":"Admin proxy is disabled for this deployment."}`. No admin data, storage configuration, environment details, document data, or backend debug data was exposed. All public demo pages (`/`, `/dashboard`, `/ask`, `/policies`, `/onboarding`, `/scenarios`, `/notes`, `/escalation`, `/login`) returned 200. `ADMIN_PROXY_ENABLED` appears disabled in the public deployment based on runtime behaviour. This does not activate production auth, does not make the product production-ready, and does not substitute for real staff use approval, DPA/content permissions, pilot governance, QCS permissions, or final controlled pilot sign-off. `ADMIN_PROXY_ENABLED` must not be enabled in any non-local environment - do not touch this flag. Proof doc at `docs/4s90p-public-deployment-safety-proof.md`. Latest checkpoint remains `3513f2a` until this docs commit is made.
+
 ---
 
 ## 1. Current Checkpoint
 
 | Item | Value |
 |---|---|
-| Commit | `02f64ea` |
+| Commit | `3513f2a` |
 | Branch | `main` |
 | Repo path | `C:\Projects\worktwin-care-pilot\worktwin-care-pilot-starter` |
 | Backend | FastAPI / `backend/app/main.py` |
@@ -111,6 +113,7 @@ The pilot client is **Thumhara Centre**. No real staff, service-user, resident, 
 | `008_organisation_memberships.sql` | Not applied | 4S.88G blocker - safe dev branch required before applying |
 | `middleware.ts` route protection | Staff routes covered in pilot-auth mode (4S.90C) | In pilot-auth mode, middleware protects `/dashboard`, `/ask`, `/policies`, `/onboarding`, `/scenarios`, `/scenarios/*`, `/notes`, `/escalation`; public demo behaviour remains fail-open when `NEXT_PUBLIC_PILOT_AUTH_MODE` is not `true`; admin routes are deliberately not protected by this middleware slice — admin auth/RBAC/proxy session is a separate concern |
 | `supabase-browser.ts` token extraction | Hardened (partial) | `getSession()` obtains the local token; `getUser(token)` validates it server-side before forwarding; admin proxy real Supabase session validation remains outstanding |
+| Public deployment safety (4S.90P) | Passed - current demo posture | Admin proxy disabled in public deployment; admin and debug endpoints return 403 with safe static message; no data exposed; all public demo pages load; does not activate production auth; does not satisfy full production rollout prerequisites |
 
 ---
 
@@ -149,7 +152,7 @@ The pilot client is **Thumhara Centre**. No real staff, service-user, resident, 
 
 4. **Admin routes not protected by this middleware slice** - Staff routes (`/dashboard`, `/ask`, `/policies`, `/onboarding`, `/scenarios`, `/notes`, `/escalation`) are now covered in pilot-auth mode (4S.90C). Admin routes (`/admin/*`) are deliberately outside this middleware slice; admin routes are governed separately by the admin proxy session guard, CSRF guard, allowlist, role checks, and response minimisation. `ADMIN_PROXY_ENABLED` must not be enabled in any non-local environment until production rollout controls, public env safety, DPA/content permissions, pilot governance, and final deployment proof are complete.
 
-5. **Production admin rollout controls outstanding** - The admin proxy session guard is real (4S.90N-C, proven in 4S.90N-D). The CSRF guard is real (4S.90N-E). Admin response minimisation is complete (4S.90N-F, checkpoint `02f64ea`). Remaining prerequisites before `ADMIN_PROXY_ENABLED` can be set in any non-local environment: production rollout controls, public environment safety sign-off, DPA and content permissions, pilot governance sign-off, and final deployment proof.
+5. **Production admin rollout controls outstanding** - The admin proxy session guard is real (4S.90N-C, proven in 4S.90N-D). The CSRF guard is real (4S.90N-E). Admin response minimisation is complete (4S.90N-F, checkpoint `02f64ea`). Public deployment safety passed for current demo posture (4S.90P, checkpoint `3513f2a`) - admin proxy is confirmed disabled in the public deployment; admin and debug endpoints return 403 with safe static message; no data exposed. Remaining prerequisites before `ADMIN_PROXY_ENABLED` can be set in any non-local environment: production rollout controls, DPA and content permissions, pilot governance sign-off, and final controlled pilot sign-off.
 
 ---
 
@@ -163,6 +166,8 @@ WorkTwin is **credible for a controlled stakeholder demo** with the following co
 - RAG answers from Visitor SOP are available for controlled internal demonstration (AC32 is blocked — QCS content restriction applies from 2026-05-07; must not be used in demo, pilot, or staff-style Ask until written permission obtained; see Section 11)
 - Do not demonstrate the admin proxy upload flow - the proxy is disabled publicly and production rollout controls are outstanding
 - Do not represent the system as production-ready or as having passed any regulatory review
+
+Public deployment safety has been confirmed for the current demo posture (4S.90P): admin proxy is disabled in the public Vercel deployment; admin and debug endpoints return 403 with a safe static message; no data is exposed; all public demo pages load. This confirmation does not activate production auth, does not make the product production-ready, and does not substitute for DPA/content permissions, pilot governance, or final controlled pilot sign-off.
 
 The system demonstrates the intended architecture convincingly: governance gates, fail-closed grounding, escalation short-circuit, source citation. The gaps are infrastructure and compliance, not design.
 

@@ -27,7 +27,7 @@ This is a prototype built for pilot discovery, stakeholder review and future cli
 | Landing page | Yes |
 | Staff dashboard | Yes |
 | Ask WorkTwin (AI assistant) | Yes — governed RAG pipeline; source-grounded where document gate state permits |
-| Policy library | Yes — Visitor Sign-In (Lane A, staff-visible); AC32 (controlled internal only) |
+| Policy library | Yes -- Visitor Sign-In (Lane A, staff-visible) only; AC32, CC34, QQ03 are BLOCKED (2026-05-07) -- QCS content restriction; must not be used in demo |
 | Onboarding hub | Yes — sample content |
 | Practice scenarios | Yes — fictional scenarios |
 | Private notes | Yes — session-only; not a persistent production implementation |
@@ -39,8 +39,7 @@ This is a prototype built for pilot discovery, stakeholder review and future cli
 **Current document state:**
 
 - **Visitor Sign-In and Identification Procedure** — Lane A; the first clean proof. Approved for staff-visible source-grounded answers.
-- **AC32 (Mobile Phone and Portable Device Use Policy)** — Lane A, controlled internal Thumhara Centre staff-style testing only. QCS AI/RAG use not confirmed before wider rollout.
-- **CC34 (Infection Control)** and **QQ03 (Complaints)** — admin answer-debug only; not visible to staff.
+- **AC32 (Mobile Phone and Portable Device Use Policy)**, **CC34 (Infection Control)**, and **QQ03 (Complaints)** -- BLOCKED (2026-05-07) -- QCS content restriction applies; must not be used in demo, pilot, staff-style Ask, answer-debug expansion, embedding expansion, staff visibility, or production until written permission confirms this specific AI/RAG use case is allowed. Their DB flags and embeddings are historical/current registry state only and do not represent approved continuing use. Do not use in demo material.
 - **CR100 (Safeguarding)** and **PM11 (Whistleblowing)** — human-only escalation; never AI-answerable.
 - **PPE Policy** — pending; PDF not yet received.
 - **CR07 (Data Protection)** — parked; PDF export and data-protection escalation strategy required before upload.
@@ -59,7 +58,7 @@ After entering, staff land on a personal dashboard. It shows their name, a welco
 Staff can type a free-text question into the AI assistant. The assistant answers from approved governing documents where the source and gate state permit, cites its source, and recommends escalation where the topic is sensitive or outside its scope. It does not give final employment, legal, medical or disciplinary advice. Safeguarding, medication concerns and anything ambiguous are flagged for human review. AI answers are only returned from documents that have passed all governance gates.
 
 ### Policy library
-Staff can browse and search approved policy documents. Visitor Sign-In and Identification Procedure is currently approved and staff-visible. AC32 (Mobile Phone and Portable Device Use Policy) is visible in controlled internal testing only. Documents in admin-debug or human-only lanes are not visible here. This is read-only. No policies have been approved for unsupervised real-world use at this stage.
+Staff can browse and search approved policy documents. Visitor Sign-In and Identification Procedure is currently approved and staff-visible. AC32, CC34, and QQ03 are QCS-derived documents -- BLOCKED (2026-05-07); must not be used in demo. Documents in admin-debug or human-only lanes are not visible here. This is read-only. No policies have been approved for unsupervised real-world use at this stage.
 
 ### Onboarding hub
 New staff or those in their first weeks can follow a structured onboarding path. This includes key policies to read, short tasks to acknowledge, and links to relevant practice scenarios. Content is sample/fictional.
@@ -83,7 +82,7 @@ Staff can view a list of escalation contacts relevant to their role — safeguar
 | Admin API / proxy | Disabled/fail-closed publicly (ADMIN_PROXY_ENABLED not set); must not be enabled before real auth, session, CSRF, and RBAC are in place |
 | High-risk topics | Routed to human escalation — no autonomous AI advice |
 | Personal data | No real staff, service-user, resident, care-plan, HR, safeguarding case-note or named complaint personal data has been introduced; some controlled internal policy testing has used Thumhara Centre/QCS policy documents under governance restrictions |
-| Staff-facing RAG | Governed pipeline; Visitor Sign-In is staff-visible (Lane A); AC32 is controlled internal only; CC34 and QQ03 are admin-debug only; CR100 and PM11 are human-only escalation |
+| Staff-facing RAG | Governed pipeline; Visitor Sign-In is staff-visible (Lane A); AC32, CC34, and QQ03 are BLOCKED (2026-05-07) -- QCS content restriction; must not be used in demo; CR100 and PM11 are human-only escalation |
 | Individual staff data | Not shared with employer in any form |
 | Surveillance behaviours | Not built — see privacy principles |
 | Auth | Not activated publicly; auth scaffolding (JWT ES256/JWKS, Bearer forwarding, Supabase SSR) is wired but E2E proof (4S.88G) is blocked |
@@ -102,10 +101,11 @@ Current posture at checkpoint `4437415`:
 - Auth: not activated publicly (`PILOT_AUTH_MODE=false`); scaffolding is wired but E2E proof (4S.88G) is blocked
 
 **Demo posture summary:**
-- Credible for a controlled stakeholder demo.
+- Credible for a controlled stakeholder demo using Visitor Sign-In SOP examples only.
+- Demo must use Visitor Sign-In SOP content only -- AC32, CC34, and QQ03 are BLOCKED (2026-05-07) and must not appear in any demo, demo question, or demo material.
 - Not production-ready.
 - Not approved for unsupervised real staff use.
-- Do not demonstrate admin upload/proxy as production-ready — the proxy is disabled and session/CSRF guards are test-only stubs.
+- Do not demonstrate admin upload/proxy as production-ready -- the proxy is disabled publicly; real session guard (4S.90N-C), real CSRF / same-origin guard (4S.90N-E), and admin response minimisation (4S.90N-F) are implemented; production rollout controls, DPA/content permissions, pilot governance, and final controlled pilot sign-off remain outstanding.
 
 ---
 
@@ -123,18 +123,18 @@ Use natural language. Do not read from slides.
 >
 > The admin side is completely separate. Admin screens may be visible in this demo environment depending on the configuration, but the admin API and proxy are locked down and not part of what staff see at all. Do not treat admin upload or proxy as production-ready.
 >
-> This is a working controlled prototype. Before going live with a real team we would need: staff authentication — which is scaffolded but not yet activated — DPA and legal review, confirmation that the QCS licence permits AI/RAG use for the relevant documents, governance sign-off, and full safety tests. We'd also work with you to load your own approved documents under a proper governance process."
+> This is a working controlled prototype. Before going live with a real team we would need: staff authentication -- which is scaffolded but not yet activated -- DPA and legal review, written permission from QCS confirming the licence permits AI/RAG use for each document, governance sign-off, and full safety tests. We'd also work with you to load your own approved documents under a proper governance process."
 
 ---
 
 ## 7. Known limitations and next steps
 
 - **Still a controlled prototype.** The product is not approved for live use with real staff or service users.
-- **Policies not approved for production.** Before real use, policies must be reviewed, approved and uploaded by the employer under a proper governance process. Visitor Sign-In is the first clean Lane A proof. AC32 is controlled internal only. Other documents are admin-debug only, human-only, or pending.
+- **Policies not approved for production.** Before real use, policies must be reviewed, approved and uploaded by the employer under a proper governance process. Visitor Sign-In is the first clean Lane A proof and the only document safe for demo. AC32, CC34, and QQ03 are QCS-derived and BLOCKED (2026-05-07). Other documents are human-only or pending.
 - **No high-risk autonomous advice.** The system intentionally does not give autonomous advice on safeguarding, legal or disciplinary matters. This is by design and will not change.
 - **Auth scaffolded but not activated.** Auth scaffolding (JWT ES256/JWKS, Supabase SSR, Bearer forwarding, membership resolution) is wired and in place. Public pilot auth is not activated because the E2E proof (4S.88G) is blocked pending a safe migration path for the `organisation_memberships` table. `PILOT_AUTH_MODE` remains `false`.
-- **Admin proxy disabled.** The admin proxy is disabled (`ADMIN_PROXY_ENABLED` not set). Session and CSRF guards are test-only stubs. Do not represent admin upload/proxy as production-ready.
-- **QCS AI/RAG use not confirmed.** AC32, CC34, and QQ03 are QCS-licensed content. Use inside an AI/RAG pipeline has not been confirmed as permitted. No further expansion of staff visibility or AI use for these documents until confirmed.
+- **Admin proxy disabled publicly.** The admin proxy is disabled publicly (`ADMIN_PROXY_ENABLED` not set). Real session guard (4S.90N-C) is implemented. Real CSRF / same-origin guard (4S.90N-E) is implemented. Admin response minimisation (4S.90N-F) is implemented. Production rollout controls, DPA/content permissions, pilot governance, and final controlled pilot sign-off remain outstanding. Do not represent admin upload/proxy as production-ready.
+- **QCS content blocked.** AC32, CC34, and QQ03 are QCS-derived content. BLOCKED (2026-05-07) -- QCS content restriction applies; must not be used in demo, pilot, staff-style Ask, answer-debug expansion, embedding expansion, staff visibility, or production until written permission confirms this specific AI/RAG use case is allowed. Their DB flags and embeddings are historical/current registry state only and do not represent approved continuing use. See docs/current-state.md Section 12.
 - **No DPA.** A data processing agreement with Thumhara Centre is required before any real personal data is introduced.
 - **Future work may include:**
   - More granular staff role journeys (senior carer, team leader, coordinator)

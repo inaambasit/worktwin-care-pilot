@@ -8,7 +8,8 @@
 |---|---|
 | [Current state](current-state.md) | **Main source of truth.** Current checkpoint, feature state, blockers, demo posture and do-not-touch list |
 | [Policy upload and AI testing tracker](policy-upload-testing-tracker.md) | Source of truth for policy and document governance, upload testing scope and results |
-| [Clean-corpus policy approval template](clean-corpus-policy-approval-template.md) | Reusable approval template — complete before uploading any document to WorkTwin |
+| [Clean-corpus policy approval template](clean-corpus-policy-approval-template.md) | Reusable approval template -- complete before uploading any document to WorkTwin |
+| [Visitor SOP clean-corpus approval record](visitor-sop-corpus-approval.md) | Completed approval record for Visitor Sign-In and Identification Procedure -- first confirmed clean-corpus document; Lane A; approved for controlled internal demo use |
 | [Auth E2E proof blocker (4S.88G)](4s88g-auth-e2e-proof-blocker.md) | Current auth E2E blocker record — blocked pending safe migration path |
 | [Sandbox auth E2E setup plan (4S.90I)](4s90i-sandbox-auth-e2e-plan.md) | Plan to prove auth E2E in a separate sandbox Supabase project without touching the production-labelled Thumhara project |
 | [Sandbox auth E2E proof (4S.90L)](4s90l-sandbox-auth-e2e-proof.md) | Proof record — local sandbox auth E2E passed; `/policies` wrong-org boundary fix committed in `23632a4`; public auth still disabled |

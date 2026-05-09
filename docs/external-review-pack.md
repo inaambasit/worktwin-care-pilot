@@ -44,11 +44,13 @@ end-user access. `NEXT_PUBLIC_ADMIN_DEMO_ENABLED` controls UI visibility only
 and does not grant admin API access. All admin and debug API endpoints are
 protected by bearer token. Browser admin calls are routed through a
 server-side Vercel proxy so the token is never exposed in the browser bundle.
-The proxy has been partially hardened (typed path allowlist, method guard,
-CSRF fail-closed guard for POST/PATCH, upload content-type/size guards, safe
-audit logging, no-store caching); it is not yet production-ready — real
-Supabase Auth session validation, real organisation_memberships lookup, and
-production CSRF/same-site controls remain outstanding.
+The proxy has been hardened (typed path allowlist, method guard, real Supabase
+Auth session validation and organisation_memberships role check via backend
+/admin/session-check (4S.90N-C), real same-origin / fetch-metadata CSRF guard
+for POST/PATCH (4S.90N-E), admin response minimisation (4S.90N-F), upload
+content-type/size guards, safe audit logging, no-store caching); it is not yet
+production-ready -- admin session guard exists but production admin rollout
+controls and real pilot governance are not complete.
 
 **Demo status:** The app is a working pilot/demo prototype. The backend contains
 a governed staff /ask RAG path, but it requires OpenAI, the database, and a
@@ -72,12 +74,16 @@ The following screens are accessible in the live staff demo:
   and fallback-safe unless its live configuration and qualifying source state
   have been explicitly verified.
 - **Policy library** - browse and search approved policy documents. Visitor
-  Sign-In and Identification Procedure is the first clean Lane A proof —
-  approved for staff-visible source-grounded answers. AC32 (Mobile Phone and
-  Portable Device Use Policy) has controlled internal Thumhara Centre
-  staff-style testing status; QCS AI/RAG permission still requires
-  confirmation before wider rollout. CC34 (Infection Control) and QQ03
-  (Complaints) remain admin answer-debug only and are not staff-visible.
+  Sign-In and Identification Procedure is the first clean Lane A proof --
+  approved for staff-visible source-grounded answers. This is the only
+  document approved for demo use. AC32 (Mobile Phone and Portable Device Use
+  Policy), CC34 (Infection Control), and QQ03 (Complaints) are QCS-derived
+  documents. BLOCKED (2026-05-07) -- QCS content restriction applies; must
+  not be used in demo, pilot, staff-style Ask, answer-debug expansion,
+  embedding expansion, staff visibility, or production until written
+  permission confirms this specific AI/RAG use case is allowed. Their current
+  DB flags and embeddings are historical/current registry state only and do
+  not represent approved continuing use. Do not use in external demo material.
 - **Onboarding hub** - structured onboarding checklist and guidance for new
   staff.
 - **Practice scenarios** - learning scenarios to build staff confidence.
@@ -100,20 +106,22 @@ The following screens are accessible in the live staff demo:
   is returned.
 - If infrastructure is unavailable, no qualifying source exists, or a topic is
   high risk, the endpoint returns a safe fallback.
-- The product is not pilot-ready. Authentication, RBAC, admin session protection,
-  full safety tests, and pilot governance must be in place before any real staff
-  use or real documents are uploaded.
-- AC32 (Mobile Phone and Portable Device Use Policy) has been approved only
-  for controlled internal Thumhara Centre staff-style testing; it is not
-  approved for wider rollout. QCS AI/RAG permission (for extracting policy
-  text, storing in WorkTwin/Supabase, vector search, and AI-generated answers
-  outside the QCS platform) still requires confirmation before any wider
-  deployment.
+- The product is not pilot-ready. Authentication, RBAC, full safety tests, and
+  pilot governance must be in place before any real staff use or real documents
+  are uploaded. Admin session guard exists (4S.90N-C) but production admin
+  rollout controls and real pilot governance are not complete.
 - Visitor Sign-In and Identification Procedure is the first clean Lane A
-  policy — approved for staff-visible source-grounded answers. AC32 has
-  controlled internal testing status. CC34 (Infection Control) and QQ03
-  (Complaints) remain admin answer-debug only and are not staff-visible.
-  CR100 (Safeguarding) and PM11 (Whistleblowing) are human-only escalation
+  policy -- approved for staff-visible source-grounded answers. This is the
+  only document approved for demo use.
+- AC32 (Mobile Phone and Portable Device Use Policy), CC34 (Infection
+  Control), and QQ03 (Complaints) are QCS-derived documents. BLOCKED
+  (2026-05-07) -- QCS content restriction applies; must not be used in demo,
+  pilot, staff-style Ask, answer-debug expansion, embedding expansion, staff
+  visibility, or production until written permission confirms this specific
+  AI/RAG use case is allowed. Their current DB flags and embeddings are
+  historical/current registry state only and do not represent approved
+  continuing use. Do not use in external demo material.
+- CR100 (Safeguarding) and PM11 (Whistleblowing) are human-only escalation
   and are never AI-answerable.
 - No real service-user records, MAR charts, care plans, HR/payroll files or
   private case files should be uploaded to the system under any circumstances.
@@ -122,8 +130,10 @@ The following screens are accessible in the live staff demo:
   controlled internal policy testing has used Thumhara Centre/QCS policy
   documents under governance restrictions.
 - A data processing agreement (DPA) with Thumhara Centre is required before
-  any real personal data is introduced. QCS AI/RAG use for AC32, CC34, and
-  QQ03 has not been confirmed as permitted before wider rollout.
+  any real personal data is introduced. AC32, CC34, and QQ03 are QCS-derived
+  content; their use in WorkTwin AI/RAG workflows is BLOCKED (2026-05-07)
+  until written permission confirms this specific use case is permitted.
+  See docs/current-state.md Section 12.
 - Employee conversations are private by design. The product direction is that
   any future employer dashboards should show anonymised trends only. Individual
   chat transcripts should not be visible to managers.

@@ -1,6 +1,6 @@
 # WorkTwin Care Pilot - Current State
 
-> Generated: 2026-05-07. Updated: 2026-05-09. Source of truth for checkpoint `3513f2a` on branch `main`.
+> Generated: 2026-05-07. Updated: 2026-05-09. Source of truth for checkpoint `965f059` on branch `main`.
 > Update this file whenever a milestone changes the status of any item below.
 > Do not edit other files to reconcile with this document - fix those files instead.
 
@@ -24,13 +24,21 @@
 
 > **4S.90P (2026-05-09):** Public deployment safety proof passed for current public demo posture. Tested against https://worktwin-care-pilot.vercel.app at commit `3513f2a`. Repo was clean. Admin proxy endpoints (`/api/admin/documents`, `/api/admin/debug/storage-config`) both returned 403 with a safe static message only - `{"detail":"Admin proxy is disabled for this deployment."}`. No admin data, storage configuration, environment details, document data, or backend debug data was exposed. All public demo pages (`/`, `/dashboard`, `/ask`, `/policies`, `/onboarding`, `/scenarios`, `/notes`, `/escalation`, `/login`) returned 200. `ADMIN_PROXY_ENABLED` appears disabled in the public deployment based on runtime behaviour. This does not activate production auth, does not make the product production-ready, and does not substitute for real staff use approval, DPA/content permissions, pilot governance, QCS permissions, or final controlled pilot sign-off. `ADMIN_PROXY_ENABLED` must not be enabled in any non-local environment - do not touch this flag. Proof doc at `docs/4s90p-public-deployment-safety-proof.md`. Latest checkpoint remains `3513f2a` until this docs commit is made.
 
+> **4S.90Q-A (2026-05-09):** QCS wording alignment and Visitor SOP clean-corpus approval -- docs-only slice.
+> - QCS wording alignment complete in external-review-pack and staff-demo-walkthrough
+> - Visitor SOP clean-corpus approval record created
+> - QCS DB/embedding cleanup decision added as deferred backlog
+> - docs-only slice
+> - no DB, code, env, migration, embedding, or governance flag changes
+> - latest checkpoint remains `965f059` until this docs commit is made
+
 ---
 
 ## 1. Current Checkpoint
 
 | Item | Value |
 |---|---|
-| Commit | `3513f2a` |
+| Commit | `965f059` |
 | Branch | `main` |
 | Repo path | `C:\Projects\worktwin-care-pilot\worktwin-care-pilot-starter` |
 | Backend | FastAPI / `backend/app/main.py` |
@@ -112,7 +120,7 @@ The pilot client is **Thumhara Centre**. No real staff, service-user, resident, 
 | Real staff use | Not approved | No DPA, no QCS licence AI/RAG confirmation, auth not activated |
 | `008_organisation_memberships.sql` | Not applied | 4S.88G blocker - safe dev branch required before applying |
 | `middleware.ts` route protection | Staff routes covered in pilot-auth mode (4S.90C) | In pilot-auth mode, middleware protects `/dashboard`, `/ask`, `/policies`, `/onboarding`, `/scenarios`, `/scenarios/*`, `/notes`, `/escalation`; public demo behaviour remains fail-open when `NEXT_PUBLIC_PILOT_AUTH_MODE` is not `true`; admin routes are deliberately not protected by this middleware slice — admin auth/RBAC/proxy session is a separate concern |
-| `supabase-browser.ts` token extraction | Hardened (partial) | `getSession()` obtains the local token; `getUser(token)` validates it server-side before forwarding; admin proxy real Supabase session validation remains outstanding |
+| `supabase-browser.ts` token extraction | Hardened (complete via 4S.90N-C) | `getSession()` obtains the local token; `getUser(token)` validates it server-side before forwarding; admin proxy real Supabase session validation complete (4S.90N-C); public pilot auth remains disabled; full production rollout remains blocked pending production controls, DPA/content permissions, pilot governance, and final sign-off |
 | Public deployment safety (4S.90P) | Passed - current demo posture | Admin proxy disabled in public deployment; admin and debug endpoints return 403 with safe static message; no data exposed; all public demo pages load; does not activate production auth; does not satisfy full production rollout prerequisites |
 
 ---
@@ -208,6 +216,7 @@ A sandbox Supabase auth E2E setup plan has been created at `docs/4s90i-sandbox-a
 | 4S.89D | Update auth-readiness note to reflect 4S.88G blocker status | `docs/auth-readiness-review.md` | None |
 | 4S.89E | Update auth-schema note to reflect current migration state | `docs/auth-schema-plan.md` | None |
 | 4S.89F | Align external-review-pack and staff-demo walkthrough with current policy and demo posture | `docs/external-review-pack.md`, `docs/staff-demo-walkthrough.md` | 4S.89C |
+| 4S.90Q-A | QCS wording alignment and Visitor SOP clean-corpus approval -- hard block wording applied to external-review-pack and staff-demo-walkthrough; Visitor SOP corpus approval record created; QCS DB cleanup backlog added to Section 10 | `docs/external-review-pack.md`, `docs/staff-demo-walkthrough.md`, `docs/visitor-sop-corpus-approval.md`, `docs/current-state.md`, `docs/README.md` | None |
 
 ### Technical backlog
 
@@ -231,6 +240,23 @@ A sandbox Supabase auth E2E setup plan has been created at `docs/4s90i-sandbox-a
 | Admin proxy sandbox E2E proof (4S.90N-D) | Real sandbox organisation_admin session proven end to end; backend `/admin/session-check` returned `200 OK`; proxy reached ADMIN_TOKEN guard; `503 not_configured` with intentionally empty ADMIN_TOKEN (expected pass); no admin forwarding; admin proxy remains disabled publicly; documentation only. | 4S.90N-D (documentation only) |
 | Admin proxy CSRF / same-origin guard (4S.90N-E) | Real same-origin / fetch-metadata CSRF guard implemented in `frontend/app/api/admin/[...path]/route.ts`; POST and PATCH protected; GET CSRF-bypassed; DELETE method-blocked before CSRF; fails closed if no valid header present; 13 targeted CSRF tests passed; full E2E public-demo suite 40 passed, 37 skipped, 0 failed. | 4S.90N-E (`185b07e`) |
 | Admin response minimisation (4S.90N-F) | Three commits: upload error paths return safe strings only (6416c37, pytest 138 passed); answer-debug suppresses ANSWER_MODEL and estimated_cost_note (80e9124, pytest 150 passed); per-role strip helper removes internal document fields, upload internals, registry_warning, and embedding model/token/cost fields from organisation_admin proxy responses; worktwin_dev_admin passthrough unchanged; frontend build passed; admin proxy grep tests 21 passed, 31 skipped, 0 failed; strip helper tests 29 passed. | 4S.90N-F (`02f64ea`) |
+
+### QCS data-governance cleanup (deferred -- do not act without explicit approval)
+
+The following DB and embedding cleanup actions are identified but not taken in this docs-only slice.
+No DB action, migration, or embedding change is permitted without a dedicated controlled slice and
+explicit sign-off.
+
+| Item | Description | Blocked on |
+|---|---|---|
+| AC32 DB flag cleanup | Consider setting approved_for_staff_visibility = false and approved_for_source_grounded_answers = false for AC32; current flags are historical/current registry state and do not represent approved continuing use | Written QCS permission decision (permit or deny) |
+| CC34 / QQ03 answer-debug flag review | Consider clearing approved_for_source_grounded_answers for CC34 and QQ03; staff visibility is already false; answer-debug access is already gated | Written QCS permission decision |
+| QCS-derived embedding archive / removal | If QCS permission is denied: consider archiving or removing document_chunks and document_embeddings rows for AC32, CC34, QQ03; removes QCS-derived content from the vector store entirely | Written QCS permission denial confirmed |
+| QCS-derived embedding retain | If QCS permission is granted: run clean-corpus approval templates for AC32, CC34, QQ03 and clear the content restriction | Written QCS permission granted confirmed |
+
+> Visitor SOP clean-corpus approval record created: docs/visitor-sop-corpus-approval.md (2026-05-09).
+> Visitor Sign-In and Identification Procedure is confirmed clean-corpus -- not QCS-derived; Lane A;
+> all governance flags set correctly; approved for controlled internal demo use.
 
 ### External decisions required
 

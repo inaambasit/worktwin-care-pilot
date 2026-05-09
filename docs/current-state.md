@@ -1,6 +1,6 @@
 # WorkTwin Care Pilot - Current State
 
-> Generated: 2026-05-07. Updated: 2026-05-09. Source of truth for checkpoint `185b07e` on branch `main`.
+> Generated: 2026-05-07. Updated: 2026-05-09. Source of truth for checkpoint `02f64ea` on branch `main`.
 > Update this file whenever a milestone changes the status of any item below.
 > Do not edit other files to reconcile with this document - fix those files instead.
 
@@ -20,13 +20,15 @@
 
 > **4S.90N-E (2026-05-09):** Real same-origin / fetch-metadata CSRF guard implemented and tested. POST and PATCH admin proxy requests now require `Sec-Fetch-Site: same-origin` or a matching `Origin` header; absence of both fails closed. GET remains CSRF-bypassed (read-only). DELETE is method-blocked by the path allowlist before CSRF is checked. Test seam preserved for `NODE_ENV=test` / `PLAYWRIGHT_TEST` only. 13 targeted CSRF tests passed; full E2E public-demo suite 40 passed, 37 skipped, 0 failed. No raw `Origin`, `Referer`, session tokens, or secret values are logged. Admin proxy remains disabled publicly. Admin response minimisation (4S.90N-F) remains outstanding as the next blocker before non-local admin proxy enablement. Proof doc at `docs/4s90n-e-admin-proxy-csrf-proof.md`. Checkpoint: `185b07e`.
 
+> **4S.90N-F (2026-05-09):** Admin response minimisation complete. Three commits across backend and frontend: raw upload exception text no longer leaks from backend upload paths (6416c37); answer-debug no longer returns the real ANSWER_MODEL or estimated_cost_note (80e9124); a per-role strip helper now removes internal document fields, upload internals, registry_warning, and embedding model/token/cost fields from organisation_admin proxy responses before forwarding (02f64ea); worktwin_dev_admin passthrough remains unchanged. Backend pytest 138 passed (F1A), 150 passed (F1B); frontend build passed; admin proxy grep tests 21 passed, 31 skipped, 0 failed; strip helper tests 29 passed. ADMIN_PROXY_ENABLED remains disabled publicly. No production admin rollout is active. Remaining blockers are production rollout controls, public env safety, DPA/content permissions, pilot governance, and final deployment proof. Proof doc at `docs/4s90n-f-admin-response-minimisation-proof.md`. Checkpoint: `02f64ea`.
+
 ---
 
 ## 1. Current Checkpoint
 
 | Item | Value |
 |---|---|
-| Commit | `185b07e` |
+| Commit | `02f64ea` |
 | Branch | `main` |
 | Repo path | `C:\Projects\worktwin-care-pilot\worktwin-care-pilot-starter` |
 | Backend | FastAPI / `backend/app/main.py` |
@@ -102,7 +104,7 @@ The pilot client is **Thumhara Centre**. No real staff, service-user, resident, 
 | Item | Status | Why |
 |---|---|---|
 | `PILOT_AUTH_MODE` | `false` | E2E proof (4S.88G) not complete; activating without it would give false confidence |
-| Admin proxy | Disabled (`ADMIN_PROXY_ENABLED` not set) | Session guard is now real (4S.90N-C); CSRF guard is now a real same-origin / fetch-metadata guard (4S.90N-E); admin response minimisation (4S.90N-F) outstanding; not safe to expose in any non-local environment |
+| Admin proxy | Disabled (`ADMIN_PROXY_ENABLED` not set) | Session guard is now real (4S.90N-C); CSRF guard is now a real same-origin / fetch-metadata guard (4S.90N-E); admin response minimisation complete (4S.90N-F); remaining blockers are production rollout controls, public env safety, DPA/content permissions, pilot governance, and final deployment proof |
 | Session guard | Real (4S.90N-C) | `getAdminProxySessionContext` validates real Supabase server session via `getUser()` and calls backend `/admin/session-check`; test seam preserved for Playwright test mode only |
 | CSRF guard | Real same-origin / fetch-metadata guard (4S.90N-E) | POST and PATCH require `Sec-Fetch-Site: same-origin` or matching `Origin`; GET is CSRF-bypassed; DELETE is method-blocked before CSRF; fails closed if neither header is present |
 | Real staff use | Not approved | No DPA, no QCS licence AI/RAG confirmation, auth not activated |
@@ -145,11 +147,9 @@ The pilot client is **Thumhara Centre**. No real staff, service-user, resident, 
 
 3. **No DPA or data processing agreement** - WorkTwin does not yet have a signed DPA or data processing addendum covering the Thumhara Centre relationship. Required before any real personal data is introduced.
 
-4. **Admin response minimisation outstanding (4S.90N-F)** - The session guard is real (4S.90N-C, proven in 4S.90N-D) and the CSRF guard is now a real same-origin / fetch-metadata guard (4S.90N-E, checkpoint `185b07e`). Admin and debug endpoint responses must be reviewed and minimised before `ADMIN_PROXY_ENABLED` is set in any non-local environment. Response content, field scope, and error verbosity must be audited to ensure no internal detail leaks to the proxy caller.
+4. **Admin routes not protected by this middleware slice** - Staff routes (`/dashboard`, `/ask`, `/policies`, `/onboarding`, `/scenarios`, `/notes`, `/escalation`) are now covered in pilot-auth mode (4S.90C). Admin routes (`/admin/*`) are deliberately outside this middleware slice; admin routes are governed separately by the admin proxy session guard, CSRF guard, allowlist, role checks, and response minimisation. `ADMIN_PROXY_ENABLED` must not be enabled in any non-local environment until production rollout controls, public env safety, DPA/content permissions, pilot governance, and final deployment proof are complete.
 
-5. **Admin routes not protected by this middleware slice** - Staff routes (`/dashboard`, `/ask`, `/policies`, `/onboarding`, `/scenarios`, `/notes`, `/escalation`) are now covered in pilot-auth mode (4S.90C). Admin routes (`/admin/*`) are deliberately outside this middleware slice; admin auth, RBAC, and proxy session design remain outstanding and are prerequisites before `ADMIN_PROXY_ENABLED` can be set in any non-local environment.
-
-6. **Production admin rollout controls outstanding** - The admin proxy session guard is real (4S.90N-C, proven in 4S.90N-D). The CSRF guard is now a real same-origin / fetch-metadata guard (4S.90N-E). Admin response minimisation (4S.90N-F) and all remaining production rollout controls listed in this section remain outstanding prerequisites before `ADMIN_PROXY_ENABLED` can be set in any non-local environment.
+5. **Production admin rollout controls outstanding** - The admin proxy session guard is real (4S.90N-C, proven in 4S.90N-D). The CSRF guard is real (4S.90N-E). Admin response minimisation is complete (4S.90N-F, checkpoint `02f64ea`). Remaining prerequisites before `ADMIN_PROXY_ENABLED` can be set in any non-local environment: production rollout controls, public environment safety sign-off, DPA and content permissions, pilot governance sign-off, and final deployment proof.
 
 ---
 
@@ -161,7 +161,7 @@ WorkTwin is **credible for a controlled stakeholder demo** with the following co
 - All questions must use the demo identity mode (`PILOT_AUTH_MODE=false`)
 - Escalation demos are safe - deterministic, no LLM
 - RAG answers from Visitor SOP are available for controlled internal demonstration (AC32 is blocked — QCS content restriction applies from 2026-05-07; must not be used in demo, pilot, or staff-style Ask until written permission obtained; see Section 11)
-- Do not demonstrate the admin proxy upload flow - the proxy is disabled publicly and admin response minimisation (4S.90N-F) is outstanding
+- Do not demonstrate the admin proxy upload flow - the proxy is disabled publicly and production rollout controls are outstanding
 - Do not represent the system as production-ready or as having passed any regulatory review
 
 The system demonstrates the intended architecture convincingly: governance gates, fail-closed grounding, escalation short-circuit, source citation. The gaps are infrastructure and compliance, not design.
@@ -225,6 +225,7 @@ A sandbox Supabase auth E2E setup plan has been created at `docs/4s90i-sandbox-a
 | Admin proxy real session-check integration (4S.90N-C) | `getAdminProxySessionContext` now validates the real Supabase server session server-side via `getUser()` in non-test mode, then calls backend `/admin/session-check`; test seam preserved for Playwright only; magic link token hash callback supported; no service_role key in frontend. | 4S.90N-C (`a740daa`) |
 | Admin proxy sandbox E2E proof (4S.90N-D) | Real sandbox organisation_admin session proven end to end; backend `/admin/session-check` returned `200 OK`; proxy reached ADMIN_TOKEN guard; `503 not_configured` with intentionally empty ADMIN_TOKEN (expected pass); no admin forwarding; admin proxy remains disabled publicly; documentation only. | 4S.90N-D (documentation only) |
 | Admin proxy CSRF / same-origin guard (4S.90N-E) | Real same-origin / fetch-metadata CSRF guard implemented in `frontend/app/api/admin/[...path]/route.ts`; POST and PATCH protected; GET CSRF-bypassed; DELETE method-blocked before CSRF; fails closed if no valid header present; 13 targeted CSRF tests passed; full E2E public-demo suite 40 passed, 37 skipped, 0 failed. | 4S.90N-E (`185b07e`) |
+| Admin response minimisation (4S.90N-F) | Three commits: upload error paths return safe strings only (6416c37, pytest 138 passed); answer-debug suppresses ANSWER_MODEL and estimated_cost_note (80e9124, pytest 150 passed); per-role strip helper removes internal document fields, upload internals, registry_warning, and embedding model/token/cost fields from organisation_admin proxy responses; worktwin_dev_admin passthrough unchanged; frontend build passed; admin proxy grep tests 21 passed, 31 skipped, 0 failed; strip helper tests 29 passed. | 4S.90N-F (`02f64ea`) |
 
 ### External decisions required
 
@@ -247,7 +248,7 @@ A sandbox Supabase auth E2E setup plan has been created at `docs/4s90i-sandbox-a
 
 4. **`PILOT_AUTH_MODE`** - do not set to `true` in any deployed environment until 4S.88G is resolved and E2E auth proof is demonstrated.
 
-5. **`ADMIN_PROXY_ENABLED`** - do not enable in any non-local environment until admin response minimisation (4S.90N-F) is complete and all production rollout controls in Section 6 are satisfied. The session guard (4S.90N-C) and CSRF guard (4S.90N-E) are now real implementations.
+5. **`ADMIN_PROXY_ENABLED`** - do not enable in any non-local environment until all production rollout controls in Section 6 are satisfied. The session guard (4S.90N-C), CSRF guard (4S.90N-E), and admin response minimisation (4S.90N-F) are now complete. Remaining prerequisites are production rollout controls, public environment safety, DPA/content permissions, pilot governance, and final deployment proof.
 
 6. **The 11-condition staff ask gate** (`_can_use_document_for_staff_ask`, `backend/app/main.py:546-587`) - do not loosen or remove any condition. Every condition exists for a specific governance or safety reason.
 

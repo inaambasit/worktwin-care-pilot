@@ -17,6 +17,7 @@
 | [Admin proxy real session guard design (4S.90N-A)](4s90n-admin-proxy-real-session-guard-design.md) | Design record -- admin proxy session guard approach decided; frontend/Vercel kept free of service_role; backend remains membership authority via a future /admin/session-check endpoint; proxy remains disabled |
 | [Admin proxy sandbox E2E proof (4S.90N-D)](4s90n-d-admin-proxy-sandbox-e2e-proof.md) | Proof record -- sandbox E2E passed for admin proxy session-check flow; real sandbox organisation_admin session verified; backend `/admin/session-check` returned 200 OK; proxy returned 503 "not_configured" (expected pass - ADMIN_TOKEN intentionally empty); proxy remains disabled publicly; CSRF still a stub |
 | [Admin proxy CSRF / same-origin guard proof (4S.90N-E)](4s90n-e-admin-proxy-csrf-proof.md) | Proof record -- real same-origin / fetch-metadata CSRF guard implemented; POST and PATCH protected; GET CSRF-bypassed; 13 CSRF tests passed; full E2E 40 passed, 0 failed; admin response minimisation (4S.90N-F) outstanding |
+| [Admin response minimisation proof (4S.90N-F)](4s90n-f-admin-response-minimisation-proof.md) | Proof record -- upload error sanitisation, answer-debug field minimisation, and per-role admin proxy response stripping complete; organisation_admin responses stripped; worktwin_dev_admin passthrough unchanged; ADMIN_PROXY_ENABLED remains disabled publicly |
 
 ## Product and planning
 

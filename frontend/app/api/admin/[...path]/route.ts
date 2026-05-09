@@ -14,6 +14,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ADMIN_ALLOWLIST, classifyPath } from '@/lib/admin-proxy-allowlist'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { stripAdminProxyResponseForRole } from '@/lib/admin-proxy-response-strip'
 
 // Allow up to 120 s on Vercel -- generate-embeddings can take that long
 export const maxDuration = 120
@@ -266,11 +267,19 @@ async function proxyHandlerCore(
   }
 
   auditAdminProxyEvent({ component: 'admin_proxy', event_type: 'proxy_guard', method: request.method, status: upstream.status, decision: 'allow', reason: 'forwarded', route_key: classified.routeKey, role: session.role, active: session.active })
+
+  const upstreamContentType = upstream.headers.get('content-type') ?? ''
+  if (upstreamContentType.includes('application/json')) {
+    const parsed: unknown = await upstream.json()
+    const stripped = stripAdminProxyResponseForRole(parsed, classified.routeKey, session.role)
+    return NextResponse.json(stripped, { status: upstream.status })
+  }
+
   const responseBlob = await upstream.blob()
   return new NextResponse(responseBlob, {
     status: upstream.status,
     headers: {
-      'Content-Type': upstream.headers.get('content-type') ?? 'application/json',
+      'Content-Type': upstreamContentType || 'application/octet-stream',
     },
   })
 }

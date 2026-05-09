@@ -15,6 +15,7 @@
 | [Sandbox RLS baseline proof (4S.90M)](4s90m-sandbox-rls-baseline-proof.md) | Proof record — sandbox RLS/grants posture inspected; anon/authenticated direct REST blocked; service_role allowed; no RLS policies yet; backend-gated posture confirmed |
 | [RLS strategy decision (4S.90M-B)](4s90m-b-rls-strategy-decision.md) | Decision record -- WorkTwin remains backend-gated for the controlled pilot; no direct authenticated Supabase table access or new RLS policies introduced; backend enforces all policy checks via service_role |
 | [Admin proxy real session guard design (4S.90N-A)](4s90n-admin-proxy-real-session-guard-design.md) | Design record -- admin proxy session guard approach decided; frontend/Vercel kept free of service_role; backend remains membership authority via a future /admin/session-check endpoint; proxy remains disabled |
+| [Admin proxy sandbox E2E proof (4S.90N-D)](4s90n-d-admin-proxy-sandbox-e2e-proof.md) | Proof record -- sandbox E2E passed for admin proxy session-check flow; real sandbox organisation_admin session verified; backend `/admin/session-check` returned 200 OK; proxy returned 503 "not_configured" (expected pass - ADMIN_TOKEN intentionally empty); proxy remains disabled publicly; CSRF still a stub |
 
 ## Product and planning
 

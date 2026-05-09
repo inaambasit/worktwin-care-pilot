@@ -1,6 +1,6 @@
 # WorkTwin Care Pilot - Current State
 
-> Generated: 2026-05-07. Updated: 2026-05-08. Source of truth for checkpoint `23632a4` on branch `main`.
+> Generated: 2026-05-07. Updated: 2026-05-09. Source of truth for checkpoint `a740daa` on branch `main`.
 > Update this file whenever a milestone changes the status of any item below.
 > Do not edit other files to reconcile with this document - fix those files instead.
 
@@ -12,13 +12,19 @@
 
 > **4S.90N-A (2026-05-08):** Admin proxy real session guard design recorded. Decision: keep the frontend/Vercel environment free of SUPABASE_SERVICE_ROLE_KEY; backend remains the membership and role authority; the proxy will call a future backend /admin/session-check endpoint using the user Supabase access token before forwarding any admin request. Admin proxy remains disabled publicly (ADMIN_PROXY_ENABLED not set). No code or database changes made. Design doc at `docs/4s90n-admin-proxy-real-session-guard-design.md`. Next slice is 4S.90N-B (backend /admin/session-check tests and implementation). Latest checkpoint remains `002a6dd` until this docs commit is made.
 
+> **4S.90N-B (2026-05-09):** Backend `/admin/session-check` endpoint implemented and tested. JWT validation, membership resolution, organisation boundary check, and role guard (organisation_admin, worktwin_dev_admin) are passing. Backend returns a minimal decision response only (allowed, role, active, reason) - no tokens, no document data, no secrets. Admin proxy remains disabled publicly. Checkpoint: `4766805`.
+
+> **4S.90N-C (2026-05-09):** Next.js admin proxy real session-check integration wired. `getAdminProxySessionContext` now validates the real Supabase server session server-side via `getUser()` in non-test mode, then calls the backend `/admin/session-check` endpoint. Test seam preserved for Playwright test mode only. Magic link token hash callback supported. No service_role key in the frontend environment. Admin proxy remains disabled publicly. Checkpoint: `a740daa`.
+
+> **4S.90N-D (2026-05-09):** Sandbox E2E proof passed. Real sandbox organisation_admin session verified end to end: Next.js admin proxy read the real Supabase server session; proxy called backend `/admin/session-check`; backend returned `200 OK` for organisation_admin; proxy reached the final ADMIN_TOKEN guard; with ADMIN_TOKEN intentionally empty, proxy returned `503 not_configured` (expected pass condition). No admin backend forwarding occurred. Admin proxy remains disabled publicly. CSRF guard remains a test stub (4S.90N-E required). Response minimisation outstanding (4S.90N-F required). This does not make production admin access ready. Proof doc at `docs/4s90n-d-admin-proxy-sandbox-e2e-proof.md`. Checkpoint remains `a740daa` (documentation only).
+
 ---
 
 ## 1. Current Checkpoint
 
 | Item | Value |
 |---|---|
-| Commit | `5acf430` |
+| Commit | `a740daa` |
 | Branch | `main` |
 | Repo path | `C:\Projects\worktwin-care-pilot\worktwin-care-pilot-starter` |
 | Backend | FastAPI / `backend/app/main.py` |
@@ -94,9 +100,9 @@ The pilot client is **Thumhara Centre**. No real staff, service-user, resident, 
 | Item | Status | Why |
 |---|---|---|
 | `PILOT_AUTH_MODE` | `false` | E2E proof (4S.88G) not complete; activating without it would give false confidence |
-| Admin proxy | Disabled (`ADMIN_PROXY_ENABLED` not set) | Session guard and CSRF guard are test-only stubs; not safe to expose in production |
-| Session guard | Test stub only | `getAdminProxySessionContext` returns `null` for all non-test requests |
-| CSRF guard | Test stub only | Production always returns 403 for POST/PATCH through proxy |
+| Admin proxy | Disabled (`ADMIN_PROXY_ENABLED` not set) | Session guard is now real (4S.90N-C); CSRF guard is still a test stub; not safe to expose in any non-local environment |
+| Session guard | Real (4S.90N-C) | `getAdminProxySessionContext` validates real Supabase server session via `getUser()` and calls backend `/admin/session-check`; test seam preserved for Playwright test mode only |
+| CSRF guard | Test stub only | Production always returns 403 for POST/PATCH through proxy; real same-site CSRF implementation (4S.90N-E) outstanding |
 | Real staff use | Not approved | No DPA, no QCS licence AI/RAG confirmation, auth not activated |
 | `008_organisation_memberships.sql` | Not applied | 4S.88G blocker - safe dev branch required before applying |
 | `middleware.ts` route protection | Staff routes covered in pilot-auth mode (4S.90C) | In pilot-auth mode, middleware protects `/dashboard`, `/ask`, `/policies`, `/onboarding`, `/scenarios`, `/scenarios/*`, `/notes`, `/escalation`; public demo behaviour remains fail-open when `NEXT_PUBLIC_PILOT_AUTH_MODE` is not `true`; admin routes are deliberately not protected by this middleware slice — admin auth/RBAC/proxy session is a separate concern |
@@ -137,11 +143,11 @@ The pilot client is **Thumhara Centre**. No real staff, service-user, resident, 
 
 3. **No DPA or data processing agreement** - WorkTwin does not yet have a signed DPA or data processing addendum covering the Thumhara Centre relationship. Required before any real personal data is introduced.
 
-4. **Admin proxy session and CSRF guards are test-only stubs** - The proxy cannot be safely enabled in production in this state. Both guards must be replaced with real implementations before `ADMIN_PROXY_ENABLED` is set in any non-local environment.
+4. **Admin proxy CSRF guard is still a test-only stub** - The session guard is now real (4S.90N-C), proven end to end in 4S.90N-D. The CSRF guard remains a test-only stub; POST/PATCH through the proxy is blocked by the stub in non-test mode. A real same-site CSRF implementation (4S.90N-E) is required before `ADMIN_PROXY_ENABLED` is set in any non-local environment.
 
 5. **Admin routes not protected by this middleware slice** - Staff routes (`/dashboard`, `/ask`, `/policies`, `/onboarding`, `/scenarios`, `/notes`, `/escalation`) are now covered in pilot-auth mode (4S.90C). Admin routes (`/admin/*`) are deliberately outside this middleware slice; admin auth, RBAC, and proxy session design remain outstanding and are prerequisites before `ADMIN_PROXY_ENABLED` can be set in any non-local environment.
 
-6. **`supabase-browser.ts` token validation (partial hardening)** - `getSession()` is used to obtain the local access token, and `getUser(token)` now validates it server-side before forwarding. Real Supabase Auth session validation inside the admin proxy and production CSRF/same-site controls remain outstanding and are prerequisites before `ADMIN_PROXY_ENABLED` can be set in any non-local environment.
+6. **Production CSRF / same-site controls outstanding** - `getSession()` obtains the local access token; `getUser(token)` validates it server-side. Real Supabase Auth session validation inside the admin proxy is now complete (4S.90N-C, proven in 4S.90N-D). Production CSRF/same-site controls remain outstanding and are a prerequisite before `ADMIN_PROXY_ENABLED` can be set in any non-local environment.
 
 ---
 
@@ -213,6 +219,9 @@ A sandbox Supabase auth E2E setup plan has been created at `docs/4s90i-sandbox-a
 | Expanded pilot-auth middleware staff route coverage | `frontend/middleware.ts` now protects all seven staff routes in pilot-auth mode; added `frontend/tests/middleware-pilot-auth.spec.ts`; focused middleware test: 3 passed, 6 skipped in public-demo mode; `npm run build` passed; full smoke has unrelated/stale failures and was not used as the pass gate for this slice | 4S.90C (`5acf430`) |
 | CI baseline (4S.90J) | `.github/workflows/ci.yml` added: GitHub Actions CI runs frontend smoke tests, middleware-pilot-auth tests, and `npm run build` plus backend `pytest` automatically on push and pull request to main. No secrets, no deployment, demo/public-safe mode only. | 4S.90J |
 | Sandbox auth E2E proof (4S.90L) | Full local E2E proof using `worktwin-sandbox-dev` sandbox Supabase project: sign-in, JWT validation, membership resolution, positive and negative boundary checks. `/policies` wrong-org boundary gap found and fixed; `_ALLOWED_ORGANISATION_IDS` guard added; regression tests added to `backend/tests/test_policies_identity.py`; `pytest` 117/117. Public auth remains disabled. Checkpoint: `23632a4`. | 4S.90L (`23632a4`) |
+| Backend `/admin/session-check` endpoint (4S.90N-B) | `GET /admin/session-check` implemented; JWT validation, membership resolution, organisation boundary check, and role guard (organisation_admin, worktwin_dev_admin) passing; returns minimal decision response only (allowed, role, active, reason); no tokens, no document data, no secrets in response. | 4S.90N-B (`4766805`) |
+| Admin proxy real session-check integration (4S.90N-C) | `getAdminProxySessionContext` now validates the real Supabase server session server-side via `getUser()` in non-test mode, then calls backend `/admin/session-check`; test seam preserved for Playwright only; magic link token hash callback supported; no service_role key in frontend. | 4S.90N-C (`a740daa`) |
+| Admin proxy sandbox E2E proof (4S.90N-D) | Real sandbox organisation_admin session proven end to end; backend `/admin/session-check` returned `200 OK`; proxy reached ADMIN_TOKEN guard; `503 not_configured` with intentionally empty ADMIN_TOKEN (expected pass); no admin forwarding; admin proxy remains disabled publicly; documentation only. | 4S.90N-D (documentation only) |
 
 ### External decisions required
 

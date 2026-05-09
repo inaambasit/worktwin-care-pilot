@@ -4,7 +4,7 @@ import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
 import {
   ArrowLeft, CheckCircle, Check, Phone, AlertTriangle, ChevronRight,
-  Shield, User, ClipboardList, Clock, FileText,
+  Shield, User, ClipboardList, Clock, FileText, BookOpen,
 } from 'lucide-react'
 
 const SESSION_KEY = 'wt:scenario:doorstep-refusal'
@@ -13,7 +13,7 @@ type Step1Choice = 'A' | 'B' | 'C' | null
 type Step2Choice = 'A' | 'B' | 'C' | null
 type RefusedOption = 'refused' | 'refused-then-entered' | 'entered-normal' | ''
 type FamilyOption = 'spoke' | 'voicemail' | 'no-reach' | ''
-type ShaguftaOption = 'spoke' | 'will-call' | 'not-needed' | ''
+type EscalationContactOption = 'spoke' | 'will-call' | 'not-needed' | ''
 type Concern =
   | 'welfare' | 'safety' | 'capacity' | 'distress'
   | 'neglect' | 'missed-medication' | 'immediate-risk' | 'none'
@@ -24,7 +24,7 @@ interface Step3State {
   refused: RefusedOption
   familyContacted: FamilyOption
   familySaid: string
-  shaguftaContacted: ShaguftaOption
+  escalationContacted: EscalationContactOption
   concerns: Concern[]
 }
 
@@ -34,7 +34,7 @@ const initialStep3: Step3State = {
   refused: '',
   familyContacted: '',
   familySaid: '',
-  shaguftaContacted: '',
+  escalationContacted: '',
   concerns: [],
 }
 
@@ -60,7 +60,7 @@ const STEP1_OPTIONS = [
     label: 'Mark the visit as refused and leave',
     sub: 'Update the log and continue to the next visit.',
     feedback:
-      'Do not leave if you cannot confirm the service user is safe. A refusal at the door can hide a welfare or capacity concern - make a calm contact attempt first, and escalate to Shagufta if you are unsure.',
+      'Do not leave if you cannot confirm the service user is safe. A refusal at the door can hide a welfare or capacity concern - make a calm contact attempt first, and escalate to the registered manager if you are unsure.',
     recommended: false,
   },
 ]
@@ -126,7 +126,7 @@ const HERO_STEPS = [
   {
     icon: <FileText size={22} className="text-white" />,
     title: 'Record and escalate if needed',
-    body: 'Write what happened in plain words while it is fresh. If anything in your notes is a welfare or safety concern, phone Shagufta before you leave the visit.',
+    body: 'Write what happened in plain words while it is fresh. If anything in your notes is a welfare or safety concern, phone the registered manager before you leave the visit.',
     chips: ['Final step', 'Record the visit', 'Escalate if needed', 'Safe route'],
   },
 ]
@@ -232,7 +232,7 @@ export default function AccessRefusalPage() {
     if (step3.saidOrDid.trim().length < 10) errs.add('saidOrDid')
     if (!step3.refused) errs.add('refused')
     if (!step3.familyContacted) errs.add('familyContacted')
-    if (!step3.shaguftaContacted) errs.add('shaguftaContacted')
+    if (!step3.escalationContacted) errs.add('escalationContacted')
     if (step3.concerns.length === 0) errs.add('concerns')
     setStep3Errors(errs)
     if (errs.size === 0) setCompleted(true)
@@ -269,7 +269,7 @@ export default function AccessRefusalPage() {
         If anyone is in immediate danger, call 999 first.
       </p>
       <p className="text-xs text-red-200 leading-relaxed mb-4">
-        Don&apos;t wait on hold for the family contact or for Shagufta. Call 999, then phone Shagufta
+        Don&apos;t wait on hold for the family contact or for the registered manager. Call 999, then phone the registered manager
         as soon as you safely can.
       </p>
       <a
@@ -282,14 +282,14 @@ export default function AccessRefusalPage() {
     </div>
   )
 
-  const cardShagufta = (
+  const cardRegisteredManager = (
     <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
       <div className="flex items-center gap-3 mb-3">
         <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center shrink-0">
           <Shield size={18} className="text-teal-700" />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-bold text-slate-900">Shagufta</p>
+          <p className="text-sm font-bold text-slate-900">Registered Manager (sample)</p>
           <p className="text-xs text-slate-500 leading-tight">
             Safeguarding Lead / Registered Manager
           </p>
@@ -301,7 +301,7 @@ export default function AccessRefusalPage() {
         className="flex items-center justify-center gap-2 bg-teal-700 hover:bg-teal-800 text-white font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors w-full"
       >
         <Phone size={14} />
-        Call Shagufta
+        Call registered manager
       </a>
     </div>
   )
@@ -395,13 +395,13 @@ export default function AccessRefusalPage() {
       {step === 3 ? (
         <>
           {cardEscalate}
-          {cardShagufta}
+          {cardRegisteredManager}
           {card999}
         </>
       ) : (
         <>
           {card999}
-          {cardShagufta}
+          {cardRegisteredManager}
           {step === 1 && cardFamily}
         </>
       )}
@@ -556,6 +556,12 @@ export default function AccessRefusalPage() {
                 Back to Practice Scenarios
               </Link>
             </div>
+            <Link
+              href="/escalation"
+              className="w-full flex items-center justify-center gap-2 text-sm bg-white border border-teal-200 hover:bg-teal-50 text-teal-700 font-semibold px-4 py-3 rounded-xl transition-colors"
+            >
+              Next: View Escalation Contacts
+            </Link>
             {card999}
             {cardPrivacy}
           </div>
@@ -593,6 +599,13 @@ export default function AccessRefusalPage() {
             <Clock size={11} />
             7 min walk-through
           </span>
+          <Link
+            href="/policies"
+            className="inline-flex items-center gap-1.5 bg-white border border-slate-200 text-slate-600 text-xs font-semibold px-3 py-1.5 rounded-full hover:border-teal-200 hover:text-teal-700 transition-all"
+          >
+            <BookOpen size={11} />
+            Visitor SOP
+          </Link>
         </div>
 
         {/* Two-column grid */}
@@ -621,7 +634,7 @@ export default function AccessRefusalPage() {
                       </p>
                       <p className="text-sm font-semibold text-teal-800 leading-relaxed">
                         Do not leave if you cannot confirm the service user is safe. Escalate to
-                        Shagufta if you are unsure.
+                        the registered manager if you are unsure.
                       </p>
                     </div>
                   </div>
@@ -921,14 +934,14 @@ export default function AccessRefusalPage() {
                         You could not reach the family contact.
                       </p>
                       <p className="text-sm text-amber-800 leading-relaxed">
-                        Call Shagufta before leaving if you cannot confirm the service user is safe.
+                        Call the registered manager before leaving if you cannot confirm the service user is safe.
                       </p>
                       <a
                         href="tel:07700900412"
                         className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-800 hover:text-amber-900 mt-2"
                       >
                         <Phone size={14} />
-                        07700 900 412 (demo) — Shagufta
+                        07700 900 412 (demo) — Registered Manager
                       </a>
                     </div>
                   </div>
@@ -939,14 +952,14 @@ export default function AccessRefusalPage() {
                     <div>
                       <p className="text-sm font-bold text-red-900 mb-1">A concern was raised.</p>
                       <p className="text-sm text-red-800 leading-relaxed">
-                        Phone Shagufta now and record what was said.
+                        Phone the registered manager now and record what was said.
                       </p>
                       <a
                         href="tel:07700900412"
                         className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-800 hover:text-red-900 mt-2"
                       >
                         <Phone size={14} />
-                        07700 900 412 (demo) — Shagufta
+                        07700 900 412 (demo) — Registered Manager
                       </a>
                     </div>
                   </div>
@@ -1077,16 +1090,16 @@ export default function AccessRefusalPage() {
                   </div>
 
                   <PillGroup
-                    label="Did you contact Shagufta?"
+                    label="Did you contact the registered manager?"
                     required
-                    error={step3Errors.has('shaguftaContacted')}
+                    error={step3Errors.has('escalationContacted')}
                     options={[
-                      { val: 'spoke', label: 'Yes, spoke to Shagufta' },
+                      { val: 'spoke', label: 'Yes, spoke to the registered manager' },
                       { val: 'will-call', label: 'No - will call now' },
                       { val: 'not-needed', label: 'Not needed this visit' },
                     ]}
-                    value={step3.shaguftaContacted}
-                    onChange={v => handleStep3Change('shaguftaContacted', v as ShaguftaOption)}
+                    value={step3.escalationContacted}
+                    onChange={v => handleStep3Change('escalationContacted', v as EscalationContactOption)}
                   />
 
                   {/* Concerns */}
@@ -1133,7 +1146,7 @@ export default function AccessRefusalPage() {
                         <a href="tel:999" className="font-bold underline">
                           999
                         </a>{' '}
-                        first if anyone is in danger, then phone Shagufta.
+                        first if anyone is in danger, then phone the registered manager.
                       </p>
                     </div>
                   )}

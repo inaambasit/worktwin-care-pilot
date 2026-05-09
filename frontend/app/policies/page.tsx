@@ -319,8 +319,8 @@ export default function PoliciesPage() {
               <BookOpen size={18} className="text-slate-500" />
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-700 leading-tight">Care policies</p>
-              <p className="text-xs text-slate-500">Available in demo</p>
+              <p className="text-sm font-bold text-slate-700 leading-tight">Visitor SOP</p>
+              <p className="text-xs text-slate-500">Approved for this demo</p>
             </div>
           </div>
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-3">
@@ -341,7 +341,7 @@ export default function PoliciesPage() {
             <div>
               <p className="text-sm font-semibold text-amber-800">Could not load policy library</p>
               <p className="text-xs text-amber-700 mt-0.5">
-                WorkTwin could not connect to the policy library. Showing sample data for this demo. Please try again or speak to your manager.
+                WorkTwin could not connect to the policy library. Showing the Visitor Sign-In and Identification Procedure — the one approved demo policy. Please try again or speak to your manager.
               </p>
             </div>
           </div>

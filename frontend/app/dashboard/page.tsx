@@ -59,6 +59,35 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Demo walkthrough strip */}
+        <div className="bg-white border border-teal-100 rounded-2xl px-5 py-4 shadow-sm">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Suggested demo walkthrough</p>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {[
+              { label: 'Dashboard', href: '/', active: true },
+              { label: 'Ask WorkTwin', href: '/ask', active: false },
+              { label: 'Policy Library', href: '/policies', active: false },
+              { label: 'Access Refusal', href: '/scenarios/access-refusal', active: false },
+              { label: 'Escalation', href: '/escalation', active: false },
+            ].map((item, i, arr) => (
+              <div key={item.label} className="flex items-center gap-1.5">
+                <Link
+                  href={item.href}
+                  className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
+                    item.active
+                      ? 'bg-teal-700 text-white border-teal-700'
+                      : 'border-slate-200 text-slate-600 hover:border-teal-300 hover:text-teal-700 bg-white'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+                {i < arr.length - 1 && <span className="text-slate-300 text-xs select-none">›</span>}
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-slate-400 mt-2">Follow this path to walk through the Visitor SOP demo from start to finish.</p>
+        </div>
+
         {/* Summary cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-3">
@@ -130,7 +159,7 @@ export default function DashboardPage() {
                     Service user refuses entry at the door
                   </h3>
                   <p className="text-sm text-slate-500 leading-relaxed">
-                    Practise the safe route: stay calm, contact the named family contact, escalate to Shagufta if needed, and record the visit clearly.
+                    Practise the safe route: stay calm, contact the named family contact, escalate to the registered manager if needed, and record the visit clearly.
                   </p>
                 </div>
               </div>

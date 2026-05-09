@@ -22,17 +22,17 @@ interface Category {
 const categories: Category[] = [
   {
     id: 'safeguarding',
-    title: 'Safeguarding Lead',
-    whenToUse: 'Safeguarding disclosures, adult or child protection concerns, or abuse and neglect',
+    title: 'Safeguarding Lead / Registered Manager',
+    whenToUse: 'Safeguarding disclosures, welfare or capacity concerns, access-refusal situations, abuse or neglect',
     icon: Shield,
     iconColour: 'bg-red-100 text-red-600',
     contact: {
-      name: 'Jane Thornton (sample name)',
-      role: 'Designated Safeguarding Lead',
-      phone: '07700 900 001',
+      name: 'Registered Manager (sample)',
+      role: 'Safeguarding Lead / Registered Manager',
+      phone: '07700 900 412',
       email: 'safeguarding@thumhara-demo.co.uk',
       availability: 'Mon–Fri, 09:00–17:00',
-      notes: 'For out-of-hours concerns, contact the Local Authority Safeguarding Team directly.',
+      notes: 'First escalation point for welfare concerns, access refusals and safeguarding. For out-of-hours emergencies, call 999.',
     },
   },
   {

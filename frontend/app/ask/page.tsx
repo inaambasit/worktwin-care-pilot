@@ -331,9 +331,10 @@ export default function AskPage() {
 
             {/* Common questions */}
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-              <h2 className="font-semibold text-slate-900 mb-1">Common questions</h2>
-              <p className="text-sm text-slate-500 mb-4">Start with a safe example or type your own question below.</p>
+              <h2 className="font-semibold text-slate-900 mb-1">Demo questions</h2>
+              <p className="text-sm text-slate-500 mb-4">Use the Visitor SOP questions for the main demo, or try the escalation demos below.</p>
               <div className="space-y-2">
+                <p className="text-[11px] font-bold text-teal-700 uppercase tracking-wider pb-0.5">Visitor SOP — start here</p>
                 <button
                   onClick={() => handlePrompt('What should I do when a visitor arrives?')}
                   className="w-full flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-left hover:bg-teal-50 hover:border-teal-300 hover:shadow-sm transition-all group"
@@ -361,6 +362,7 @@ export default function AskPage() {
                   </div>
                   <span className="text-sm font-medium text-slate-800 group-hover:text-teal-900">Can a visitor go beyond reception without speaking to staff?</span>
                 </button>
+                <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wider pt-2 pb-0.5">Escalation demos</p>
                 <button
                   onClick={() => handlePrompt(SAFEGUARDING_Q)}
                   className="w-full flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3.5 text-left hover:bg-amber-100 hover:border-amber-300 hover:shadow-sm transition-all group"

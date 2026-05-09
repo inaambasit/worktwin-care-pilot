@@ -15,6 +15,15 @@ import {
 // ---------------------------------------------------------------------------
 const SAMPLE_DOCS: StaffPolicyRecord[] = [
   {
+    id: 'doc-vis-001', title: 'Visitor Sign-In and Identification Procedure',
+    description: 'Step-by-step procedure for receiving visitors: signing in at reception, issuing visitor identification, escorting beyond reception, recording in the visitor log, and escalating access refusals or welfare concerns to the person in charge.',
+    file_type: 'pdf', file_size_bytes: 192512,
+    category: 'Health and Safety', tags: ['visitors', 'sign-in', 'reception', 'identification', 'access'],
+    status: 'approved', primary_language: 'en',
+    available_languages: ['en'], translation_status: 'not_required',
+    version: '1.0', review_due_date: '2027-01-01',
+  },
+  {
     id: 'doc-001', title: 'Staff Handbook',
     description: 'Comprehensive guide for all Thumhara Centre staff covering employment terms, conduct standards, key procedures and benefits.',
     file_type: 'pdf', file_size_bytes: 1468006,

@@ -897,7 +897,7 @@ export default function AskPage() {
         <div className="sticky bottom-0 bg-slate-50 pt-2">
           {showAnswer && (
             <div className="mb-2 flex flex-wrap gap-2">
-              {suggestedPrompts.slice(0, 4).map((p) => (
+              {suggestedPrompts.slice(0, 3).map((p) => (
                 <button
                   key={p}
                   onClick={() => handlePrompt(p)}

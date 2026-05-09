@@ -877,6 +877,25 @@ def _safe_embedding_error(exc: Exception) -> str:
     return msg
 
 
+# 4S.90N-F1A: Upload pipeline error messages -- never expose raw exception text.
+_UPLOAD_ERROR_MESSAGES: Dict[str, str] = {
+    "storage": "Document storage upload failed.",
+    "registry": "Registry save failed.",
+    "extraction_storage": "Extraction storage failed.",
+    "chunking": "Chunking failed.",
+}
+
+
+def _safe_upload_error_message(kind: str) -> str:
+    """Return a generic safe upload error message. Never exposes raw exception text."""
+    return _UPLOAD_ERROR_MESSAGES.get(kind, "Upload pipeline step failed.")
+
+
+def _safe_extraction_warning() -> str:
+    """Return a generic safe extraction warning. Never exposes raw exception text."""
+    return "Text extraction failed."
+
+
 def _fetch_chunk_texts(chunk_ids: List[str]) -> Dict[str, str]:
     """Fetch chunk_text for the given chunk IDs from document_chunks (backend-only)."""
     import httpx as _httpx
@@ -3352,9 +3371,9 @@ async def upload_document_pdf(
                 extraction_warnings.append(
                     "No text extracted. The PDF may be a scanned image or encrypted."
                 )
-        except Exception as exc:
+        except Exception:
             extraction_status = "failed"
-            extraction_warnings.append(f"Text extraction error: {exc}")
+            extraction_warnings.append(_safe_extraction_warning())
     else:
         extraction_warnings.append("pypdf not installed — text extraction skipped.")
 
@@ -3403,10 +3422,10 @@ async def upload_document_pdf(
             )
         else:
             _http_upload_to_supabase(storage_path, file_bytes)
-    except Exception as exc:
+    except Exception:
         raise HTTPException(
             status_code=500,
-            detail=f"Supabase storage upload failed: {exc}",
+            detail=_safe_upload_error_message("storage"),
         )
 
     # ---- 9. Build registry record ----
@@ -3469,9 +3488,9 @@ async def upload_document_pdf(
             persisted = _create_registry_record(doc)
             doc = persisted
             registry_status = "saved"
-        except RuntimeError as exc:
+        except RuntimeError:
             registry_status = "failed"
-            registry_error = str(exc)
+            registry_error = _safe_upload_error_message("registry")
 
     if registry_status == "saved":
         _create_audit_event(
@@ -3515,9 +3534,9 @@ async def upload_document_pdf(
                     event_summary=f"Extraction saved: {extracted_char_count} chars, {extracted_page_count} pages",
                     metadata={"extraction_status": extraction_status, "char_count": extracted_char_count},
                 )
-            except Exception as exc:
+            except Exception:
                 extraction_storage_status = "failed"
-                extraction_storage_error = str(exc)
+                extraction_storage_error = _safe_upload_error_message("extraction_storage")
         else:
             extraction_storage_status = "skipped"
 
@@ -3572,10 +3591,10 @@ async def upload_document_pdf(
                         event_summary=f"{chunk_count} chunks prepared for document",
                         metadata={"chunk_count": chunk_count},
                     )
-            except Exception as exc:
+            except Exception:
                 chunk_count = 0
                 chunking_status = "failed"
-                chunking_error = str(exc)
+                chunking_error = _safe_upload_error_message("chunking")
         elif registry_status != "saved":
             chunking_status = "skipped"
         else:

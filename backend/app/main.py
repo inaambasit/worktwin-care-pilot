@@ -3101,8 +3101,7 @@ def answer_debug(payload: AnswerDebugRequest, _: None = Depends(_require_admin))
             "result_count": 0,
             "sources": [],
             "safety_note": safety_note,
-            "model": ANSWER_MODEL,
-            "estimated_cost_note": None,
+            "model": "internal",
             "note": _admin_note,
         }
 
@@ -3116,8 +3115,7 @@ def answer_debug(payload: AnswerDebugRequest, _: None = Depends(_require_admin))
             "result_count": len(raw_rows),
             "sources": [],
             "safety_note": safety_note or "No safe approved chunks available for answer generation.",
-            "model": ANSWER_MODEL,
-            "estimated_cost_note": None,
+            "model": "internal",
             "note": _admin_note,
         }
 
@@ -3164,8 +3162,7 @@ def answer_debug(payload: AnswerDebugRequest, _: None = Depends(_require_admin))
         "result_count": len(filtered_rows),
         "sources": sources,
         "safety_note": safety_note,
-        "model": answer_result["model"],
-        "estimated_cost_note": answer_result["estimated_cost_note"],
+        "model": "internal",
         "note": _admin_note,
     }
 

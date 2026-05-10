@@ -2410,6 +2410,7 @@ def list_documents(
     category: Optional[str] = None,
     vertical: Optional[str] = None,
     organisation_id: Optional[str] = None,
+    x_worktwin_admin_org: Optional[str] = Header(default=None),
     _: None = Depends(_require_admin),
 ):
     """
@@ -2420,6 +2421,11 @@ def list_documents(
     registry_warning: non-null when DB is configured but unavailable.
     Never exposes secrets or internal keys.
     """
+    # Internal proxy header (set by Next.js admin proxy from validated session) takes
+    # precedence over any caller-supplied organisation_id query param.
+    if x_worktwin_admin_org:
+        organisation_id = x_worktwin_admin_org
+
     registry_warning: Optional[str] = None
 
     if _DB_CONFIGURED:
@@ -2453,16 +2459,26 @@ def list_documents(
 
 
 @app.get("/documents/{doc_id}", response_model=DocumentRecord)
-def get_document(doc_id: str, _: None = Depends(_require_admin)):
+def get_document(
+    doc_id: str,
+    x_worktwin_admin_org: Optional[str] = Header(default=None),
+    _: None = Depends(_require_admin),
+):
     if _DB_CONFIGURED:
         try:
             record = _get_registry_record(doc_id)
             if record is not None:
+                if x_worktwin_admin_org and record.get("organisation_id") != x_worktwin_admin_org:
+                    raise HTTPException(status_code=404, detail="Document not found")
                 return record
+        except HTTPException:
+            raise
         except Exception:
-            pass  # fall through to in-memory
+            pass  # fall through to in-memory on DB errors
     doc = _find_doc(doc_id)
     if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    if x_worktwin_admin_org and doc.get("organisation_id") != x_worktwin_admin_org:
         raise HTTPException(status_code=404, detail="Document not found")
     return doc
 

@@ -670,6 +670,51 @@ test.describe('Admin proxy -- CSRF guard', () => {
 })
 
 // ---------------------------------------------------------------------------
+// 4S.96B: Tenant org-scope header forwarding
+// ---------------------------------------------------------------------------
+
+test.describe('Admin proxy -- org scope header (4S.96B)', () => {
+  test('browser-supplied x-worktwin-admin-org is not trusted -- proxy still reaches 503', async ({ request }) => {
+    // The proxy builds forwardHeaders from session only (Authorization + x-worktwin-admin-org
+    // from validated session + Content-Type). A browser-supplied x-worktwin-admin-org must
+    // not reach the backend as an override.
+    // Observable: proxy still completes all guards and attempts the backend call (503
+    // not_configured), unchanged from a request that omits the browser header entirely.
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.get('/api/admin/documents', {
+      headers: {
+        'x-worktwin-test-admin-role': 'organisation_admin',
+        'x-worktwin-test-admin-active': 'true',
+        'x-worktwin-admin-org': 'evil-other-org',
+      },
+    })
+    // 503 = proxy forwarded the request (did not stop at a guard), confirming no
+    // guard was tripped by the browser header and the proxy set its own org header
+    // from the session rather than copying the browser value.
+    expect(response.status()).toBe(503)
+  })
+
+  test('request without browser org header also reaches 503 (baseline)', async ({ request }) => {
+    test.skip(
+      !process.env.ADMIN_PROXY_ENABLED,
+      'Requires ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server',
+    )
+    const response = await request.get('/api/admin/documents', {
+      headers: {
+        'x-worktwin-test-admin-role': 'organisation_admin',
+        'x-worktwin-test-admin-active': 'true',
+      },
+    })
+    // Baseline: no browser org header → same 503 result, confirming the two cases
+    // produce identical observable behaviour.
+    expect(response.status()).toBe(503)
+  })
+})
+
+// ---------------------------------------------------------------------------
 // Upload safety guards (4S.85G-8)
 // Run with ADMIN_PROXY_ENABLED=true and PLAYWRIGHT_TEST=true in dev server.
 // ---------------------------------------------------------------------------

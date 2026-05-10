@@ -253,6 +253,8 @@ async function proxyHandlerCore(
 
   const forwardHeaders: Record<string, string> = {
     Authorization: `Bearer ${ADMIN_TOKEN}`,
+    // Set from validated session only -- never copied from the browser request.
+    'x-worktwin-admin-org': session.organisationId,
   }
   // Forward Content-Type verbatim -- multipart/form-data must include its boundary
   const contentType = request.headers.get('content-type')

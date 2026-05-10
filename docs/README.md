@@ -1,6 +1,6 @@
 # WorkTwin Care Pilot - Docs Index
 
-> Controlled prototype. Not production-ready. Public auth disabled. Admin proxy disabled publicly. Real staff and pilot use blocked pending auth completion and safety sign-off.
+> Controlled prototype. Not production-ready. Public auth disabled. Admin proxy disabled publicly. Staff demo is Visitor SOP-only (checkpoint ac2d6ac, 4S.91C). Real staff and pilot use blocked pending DPA, pilot governance, auth activation, content permissions, and final sign-off.
 
 ## Current state
 
@@ -20,6 +20,7 @@
 | [Admin proxy CSRF / same-origin guard proof (4S.90N-E)](4s90n-e-admin-proxy-csrf-proof.md) | Proof record -- real same-origin / fetch-metadata CSRF guard implemented; POST and PATCH protected; GET CSRF-bypassed; 13 CSRF tests passed; full E2E 40 passed, 0 failed; admin response minimisation (4S.90N-F) outstanding |
 | [Admin response minimisation proof (4S.90N-F)](4s90n-f-admin-response-minimisation-proof.md) | Proof record -- upload error sanitisation, answer-debug field minimisation, and per-role admin proxy response stripping complete; organisation_admin responses stripped; worktwin_dev_admin passthrough unchanged; ADMIN_PROXY_ENABLED remains disabled publicly |
 | [Public deployment safety proof (4S.90P)](4s90p-public-deployment-safety-proof.md) | Proof record -- admin proxy disabled in public Vercel deployment; admin and debug endpoints return 403 with safe static message; no data exposed; all public demo pages load; current demo posture confirmed safe; does not activate production auth; real staff use, DPA/content permissions, pilot governance, QCS permissions, and final controlled pilot sign-off remain outstanding |
+| Visitor SOP-only demo journey (4S.91B) | Milestone closed -- Dashboard guides demo path; Ask focuses on Visitor SOP questions; Policy Library fallback is Visitor Sign-In only; Access Refusal connects to Visitor SOP and escalation; Escalation uses sample/non-personal contact labels; no real staff names; smoke 16/16; live route check passed; admin proxy 403 confirmed; checkpoint ac2d6ac |
 
 ## Product and planning
 

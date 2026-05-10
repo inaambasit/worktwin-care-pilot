@@ -1,6 +1,6 @@
 # WorkTwin Care Pilot - Current State
 
-> Generated: 2026-05-07. Updated: 2026-05-09. Source of truth for checkpoint `965f059` on branch `main`.
+> Generated: 2026-05-07. Updated: 2026-05-10. Source of truth for checkpoint `ac2d6ac` on branch `main`.
 > Update this file whenever a milestone changes the status of any item below.
 > Do not edit other files to reconcile with this document - fix those files instead.
 
@@ -32,13 +32,17 @@
 > - no DB, code, env, migration, embedding, or governance flag changes
 > - latest checkpoint remains `965f059` until this docs commit is made
 
+> **4S.91B (2026-05-10):** Visitor SOP-only demo journey polished. Dashboard guides the demo path; Ask demo path focuses on Visitor SOP questions; Policy Library fallback is Visitor Sign-In and Identification Procedure only; Access Refusal scenario connects to Visitor SOP and escalation; Escalation uses sample/non-personal contact labels; no real staff names in the staff-facing demo journey. Build passed. Smoke passed 16/16. Live route check: / 200, /dashboard 200, /ask 200, /policies 200, /scenarios/access-refusal 200, /escalation 200. Public admin proxy check: /api/admin/documents 403 - {"detail":"Admin proxy is disabled for this deployment."}. No backend, DB, auth, admin proxy, env, QCS, migration, or embedding changes made. Checkpoint: `ac2d6ac`.
+
+> **4S.91C (2026-05-10):** Documentation and review pack alignment -- docs-only slice. current-state.md, staff-demo-walkthrough.md, external-review-pack.md, and docs/README.md updated to reflect Visitor SOP-only demo journey, checkpoint ac2d6ac, 4S.91B closed, smoke 16/16, live route check results, and public admin proxy 403 confirmation. No backend, DB, auth, admin proxy, env, QCS, migration, or embedding changes made. Latest checkpoint remains `ac2d6ac` until this docs commit is made.
+
 ---
 
 ## 1. Current Checkpoint
 
 | Item | Value |
 |---|---|
-| Commit | `965f059` |
+| Commit | `ac2d6ac` |
 | Branch | `main` |
 | Repo path | `C:\Projects\worktwin-care-pilot\worktwin-care-pilot-starter` |
 | Backend | FastAPI / `backend/app/main.py` |
@@ -104,7 +108,7 @@ The pilot client is **Thumhara Centre**. No real staff, service-user, resident, 
 - 9 backend test files (JWT auth, membership, staff context, ask identity, policies identity, grounding safety, document registry models, governance gates, test_app_import.py)
 - `backend/tests/test_governance_gates.py` added in 4S.90A: 39 governance gate unit tests passed (8 test classes covering embedding gate, answer-debug gate, staff visibility gate, staff Ask gate, sensitive/escalation/dummy document blocking, role matching, and fully approved document pass-all verification) — no DB, no HTTP, plain dict fixtures only
 - Related tests also passed in 4S.90A: `test_ask_grounding_safety.py` and `test_document_registry_models.py`, 17 passed — no runtime code changed
-- Playwright smoke tests (15 tests, all major staff routes)
+- Playwright smoke tests (16 tests, all major staff routes)
 - Admin proxy spec (30+ tests, 5 describe blocks)
 
 ---
@@ -137,7 +141,7 @@ The pilot client is **Thumhara Centre**. No real staff, service-user, resident, 
 | QQ03 Complaints, Suggestions and Compliments Policy | B | Yes | Yes | Yes (indexed) | No | Admin answer-debug only | BLOCKED (2026-05-07) — QCS content restriction applies; not for staff visibility or further AI-RAG expansion until written permission obtained; see Section 11 |
 | CR100 Safeguarding Adults Policy and Procedure | C - human-only | Yes (human-only reference) | Yes | No | No | No - human escalation required | Not approved for embedding or AI answers; must trigger human escalation |
 | PM11 Raising Concerns / Freedom to Speak Up / Whistleblowing | C - human-only | Yes (human-only reference) | Yes | No | No | No - human escalation required | Not approved for embedding or AI answers; must trigger human escalation |
-| PPE Policy | Pending | No | No | No | No | No | PDF not yet received from Shagufta |
+| PPE Policy | Pending | No | No | No | No | No | PDF not yet received |
 | CR07 Data Protection (English) | Parked | No | No | No | No | No | DOCX exists but PDF export and data-protection escalation strategy required before upload |
 | CR07 Data Protection (Urdu) | Parked - do not upload | No | No | No | No | No | Multilingual strategy required before upload |
 
@@ -175,7 +179,7 @@ WorkTwin is **credible for a controlled stakeholder demo** with the following co
 - Do not demonstrate the admin proxy upload flow - the proxy is disabled publicly and production rollout controls are outstanding
 - Do not represent the system as production-ready or as having passed any regulatory review
 
-Public deployment safety has been confirmed for the current demo posture (4S.90P): admin proxy is disabled in the public Vercel deployment; admin and debug endpoints return 403 with a safe static message; no data is exposed; all public demo pages load. This confirmation does not activate production auth, does not make the product production-ready, and does not substitute for DPA/content permissions, pilot governance, or final controlled pilot sign-off.
+Public deployment safety has been confirmed for the current demo posture (4S.90P, 4S.91B): admin proxy is disabled in the public Vercel deployment; /api/admin/documents returns 403 with body {"detail":"Admin proxy is disabled for this deployment."}; no data is exposed; live route check passed (/ 200, /dashboard 200, /ask 200, /policies 200, /scenarios/access-refusal 200, /escalation 200); smoke passed 16/16 at checkpoint ac2d6ac. The Visitor SOP-only demo journey is polished: Dashboard guides the demo path; Ask focuses on Visitor SOP questions; Policy Library fallback is Visitor Sign-In and Identification Procedure only; Access Refusal scenario connects to Visitor SOP and escalation; Escalation uses sample/non-personal contact labels; no real staff names in the staff-facing demo journey. This confirmation does not activate production auth, does not make the product production-ready, and does not substitute for DPA/content permissions, pilot governance, or final controlled pilot sign-off.
 
 The system demonstrates the intended architecture convincingly: governance gates, fail-closed grounding, escalation short-circuit, source citation. The gaps are infrastructure and compliance, not design.
 
@@ -217,6 +221,7 @@ A sandbox Supabase auth E2E setup plan has been created at `docs/4s90i-sandbox-a
 | 4S.89E | Update auth-schema note to reflect current migration state | `docs/auth-schema-plan.md` | None |
 | 4S.89F | Align external-review-pack and staff-demo walkthrough with current policy and demo posture | `docs/external-review-pack.md`, `docs/staff-demo-walkthrough.md` | 4S.89C |
 | 4S.90Q-A | QCS wording alignment and Visitor SOP clean-corpus approval -- hard block wording applied to external-review-pack and staff-demo-walkthrough; Visitor SOP corpus approval record created; QCS DB cleanup backlog added to Section 10 | `docs/external-review-pack.md`, `docs/staff-demo-walkthrough.md`, `docs/visitor-sop-corpus-approval.md`, `docs/current-state.md`, `docs/README.md` | None |
+| 4S.91C | Documentation and review pack alignment -- current-state.md, staff-demo-walkthrough.md, external-review-pack.md, and docs/README.md updated to reflect Visitor SOP-only demo journey, checkpoint ac2d6ac, 4S.91B closed, smoke 16/16, live route check, and public admin proxy 403 confirmation | `docs/current-state.md`, `docs/staff-demo-walkthrough.md`, `docs/external-review-pack.md`, `docs/README.md` | None |
 
 ### Technical backlog
 
@@ -240,6 +245,7 @@ A sandbox Supabase auth E2E setup plan has been created at `docs/4s90i-sandbox-a
 | Admin proxy sandbox E2E proof (4S.90N-D) | Real sandbox organisation_admin session proven end to end; backend `/admin/session-check` returned `200 OK`; proxy reached ADMIN_TOKEN guard; `503 not_configured` with intentionally empty ADMIN_TOKEN (expected pass); no admin forwarding; admin proxy remains disabled publicly; documentation only. | 4S.90N-D (documentation only) |
 | Admin proxy CSRF / same-origin guard (4S.90N-E) | Real same-origin / fetch-metadata CSRF guard implemented in `frontend/app/api/admin/[...path]/route.ts`; POST and PATCH protected; GET CSRF-bypassed; DELETE method-blocked before CSRF; fails closed if no valid header present; 13 targeted CSRF tests passed; full E2E public-demo suite 40 passed, 37 skipped, 0 failed. | 4S.90N-E (`185b07e`) |
 | Admin response minimisation (4S.90N-F) | Three commits: upload error paths return safe strings only (6416c37, pytest 138 passed); answer-debug suppresses ANSWER_MODEL and estimated_cost_note (80e9124, pytest 150 passed); per-role strip helper removes internal document fields, upload internals, registry_warning, and embedding model/token/cost fields from organisation_admin proxy responses; worktwin_dev_admin passthrough unchanged; frontend build passed; admin proxy grep tests 21 passed, 31 skipped, 0 failed; strip helper tests 29 passed. | 4S.90N-F (`02f64ea`) |
+| Visitor SOP-only demo journey (4S.91B) | Dashboard guides the demo path; Ask demo path focuses on Visitor SOP questions; Policy Library fallback is Visitor Sign-In and Identification Procedure only; Access Refusal scenario connects to Visitor SOP and escalation; Escalation uses sample/non-personal contact labels; no real staff names in the staff-facing demo journey; build passed; smoke 16/16; live route check passed; public admin proxy 403 confirmed. No backend, DB, auth, admin proxy, env, QCS, migration, or embedding changes made. | 4S.91B (`ac2d6ac`) |
 
 ### QCS data-governance cleanup (deferred -- do not act without explicit approval)
 
@@ -264,7 +270,7 @@ explicit sign-off.
 |---|---|
 | Obtain written permission confirming QCS licence permits this specific AI/RAG use case (text extraction, storage in WorkTwin/Supabase, chunking, vectorisation, AI-generated answers, staff-facing serving) for AC32, CC34, QQ03 and any other QCS content | Legal / QCS |
 | DPA / data processing addendum with Thumhara Centre | Legal |
-| PPE Policy PDF delivery | Shagufta |
+| PPE Policy PDF delivery | Care provider |
 | CR07 data-protection escalation strategy | Legal / governance |
 
 ---

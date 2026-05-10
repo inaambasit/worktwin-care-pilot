@@ -1,7 +1,7 @@
 # Staff Demo Walkthrough
 
-**Updated:** 7 May 2026  
-**Milestone:** 4S.89H  
+**Updated:** 10 May 2026
+**Milestone:** 4S.91C
 **Status:** Controlled pilot prototype — not production-ready; not approved for unsupervised real staff use  
 **Pilot client:** Thumhara Centre
 
@@ -52,10 +52,10 @@ This is a prototype built for pilot discovery, stakeholder review and future cli
 Staff arrive at the root URL and see the WorkTwin Care landing page. It introduces the product clearly, with a call to action to enter the staff area. No login is required for this demo; access is open for demonstration purposes only. Auth scaffolding exists but is not activated publicly — the E2E proof (4S.88G) is blocked.
 
 ### Dashboard
-After entering, staff land on a personal dashboard. It shows their name, a welcome message, and quick links to all main features. The layout is calm and uncluttered, appropriate for care staff who may be accessing this between shifts.
+After entering, staff land on a personal dashboard. It shows their name, a welcome message, and quick links to all main features. The dashboard guides the Visitor SOP demo path -- a clear prompt directs staff toward policy lookup and the access-refusal scenario. The layout is calm and uncluttered, appropriate for care staff who may be accessing this between shifts.
 
 ### Ask WorkTwin
-Staff can type a free-text question into the AI assistant. The assistant answers from approved governing documents where the source and gate state permit, cites its source, and recommends escalation where the topic is sensitive or outside its scope. It does not give final employment, legal, medical or disciplinary advice. Safeguarding, medication concerns and anything ambiguous are flagged for human review. AI answers are only returned from documents that have passed all governance gates.
+Staff can type a free-text question into the AI assistant. The Ask demo path focuses on Visitor SOP questions -- for example, visitor sign-in procedures, identification requirements, and visitor access controls. The assistant answers from approved governing documents where the source and gate state permit, cites its source, and recommends escalation where the topic is sensitive or outside its scope. It does not give final employment, legal, medical or disciplinary advice. Safeguarding, medication concerns and anything ambiguous are flagged for human review. AI answers are only returned from documents that have passed all governance gates.
 
 ### Policy library
 Staff can browse and search approved policy documents. Visitor Sign-In and Identification Procedure is currently approved and staff-visible. AC32, CC34, and QQ03 are QCS-derived documents -- BLOCKED (2026-05-07); must not be used in demo. Documents in admin-debug or human-only lanes are not visible here. This is read-only. No policies have been approved for unsupervised real-world use at this stage.
@@ -91,17 +91,18 @@ Staff can view a list of escalation contacts relevant to their role — safeguar
 
 ## 5. Demo posture
 
-Current posture at checkpoint `4437415`:
+Current posture at checkpoint `ac2d6ac`:
 
 - Local build passes (Next.js, no errors or warnings)
-- Playwright smoke tests: 15 staff route tests cover all major staff routes
-- Live staff pages return HTTP 200 for all core routes
+- Playwright smoke tests: 16/16 passed -- all major staff routes
+- Live route check passed: / 200, /dashboard 200, /ask 200, /policies 200, /scenarios/access-refusal 200, /escalation 200
 - Admin demo screen visibility: controlled by `NEXT_PUBLIC_ADMIN_DEMO_ENABLED`; may be visible in the live deployed demo
-- Admin API proxy: disabled (`ADMIN_PROXY_ENABLED` not set); returns fail-closed for all proxy requests
+- Admin API proxy: disabled (ADMIN_PROXY_ENABLED not set); /api/admin/documents returned 403 - {"detail":"Admin proxy is disabled for this deployment."}
 - Auth: not activated publicly (`PILOT_AUTH_MODE=false`); scaffolding is wired but E2E proof (4S.88G) is blocked
 
 **Demo posture summary:**
 - Credible for a controlled stakeholder demo using Visitor Sign-In SOP examples only.
+- Demo journey is Visitor SOP-only: Dashboard guides the demo path; Ask focuses on Visitor SOP questions; Policy Library fallback is Visitor Sign-In and Identification Procedure only; Access Refusal scenario connects to Visitor SOP and escalation; Escalation uses sample/non-personal contact labels; no real staff names in the staff-facing demo journey.
 - Demo must use Visitor Sign-In SOP content only -- AC32, CC34, and QQ03 are BLOCKED (2026-05-07) and must not appear in any demo, demo question, or demo material.
 - Not production-ready.
 - Not approved for unsupervised real staff use.

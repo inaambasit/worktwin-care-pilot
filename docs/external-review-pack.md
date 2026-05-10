@@ -1,7 +1,7 @@
 # WorkTwin Care Pilot - External Review Pack
 
-Version: 2026-05-07
-Milestone: 4S.89H
+Version: 2026-05-10
+Milestone: 4S.91C
 
 ---
 
@@ -24,7 +24,7 @@ and what must never be built.
 record of checkpoint, blockers, and pilot-readiness status.
 `docs/policy-upload-testing-tracker.md` is the authoritative record of
 policy/document testing state. This review pack reflects the position as of
-7 May 2026; refer to those documents for the latest updates.
+10 May 2026 (checkpoint ac2d6ac, 4S.91C); refer to those documents for the latest updates.
 
 ---
 
@@ -52,7 +52,15 @@ content-type/size guards, safe audit logging, no-store caching); it is not yet
 production-ready -- admin session guard exists but production admin rollout
 controls and real pilot governance are not complete.
 
-**Demo status:** The app is a working pilot/demo prototype. The backend contains
+**Demo status:** The app is a working pilot/demo prototype. The staff demo is
+Visitor SOP-only: the Dashboard guides the demo path; the Ask demo path focuses
+on Visitor SOP questions; the Policy Library fallback is Visitor Sign-In and
+Identification Procedure only; the Access Refusal scenario connects to Visitor
+SOP and escalation; Escalation uses sample/non-personal contact labels; no real
+staff names appear in the staff-facing demo journey. Live route check at
+checkpoint ac2d6ac: / 200, /dashboard 200, /ask 200, /policies 200,
+/scenarios/access-refusal 200, /escalation 200; /api/admin/documents 403 -
+{"detail":"Admin proxy is disabled for this deployment."}. The backend contains
 a governed staff /ask RAG path, but it requires OpenAI, the database, and a
 qualifying governed document to return source-grounded answers. High-risk topics
 always short-circuit to human escalation. When infrastructure is unavailable or
@@ -259,7 +267,7 @@ Specific areas to assess:
 
 ---
 
-### D. Shagufta / Care-Sector Domain Feedback Prompt
+### D. Care-Sector Domain Feedback Prompt
 
 You are reviewing the WorkTwin Care Pilot from the perspective of a UK care
 home manager or registered care provider. The product is designed to help

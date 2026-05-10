@@ -331,8 +331,8 @@ export default function AccessRefusalPage() {
   const cardPrivacy = (
     <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
       <p className="text-xs text-slate-500 leading-relaxed">
-        Practice mode. Your private notes and personal Ask WorkTwin questions stay private in this
-        demo. Structured visit records may be shared with authorised leads where required.
+        Practice mode — session only. This practice record is not submitted to any real care
+        system and will not be saved between sessions.
       </p>
     </div>
   )
@@ -1157,11 +1157,11 @@ export default function AccessRefusalPage() {
                   className="w-full flex items-center justify-center gap-2 text-sm font-semibold px-4 py-3.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white transition-colors shadow-sm"
                 >
                   <CheckCircle size={16} />
-                  Save record &amp; finish
+                  Finish practice record
                 </button>
                 {step3Errors.size > 0 && (
                   <p className="text-xs text-center text-red-500">
-                    Please complete all required fields before saving.
+                    Please complete all required fields before finishing.
                   </p>
                 )}
                 <button

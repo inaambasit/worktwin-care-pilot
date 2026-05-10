@@ -20,6 +20,7 @@ import { stripAdminProxyResponseForRole } from '@/lib/admin-proxy-response-strip
 export const maxDuration = 120
 
 const ADMIN_PROXY_ENABLED = process.env.ADMIN_PROXY_ENABLED === 'true'
+const IS_PROD_LIKE = process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production'
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN ?? ''
 const BACKEND_URL =
   process.env.API_BASE_URL ??
@@ -166,7 +167,14 @@ async function proxyHandlerCore(
   request: NextRequest,
   { params }: { params: { path: string[] } },
 ): Promise<NextResponse> {
-  // Disabled guard must remain first -- all active Playwright tests depend on this 403.
+  // 4S.92B: Production safety guard -- fail closed if PLAYWRIGHT_TEST is set in a production
+  // deployment. Fires before any test seam headers can be processed.
+  if (IS_PROD_LIKE && !!process.env.PLAYWRIGHT_TEST) {
+    auditAdminProxyEvent({ component: 'admin_proxy', event_type: 'proxy_guard', method: request.method, status: 503, decision: 'deny', reason: 'playwright_test_in_production' })
+    return NextResponse.json({ detail: 'Service unavailable.' }, { status: 503 })
+  }
+
+  // Disabled guard must remain second -- all active Playwright tests depend on this 403.
   if (!ADMIN_PROXY_ENABLED) {
     auditAdminProxyEvent({ component: 'admin_proxy', event_type: 'proxy_guard', method: request.method, status: 403, decision: 'deny', reason: 'proxy_disabled' })
     return NextResponse.json(

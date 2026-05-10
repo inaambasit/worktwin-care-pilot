@@ -51,6 +51,57 @@ test.describe('Admin proxy -- disabled baseline', () => {
 })
 
 // ---------------------------------------------------------------------------
+// 4S.92B: Production safety guard
+// a) test seam accepted in test/dev mode -- production guard must not fire
+// b) production + PLAYWRIGHT_TEST fails closed with 503
+// c) normal disabled proxy returns 403 even with PLAYWRIGHT_TEST set (guard is prod-only)
+// ---------------------------------------------------------------------------
+
+test.describe('Admin proxy -- production safety guard (4S.92B)', () => {
+  test('a) test seam accepted in test/dev mode -- production safety guard does not fire', async ({ request }) => {
+    // In a non-production environment the production guard must not activate.
+    // Test seam headers are processed; disabled proxy returns 403, not 503.
+    const response = await request.get('/api/admin/documents', {
+      headers: {
+        'x-worktwin-test-admin-role': 'organisation_admin',
+        'x-worktwin-test-admin-active': 'true',
+      },
+    })
+    // Must NOT be 503 from the production safety guard.
+    expect(response.status()).not.toBe(503)
+  })
+
+  test('b) production + PLAYWRIGHT_TEST fails closed with 503 before test seam activates', async ({ request }) => {
+    // Only meaningful when the Next.js server runs with NODE_ENV=production or
+    // VERCEL_ENV=production. In that environment any admin proxy request while
+    // PLAYWRIGHT_TEST is set must be rejected with 503 before test seam headers are read.
+    test.skip(
+      process.env.NODE_ENV !== 'production' && process.env.VERCEL_ENV !== 'production',
+      'Only verifiable with NODE_ENV=production or VERCEL_ENV=production in the dev server',
+    )
+    const response = await request.get('/api/admin/documents', {
+      headers: {
+        'x-worktwin-test-admin-role': 'organisation_admin',
+        'x-worktwin-test-admin-active': 'true',
+      },
+    })
+    expect(response.status()).toBe(503)
+    const body = await response.json()
+    expect(body.detail).toBe('Service unavailable.')
+  })
+
+  test('c) disabled proxy returns 403 even with PLAYWRIGHT_TEST set (guard only fires in production)', async ({ request }) => {
+    // The production safety guard is conditioned on IS_PROD_LIKE. In dev/test mode,
+    // even with PLAYWRIGHT_TEST set, the guard must not fire and the normal 403
+    // disabled-proxy response must be returned.
+    const response = await request.get('/api/admin/documents')
+    expect(response.status()).toBe(403)
+    const body = await response.json()
+    expect(body.detail).toBe('Admin proxy is disabled for this deployment.')
+  })
+})
+
+// ---------------------------------------------------------------------------
 // Allowlist classification -- unit-style, no HTTP, safe while proxy is disabled
 // ---------------------------------------------------------------------------
 

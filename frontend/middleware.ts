@@ -9,6 +9,7 @@ const STAFF_ROOTS = [
   '/scenarios',
   '/notes',
   '/escalation',
+  '/admin',
 ]
 
 function isProtectedStaffPath(pathname: string): boolean {
@@ -75,5 +76,7 @@ export const config = {
     '/scenarios/:path*',
     '/notes/:path*',
     '/escalation/:path*',
+    '/admin',
+    '/admin/:path*',
   ],
 }

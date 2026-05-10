@@ -63,6 +63,12 @@ test.describe('Middleware — public demo mode (NEXT_PUBLIC_PILOT_AUTH_MODE not 
     expect(url.pathname).toBe('/book-pilot')
     await expect(page.getByRole('heading', { name: 'Book a WorkTwin Care Pilot' })).toBeVisible()
   })
+
+  test('/admin is accessible without redirect in public demo mode', async ({ page }) => {
+    await page.goto('/admin')
+    const url = new URL(page.url())
+    expect(url.pathname).not.toBe('/login')
+  })
 })
 
 // ─── Pilot-auth mode (requires NEXT_PUBLIC_PILOT_AUTH_MODE=true server) ──────
@@ -108,11 +114,19 @@ test.describe('Middleware — pilot-auth mode (NEXT_PUBLIC_PILOT_AUTH_MODE=true)
     expect(url.pathname).toBe('/book-pilot')
   })
 
-  test('/admin is not protected by this middleware slice', async ({ page }) => {
+  test('unauthenticated /admin redirects to /login?next=/admin', async ({ page }) => {
     await page.goto('/admin')
     const url = new URL(page.url())
-    // Admin route protection is a separate concern — must not redirect to /login here
-    expect(url.pathname).not.toBe('/login')
-    expect(url.pathname).toBe('/admin')
+    expect(url.pathname).toBe('/login')
+    expect(url.searchParams.get('next')).toBe('/admin')
+  })
+
+  test('unauthenticated /admin/documents redirects to /login?next=/admin/documents', async ({
+    page,
+  }) => {
+    await page.goto('/admin/documents')
+    const url = new URL(page.url())
+    expect(url.pathname).toBe('/login')
+    expect(url.searchParams.get('next')).toBe('/admin/documents')
   })
 })

@@ -9,10 +9,13 @@ const ALLOWED_NEXT_PATHS = new Set([
   '/scenarios',
   '/notes',
   '/escalation',
+  '/admin',
 ])
 
 function safeNext(raw: string | null | undefined): string {
-  if (raw && ALLOWED_NEXT_PATHS.has(raw)) return raw
+  if (!raw) return '/dashboard'
+  if (ALLOWED_NEXT_PATHS.has(raw)) return raw
+  if (raw.startsWith('/admin/')) return raw
   return '/dashboard'
 }
 

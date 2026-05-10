@@ -36,6 +36,8 @@
 
 > **4S.91C (2026-05-10):** Documentation and review pack alignment -- docs-only slice. current-state.md, staff-demo-walkthrough.md, external-review-pack.md, and docs/README.md updated to reflect Visitor SOP-only demo journey, checkpoint ac2d6ac, 4S.91B closed, smoke 16/16, live route check results, and public admin proxy 403 confirmation. No backend, DB, auth, admin proxy, env, QCS, migration, or embedding changes made. Latest checkpoint remains `ac2d6ac` until this docs commit is made.
 
+> **4S.95A (2026-05-10):** Pilot identity and environment decision record saved -- docs-only slice. Authoritative pre-migration reference created at `docs/4s95a-pilot-identity-and-environment-decision-record.md` (checkpoint `04fc14c`). Confirms: `organisation_id=thumhara-centre`; new dedicated Supabase pilot project (`worktwin-thumhara-pilot`) required (do not use sandbox or existing production-labelled project); placeholder-only user references in repo; bootstrap admin via Supabase SQL editor after Auth user exists, `created_by` nullable for bootstrap row only; single-org `LIMIT 1` membership lookup acceptable for first pilot only; staff middleware routes confirmed (seven routes); `/admin/:path*` not yet in middleware (must be added in 4S.95E before admin proxy is enabled); admin proxy remains disabled publicly; JWT validation wording clarified (see `backend/app/jwt_auth.py`); DPA/governance prerequisites and real-staff blockers recorded; AC32/CC34/QQ03 remain frozen; Visitor SOP re-upload (not SQL patch) is the preferred pilot path (4S.95G); next-slice sequence 4S.95B–4S.95I defined. No code, SQL, env, migration, or Supabase changes made. Latest checkpoint remains `04fc14c` until this docs commit is made.
+
 ---
 
 ## 1. Current Checkpoint

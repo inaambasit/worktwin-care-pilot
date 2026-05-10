@@ -4,6 +4,7 @@
 **Checkpoint:** `04fc14c`
 **Branch:** `main`
 **Status:** Docs-only decision record. No code, SQL, env, or migration changes made.
+**Amendment:** Section 2 superseded by 4S.95B-R (2026-05-10). See Section 2B for the current Supabase project decision. Section 13 next-slice sequence updated accordingly.
 
 > This record is the authoritative pre-migration reference for pilot identity and environment decisions.
 > It must be read before executing any of: `organisation_memberships` migration, pilot auth activation,
@@ -24,12 +25,47 @@ This string is the canonical `organisation_id` for the pilot client. It must be 
 
 ## 2. Supabase Project
 
-**Decision:** Create a new dedicated Supabase pilot project for the real pilot.
+> **SUPERSEDED (4S.95B-R, 2026-05-10):** The original decision in Section 2A is superseded. Section 2B records the revised decision. Read Section 2B as the current authoritative decision.
 
-- Suggested project name: `worktwin-thumhara-pilot`
-- Do not use the sandbox project (`worktwin-sandbox-dev`) for the real pilot. It was created for E2E proof only and contains fake/test data.
-- Do not use the existing production-labelled project until separately and explicitly approved in writing.
-- The new pilot project must have all migrations (001–008) applied in order before any auth or membership operations.
+### 2A. Original Decision (4S.95A) — Superseded
+
+Original decision: create a new dedicated Supabase pilot project (`worktwin-thumhara-pilot`). Do not use the sandbox or the existing production-labelled project. Apply all migrations 001–008 to the new project before any auth or membership operations.
+
+This decision is superseded because Supabase Free tier limits block a third active project.
+
+### 2B. Revised Decision (4S.95B-R, 2026-05-10)
+
+**Decision:** Use the existing `worktwin-care-pilot` Supabase project for controlled pilot infrastructure. Isolate all pilot data under `organisation_id=thumhara-centre`.
+
+**Reason for reuse:** Supabase Free tier limits block creation of a third active project. Inspection of the existing project confirms it can be reused safely because pilot data is isolated by `organisation_id`.
+
+**Supabase project facts (inspected 2026-05-10):**
+
+| Field | Value |
+|---|---|
+| Project name | `worktwin-care-pilot` |
+| Label in Supabase UI | PRODUCTION |
+| Public tables present | `document_registry`, `document_chunks`, `document_embeddings`, `document_extractions`, `document_audit_events`, `organisation_memberships` |
+| `auth.users` count | 1 |
+| `organisation_memberships` count | 1 |
+| Existing membership | `demo-org` / `staff` / `active=true` / count=1 |
+| `document_registry` count | 15 |
+| Existing document `organisation_id` | All 15 rows under `demo-org` |
+| `thumhara-centre` rows | None found |
+
+**Constraints on reuse:**
+
+- This is not a clean new project. It is an existing project with historical `demo-org` data.
+- Reuse is acceptable only because all pilot data will be isolated under `organisation_id=thumhara-centre`.
+- The existing `demo-org` rows must remain untouched.
+- QCS/demo documents must not be migrated or re-associated to `thumhara-centre`.
+- The first WorkTwin admin/test user must be a new Auth user with exactly one active `organisation_memberships` row for `thumhara-centre`.
+- Do not use the existing `demo-org` staff user for any pilot activity.
+- The current backend membership lookup uses `LIMIT 1` (`backend/app/membership.py`). Every pilot test user must have exactly one active membership row to avoid silent wrong-org resolution.
+- Real Thumhara Centre staff remain blocked pending DPA and governance sign-off (Section 8).
+- `ADMIN_PROXY_ENABLED` remains disabled.
+- `NEXT_PUBLIC_PILOT_AUTH_MODE` remains `false`.
+- Migrations 001–008 do not need to be re-applied — the project already carries the schema. Verify the schema state before any auth or membership operations.
 
 ---
 
@@ -60,7 +96,7 @@ Real credentials belong in the Supabase Auth dashboard and in secrets management
   1. Create the Auth user via Supabase dashboard or API (email: `<pilot-admin-email>`)
   2. Note the resulting `<auth-user-uuid>`
   3. Insert a row into `organisation_memberships` via SQL editor using those values
-  4. Verify via `/admin/session-check` (see slice 4S.95D)
+  4. Verify via `/admin/session-check` (see slice 4S.95E)
 
 ---
 
@@ -99,18 +135,18 @@ the backend `/admin/session-check` endpoint, the CSRF guard, the path allowlist,
 
 **Before enabling `ADMIN_PROXY_ENABLED` for any pilot admin use:** add `/admin/:path*` to
 `frontend/middleware.ts` as an authentication gate. Role enforcement stays in the admin proxy/backend
-session-check path — middleware is the auth gate only. This is slice **4S.95E**.
+session-check path — middleware is the auth gate only. This is slice **4S.95F**.
 
 ---
 
 ## 7. Admin Proxy
 
-**Decision:** Admin proxy remains disabled publicly. Enabling it requires completing 4S.95E first.
+**Decision:** Admin proxy remains disabled publicly. Enabling it requires completing 4S.95F first.
 
-- `ADMIN_PROXY_ENABLED=false` is the public default and must not be changed without completing 4S.95E.
+- `ADMIN_PROXY_ENABLED=false` is the public default and must not be changed without completing 4S.95F.
 - The enabled-mode path uses Supabase session/token validation (`getAdminProxySessionContext`, proven in 4S.90N-C/D) and the backend `/admin/session-check` endpoint (proven in 4S.90N-D).
 - The `PLAYWRIGHT_TEST` production fail-closed guard exists to prevent test seam misuse in production.
-- Do not enable admin proxy in any Vercel, Render, or shared environment until 4S.95E and the
+- Do not enable admin proxy in any Vercel, Render, or shared environment until 4S.95F and the
   DPA/governance prerequisites are satisfied.
 
 ---
@@ -143,9 +179,9 @@ session-check path — middleware is the auth gate only. This is slice **4S.95E*
 | QQ03 Complaints, Suggestions and Compliments Policy | Frozen — QCS content restriction; must not be migrated or served |
 | Visitor Sign-In and Identification Procedure | Confirmed clean Lane A; Thumhara-original SOP; approved for controlled demo use (corpus approval: `docs/visitor-sop-corpus-approval.md`) |
 
-**Preferred route for Visitor SOP in the pilot project:** re-upload the Visitor SOP under the new
-`worktwin-thumhara-pilot` Supabase project and `thumhara-centre` org rather than SQL-patching
-existing demo rows. This is slice **4S.95G**.
+**Preferred route for Visitor SOP in the pilot project:** re-upload the Visitor SOP under the existing
+`worktwin-care-pilot` Supabase project with `organisation_id=thumhara-centre` rather than SQL-patching
+existing `demo-org` rows. This is slice **4S.95H**.
 
 ---
 
@@ -162,17 +198,17 @@ or security-facing description:
 
 ---
 
-## 11. Pre-Migration Checklist
+## 11. Pre-Pilot Checklist
 
-The following questions must be answered before running any migration against the new pilot project.
+The following must be confirmed before any auth or membership operations against the existing `worktwin-care-pilot` project. No new Supabase project is required (see Section 2B).
 
-- [ ] New `worktwin-thumhara-pilot` Supabase project created and confirmed accessible
-- [ ] Migration files 001–008 reviewed for the new project (no sandbox-specific data in seed files)
-- [ ] `organisation_memberships` migration (008) reviewed: confirm `thumhara-centre` org row, placeholder users only, no real emails committed
-- [ ] `.env` for pilot deployment prepared with new project credentials (Supabase URL, anon key, service role key) — stored in secrets only, not committed to repo
-- [ ] Backend JWT verifier configuration for the new pilot project confirmed and stored securely in deployment secrets
+- [ ] Existing `worktwin-care-pilot` Supabase project accessible and schema state verified — confirm all 8 migrations (001–008) are applied
+- [ ] `organisation_memberships` table confirmed present with no existing `thumhara-centre` rows
+- [ ] Existing `demo-org` rows confirmed intact — 15 `document_registry` rows, 1 `organisation_memberships` row — before any pilot operations touch the project
+- [ ] `.env` for pilot deployment uses `worktwin-care-pilot` project credentials (Supabase URL, anon key, service role key) — stored in secrets only, not committed to repo
+- [ ] Backend JWT verifier configuration confirmed for `worktwin-care-pilot` project and stored securely in deployment secrets
 - [ ] ANSWER_MODEL, OPENAI_API_KEY, and rate limits confirmed for pilot deployment
-- [ ] Visitor SOP PDF available for re-upload under the new project
+- [ ] Visitor SOP PDF available for re-upload under `thumhara-centre` in the existing project (slice 4S.95H)
 
 ---
 
@@ -183,27 +219,30 @@ The following must all be resolved before any real Thumhara Centre staff account
 - [ ] WorkTwin–Thumhara data processing route agreed and documented
 - [ ] Supabase and OpenAI subprocessor/processing terms reviewed by WorkTwin
 - [ ] Thumhara management written pilot sign-off received
-- [ ] New pilot Supabase project (`worktwin-thumhara-pilot`) standing and migrations applied (4S.95B/C)
-- [ ] Bootstrap admin account proven via `/admin/session-check` (4S.95D)
-- [ ] `/admin/:path*` added to middleware protection (4S.95E)
-- [ ] Admin proxy enabled and E2E proven in pilot deployment only (4S.95F)
-- [ ] Visitor SOP re-uploaded and indexed under `thumhara-centre` in the new project (4S.95G)
-- [ ] Pilot auth activated and proven with test users only (4S.95H)
+- [ ] Bootstrap Auth user created in existing `worktwin-care-pilot` project (4S.95C)
+- [ ] Bootstrap `worktwin_dev_admin` membership row inserted for `thumhara-centre` (4S.95D)
+- [ ] Bootstrap admin proven via `/admin/session-check` (4S.95E)
+- [ ] `/admin/:path*` added to middleware protection (4S.95F)
+- [ ] Admin proxy enabled and E2E proven in controlled pilot deployment only (4S.95G)
+- [ ] Visitor SOP re-uploaded and indexed under `thumhara-centre` in the existing project (4S.95H)
+- [ ] Pilot auth activated and proven with test users only (4S.95I)
 
 ---
 
 ## 13. Next-Slice Sequence
 
+> **Updated by 4S.95B-R (2026-05-10):** Sequence revised to reflect reuse of the existing `worktwin-care-pilot` project. Steps for new project creation and migration application are removed. New project `worktwin-thumhara-pilot` is no longer required.
+
 | Slice | Description | Prerequisite |
 |---|---|---|
-| **4S.95B** | Create/check new pilot Supabase project (`worktwin-thumhara-pilot`) and confirm migration readiness | This record (4S.95A) |
-| **4S.95C** | Apply migrations 001–008 to the new pilot project in order | 4S.95B |
-| **4S.95D** | Seed first bootstrap admin (WorkTwin-controlled account only) and prove `/admin/session-check` returns `200 OK` | 4S.95C |
-| **4S.95E** | Add `/admin/:path*` to `frontend/middleware.ts` as an authentication gate | 4S.95D |
-| **4S.95F** | Enable admin proxy (`ADMIN_PROXY_ENABLED=true`) in pilot deployment only and prove E2E (session guard → session-check → role check → response minimisation) | 4S.95E |
-| **4S.95G** | Re-upload Visitor SOP PDF under `thumhara-centre` in the new pilot project; verify extraction, embedding, governance flags, and staff visibility | 4S.95F |
-| **4S.95H** | Activate pilot auth (`NEXT_PUBLIC_PILOT_AUTH_MODE=true`) in pilot deployment; prove E2E with test users only; no real Thumhara staff at this stage | 4S.95G |
-| **4S.95I** | DPA and governance pack complete; Thumhara management sign-off received; real staff accounts permitted under the agreed data processing route | 4S.95H + all governance prerequisites |
+| **4S.95B-R** | Record decision to reuse existing `worktwin-care-pilot` project with `thumhara-centre` isolation (this slice — docs only) | 4S.95A |
+| **4S.95C** | Create/invite WorkTwin-controlled bootstrap Auth user in existing `worktwin-care-pilot` project | 4S.95B-R |
+| **4S.95D** | Insert bootstrap `worktwin_dev_admin` membership row for `thumhara-centre` using placeholder-safe SQL | 4S.95C |
+| **4S.95E** | Prove backend `/admin/session-check` returns `200 OK` for the bootstrap admin | 4S.95D |
+| **4S.95F** | Add `/admin/:path*` to `frontend/middleware.ts` as an authentication gate | 4S.95E |
+| **4S.95G** | Enable admin proxy (`ADMIN_PROXY_ENABLED=true`) in controlled pilot deployment only and prove E2E (session guard → session-check → role check → response minimisation) | 4S.95F |
+| **4S.95H** | Re-upload Visitor SOP PDF under `thumhara-centre` in the existing project; verify extraction, embedding, governance flags, and staff visibility | 4S.95G |
+| **4S.95I** | Activate pilot auth (`NEXT_PUBLIC_PILOT_AUTH_MODE=true`) in pilot deployment; prove E2E with test users only; no real Thumhara Centre staff at this stage | 4S.95H |
 
 ---
 

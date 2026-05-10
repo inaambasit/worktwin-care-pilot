@@ -38,9 +38,9 @@ export default function BookPilotPage() {
               organisation&rsquo;s context before any pilot begins.
             </p>
             <p className="text-slate-500 text-xs leading-relaxed mb-6 bg-slate-50 rounded-xl p-4">
-              This demo stores nothing. No data from this form is sent to a server, saved in a database, or
-              retained beyond your browser session. A real pilot enquiry would be followed up directly by the
-              WorkTwin team.
+              This demo stores nothing. No data from this form is sent to a live CRM, care system, server or
+              any external service. Nothing leaves your browser session. A real pilot enquiry would be followed
+              up directly by the WorkTwin team.
             </p>
             <Link
               href="/"
@@ -156,7 +156,7 @@ export default function BookPilotPage() {
 
           <div className="pt-2 flex items-center justify-between gap-4">
             <p className="text-xs text-slate-400 leading-relaxed">
-              This demo stores nothing. No data is sent to a server.
+              This demo stores nothing. No data is sent to a server, CRM or care system.
             </p>
             <button
               type="submit"

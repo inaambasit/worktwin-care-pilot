@@ -253,7 +253,7 @@ export default function LandingPage() {
             WorkTwin Care Pilot is the first vertical test of the broader WorkTwin platform. &copy; {new Date().getFullYear()} WorkTwin.
           </p>
           <div className="flex gap-4 text-xs text-slate-500">
-            <Link href="/#privacy" className="hover:text-slate-300">Privacy model</Link>
+            <Link href="/privacy-model" className="hover:text-slate-300">Privacy model</Link>
             <Link href="/escalation" className="hover:text-slate-300">Escalation</Link>
           </div>
         </div>

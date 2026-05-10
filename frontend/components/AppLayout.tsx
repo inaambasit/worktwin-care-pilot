@@ -99,6 +99,19 @@ function SidebarContent({
               Escalation Contacts
               {pathname === '/escalation' && <ChevronRight size={14} className="ml-auto text-teal-400" />}
             </Link>
+            <Link
+              href="/privacy-model"
+              onClick={onNavClick}
+              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                pathname === '/privacy-model'
+                  ? 'bg-teal-50 text-teal-700 border border-teal-100'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              }`}
+            >
+              <Shield size={16} className="text-teal-500" />
+              Privacy model
+              {pathname === '/privacy-model' && <ChevronRight size={14} className="ml-auto text-teal-400" />}
+            </Link>
           </>
         )}
       </nav>

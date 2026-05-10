@@ -23,7 +23,7 @@ const suggestedPrompts = [
 ]
 
 // ---------------------------------------------------------------------------
-// Display types — internal to this page, used by both live API and demo fallback
+// Display types - internal to this page, used by both live API and demo fallback
 // ---------------------------------------------------------------------------
 
 interface DisplaySource {
@@ -48,7 +48,7 @@ interface DisplayAnswer {
   contactRoutes: string[]
 }
 
-// Demo fallback answers — shown when the backend is unreachable.
+// Demo fallback answers - shown when the backend is unreachable.
 
 const medicationAnswer: DisplayAnswer = {
   question: MEDICATION_Q,
@@ -69,8 +69,8 @@ const medicationAnswer: DisplayAnswer = {
     'Medication Lead',
     'Registered Manager',
     'Senior person on duty',
-    'NHS 111 — for urgent non-emergency medical guidance',
-    '999 — if the service user is in immediate danger',
+    'NHS 111 - for urgent non-emergency medical guidance',
+    '999 - if the service user is in immediate danger',
   ],
 }
 
@@ -93,7 +93,7 @@ const safeguardingAnswer: DisplayAnswer = {
     'Designated Safeguarding Lead',
     'Line Manager or Registered Manager',
     'Senior person on duty if the Designated Lead is unavailable',
-    '999 — if there is immediate risk to life or physical safety',
+    '999 - if there is immediate risk to life or physical safety',
   ],
 }
 
@@ -240,6 +240,15 @@ export default function AskPage() {
     <AppLayout>
       <div className="max-w-6xl mx-auto px-4 pt-4 pb-8 space-y-6">
 
+        {/* Always-visible demo-mode honesty status line */}
+        <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2">
+          <AlertTriangle size={13} className="text-amber-600 shrink-0" />
+          <p className="text-xs text-amber-800">
+            <span className="font-semibold">Demo mode</span>{' '}
+            - answers use sample documents only. No real staff or service-user data is used in this demo.
+          </p>
+        </div>
+
         {/* Idle state */}
         {!showAnswer && !isLoading && (
           <>
@@ -312,20 +321,20 @@ export default function AskPage() {
               <div className="bg-teal-50 border-b border-teal-100 px-5 py-4 flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
                   <BookOpen size={15} className="text-teal-600" />
-                  <h2 className="font-semibold text-teal-900 text-sm">Example of a good source-grounded answer</h2>
+                  <h2 className="font-semibold text-teal-900 text-sm">Example of a source-grounded answer</h2>
                 </div>
                 <span className="text-xs bg-amber-100 text-amber-800 font-semibold px-2.5 py-1 rounded-full">Example only - not a live retrieved answer</span>
               </div>
               <div className="p-5">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Question</p>
-                <p className="text-sm text-slate-700 italic mb-4">&ldquo;What should I do if a visitor arrives without signing in?&rdquo;</p>
+                <p className="text-sm text-slate-700 italic mb-4">&ldquo;What should I do when a visitor arrives at reception?&rdquo;</p>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Answer</p>
-                <p className="text-sm text-slate-700 leading-relaxed mb-4">Ask the visitor to follow the sign-in process and wear the required identification, then speak to the person in charge if you are unsure.</p>
+                <p className="text-sm text-slate-700 leading-relaxed mb-4">For a visitor arriving at reception, staff should follow the visitor sign-in process, confirm the visitor&apos;s identity, record the visit, and escalate if anything feels unsafe or unclear.</p>
                 <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 mb-4">
                   <BookOpen size={12} className="text-teal-600 shrink-0" />
-                  <span className="text-xs text-slate-600"><span className="font-semibold">Example source:</span> Visitor Sign-In and Identification Procedure</span>
+                  <span className="text-xs text-slate-600"><span className="font-semibold">Source:</span> Visitor Sign-In and Identification Procedure - controlled demo document</span>
                 </div>
-                <p className="text-xs text-slate-400">This is an example of the expected answer format. It is not proof that this answer was retrieved during your session.</p>
+                <p className="text-xs text-slate-400">This is a demo example only. It does not imply that this answer was retrieved live during your session.</p>
               </div>
             </div>
 
@@ -334,7 +343,7 @@ export default function AskPage() {
               <h2 className="font-semibold text-slate-900 mb-1">Demo questions</h2>
               <p className="text-sm text-slate-500 mb-4">Use the Visitor SOP questions for the main demo, or try the escalation demos below.</p>
               <div className="space-y-2">
-                <p className="text-[11px] font-bold text-teal-700 uppercase tracking-wider pb-0.5">Visitor SOP — start here</p>
+                <p className="text-[11px] font-bold text-teal-700 uppercase tracking-wider pb-0.5">Visitor SOP - start here</p>
                 <button
                   onClick={() => handlePrompt('What should I do when a visitor arrives?')}
                   className="w-full flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-left hover:bg-teal-50 hover:border-teal-300 hover:shadow-sm transition-all group"
@@ -482,7 +491,7 @@ export default function AskPage() {
           </div>
         )}
 
-        {/* Error state — backend unreachable and no demo fallback available */}
+        {/* Error state - backend unreachable and no demo fallback available */}
         {apiError && !isLoading && (
           <div className="space-y-4">
             <div className="flex justify-end">
@@ -530,7 +539,7 @@ export default function AskPage() {
               </div>
             </div>
 
-            {/* Demo fallback notice — backend was unreachable */}
+            {/* Demo fallback notice - backend was unreachable */}
             {isDemoFallback && (
               <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-800">
                 <AlertTriangle size={13} className="shrink-0 text-amber-600" />
@@ -546,7 +555,7 @@ export default function AskPage() {
               </div>
             )}
 
-            {/* Fallback guidance — no approved source, but not a high-risk escalation */}
+            {/* Fallback guidance - no approved source, but not a high-risk escalation */}
             {isFallbackGuidance(currentAnswer) && (
               <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
                 <div className="bg-slate-50 border-b border-slate-100 px-5 py-4">
@@ -592,7 +601,7 @@ export default function AskPage() {
               </div>
             )}
 
-            {/* Escalation required — high-risk topics only */}
+            {/* Escalation required - high-risk topics only */}
             {currentAnswer.requiresEscalation && isHighRisk(currentAnswer) && (
               <div className="bg-white border border-amber-200 rounded-2xl overflow-hidden shadow-sm">
                 <div className="bg-amber-50 px-5 py-4 border-b border-amber-100">
@@ -651,7 +660,7 @@ export default function AskPage() {
               </div>
             )}
 
-            {/* Main answer card — only shown when permitted and no escalation required */}
+            {/* Main answer card - only shown when permitted and no escalation required */}
             {currentAnswer.allowedToAnswer && !currentAnswer.requiresEscalation && (
               <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
                 {/* Answer header */}
@@ -795,7 +804,7 @@ export default function AskPage() {
               </div>
             )}
 
-            {/* Checklist panel — medication only */}
+            {/* Checklist panel - medication only */}
             {showChecklist && currentAnswer.riskCategory === 'medication' && currentAnswer.allowedToAnswer && !currentAnswer.requiresEscalation && (
               <div className="bg-white border border-teal-200 rounded-2xl overflow-hidden shadow-sm">
                 <div className="bg-teal-50 border-b border-teal-100 px-5 py-4">
@@ -823,7 +832,7 @@ export default function AskPage() {
               </div>
             )}
 
-            {/* Quiz panel — medication only */}
+            {/* Quiz panel - medication only */}
             {showQuiz && currentAnswer.riskCategory === 'medication' && currentAnswer.allowedToAnswer && !currentAnswer.requiresEscalation && (
               <div className="bg-white border border-violet-200 rounded-2xl overflow-hidden shadow-sm">
                 <div className="bg-violet-50 border-b border-violet-100 px-5 py-4">

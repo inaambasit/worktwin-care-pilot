@@ -33,8 +33,9 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByRole('button', { name: /I have a safeguarding concern/i })).toBeVisible()
     await expect(page.getByText('Private from managers in this demo').first()).toBeVisible()
     await expect(page.getByText('Demo safety mode')).toBeVisible()
-    await expect(page.getByText('Example of a good source-grounded answer')).toBeVisible()
+    await expect(page.getByText('Example of a source-grounded answer')).toBeVisible()
     await expect(page.getByText('Example only - not a live retrieved answer')).toBeVisible()
+    await expect(page.getByText('Visitor Sign-In and Identification Procedure').first()).toBeVisible()
   })
 
   test('ask page returns a visitor answer when common question is clicked', async ({ page }) => {
@@ -162,5 +163,35 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByText(/secure sign-in link/i).first()).toBeVisible()
     await expect(page.getByRole('link', { name: 'Back to sign in' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'WorkTwin home' })).toBeVisible()
+  })
+
+  test('/privacy-model page loads and shows privacy boundary messaging', async ({ page }) => {
+    await page.goto('/privacy-model')
+    await expect(page.getByRole('heading', { name: 'How this demo handles data and privacy' })).toBeVisible()
+    await expect(page.getByText(/Controlled.*demo.*not production/i).first()).toBeVisible()
+    await expect(page.getByText(/No real data should be entered/i).first()).toBeVisible()
+    await expect(page.getByText(/session-only/i).first()).toBeVisible()
+  })
+
+  test('landing page links to /privacy-model', async ({ page }) => {
+    await page.goto('/')
+    const privacyLink = page.getByRole('link', { name: /Privacy model/i }).first()
+    await expect(privacyLink).toHaveAttribute('href', '/privacy-model')
+  })
+
+  test('ask page always shows demo-mode honesty status line', async ({ page }) => {
+    await page.goto('/ask')
+    await expect(page.getByText(/answers use sample documents only/i).first()).toBeVisible()
+  })
+
+  test('/book-pilot confirmation clearly states session-only and no live CRM submission', async ({ page }) => {
+    await page.goto('/book-pilot')
+    await page.getByLabel('Your name').fill('Test User')
+    await page.getByLabel('Organisation').fill('Test Org')
+    await page.getByLabel('Role').fill('Manager')
+    await page.getByLabel('What are you looking to explore?').fill('Exploring onboarding support')
+    await page.getByRole('button', { name: 'Submit enquiry' }).click()
+    await expect(page.getByText(/live CRM, care system/i)).toBeVisible()
+    await expect(page.getByText('Nothing leaves your browser session.')).toBeVisible()
   })
 })

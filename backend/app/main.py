@@ -452,14 +452,19 @@ def _can_show_document_to_staff(document: Dict[str, Any]) -> Tuple[bool, Optiona
     """
     Governance gate for staff visibility.
     Returns (allowed, blocked_reason).
-    All six conditions must hold:
-      is_sensitive=False, escalation_required=False, real_document=True,
-      dummy_document=False, status=approved, approved_for_staff_visibility=True.
+    All seven conditions must hold:
+      is_sensitive=False, escalation_required=False,
+      contains_qcs_or_third_party_content not True,
+      real_document=True, dummy_document=False,
+      status=approved, approved_for_staff_visibility=True.
     """
     if document.get("is_sensitive", False):
         return False, "Document is marked sensitive and cannot be shown to staff."
     if document.get("escalation_required", False):
         return False, "Document requires escalation and cannot be shown to staff."
+    # Hard-block: QCS/third-party content is never surfaced to staff regardless of other flags.
+    if document.get("contains_qcs_or_third_party_content") is True:
+        return False, "Document contains QCS or third-party content and cannot be shown to staff."
     if not document.get("real_document", False):
         return False, "Document is not marked as a real document and cannot be shown to staff."
     if document.get("dummy_document", True):
@@ -537,7 +542,7 @@ def _fetch_staff_ask_document_eligibility_batch(
             "id,status,real_document,dummy_document,is_sensitive,escalation_required,"
             "approved_for_staff_visibility,approved_for_source_grounded_answers,"
             "approved_for_embedding,governance_reviewed_by,governance_reviewed_at,"
-            "embedding_status,access_roles"
+            "embedding_status,access_roles,contains_qcs_or_third_party_content"
         ),
     }
     try:
@@ -555,33 +560,38 @@ def _can_use_document_for_staff_ask(
 ) -> Tuple[bool, Optional[str]]:
     """
     Strictest governance gate — staff /ask RAG only.
-    Composes _can_show_document_to_staff (conditions 1–6) then adds five
-    RAG-specific conditions (7–11) plus an access_roles check.
+    Composes _can_show_document_to_staff (conditions 1–7, includes QCS block) then
+    adds RAG-specific conditions plus an access_roles check.
     All conditions must hold; returns (False, reason) on the first failure.
     Never call this with None — caller must skip rows with no eligibility record.
     """
-    # Conditions 1–6: reuse existing staff visibility gate
+    # Conditions 1–7: reuse existing staff visibility gate (includes QCS hard-block)
     ok, reason = _can_show_document_to_staff(document)
     if not ok:
         return False, reason
 
-    # Condition 7: must be approved for source-grounded AI answers
+    # Fail closed: only explicit contains_qcs_or_third_party_content=False is safe for Ask.
+    # True is already caught above; None/missing is treated as unknown/unsafe.
+    if document.get("contains_qcs_or_third_party_content") is not False:
+        return False, "contains_qcs_or_third_party_content must be explicitly False for staff /ask."
+
+    # Must be approved for source-grounded AI answers
     if not document.get("approved_for_source_grounded_answers", False):
         return False, "approved_for_source_grounded_answers must be True for staff /ask."
 
-    # Condition 8: must be approved for embedding
+    # Must be approved for embedding
     if not document.get("approved_for_embedding", False):
         return False, "approved_for_embedding must be True for staff /ask."
 
-    # Condition 9: governance reviewer must be recorded
+    # Governance reviewer must be recorded
     if not document.get("governance_reviewed_by"):
         return False, "governance_reviewed_by must be set for staff /ask."
 
-    # Condition 10: governance review timestamp must be recorded
+    # Governance review timestamp must be recorded
     if not document.get("governance_reviewed_at"):
         return False, "governance_reviewed_at must be set for staff /ask."
 
-    # Condition 11: embeddings must be fully indexed
+    # Embeddings must be fully indexed
     if document.get("embedding_status") != "indexed":
         return False, "embedding_status must be indexed for staff /ask."
 

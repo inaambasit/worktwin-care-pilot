@@ -27,6 +27,7 @@ def _fully_approved_doc(**overrides):
     doc = {
         "is_sensitive": False,
         "escalation_required": False,
+        "contains_qcs_or_third_party_content": False,
         "real_document": True,
         "dummy_document": False,
         "status": "approved",
@@ -331,3 +332,52 @@ class TestAccessRoleMatching:
         ok, reason = _can_use_document_for_staff_ask(doc, _DISALLOWED_ROLE)
         assert ok is False
         assert reason is not None
+
+
+# ---------------------------------------------------------------------------
+# 9. QCS / third-party content hard-block (Task 4S.92A)
+# ---------------------------------------------------------------------------
+
+class TestQCSAndThirdPartyContentBlocked:
+    """
+    contains_qcs_or_third_party_content=True is a hard block for all staff gates.
+    Missing (None) fails closed for staff Ask but does not block staff visibility.
+    Only explicit False passes the Ask gate.
+    """
+
+    def test_qcs_doc_fails_staff_visibility_even_if_all_other_flags_true(self):
+        doc = _fully_approved_doc(contains_qcs_or_third_party_content=True)
+        ok, reason = _can_show_document_to_staff(doc)
+        assert ok is False
+        assert "qcs" in reason.lower() or "third" in reason.lower()
+
+    def test_qcs_doc_fails_staff_ask_even_if_all_other_flags_true(self):
+        doc = _fully_approved_doc(contains_qcs_or_third_party_content=True)
+        ok, reason = _can_use_document_for_staff_ask(doc, _ALLOWED_ROLE)
+        assert ok is False
+        assert reason is not None
+
+    def test_missing_content_source_flag_fails_staff_ask_fail_closed(self):
+        # None (missing) must block the Ask gate — fail closed, unknown is unsafe.
+        doc = _fully_approved_doc(contains_qcs_or_third_party_content=None)
+        ok, reason = _can_use_document_for_staff_ask(doc, _ALLOWED_ROLE)
+        assert ok is False
+        assert "contains_qcs_or_third_party_content" in reason
+
+    def test_missing_content_source_flag_passes_staff_visibility(self):
+        # None (missing) must NOT block the visibility gate — only explicit True is blocked.
+        doc = _fully_approved_doc(contains_qcs_or_third_party_content=None)
+        ok, _ = _can_show_document_to_staff(doc)
+        assert ok is True
+
+    def test_clean_visitor_sop_doc_passes_staff_visibility(self):
+        doc = _fully_approved_doc(contains_qcs_or_third_party_content=False)
+        ok, reason = _can_show_document_to_staff(doc)
+        assert ok is True
+        assert reason is None
+
+    def test_clean_visitor_sop_doc_passes_staff_ask(self):
+        doc = _fully_approved_doc(contains_qcs_or_third_party_content=False)
+        ok, reason = _can_use_document_for_staff_ask(doc, _ALLOWED_ROLE)
+        assert ok is True
+        assert reason is None

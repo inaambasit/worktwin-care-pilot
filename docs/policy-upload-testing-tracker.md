@@ -111,6 +111,7 @@ Based on current registry proof as of 2026-05-06.
 | Thumhara Centre Professional Boundaries Policy (TC-POL-005) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Covers professional boundaries, gifts and money, private contact, social media, conflicts of interest, safeguarding, abuse, exploitation, sexual misconduct, harassment, complaints, HR, disciplinary matters, and staff conduct concerns. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug — abuse, exploitation, sexual misconduct, harassment, safeguarding, gifts/money, private contact, HR, and conduct questions must all be verified to escalate correctly before any AI-answer or staff-visibility decision. |
 | Thumhara Centre Accident and Incident Reporting Policy (TC-POL-006) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Covers accidents, incidents, near misses, serious injuries, falls, medication incidents, safeguarding, violence and aggression, fire, confidentiality and data protection incidents, health and safety, complaints, HR, external reporting, and regulator notification. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug — serious injury, falls, medication, safeguarding, fire, violence/aggression, confidentiality breach, emergency, and external reporting/regulator notification questions must all be verified to escalate correctly before any AI-answer or staff-visibility decision. |
 | Thumhara Centre Complaints, Suggestions and Compliments Policy (TC-POL-007) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Covers complaints, suggestions, compliments, safeguarding, abuse, neglect, staff misconduct, discrimination, harassment, medication, accidents/incidents, confidentiality and data protection incidents, legal issues, police involvement, regulator involvement, HR, disciplinary matters, complaint outcomes, and serious distress. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug — safeguarding, complaint outcome, HR, legal/regulator, medication, accident/incident, discrimination/harassment, and serious distress questions must all be verified to escalate correctly before any AI-answer or staff-visibility decision. Clean-corpus Thumhara-original replacement for the QCS-blocked QQ03 in the Complaints, Suggestions and Compliments subject area. |
+| Thumhara Centre Raising Concerns and Speaking Up Policy (TC-POL-008) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Covers raising concerns, speaking up, safeguarding, abuse, neglect, risk of harm, unsafe practice, poor care, medication concerns, health and safety, bullying, harassment, discrimination, professional boundaries, confidentiality and data protection concerns, misuse of money/resources/position, dishonest/improper/unlawful behaviour, attempts to hide concerns, HR, disciplinary matters, external reporting, CQC, police, whistleblowing protection, and speaking-up retaliation. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug — safeguarding, medication, abuse, harassment, discrimination, HR, legal/regulator, police, whistleblowing protection, and external reporting questions must escalate correctly before any AI-answer or staff-visibility decision. Clean-corpus Thumhara-original replacement for the QCS-blocked PM11 / Raising Concerns / Freedom to Speak Up / Whistleblowing subject area. |
 
 ### Gate Summary per Document
 
@@ -131,6 +132,7 @@ Based on current registry proof as of 2026-05-06.
 | TC-POL-005 Professional Boundaries Policy | No | No | No |
 | TC-POL-006 Accident and Incident Reporting Policy | No | No | No |
 | TC-POL-007 Complaints, Suggestions and Compliments Policy | No | No | No |
+| TC-POL-008 Raising Concerns and Speaking Up Policy | No | No | No |
 
 ---
 
@@ -934,6 +936,94 @@ Before any AI-answer or staff-visibility use:
 
 ---
 
+## TC-POL-008 Controlled Upload — 2026-05-11
+
+TC-POL-008 Thumhara Centre Raising Concerns and Speaking Up Policy was uploaded through the local authenticated admin proxy for controlled WorkTwin testing only. This is an original Thumhara Centre-owned draft — it is not QCS content and not sourced from any third-party policy library. No third-party content restriction applies. It is the clean-corpus Thumhara-original replacement for the QCS-blocked PM11 / Raising Concerns / Freedom to Speak Up / Whistleblowing subject area.
+
+### Upload Details
+
+| Field | Value |
+|-------|-------|
+| Document code | TC-POL-008 |
+| Document ID | `d3419848-35e9-4a4a-953d-64c3072170a0` |
+| Title | Thumhara Centre Raising Concerns and Speaking Up Policy |
+| File | `TC-POL-008-raising-concerns-and-speaking-up-policy-draft-v0.1.pdf` |
+| Storage key | `thumhara-centre/documents/d3419848-35e9-4a4a-953d-64c3072170a0/TC-POL-008-raising-concerns-and-speaking-up-policy-draft-v0.1.pdf` |
+| Organisation | thumhara-centre |
+| Category | Raising Concerns and Speaking Up |
+| Vertical | care |
+| Status | draft |
+| Sensitive | false |
+| Escalation required | false |
+| chunk_count (upload response) | 15 |
+| embedding_record_count (upload response) | 15 |
+| chunking_status | prepared |
+| embedding_status | pending |
+
+### Tenant and Organisation Proof
+
+| Check | Result |
+|-------|--------|
+| IS_THUMHARA | true |
+| IS_DEMO_ORG | false |
+| STORAGE_IS_THUMHARA_PREFIX | true |
+| LIST_ORGS | thumhara-centre |
+| LIST_MATCHING_POLICY_COUNT | 1 |
+| LIST_HAS_DEMO_ORG | false |
+
+List count after upload: **9 documents**, all thumhara-centre — no demo-org documents present.
+
+### Governance State at Upload
+
+All AI and visibility gates are disabled. No gate has been deliberately enabled. No embedding has been triggered.
+
+| Gate | State |
+|------|-------|
+| `approved_for_embedding` | false |
+| `approved_for_ai_answers` | false |
+| `approved_for_source_grounded_answers` | false |
+| `approved_for_staff_visibility` | false |
+
+### Content Source
+
+TC-POL-008 contains original Thumhara Centre-owned draft wording. It is not QCS content, not a third-party policy library document, and is not subject to any licence restriction. It is a clean-corpus Thumhara-original document per the clean-corpus direction established 2026-05-07. The subject area — raising concerns, speaking up, whistleblowing protection, and external reporting — overlaps with the now-blocked QCS-era PM11 (Raising Concerns / Freedom to Speak Up / Whistleblowing), but TC-POL-008 is entirely Thumhara-owned text and the QCS restriction does not apply to it.
+
+### Content Notes
+
+TC-POL-008 addresses how staff may raise concerns about unsafe, unlawful, or improper practice in a care setting, and the protections in place for those who do. Although the document is not marked sensitive and does not require escalation at upload, it spans several high-stakes subject areas that require careful admin answer-debug before any AI-answer or staff-visibility decision is made. The policy touches the following areas:
+
+- **Raising concerns and speaking up** — questions about how, when, and to whom concerns should be raised must produce appropriately clear, policy-guided answers that direct staff to the correct internal or external route; AI must not attempt to assess whether a concern is serious enough to report or advise staff to delay raising it.
+- **Safeguarding, abuse, and neglect** — concerns about abuse, neglect, or risk of harm to a service user intersect directly with safeguarding obligations; AI must escalate any such question to the designated safeguarding lead immediately and must not attempt to assess whether a concern meets a safeguarding threshold.
+- **Unsafe practice, poor care, and risk of harm** — concerns about unsafe working practices, poor standards of care, or risks to service users or staff must be directed to the appropriate route without equivocation; AI must not minimise or qualify a concern.
+- **Medication concerns** — questions about medication administration concerns or medication safety risks must escalate to the Registered Manager and relevant clinical lead; AI must not advise on clinical consequences or self-correction.
+- **Health and safety** — concerns about health and safety risks, including RIDDOR-notifiable matters and HSE-notifiable events, must escalate to the Registered Manager; AI must not imply that informal internal resolution is sufficient for statutory obligations.
+- **Bullying, harassment, and discrimination** — questions about bullying, harassment, or discriminatory treatment carry employment-law and protected-characteristic implications; these must escalate to HR and the Registered Manager; AI must not advise on whether conduct constitutes bullying, harassment, or discrimination, or on the likely outcome of a formal complaint.
+- **Professional boundaries** — concerns touching on boundary violations, inappropriate relationships, or misconduct intersect with the Professional Boundaries Policy (TC-POL-005) and safeguarding; AI must escalate and must not attempt to adjudicate boundary concerns.
+- **Confidentiality and data protection concerns** — concerns about inappropriate disclosure of personal information, data misuse, or confidentiality breaches must escalate to the data protection lead and, where required, the ICO; AI must not advise on lawfulness of disclosure or on notification obligations.
+- **Misuse of money, resources, or position** — concerns about financial irregularity, theft, fraud, or misuse of a position of trust must be directed to the Registered Manager and, where required, external bodies; AI must not assess whether conduct constitutes fraud or advise on financial investigation procedures.
+- **Dishonest, improper, or unlawful behaviour** — concerns about dishonesty, improper conduct, or suspected criminal behaviour must escalate to the Registered Manager and, where required, the police; AI must not advise on whether conduct is unlawful or what the criminal consequences may be.
+- **Attempts to hide concerns or suppress speaking up** — questions about pressure to stay silent, being told not to raise a concern, or fear of reprisal are particularly sensitive; AI must clearly direct staff to the raising concerns route and to external routes (CQC, police) where internal routes may be compromised.
+- **HR and disciplinary matters** — concerns that trigger or are connected to disciplinary or grievance processes must be handled by HR and management; AI must not advise on the merits or outcome of a disciplinary process.
+- **External reporting (CQC, police, and other regulators)** — questions about when and how to report to the CQC, police, or another external regulator must escalate to the Registered Manager; where staff believe internal routes are inadequate or compromised, AI must clearly signpost the availability of external reporting routes without discouraging use of them.
+- **Whistleblowing protection and speaking-up retaliation** — questions about whistleblower protection, detriment for raising a concern, or retaliation against a staff member who has spoken up carry employment-law implications (Public Interest Disclosure Act); AI must not advise on legal rights or employment remedies and must escalate to HR or an appropriate external adviser.
+
+### Conclusion and Lane Assignment
+
+TC-POL-008 is a **Lane A candidate**. It provides Thumhara-original policy content for the Raising Concerns and Speaking Up subject area, and is the clean-corpus replacement for the QCS-blocked PM11 for WorkTwin testing purposes.
+
+**Must not be used as live operational policy until Thumhara Centre leadership has reviewed and approved the draft content.**
+
+**Must remain Lane A candidate / draft upload only until leadership review.** Despite being classified as a Lane A candidate for future use, the subject matter of TC-POL-008 spans multiple high-sensitivity areas — safeguarding, abuse, neglect, medication concerns, bullying, harassment, discrimination, misuse of money/resources/position, dishonest/unlawful behaviour, attempts to hide concerns, HR/disciplinary, external reporting, CQC, police, and whistleblowing protection — that carry significant legal, regulatory, and welfare consequences if handled incorrectly. These topics require verified escalation behaviour at the admin answer-debug stage before any staff-facing use is considered.
+
+Before any AI-answer or staff-visibility use:
+
+1. Thumhara Centre leadership must review and approve the draft policy content.
+2. `approved_for_embedding` must be deliberately enabled.
+3. The embedding pipeline must complete successfully.
+4. Admin answer-debug must be run with particular care: safeguarding, abuse/neglect, risk of harm, unsafe practice, poor care, medication concerns, health and safety, bullying, harassment, discrimination, professional boundary concerns, confidentiality/data protection concerns, misuse of money/resources/position, dishonest/improper/unlawful behaviour, attempts to hide concerns, HR/disciplinary, external reporting (CQC, police), and whistleblowing protection/speaking-up retaliation question types must all be tested and verified to produce correct escalation or appropriately scoped policy-guided answers before staff visibility is considered. Any answer that fails to escalate correctly on safeguarding, abuse/neglect, medication concerns, bullying/harassment/discrimination, attempts to suppress a concern, or whistleblowing protection questions must not be approved for staff-facing use.
+
+---
+
 ## Policy QA Routing Backlog — 2026-05-06
 
 ### AC32 — Mobile Phone and Portable Device Use Policy
@@ -1058,6 +1148,7 @@ Use this template to record each policy decision. Add a new row each time a docu
 | 2026-05-11 | TC-POL-005 Thumhara Centre Professional Boundaries Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Covers professional boundaries, gifts and money, private contact, social media, conflicts of interest, safeguarding, abuse, exploitation, sexual misconduct, harassment, complaints, HR, disciplinary matters, and staff conduct concerns. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). List count after upload: 6 documents, all thumhara-centre. | No flags enabled | Upload confirmed — 15 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; admin answer-debug must be conducted with particular care — abuse, exploitation, sexual misconduct, harassment, safeguarding, gifts/money, private contact, social media, conflicts of interest, HR, disciplinary, and staff conduct question types must all be verified to escalate correctly before any AI-answer or staff-visibility decision; any answer that fails to escalate on abuse, exploitation, sexual misconduct, harassment, or safeguarding questions must not be approved for staff-facing use |
 | 2026-05-11 | TC-POL-006 Thumhara Centre Accident and Incident Reporting Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Covers accidents, incidents, near misses, serious injuries, falls, medication incidents, safeguarding, violence and aggression, fire, confidentiality and data protection incidents, health and safety, complaints, HR, external reporting, and regulator notification. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). List count after upload: 7 documents, all thumhara-centre. | No flags enabled | Upload confirmed — 15 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; admin answer-debug must be conducted with particular care — serious injury, falls, medication incidents, safeguarding, fire, violence/aggression, confidentiality/data protection incidents, health and safety/RIDDOR, complaints, HR, and external reporting/regulator notification question types must all be verified to escalate correctly before any AI-answer or staff-visibility decision; any answer that fails to escalate correctly on serious injury, medication, safeguarding, fire, violence, or statutory notification questions must not be approved for staff-facing use |
 | 2026-05-11 | TC-POL-007 Thumhara Centre Complaints, Suggestions and Compliments Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Covers complaints, suggestions, compliments, safeguarding, abuse, neglect, staff misconduct, discrimination, harassment, medication, accidents/incidents, confidentiality and data protection incidents, legal issues, police involvement, regulator involvement, HR, disciplinary matters, complaint outcomes, and serious distress. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). List count after upload: 8 documents, all thumhara-centre. Clean-corpus Thumhara-original replacement for the QCS-blocked QQ03. | No flags enabled | Upload confirmed — 16 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; admin answer-debug must be conducted with particular care — safeguarding, abuse/neglect, complaint outcome, staff misconduct, discrimination, harassment, medication, accident/incident, confidentiality/data protection incidents, legal issues, police involvement, regulator involvement, HR, disciplinary, and serious distress question types must all be verified to escalate correctly before any AI-answer or staff-visibility decision; any answer that fails to escalate correctly on safeguarding, abuse/neglect, staff misconduct, discrimination, harassment, medication, legal, police/regulator, or HR/disciplinary questions must not be approved for staff-facing use |
+| 2026-05-11 | TC-POL-008 Thumhara Centre Raising Concerns and Speaking Up Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Covers raising concerns, speaking up, safeguarding, abuse, neglect, risk of harm, unsafe practice, poor care, medication concerns, health and safety, bullying, harassment, discrimination, professional boundaries, confidentiality and data protection concerns, misuse of money/resources/position, dishonest/improper/unlawful behaviour, attempts to hide concerns, HR, disciplinary matters, external reporting, CQC, police, whistleblowing protection, and speaking-up retaliation. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). List count after upload: 9 documents, all thumhara-centre. Clean-corpus Thumhara-original replacement for the QCS-blocked PM11 / Raising Concerns / Freedom to Speak Up / Whistleblowing subject area. | No flags enabled | Upload confirmed — 15 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; admin answer-debug must be conducted with particular care — safeguarding, abuse/neglect, risk of harm, unsafe practice, poor care, medication concerns, health and safety, bullying, harassment, discrimination, professional boundary concerns, confidentiality/data protection concerns, misuse of money/resources/position, dishonest/improper/unlawful behaviour, attempts to hide concerns, HR/disciplinary, external reporting (CQC, police), and whistleblowing protection/speaking-up retaliation question types must all be verified to escalate correctly before any AI-answer or staff-visibility decision; any answer that fails to escalate correctly on safeguarding, abuse/neglect, medication concerns, bullying/harassment/discrimination, attempts to suppress a concern, or whistleblowing protection questions must not be approved for staff-facing use |
 
 ---
 

@@ -2923,13 +2923,22 @@ def generate_document_embeddings(doc_id: str, payload: GenerateEmbeddingsRequest
 # ---------------------------------------------------------------------------
 
 @app.post("/documents/search-vector")
-def search_vector(payload: VectorSearchRequest, _: None = Depends(_require_admin)):
+def search_vector(
+    payload: VectorSearchRequest,
+    _: None = Depends(_require_admin),
+    x_worktwin_admin_org: Optional[str] = Header(default=None),
+):
     """
     Admin/debug-only vector retrieval endpoint — Milestone 4G.
 
     Embeds the query with text-embedding-3-small and searches document_embeddings
     using pgvector cosine similarity via the match_document_chunks Postgres function.
     Returns retrieved chunk metadata and previews only — no AI answer, no LLM.
+
+    Tenant scoping: x-worktwin-admin-org (set by the Next.js admin proxy from the
+    validated session) always overrides payload.organisation_id so the admin proxy
+    cannot fall back to the demo-org default. Direct/internal callers without the
+    header may still use payload.organisation_id for backwards compatibility.
 
     Safety rules enforced:
     - OPENAI_API_KEY must be configured on the backend (Render env var). Never frontend.
@@ -2947,6 +2956,10 @@ def search_vector(payload: VectorSearchRequest, _: None = Depends(_require_admin
 
     Requires backend/sql/006_vector_search.sql to have been run in Supabase SQL Editor.
     """
+    # x-worktwin-admin-org (from the authenticated Next.js proxy) takes precedence
+    # over any caller-supplied payload.organisation_id / the "demo-org" default.
+    effective_org = x_worktwin_admin_org or payload.organisation_id
+
     if not _OPENAI_CONFIGURED:
         return {
             "status": "not_configured",
@@ -2968,7 +2981,7 @@ def search_vector(payload: VectorSearchRequest, _: None = Depends(_require_admin
 
     try:
         rows = _vector_search_chunks(
-            organisation_id=payload.organisation_id,
+            organisation_id=effective_org,
             query=query_clean,
             match_count=safe_count,
             threshold=0.0,
@@ -2978,7 +2991,7 @@ def search_vector(payload: VectorSearchRequest, _: None = Depends(_require_admin
         safe_err = _safe_embedding_error(exc)
         return {
             "query": query_clean,
-            "organisation_id": payload.organisation_id,
+            "organisation_id": effective_org,
             "match_count": safe_count,
             "result_count": 0,
             "results": [],
@@ -3007,7 +3020,7 @@ def search_vector(payload: VectorSearchRequest, _: None = Depends(_require_admin
 
     return {
         "query": query_clean,
-        "organisation_id": payload.organisation_id,
+        "organisation_id": effective_org,
         "match_count": safe_count,
         "result_count": len(results),
         "results": results,
@@ -3023,12 +3036,21 @@ def search_vector(payload: VectorSearchRequest, _: None = Depends(_require_admin
 # ---------------------------------------------------------------------------
 
 @app.post("/documents/answer-debug")
-def answer_debug(payload: AnswerDebugRequest, _: None = Depends(_require_admin)):
+def answer_debug(
+    payload: AnswerDebugRequest,
+    _: None = Depends(_require_admin),
+    x_worktwin_admin_org: Optional[str] = Header(default=None),
+):
     """
     Admin/debug-only source-grounded answer test — Milestone 4H.
 
     Embeds the query, retrieves chunks via pgvector, sends only those chunks to
     ANSWER_MODEL, and returns a source-grounded answer with citations.
+
+    Tenant scoping: x-worktwin-admin-org (set by the Next.js admin proxy from the
+    validated session) always overrides payload.organisation_id so the admin proxy
+    cannot fall back to the demo-org default. Direct/internal callers without the
+    header may still use payload.organisation_id for backwards compatibility.
 
     Safety rules enforced:
     - OPENAI_API_KEY must be configured on the backend. Never frontend.
@@ -3044,6 +3066,10 @@ def answer_debug(payload: AnswerDebugRequest, _: None = Depends(_require_admin))
     - No real Thumhara/QCS documents yet — dummy/sample only.
     """
     import httpx as _httpx
+
+    # x-worktwin-admin-org (from the authenticated Next.js proxy) takes precedence
+    # over any caller-supplied payload.organisation_id / the "demo-org" default.
+    effective_org = x_worktwin_admin_org or payload.organisation_id
 
     if not _OPENAI_CONFIGURED:
         return {
@@ -3082,7 +3108,7 @@ def answer_debug(payload: AnswerDebugRequest, _: None = Depends(_require_admin))
     rpc_url = f"{_SUPABASE_URL}/rest/v1/rpc/match_document_chunks"
     rpc_payload = {
         "query_embedding": vector_str,
-        "match_organisation_id": payload.organisation_id,
+        "match_organisation_id": effective_org,
         "match_threshold": 0.0,
         "match_count": safe_count,
     }
@@ -3151,7 +3177,7 @@ def answer_debug(payload: AnswerDebugRequest, _: None = Depends(_require_admin))
     if not raw_rows:
         return {
             "query": query_clean,
-            "organisation_id": payload.organisation_id,
+            "organisation_id": effective_org,
             "answer": _no_source_answer,
             "confidence": "insufficient_sources",
             "result_count": 0,
@@ -3165,7 +3191,7 @@ def answer_debug(payload: AnswerDebugRequest, _: None = Depends(_require_admin))
     if not filtered_rows:
         return {
             "query": query_clean,
-            "organisation_id": payload.organisation_id,
+            "organisation_id": effective_org,
             "answer": "This question needs to be escalated to a human lead.",
             "confidence": "blocked_safety",
             "result_count": len(raw_rows),
@@ -3197,7 +3223,7 @@ def answer_debug(payload: AnswerDebugRequest, _: None = Depends(_require_admin))
 
     # Audit event for answer debug (regardless of confidence)
     _create_audit_event(
-        organisation_id=payload.organisation_id,
+        organisation_id=effective_org,
         event_type="answer_debug_tested",
         document_id=None,
         event_summary=f"Answer debug: confidence={confidence}, result_count={len(filtered_rows)}",
@@ -3212,7 +3238,7 @@ def answer_debug(payload: AnswerDebugRequest, _: None = Depends(_require_admin))
 
     return {
         "query": query_clean,
-        "organisation_id": payload.organisation_id,
+        "organisation_id": effective_org,
         "answer": answer_text,
         "confidence": confidence,
         "result_count": len(filtered_rows),

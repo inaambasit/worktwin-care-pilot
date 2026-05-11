@@ -1,4 +1,6 @@
 """
+4S.96C-3 audit log tests are appended at the bottom of this file.
+
 4S.96B -- Admin document tenant isolation tests.
 
 Verifies that GET /documents and GET /documents/{id} enforce organisation scope
@@ -187,3 +189,73 @@ def test_get_document_db_path_matching_org_returns_document(bypass_admin_auth):
         )
     assert resp.status_code == 200
     assert resp.json()["organisation_id"] == _OTHER_ORG
+
+
+# ---------------------------------------------------------------------------
+# 4S.96C-3 — Audit log for cross-tenant admin document detail denial
+# ---------------------------------------------------------------------------
+
+def test_get_document_db_path_cross_org_creates_audit_event(bypass_admin_auth):
+    """DB path: cross-org denial must emit admin_document_cross_org_denied audit event."""
+    _demo_record = {
+        "id": _KNOWN_DEMO_DOC_ID,
+        "organisation_id": _DEMO_ORG,
+        "title": "Staff Handbook",
+        "category": "care",
+        "status": "draft",
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z",
+    }
+    with patch("app.main._DB_CONFIGURED", True), \
+         patch("app.main._get_registry_record", return_value=_demo_record), \
+         patch("app.main._create_audit_event") as mock_audit:
+        resp = client.get(
+            f"/documents/{_KNOWN_DEMO_DOC_ID}",
+            headers={"x-worktwin-admin-org": _OTHER_ORG},
+        )
+    assert resp.status_code == 404
+    mock_audit.assert_called_once()
+    call_kwargs = mock_audit.call_args
+    assert call_kwargs.kwargs["event_type"] == "admin_document_cross_org_denied"
+    assert call_kwargs.kwargs["organisation_id"] == _OTHER_ORG
+    assert call_kwargs.kwargs["document_id"] == _KNOWN_DEMO_DOC_ID
+    assert call_kwargs.kwargs["metadata"]["document_organisation_id"] == _DEMO_ORG
+    assert call_kwargs.kwargs["metadata"]["reason"] == "cross_org_document_access_denied"
+
+
+def test_get_document_inmemory_path_cross_org_creates_audit_event(bypass_admin_auth):
+    """In-memory fallback path: cross-org denial must emit audit event."""
+    with patch("app.main._create_audit_event") as mock_audit:
+        resp = client.get(
+            f"/documents/{_KNOWN_DEMO_DOC_ID}",
+            headers={"x-worktwin-admin-org": _OTHER_ORG},
+        )
+    assert resp.status_code == 404
+    mock_audit.assert_called_once()
+    call_kwargs = mock_audit.call_args
+    assert call_kwargs.kwargs["event_type"] == "admin_document_cross_org_denied"
+    assert call_kwargs.kwargs["organisation_id"] == _OTHER_ORG
+    assert call_kwargs.kwargs["document_id"] == _KNOWN_DEMO_DOC_ID
+    assert call_kwargs.kwargs["metadata"]["document_organisation_id"] == _DEMO_ORG
+
+
+def test_get_document_matching_org_does_not_create_audit_event(bypass_admin_auth):
+    """Same-org access must NOT emit a cross-org denial audit event."""
+    with patch("app.main._create_audit_event") as mock_audit:
+        resp = client.get(
+            f"/documents/{_KNOWN_DEMO_DOC_ID}",
+            headers={"x-worktwin-admin-org": _DEMO_ORG},
+        )
+    assert resp.status_code == 200
+    mock_audit.assert_not_called()
+
+
+def test_get_document_unknown_id_does_not_create_cross_org_audit_event(bypass_admin_auth):
+    """Unknown document id must NOT emit a cross-org denial audit event."""
+    with patch("app.main._create_audit_event") as mock_audit:
+        resp = client.get(
+            "/documents/does-not-exist",
+            headers={"x-worktwin-admin-org": _OTHER_ORG},
+        )
+    assert resp.status_code == 404
+    mock_audit.assert_not_called()

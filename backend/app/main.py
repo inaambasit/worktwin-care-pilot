@@ -335,6 +335,24 @@ def _create_audit_event(
         pass  # audit events are non-critical
 
 
+def _audit_admin_document_cross_org_denied(
+    session_org: str,
+    doc_id: str,
+    doc_org: str,
+) -> None:
+    _create_audit_event(
+        organisation_id=session_org,
+        event_type="admin_document_cross_org_denied",
+        document_id=doc_id,
+        event_summary="Admin attempted to access a document from a different organisation",
+        metadata={
+            "route": f"documents/{doc_id}",
+            "reason": "cross_org_document_access_denied",
+            "document_organisation_id": doc_org,
+        },
+    )
+
+
 def _get_document_governance_summary(document_id: str) -> Optional[Dict[str, Any]]:
     """Return governance fields for a single document. None if not found or DB not configured."""
     if not _DB_CONFIGURED:
@@ -2471,6 +2489,11 @@ def get_document(
             record = _get_registry_record(doc_id)
             if record is not None:
                 if x_worktwin_admin_org and record.get("organisation_id") != x_worktwin_admin_org:
+                    _audit_admin_document_cross_org_denied(
+                        session_org=x_worktwin_admin_org,
+                        doc_id=doc_id,
+                        doc_org=record.get("organisation_id", ""),
+                    )
                     raise HTTPException(status_code=404, detail="Document not found")
                 return record
         except HTTPException:
@@ -2481,6 +2504,11 @@ def get_document(
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
     if x_worktwin_admin_org and doc.get("organisation_id") != x_worktwin_admin_org:
+        _audit_admin_document_cross_org_denied(
+            session_org=x_worktwin_admin_org,
+            doc_id=doc_id,
+            doc_org=doc.get("organisation_id", ""),
+        )
         raise HTTPException(status_code=404, detail="Document not found")
     return doc
 

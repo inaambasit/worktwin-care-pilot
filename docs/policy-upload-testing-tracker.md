@@ -110,6 +110,7 @@ Based on current registry proof as of 2026-05-06.
 | Thumhara Centre Infection Prevention and Basic Hygiene Policy (TC-POL-004) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Covers infection prevention, illness symptoms, PPE, hygiene, bodily fluids, contaminated items, suspected outbreaks, public health guidance, health and safety, safeguarding escalation, and emergency escalation. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug — health, infection, outbreak, contaminated bodily fluid, and emergency questions must be verified to escalate correctly before any AI-answer or staff-visibility decision. |
 | Thumhara Centre Professional Boundaries Policy (TC-POL-005) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Covers professional boundaries, gifts and money, private contact, social media, conflicts of interest, safeguarding, abuse, exploitation, sexual misconduct, harassment, complaints, HR, disciplinary matters, and staff conduct concerns. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug — abuse, exploitation, sexual misconduct, harassment, safeguarding, gifts/money, private contact, HR, and conduct questions must all be verified to escalate correctly before any AI-answer or staff-visibility decision. |
 | Thumhara Centre Accident and Incident Reporting Policy (TC-POL-006) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Covers accidents, incidents, near misses, serious injuries, falls, medication incidents, safeguarding, violence and aggression, fire, confidentiality and data protection incidents, health and safety, complaints, HR, external reporting, and regulator notification. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug — serious injury, falls, medication, safeguarding, fire, violence/aggression, confidentiality breach, emergency, and external reporting/regulator notification questions must all be verified to escalate correctly before any AI-answer or staff-visibility decision. |
+| Thumhara Centre Complaints, Suggestions and Compliments Policy (TC-POL-007) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Covers complaints, suggestions, compliments, safeguarding, abuse, neglect, staff misconduct, discrimination, harassment, medication, accidents/incidents, confidentiality and data protection incidents, legal issues, police involvement, regulator involvement, HR, disciplinary matters, complaint outcomes, and serious distress. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug — safeguarding, complaint outcome, HR, legal/regulator, medication, accident/incident, discrimination/harassment, and serious distress questions must all be verified to escalate correctly before any AI-answer or staff-visibility decision. Clean-corpus Thumhara-original replacement for the QCS-blocked QQ03 in the Complaints, Suggestions and Compliments subject area. |
 
 ### Gate Summary per Document
 
@@ -129,6 +130,7 @@ Based on current registry proof as of 2026-05-06.
 | TC-POL-004 Infection Prevention and Basic Hygiene Policy | No | No | No |
 | TC-POL-005 Professional Boundaries Policy | No | No | No |
 | TC-POL-006 Accident and Incident Reporting Policy | No | No | No |
+| TC-POL-007 Complaints, Suggestions and Compliments Policy | No | No | No |
 
 ---
 
@@ -846,6 +848,92 @@ Before any AI-answer or staff-visibility use:
 
 ---
 
+## TC-POL-007 Controlled Upload — 2026-05-11
+
+TC-POL-007 Thumhara Centre Complaints, Suggestions and Compliments Policy was uploaded through the local authenticated admin proxy for controlled WorkTwin testing only. This is an original Thumhara Centre-owned draft — it is not QCS content and not sourced from any third-party policy library. No third-party content restriction applies. It is the clean-corpus Thumhara-original replacement for the QCS-blocked QQ03 in the Complaints, Suggestions and Compliments subject area.
+
+### Upload Details
+
+| Field | Value |
+|-------|-------|
+| Document code | TC-POL-007 |
+| Document ID | `631bf64d-29f9-4972-af12-5e75ddd8aed6` |
+| Title | Thumhara Centre Complaints, Suggestions and Compliments Policy |
+| File | `TC-POL-007-complaints-suggestions-and-compliments-policy-draft-v0.1.pdf` |
+| Storage key | `thumhara-centre/documents/631bf64d-29f9-4972-af12-5e75ddd8aed6/TC-POL-007-complaints-suggestions-and-compliments-policy-draft-v0.1.pdf` |
+| Organisation | thumhara-centre |
+| Category | Complaints, Suggestions and Compliments |
+| Vertical | care |
+| Status | draft |
+| Sensitive | false |
+| Escalation required | false |
+| chunk_count (upload response) | 16 |
+| embedding_record_count (upload response) | 16 |
+| chunking_status | prepared |
+| embedding_status | pending |
+
+### Tenant and Organisation Proof
+
+| Check | Result |
+|-------|--------|
+| IS_THUMHARA | true |
+| IS_DEMO_ORG | false |
+| STORAGE_IS_THUMHARA_PREFIX | true |
+| LIST_ORGS | thumhara-centre |
+| LIST_MATCHING_POLICY_COUNT | 1 |
+| LIST_HAS_DEMO_ORG | false |
+
+List count after upload: **8 documents**, all thumhara-centre — no demo-org documents present.
+
+### Governance State at Upload
+
+All AI and visibility gates are disabled. No gate has been deliberately enabled. No embedding has been triggered.
+
+| Gate | State |
+|------|-------|
+| `approved_for_embedding` | false |
+| `approved_for_ai_answers` | false |
+| `approved_for_source_grounded_answers` | false |
+| `approved_for_staff_visibility` | false |
+
+### Content Source
+
+TC-POL-007 contains original Thumhara Centre-owned draft wording. It is not QCS content, not a third-party policy library document, and is not subject to any licence restriction. It is a clean-corpus Thumhara-original document per the clean-corpus direction established 2026-05-07. The subject area — complaints, suggestions, and compliments — overlaps with the now-blocked QCS document QQ03, but TC-POL-007 is entirely Thumhara-owned text and the QCS restriction does not apply to it.
+
+### Content Notes
+
+TC-POL-007 addresses how complaints, suggestions, and compliments are received, recorded, investigated, and resolved in a care setting. Although the document is not marked sensitive and does not require escalation at upload, it spans several high-stakes subject areas that require careful admin answer-debug before any AI-answer or staff-visibility decision is made. The policy touches the following areas:
+
+- **Complaints handling and complaint outcomes** — questions about how a complaint is investigated, what the outcome means, or what happens after a complaint is upheld or dismissed must escalate to a manager or responsible person; AI must not advise complainants or staff on the merits or fairness of a complaint outcome, and must not attempt to adjudicate on behalf of the organisation.
+- **Safeguarding, abuse, and neglect** — complaints can reveal abuse, neglect, or exploitation; any question in which a complaint may indicate harm to a service user must escalate to the designated safeguarding lead immediately; AI must not attempt to assess whether a complaint crosses a safeguarding threshold.
+- **Staff misconduct** — questions about complaints involving named staff conduct allegations must escalate to management and HR; AI must not attempt to assess or characterise staff behaviour based on complaint content.
+- **Discrimination and harassment** — complaints about discriminatory treatment or harassment carry protected-characteristic and employment-law implications; these must escalate to HR and, where relevant, the Registered Manager; AI must not advise on whether conduct constitutes discrimination or harassment.
+- **Medication** — complaints involving medication errors, refusals, or administration failures must escalate to the Registered Manager and relevant clinical lead; AI must not advise on clinical consequences or medicinal responses.
+- **Accidents and incidents** — where a complaint arises from or is linked to a reportable accident or incident, the complaints procedure intersects with the incident reporting obligations; AI must escalate to the Registered Manager and must not conflate complaint resolution with statutory incident reporting.
+- **Confidentiality and data protection incidents** — complaints about information handling, data misuse, or confidentiality breaches must escalate to the data protection lead; AI must not advise staff on whether a disclosure or breach was lawful or on ICO notification obligations.
+- **Legal issues and formal legal correspondence** — complaints that escalate to legal action or that involve formal legal correspondence must be referred to the Registered Manager and legal advisers; AI must not advise on legal strategy, liability, or settlement.
+- **Police involvement** — where a complaint involves or leads to police contact, AI must direct staff to the Registered Manager immediately; AI must not advise on how to respond to police enquiries or on the implications of a police investigation.
+- **Regulator involvement (CQC, local authority)** — complaints that trigger CQC notification, local authority safeguarding enquiries, or other regulatory intervention must be handled by the Registered Manager; AI must not advise on regulatory thresholds or timelines.
+- **HR and disciplinary matters** — disciplinary processes triggered by or connected to a complaint must be handled by HR and management; AI must not advise on disciplinary procedures, likely outcomes, or staff rights in these processes.
+- **Serious distress** — complainants, service users, or staff may be in serious distress during or after a complaints process; AI must always signpost to a manager or appropriate support and must never attempt to manage distress through information alone.
+
+### Conclusion and Lane Assignment
+
+TC-POL-007 is a **Lane A candidate**. It provides Thumhara-original policy content for the Complaints, Suggestions and Compliments subject area, and is the clean-corpus replacement for the QCS-blocked QQ03 for WorkTwin testing purposes.
+
+**Must not be used as live operational policy until Thumhara Centre leadership has reviewed and approved the draft content.**
+
+**Must remain Lane A candidate / draft upload only until leadership review.** Despite being classified as a Lane A candidate for future use, the subject matter of TC-POL-007 spans multiple high-sensitivity areas — safeguarding, abuse, neglect, staff misconduct, discrimination, harassment, medication, legal issues, police and regulator involvement, HR/disciplinary, and serious distress — that carry significant legal, regulatory, and welfare consequences if handled incorrectly. These topics require verified escalation behaviour at the admin answer-debug stage before any staff-facing use is considered.
+
+Before any AI-answer or staff-visibility use:
+
+1. Thumhara Centre leadership must review and approve the draft policy content.
+2. `approved_for_embedding` must be deliberately enabled.
+3. The embedding pipeline must complete successfully.
+4. Admin answer-debug must be run with particular care: safeguarding, abuse/neglect, complaint outcome, staff misconduct, discrimination, harassment, medication, accident/incident, confidentiality/data protection incidents, legal issues, police involvement, regulator involvement, HR, disciplinary, and serious distress question types must all be tested and verified to produce correct escalation or appropriately scoped policy-guided answers before staff visibility is considered. Any answer that fails to escalate correctly on safeguarding, abuse/neglect, staff misconduct, discrimination, harassment, medication, legal, police/regulator, or HR/disciplinary questions must not be approved for staff-facing use.
+
+---
+
 ## Policy QA Routing Backlog — 2026-05-06
 
 ### AC32 — Mobile Phone and Portable Device Use Policy
@@ -969,6 +1057,7 @@ Use this template to record each policy decision. Add a new row each time a docu
 | 2026-05-11 | TC-POL-004 Thumhara Centre Infection Prevention and Basic Hygiene Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Covers infection prevention, illness symptoms, PPE, hygiene, bodily fluids, contaminated items, suspected outbreaks, public health guidance, health and safety, safeguarding escalation, and emergency escalation. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). Clean-corpus alternative to the QCS-blocked CC34 in the Infection Prevention subject area. | No flags enabled | Upload confirmed — 14 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; admin answer-debug must be conducted with particular care — health, infection, outbreak, contaminated bodily fluid, PPE, safeguarding escalation, and emergency escalation question types must all be verified to produce correct escalation or appropriately scoped answers before any AI-answer or staff-visibility decision |
 | 2026-05-11 | TC-POL-005 Thumhara Centre Professional Boundaries Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Covers professional boundaries, gifts and money, private contact, social media, conflicts of interest, safeguarding, abuse, exploitation, sexual misconduct, harassment, complaints, HR, disciplinary matters, and staff conduct concerns. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). List count after upload: 6 documents, all thumhara-centre. | No flags enabled | Upload confirmed — 15 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; admin answer-debug must be conducted with particular care — abuse, exploitation, sexual misconduct, harassment, safeguarding, gifts/money, private contact, social media, conflicts of interest, HR, disciplinary, and staff conduct question types must all be verified to escalate correctly before any AI-answer or staff-visibility decision; any answer that fails to escalate on abuse, exploitation, sexual misconduct, harassment, or safeguarding questions must not be approved for staff-facing use |
 | 2026-05-11 | TC-POL-006 Thumhara Centre Accident and Incident Reporting Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Covers accidents, incidents, near misses, serious injuries, falls, medication incidents, safeguarding, violence and aggression, fire, confidentiality and data protection incidents, health and safety, complaints, HR, external reporting, and regulator notification. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). List count after upload: 7 documents, all thumhara-centre. | No flags enabled | Upload confirmed — 15 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; admin answer-debug must be conducted with particular care — serious injury, falls, medication incidents, safeguarding, fire, violence/aggression, confidentiality/data protection incidents, health and safety/RIDDOR, complaints, HR, and external reporting/regulator notification question types must all be verified to escalate correctly before any AI-answer or staff-visibility decision; any answer that fails to escalate correctly on serious injury, medication, safeguarding, fire, violence, or statutory notification questions must not be approved for staff-facing use |
+| 2026-05-11 | TC-POL-007 Thumhara Centre Complaints, Suggestions and Compliments Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Covers complaints, suggestions, compliments, safeguarding, abuse, neglect, staff misconduct, discrimination, harassment, medication, accidents/incidents, confidentiality and data protection incidents, legal issues, police involvement, regulator involvement, HR, disciplinary matters, complaint outcomes, and serious distress. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). List count after upload: 8 documents, all thumhara-centre. Clean-corpus Thumhara-original replacement for the QCS-blocked QQ03. | No flags enabled | Upload confirmed — 16 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; admin answer-debug must be conducted with particular care — safeguarding, abuse/neglect, complaint outcome, staff misconduct, discrimination, harassment, medication, accident/incident, confidentiality/data protection incidents, legal issues, police involvement, regulator involvement, HR, disciplinary, and serious distress question types must all be verified to escalate correctly before any AI-answer or staff-visibility decision; any answer that fails to escalate correctly on safeguarding, abuse/neglect, staff misconduct, discrimination, harassment, medication, legal, police/regulator, or HR/disciplinary questions must not be approved for staff-facing use |
 
 ---
 

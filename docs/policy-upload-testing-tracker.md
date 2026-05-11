@@ -107,6 +107,7 @@ Based on current registry proof as of 2026-05-06.
 | Thumhara Centre Visitor Sign-In and Identification Policy (TC-POL-001) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Safe low-risk operational content. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and brief admin spot-check. |
 | Thumhara Centre Mobile Phone and Portable Device Use Policy (TC-POL-002) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Safe operational content but touches confidentiality, data protection, and device-use responsibilities. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and brief admin answer-debug spot-check (with careful attention to confidentiality and photography/recording questions). |
 | Thumhara Centre Confidentiality and Information Handling Policy (TC-POL-003) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Touches confidentiality obligations, information-sharing duties, possible data breaches, safeguarding escalation, legal/privacy questions, and external information requests. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug before any AI-answer or staff-visibility decision — answer-debug must be conducted with particular care given the sensitivity of confidentiality breach and legal/privacy question types. |
+| Thumhara Centre Infection Prevention and Basic Hygiene Policy (TC-POL-004) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Covers infection prevention, illness symptoms, PPE, hygiene, bodily fluids, contaminated items, suspected outbreaks, public health guidance, health and safety, safeguarding escalation, and emergency escalation. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug — health, infection, outbreak, contaminated bodily fluid, and emergency questions must be verified to escalate correctly before any AI-answer or staff-visibility decision. |
 
 ### Gate Summary per Document
 
@@ -123,6 +124,7 @@ Based on current registry proof as of 2026-05-06.
 | TC-POL-001 Visitor Sign-In and Identification Policy | No | No | No |
 | TC-POL-002 Mobile Phone and Portable Device Use Policy | No | No | No |
 | TC-POL-003 Confidentiality and Information Handling Policy | No | No | No |
+| TC-POL-004 Infection Prevention and Basic Hygiene Policy | No | No | No |
 
 ---
 
@@ -598,6 +600,83 @@ Before any AI-answer or staff-visibility use:
 
 ---
 
+## TC-POL-004 Controlled Upload — 2026-05-11
+
+TC-POL-004 Thumhara Centre Infection Prevention and Basic Hygiene Policy was uploaded through the local authenticated admin proxy for controlled WorkTwin testing only. This is an original Thumhara Centre-owned draft — it is not QCS content and not sourced from any third-party policy library. No third-party content restriction applies. It covers the Infection Prevention and Basic Hygiene subject area using entirely Thumhara-owned wording.
+
+### Upload Details
+
+| Field | Value |
+|-------|-------|
+| Document code | TC-POL-004 |
+| Document ID | `b784cb90-c0f1-48bc-8f88-689c6de7f857` |
+| Title | Thumhara Centre Infection Prevention and Basic Hygiene Policy |
+| File | `TC-POL-004-infection-prevention-and-basic-hygiene-policy-draft-v0.1.pdf` |
+| Storage key | `thumhara-centre/documents/b784cb90-c0f1-48bc-8f88-689c6de7f857/TC-POL-004-infection-prevention-and-basic-hygiene-policy-draft-v0.1.pdf` |
+| Organisation | thumhara-centre |
+| Category | Infection Prevention and Basic Hygiene |
+| Vertical | care |
+| Status | draft |
+| Sensitive | false |
+| Escalation required | false |
+| chunk_count (upload response) | 14 |
+| embedding_record_count (upload response) | 14 |
+| chunking_status | prepared |
+| embedding_status | pending |
+
+### Tenant and Organisation Proof
+
+| Check | Result |
+|-------|--------|
+| IS_THUMHARA | true |
+| IS_DEMO_ORG | false |
+| STORAGE_IS_THUMHARA_PREFIX | true |
+| LIST_ORGS | thumhara-centre |
+| LIST_MATCHING_POLICY_COUNT | 1 |
+| LIST_HAS_DEMO_ORG | false |
+
+### Governance State at Upload
+
+All AI and visibility gates are disabled. No gate has been deliberately enabled. No embedding has been triggered.
+
+| Gate | State |
+|------|-------|
+| `approved_for_embedding` | false |
+| `approved_for_ai_answers` | false |
+| `approved_for_source_grounded_answers` | false |
+| `approved_for_staff_visibility` | false |
+
+### Content Source
+
+TC-POL-004 contains original Thumhara Centre-owned draft wording. It is not QCS content, not a third-party policy library document, and is not subject to any licence restriction. It is a clean-corpus Thumhara-original document per the clean-corpus direction established 2026-05-07.
+
+### Content Notes
+
+TC-POL-004 addresses infection prevention and basic hygiene practice for care settings. Although the document is not marked sensitive and does not require escalation at upload, it covers subject matter that requires careful admin answer-debug before any AI-answer or staff-visibility decision is made. The policy touches the following areas:
+
+- **Infection prevention and illness symptoms** — staff questions about identifying symptoms of infection or deciding when to call in sick must produce appropriately cautious answers and must not substitute for clinical or managerial judgement.
+- **PPE** — questions about which PPE to use and when must reflect current public health and care-sector guidance; until the companion PPE Policy PDF is available and reviewed, PPE-specific answers from this document should be treated with additional care.
+- **Hygiene and contaminated items** — guidance on handling bodily fluids, contaminated items, and waste must be accurate and must direct staff to the correct disposal and decontamination steps.
+- **Suspected outbreaks** — outbreak questions are high-stakes; AI answers must include clear escalation to the Registered Manager and relevant public health authority, not just procedural steps. Answers that contain only procedural steps without explicit escalation wording are not acceptable for staff-facing use.
+- **Public health guidance and health and safety obligations** — this policy interacts with CQC, NHS England, UKHSA, and HSE requirements; AI answers must not give staff the impression that following a draft internal policy is sufficient if public health guidance requires additional action.
+- **Safeguarding escalation** — infection-related scenarios (e.g., unexplained symptoms in a vulnerable service user) can intersect with safeguarding concerns; the system must escalate rather than answer freely in ambiguous scenarios.
+- **Emergency escalation** — outbreak or mass-illness scenarios may require 999, CQC notification, or local authority public health notification; AI answers must not imply that an internal procedure alone is sufficient.
+
+### Conclusion and Lane Assignment
+
+TC-POL-004 is a **Lane A candidate**. It provides Thumhara-original policy content for the Infection Prevention and Basic Hygiene subject area and is the clean-corpus alternative to the QCS-blocked CC34 for WorkTwin testing purposes.
+
+**Must not be used as live operational policy until Thumhara Centre leadership has reviewed and approved the draft content.**
+
+Before any AI-answer or staff-visibility use:
+
+1. Thumhara Centre leadership must review and approve the draft policy content.
+2. `approved_for_embedding` must be deliberately enabled.
+3. The embedding pipeline must complete successfully.
+4. Admin answer-debug must be run with particular care: health, infection, outbreak, contaminated bodily fluid, PPE, safeguarding escalation, and emergency escalation question types must all be tested and verified to produce correct escalation or appropriately scoped policy-guided answers before staff visibility is considered. Answers that omit escalation wording for outbreak or emergency scenarios must not be approved for staff-facing use.
+
+---
+
 ## Policy QA Routing Backlog — 2026-05-06
 
 ### AC32 — Mobile Phone and Portable Device Use Policy
@@ -718,6 +797,7 @@ Use this template to record each policy decision. Add a new row each time a docu
 | 2026-05-11 | TC-POL-001 Thumhara Centre Visitor Sign-In and Identification Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Safe low-risk operational content. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). | No flags enabled | Upload confirmed — 14 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; run brief admin answer-debug spot-check before any staff-visibility decision |
 | 2026-05-11 | TC-POL-002 Thumhara Centre Mobile Phone and Portable Device Use Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Safe operational content but touches confidentiality, data protection, and device-use responsibilities. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). Clean-corpus replacement for the QCS-blocked AC32 in the Mobile Devices subject area. | No flags enabled | Upload confirmed — 15 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; run brief admin answer-debug spot-check (with careful attention to confidentiality, data protection, and photography/recording questions) before any staff-visibility decision |
 | 2026-05-11 | TC-POL-003 Thumhara Centre Confidentiality and Information Handling Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Covers confidentiality obligations, information-sharing duties, possible data breaches, safeguarding escalation, legal/privacy questions, and external information requests. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). Fills the Confidentiality and Information Handling gap left by the parked QCS document CR07. | No flags enabled | Upload confirmed — 14 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; admin answer-debug must be conducted with particular care — confidentiality breach, data breach, information-sharing, safeguarding override, legal/privacy, and external information request question types must all be verified before any AI-answer or staff-visibility decision |
+| 2026-05-11 | TC-POL-004 Thumhara Centre Infection Prevention and Basic Hygiene Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Covers infection prevention, illness symptoms, PPE, hygiene, bodily fluids, contaminated items, suspected outbreaks, public health guidance, health and safety, safeguarding escalation, and emergency escalation. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). Clean-corpus alternative to the QCS-blocked CC34 in the Infection Prevention subject area. | No flags enabled | Upload confirmed — 14 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; admin answer-debug must be conducted with particular care — health, infection, outbreak, contaminated bodily fluid, PPE, safeguarding escalation, and emergency escalation question types must all be verified to produce correct escalation or appropriately scoped answers before any AI-answer or staff-visibility decision |
 
 ---
 

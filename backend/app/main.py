@@ -2445,6 +2445,8 @@ def list_documents(
 
     # Demo fallback — DB not configured or unavailable
     docs = _documents
+    if organisation_id:
+        docs = [d for d in docs if d.get("organisation_id") == organisation_id]
     if status:
         docs = [d for d in docs if d["status"] == status]
     if category:

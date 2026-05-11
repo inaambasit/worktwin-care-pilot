@@ -8,7 +8,7 @@
 | Real staff use | None — no staff have access |
 | Pending review | Shagufta review may occur later; not scheduled |
 | Document visibility | Admin/testing only unless gates are deliberately enabled |
-| Last updated | 2026-05-11 |
+| Last updated | 2026-05-12 |
 | PPE upload | Paused — PPE Policy PDF not yet available; will be requested from Shagufta |
 
 Documents remain in testing state until all required gates are explicitly approved. Enabling a gate is a deliberate act — it does not happen automatically upon upload.
@@ -104,7 +104,7 @@ Based on current registry proof as of 2026-05-06.
 | CR07 Data Protection and Confidentiality Policy and Procedure (English) | **B pending upload** | No | No | No | Useful for confidentiality, UK GDPR, data protection and staff responsibilities; admin-test only first because it touches legal/compliance/confidential information duties |
 | CR07 Data Protection and Confidentiality Policy and Procedure (Urdu) | Pending multilingual review | No | No | No | Do not upload yet until bilingual/multilingual document strategy is agreed |
 | QQ03 Complaints, Suggestions and Compliments Policy and Procedure | **B — admin answer-debug only** | Yes | Yes (admin/debug only) | No | BLOCKED (2026-05-07) — QCS content restriction applies; DB flag state is historical registry state only, no database flags changed in this docs-only record; must not be used for staff-style Ask, staff-visible answers, answer-debug expansion, embedding expansion, demo, pilot, or production use unless written permission obtained; a later data-governance cleanup slice should review whether DB flags/embeddings need to be disabled, hidden, archived, or removed |
-| Thumhara Centre Visitor Sign-In and Identification Policy (TC-POL-001) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Safe low-risk operational content. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and brief admin spot-check. |
+| Thumhara Centre Visitor Sign-In and Identification Policy (TC-POL-001) | **B — admin answer-debug only** | Yes | Yes (admin/debug only) | No | **Thumhara-original draft** — not QCS, not third-party content. Safe low-risk operational content. Draft only; not approved for live operational use or staff visibility. Embedding complete (14/14 chunks, 3,119 tokens). Tenant-scope bug found and fixed before answer-debug (commit e8f1325). Admin-only answer-debug passed: 3/3 questions source-grounded to TC-POL-001 only. Staff visibility blocked — document status is draft and must be approved before staff visibility. Next step: 10-question TC-POL-001 answer quality scorecard. |
 | Thumhara Centre Mobile Phone and Portable Device Use Policy (TC-POL-002) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Safe operational content but touches confidentiality, data protection, and device-use responsibilities. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and brief admin answer-debug spot-check (with careful attention to confidentiality and photography/recording questions). |
 | Thumhara Centre Confidentiality and Information Handling Policy (TC-POL-003) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Touches confidentiality obligations, information-sharing duties, possible data breaches, safeguarding escalation, legal/privacy questions, and external information requests. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug before any AI-answer or staff-visibility decision — answer-debug must be conducted with particular care given the sensitivity of confidentiality breach and legal/privacy question types. |
 | Thumhara Centre Infection Prevention and Basic Hygiene Policy (TC-POL-004) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Covers infection prevention, illness symptoms, PPE, hygiene, bodily fluids, contaminated items, suspected outbreaks, public health guidance, health and safety, safeguarding escalation, and emergency escalation. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug — health, infection, outbreak, contaminated bodily fluid, and emergency questions must be verified to escalate correctly before any AI-answer or staff-visibility decision. |
@@ -127,7 +127,7 @@ Based on current registry proof as of 2026-05-06.
 | CR07 Data Protection and Confidentiality (English) | No | No | No |
 | CR07 Data Protection and Confidentiality (Urdu) | No | No | No |
 | QQ03 Complaints, Suggestions and Compliments | Yes | Yes (admin/debug only) | No |
-| TC-POL-001 Visitor Sign-In and Identification Policy | No | No | No |
+| TC-POL-001 Visitor Sign-In and Identification Policy | Yes | Yes (admin/debug only) | No |
 | TC-POL-002 Mobile Phone and Portable Device Use Policy | No | No | No |
 | TC-POL-003 Confidentiality and Information Handling Policy | No | No | No |
 | TC-POL-004 Infection Prevention and Basic Hygiene Policy | No | No | No |
@@ -453,18 +453,132 @@ All AI and visibility gates are disabled. No gate has been deliberately enabled.
 
 TC-POL-001 contains original Thumhara Centre-owned draft wording. It is not QCS content, not a third-party policy library document, and is not subject to any licence restriction. It is a clean-corpus Thumhara-original document per the clean-corpus direction established 2026-05-07.
 
-### Conclusion and Lane Assignment
+### Conclusion and Lane Assignment (at Upload)
 
 TC-POL-001 is a **Lane A candidate**. It covers the same low-sensitivity Visitor Management subject area as the existing Visitor Sign-In and Identification Procedure but is TC-POL-001's own original Thumhara draft wording.
 
-**Must not be used as live operational policy until Thumhara Centre leadership has reviewed and approved the draft content.**
+---
 
-Before any AI-answer or staff-visibility use:
+## TC-POL-001 Governance Gates, Embedding, and Admin-Only Answer-Debug — 2026-05-12
 
-1. Thumhara Centre leadership must review and approve the draft policy content.
-2. `approved_for_embedding` must be deliberately enabled.
-3. The embedding pipeline must complete successfully.
-4. A brief admin answer-debug spot-check must be run (shorter than the full QCS-era QA process, as TC-POL-001 is clean-corpus Thumhara-original content and Lane A subject matter).
+Following upload, governance gates were enabled, the embedding pipeline was triggered, a tenant-scope bug was found and fixed, and controlled admin-only answer-debug testing was completed. Staff visibility remains blocked.
+
+### Governance State at Embedding
+
+| Field | Value |
+|-------|-------|
+| Document ID | `42d7b206-b85f-46a5-b0f2-1c3b6ff87ca3` |
+| Title | Thumhara Centre Visitor Sign-In and Identification Policy |
+| Organisation | thumhara-centre |
+| Status | draft |
+| governance_status | approved_for_ai |
+| real_document | true |
+| dummy_document | false |
+| approved_for_embedding | true |
+| approved_for_source_grounded_answers | true |
+| approved_for_staff_visibility | false |
+| embedding_status | indexed |
+| governance_reviewed_by | Inaam Basit |
+
+### Governance Readiness Proof
+
+| Check | Result |
+|-------|--------|
+| can_embed_now | true |
+| can_use_for_answer_debug_now | true |
+| can_show_to_staff_now | false |
+| Blocked reason for staff visibility | document status is draft and must be approved before staff visibility |
+
+### Embedding Proof
+
+| Field | Value |
+|-------|-------|
+| attempted_count | 14 |
+| embedded_count | 14 |
+| failed_count | 0 |
+| total_tokens | 3,119 |
+| estimated_cost | <$0.01 using text-embedding-3-small |
+
+All 14 chunks were embedded successfully with no failures. Embeddings were generated for retrieval preparation only; staff AI answers remain disabled.
+
+### Tenant-Scope Bug Found and Fixed — commit e8f1325
+
+Before answer-debug testing was run, an admin vector search revealed a tenant-scope bug: the initial search incorrectly fell back to `demo-org` and retrieved old demo/QCS-era documents instead of TC-POL-001.
+
+**Fix recorded in commit e8f1325 — Scope admin vector debug by session organisation.**
+
+`/documents/search-vector` and `/documents/answer-debug` now use `x-worktwin-admin-org` from the authenticated admin proxy header, taking precedence over any `organisation_id` in the request payload. This ensures admin vector search and answer-debug are always scoped to the authenticated administrator's organisation.
+
+Tests passed after fix:
+
+| Suite | Result |
+|-------|--------|
+| backend/tests/test_vector_search_org_scope.py | 12 passed |
+| Full backend suite | 188 passed |
+
+Live proof after server restart:
+
+| Check | Result |
+|-------|--------|
+| RESPONSE_ORG | thumhara-centre |
+| DOC_IDS | 42d7b206-b85f-46a5-b0f2-1c3b6ff87ca3 |
+| DOC_TITLES | Thumhara Centre Visitor Sign-In and Identification Policy |
+| ONLY_EXPECTED_DOC | true |
+| VECTOR_SEARCH_TENANT_SCOPE_PASS | true |
+
+### Admin-Only Answer-Debug Proof
+
+Three visitor-management questions were tested through the authenticated admin proxy after the tenant-scope fix. All three passed.
+
+| # | Question | Result |
+|---|----------|--------|
+| 1 | What should staff do when a visitor arrives at Thumhara Centre? | Pass |
+| 2 | What should staff do if a visitor does not have identification? | Pass |
+| 3 | How should visitor signing in and out be recorded? | Pass |
+
+Response indicators for all three questions:
+
+| Check | Result |
+|-------|--------|
+| ANSWER_STATUS | 200 |
+| RESPONSE_ORG | thumhara-centre |
+| CONFIDENCE | source_grounded |
+| RESULT_COUNT | 5 |
+| SOURCE_COUNT | 5 |
+| SOURCE_DOC_IDS | 42d7b206-b85f-46a5-b0f2-1c3b6ff87ca3 |
+| SOURCE_TITLES | Thumhara Centre Visitor Sign-In and Identification Policy |
+| HAS_ANSWER | true |
+| NOT_FALLBACK | true |
+| HAS_SOURCES | true |
+| SOURCE_LOOKS_CORRECT | true |
+| ANSWER_DEBUG_PASS | true |
+
+### Safety Boundary Preserved
+
+| Check | Result |
+|-------|--------|
+| FINAL_DOC_STATUS | draft |
+| FINAL_DOC_APPROVED_FOR_STAFF_VISIBILITY | false |
+| FINAL_DOC_STILL_NOT_STAFF_VISIBLE | true |
+| TC-POL-002 to TC-POL-010 remain pending | All gates off — no embedding or answer-debug triggered |
+| No staff-facing /ask exposure | Confirmed |
+| No public admin proxy change | Confirmed |
+| No QCS/demo-org leakage | Confirmed — tenant-scope fix applied before any answer-debug |
+| No dummy override used | Confirmed |
+
+### Conclusion
+
+TC-POL-001 is now **Lane B — admin answer-debug only**. Embedding is complete and admin-only source-grounded answer-debug has passed.
+
+**TC-POL-001 must not be used for staff-facing AI answers or live operational use.**
+
+Staff-facing use must remain blocked until all of the following are complete:
+- Thumhara Centre leadership has reviewed and approved the draft policy content
+- Document status is updated from draft to approved
+- `approved_for_staff_visibility` is deliberately enabled
+- A wider quality and safety scorecard has been completed
+
+**Next planned step:** A 10-question TC-POL-001 answer quality scorecard before embedding or approving any further TC-POL policies.
 
 ---
 
@@ -1368,6 +1482,8 @@ Use this template to record each policy decision. Add a new row each time a docu
 | 2026-05-07 | CC34 Infection Control Policy and Procedure | BLOCKED — QCS content restriction | Inaam Basit | CC34 is QCS-licensed content. QCS content restriction applies. Extended admin QA previously completed; not for staff visibility or further AI-RAG expansion until written permission obtained. DB flag state is historical registry state only; no database flags changed in this docs-only record. Must not be used for staff-style Ask, staff-visible answers, answer-debug expansion, embedding expansion, demo, pilot, or production use unless written permission obtained. A later data-governance cleanup slice should review whether DB flags/embeddings need to be disabled, hidden, archived, or removed. | No flags changed | N/A — restriction recorded | Obtain written permission from QCS / legal confirming AI/RAG use case is permitted before any further use |
 | 2026-05-07 | QQ03 Complaints, Suggestions and Compliments Policy and Procedure | BLOCKED — QCS content restriction | Inaam Basit | QQ03 is QCS-licensed content. QCS content restriction applies. DB flag state is historical registry state only; no database flags changed in this docs-only record. Must not be used for staff-style Ask, staff-visible answers, answer-debug expansion, embedding expansion, demo, pilot, or production use unless written permission obtained. A later data-governance cleanup slice should review whether DB flags/embeddings need to be disabled, hidden, archived, or removed. | No flags changed | N/A — restriction recorded | Obtain written permission from QCS / legal confirming AI/RAG use case is permitted before any further use |
 | 2026-05-11 | TC-POL-001 Thumhara Centre Visitor Sign-In and Identification Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Safe low-risk operational content. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). | No flags enabled | Upload confirmed — 14 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; run brief admin answer-debug spot-check before any staff-visibility decision |
+| 2026-05-12 | TC-POL-001 Thumhara Centre Visitor Sign-In and Identification Policy | B — governance gates enabled, embedding complete | Inaam Basit | `approved_for_embedding` and `approved_for_source_grounded_answers` deliberately enabled; governance_status set to approved_for_ai; `approved_for_staff_visibility` remains false — document status is draft, staff visibility blocked. Tenant-scope bug found (admin vector search fell back to demo-org) and fixed in commit e8f1325 before any answer-debug was run. | `approved_for_embedding`, `approved_for_source_grounded_answers` | Embedding: 14/14 chunks embedded, 0 failed, 3,119 tokens, <$0.01 cost. Tenant-scope fix verified: 12/12 scope tests passed, 188 full backend tests passed. Live vector search post-fix confirmed RESPONSE_ORG=thumhara-centre, ONLY_EXPECTED_DOC=true. | Run admin-only answer-debug spot-check before any staff-visibility decision |
+| 2026-05-12 | TC-POL-001 Thumhara Centre Visitor Sign-In and Identification Policy | B — admin answer-debug only | Inaam Basit | Controlled admin-only answer-debug completed via authenticated admin proxy. Three visitor-management questions tested. All responses source-grounded to TC-POL-001 only; no fallback; sources cited. Staff visibility remains blocked (approved_for_staff_visibility=false; document status=draft). No QCS/demo-org leakage; no staff-facing /ask exposure; no dummy override; TC-POL-002 to TC-POL-010 remain pending with all gates off. | No new flags changed | Pass — 3/3 questions passed; CONFIDENCE=source_grounded; SOURCE_DOC_IDS=42d7b206-b85f-46a5-b0f2-1c3b6ff87ca3 confirmed for all three; ANSWER_DEBUG_PASS=true | Run 10-question TC-POL-001 answer quality scorecard before embedding or approving any further TC-POL policies; do not enable staff visibility until leadership review, status approved, staff visibility gate approved, and wider quality/safety scorecard complete |
 | 2026-05-11 | TC-POL-002 Thumhara Centre Mobile Phone and Portable Device Use Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Safe operational content but touches confidentiality, data protection, and device-use responsibilities. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). Clean-corpus replacement for the QCS-blocked AC32 in the Mobile Devices subject area. | No flags enabled | Upload confirmed — 15 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; run brief admin answer-debug spot-check (with careful attention to confidentiality, data protection, and photography/recording questions) before any staff-visibility decision |
 | 2026-05-11 | TC-POL-003 Thumhara Centre Confidentiality and Information Handling Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Covers confidentiality obligations, information-sharing duties, possible data breaches, safeguarding escalation, legal/privacy questions, and external information requests. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). Fills the Confidentiality and Information Handling gap left by the parked QCS document CR07. | No flags enabled | Upload confirmed — 14 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; admin answer-debug must be conducted with particular care — confidentiality breach, data breach, information-sharing, safeguarding override, legal/privacy, and external information request question types must all be verified before any AI-answer or staff-visibility decision |
 | 2026-05-11 | TC-POL-004 Thumhara Centre Infection Prevention and Basic Hygiene Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Covers infection prevention, illness symptoms, PPE, hygiene, bodily fluids, contaminated items, suspected outbreaks, public health guidance, health and safety, safeguarding escalation, and emergency escalation. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). Clean-corpus alternative to the QCS-blocked CC34 in the Infection Prevention subject area. | No flags enabled | Upload confirmed — 14 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; admin answer-debug must be conducted with particular care — health, infection, outbreak, contaminated bodily fluid, PPE, safeguarding escalation, and emergency escalation question types must all be verified to produce correct escalation or appropriately scoped answers before any AI-answer or staff-visibility decision |

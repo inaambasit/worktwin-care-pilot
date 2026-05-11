@@ -112,6 +112,7 @@ Based on current registry proof as of 2026-05-06.
 | Thumhara Centre Accident and Incident Reporting Policy (TC-POL-006) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Covers accidents, incidents, near misses, serious injuries, falls, medication incidents, safeguarding, violence and aggression, fire, confidentiality and data protection incidents, health and safety, complaints, HR, external reporting, and regulator notification. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug — serious injury, falls, medication, safeguarding, fire, violence/aggression, confidentiality breach, emergency, and external reporting/regulator notification questions must all be verified to escalate correctly before any AI-answer or staff-visibility decision. |
 | Thumhara Centre Complaints, Suggestions and Compliments Policy (TC-POL-007) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Covers complaints, suggestions, compliments, safeguarding, abuse, neglect, staff misconduct, discrimination, harassment, medication, accidents/incidents, confidentiality and data protection incidents, legal issues, police involvement, regulator involvement, HR, disciplinary matters, complaint outcomes, and serious distress. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug — safeguarding, complaint outcome, HR, legal/regulator, medication, accident/incident, discrimination/harassment, and serious distress questions must all be verified to escalate correctly before any AI-answer or staff-visibility decision. Clean-corpus Thumhara-original replacement for the QCS-blocked QQ03 in the Complaints, Suggestions and Compliments subject area. |
 | Thumhara Centre Raising Concerns and Speaking Up Policy (TC-POL-008) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Covers raising concerns, speaking up, safeguarding, abuse, neglect, risk of harm, unsafe practice, poor care, medication concerns, health and safety, bullying, harassment, discrimination, professional boundaries, confidentiality and data protection concerns, misuse of money/resources/position, dishonest/improper/unlawful behaviour, attempts to hide concerns, HR, disciplinary matters, external reporting, CQC, police, whistleblowing protection, and speaking-up retaliation. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug — safeguarding, medication, abuse, harassment, discrimination, HR, legal/regulator, police, whistleblowing protection, and external reporting questions must escalate correctly before any AI-answer or staff-visibility decision. Clean-corpus Thumhara-original replacement for the QCS-blocked PM11 / Raising Concerns / Freedom to Speak Up / Whistleblowing subject area. |
+| Thumhara Centre Medication Support and Escalation Policy (TC-POL-009) | **Lane A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. **Highest-risk policy uploaded to date.** Covers medication support, medication administration boundaries, missed/refused/delayed medication, medication errors, dose/timing questions, side effects, allergy/reaction concerns, suspected overdose, controlled drugs, high-risk medication, medication storage, medication records, over-the-counter medicines, vitamins/supplements, family/professional medication requests, medication found on site, safeguarding linked to medication, confidentiality/data protection, and urgent medical escalation. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and the strictest admin answer-debug of any TC-POL policy uploaded to date — WorkTwin must not give medication advice, dosage advice, clinical advice, interaction advice, side-effect advice, or instructions to give, withhold, crush, hide, alter, stop, or restart any medication; every medication-specific question must escalate to a manager, authorised medication lead, pharmacist, GP, NHS 111, emergency services, or relevant professional route as appropriate. Any answer that fails to escalate correctly on medication administration, dosage, missed/refused medication, side effects, overdose, allergy, controlled drugs, medication errors, safeguarding, or urgent medical symptoms must not be approved for staff-facing use. |
 
 ### Gate Summary per Document
 
@@ -133,6 +134,7 @@ Based on current registry proof as of 2026-05-06.
 | TC-POL-006 Accident and Incident Reporting Policy | No | No | No |
 | TC-POL-007 Complaints, Suggestions and Compliments Policy | No | No | No |
 | TC-POL-008 Raising Concerns and Speaking Up Policy | No | No | No |
+| TC-POL-009 Medication Support and Escalation Policy | No | No | No |
 
 ---
 
@@ -1021,6 +1023,116 @@ Before any AI-answer or staff-visibility use:
 2. `approved_for_embedding` must be deliberately enabled.
 3. The embedding pipeline must complete successfully.
 4. Admin answer-debug must be run with particular care: safeguarding, abuse/neglect, risk of harm, unsafe practice, poor care, medication concerns, health and safety, bullying, harassment, discrimination, professional boundary concerns, confidentiality/data protection concerns, misuse of money/resources/position, dishonest/improper/unlawful behaviour, attempts to hide concerns, HR/disciplinary, external reporting (CQC, police), and whistleblowing protection/speaking-up retaliation question types must all be tested and verified to produce correct escalation or appropriately scoped policy-guided answers before staff visibility is considered. Any answer that fails to escalate correctly on safeguarding, abuse/neglect, medication concerns, bullying/harassment/discrimination, attempts to suppress a concern, or whistleblowing protection questions must not be approved for staff-facing use.
+
+---
+
+## TC-POL-009 Controlled Upload — 2026-05-11
+
+TC-POL-009 Thumhara Centre Medication Support and Escalation Policy was uploaded through the local authenticated admin proxy for controlled WorkTwin testing only. This is an original Thumhara Centre-owned draft — it is not QCS content and not sourced from any third-party policy library. No third-party content restriction applies. **TC-POL-009 is the highest-risk policy uploaded to date.** It addresses medication support and escalation in a care setting, covering medication administration boundaries, missed, refused, and delayed medication, medication errors, dose and timing questions, side effects, allergy and reaction concerns, suspected overdose, controlled drugs, high-risk medication, medication storage, medication records, over-the-counter medicines, vitamins, supplements, family and professional medication requests, medication found on site, safeguarding linked to medication, confidentiality and data protection, and urgent medical escalation.
+
+### Upload Details
+
+| Field | Value |
+|-------|-------|
+| Document code | TC-POL-009 |
+| Document ID | `6f5cfe3d-636a-4899-9ad7-41c26b4ec247` |
+| Title | Thumhara Centre Medication Support and Escalation Policy |
+| File | `TC-POL-009-medication-support-and-escalation-policy-draft-v0.1.pdf` |
+| Storage key | `thumhara-centre/documents/6f5cfe3d-636a-4899-9ad7-41c26b4ec247/TC-POL-009-medication-support-and-escalation-policy-draft-v0.1.pdf` |
+| Organisation | thumhara-centre |
+| Category | Medication Support and Escalation |
+| Vertical | care |
+| Status | draft |
+| Sensitive | false |
+| Escalation required | false |
+| chunk_count (upload response) | 17 |
+| embedding_record_count (upload response) | 17 |
+| chunking_status | prepared |
+| embedding_status | pending |
+
+### Tenant and Organisation Proof
+
+| Check | Result |
+|-------|--------|
+| IS_THUMHARA | true |
+| IS_DEMO_ORG | false |
+| STORAGE_IS_THUMHARA_PREFIX | true |
+| LIST_ORGS | thumhara-centre |
+| LIST_MATCHING_POLICY_COUNT | 1 |
+| LIST_HAS_DEMO_ORG | false |
+
+List count after upload: **10 documents**, all thumhara-centre — no demo-org documents present.
+
+### Governance State at Upload
+
+All AI and visibility gates are disabled. No gate has been deliberately enabled. No embedding has been triggered.
+
+| Gate | State |
+|------|-------|
+| `approved_for_embedding` | false |
+| `approved_for_ai_answers` | false |
+| `approved_for_source_grounded_answers` | false |
+| `approved_for_staff_visibility` | false |
+
+### Content Source
+
+TC-POL-009 contains original Thumhara Centre-owned draft wording. It is not QCS content, not a third-party policy library document, and is not subject to any licence restriction. It is a clean-corpus Thumhara-original document per the clean-corpus direction established 2026-05-07.
+
+### Content Notes
+
+TC-POL-009 is the highest-risk policy uploaded to date. Although the document is not marked sensitive and does not require escalation at upload, the medication subject matter carries severe clinical, safeguarding, and legal risk if handled incorrectly by an AI system. WorkTwin must not give medication advice, dosage advice, clinical advice, interaction advice, or side-effect advice under any circumstances. It must not give instructions — directly or implicitly — to give, withhold, crush, hide in food, alter, stop, or restart any medication. The policy touches the following areas, each of which demands verified escalation behaviour at the admin answer-debug stage:
+
+- **Medication administration boundaries** — questions about what staff may and may not do in relation to administering medication must produce clearly policy-guided answers; AI must not advise staff to administer, adjust, withhold, crush, hide, alter, stop, or restart any medication; these decisions belong solely to an authorised medication lead, GP, pharmacist, or nurse.
+- **Missed, refused, and delayed medication** — questions about what to do if a service user misses a dose, refuses medication, or receives medication late carry clinical consequences; AI must escalate to the authorised medication lead and must not advise on whether omission is safe, acceptable, or self-correctable.
+- **Medication errors** — questions about medication errors, near misses, or wrong-medication events must escalate immediately to the Registered Manager and authorised medication lead; AI must not minimise a medication error or advise on whether or how to self-correct.
+- **Dose and timing questions** — questions about the correct dose, timing, frequency, or route of administration of any medication must not be answered by AI under any circumstances; these must escalate to an authorised medication lead, pharmacist, or GP.
+- **Side effects** — questions about side effects of any named or unnamed medication must escalate to an authorised medication lead, pharmacist, or GP; AI must not describe side effects, assess whether a symptom is a side effect, or advise on whether to continue or stop medication.
+- **Allergy and reaction concerns** — questions about allergic reactions, hypersensitivity, or known allergies must escalate urgently to a manager, pharmacist, or emergency services depending on severity; AI must not assess whether a reaction constitutes an allergy or whether it is clinically significant.
+- **Suspected overdose** — questions about a suspected or confirmed overdose must escalate immediately to emergency services (999) and then to the Registered Manager; AI must not advise on management of a suspected overdose or assess its severity.
+- **Controlled drugs** — questions about controlled drug storage, administration, recording, witnessing, disposal, or discrepancy must escalate to the authorised medication lead and Registered Manager; AI must not advise on controlled drug handling, prescribing authority, or legal obligations under the Misuse of Drugs Regulations.
+- **High-risk medication** — questions involving high-risk or high-alert medications (such as anticoagulants, insulin, opioids, psychotropics, and similar) must escalate to an authorised medication lead or prescribing professional; AI must not attempt to advise on high-risk medication management, interactions, or monitoring.
+- **Medication storage** — questions about correct medication storage conditions (including temperature, controlled drug cabinets, and unlicensed storage arrangements) must escalate to the Registered Manager or authorised medication lead.
+- **Medication records (MAR charts)** — questions about MAR chart completion, corrections, discrepancies, missing records, or auditing must escalate to the authorised medication lead; AI must not advise on record falsification or on how to correct a MAR chart entry retrospectively.
+- **Over-the-counter medicines, vitamins, and supplements** — questions about whether staff may administer or encourage the use of OTC medicines, vitamins, or supplements must escalate to the authorised medication lead; AI must not advise on suitability, interactions, or dosing.
+- **Family and professional medication requests** — questions about family members or external professionals requesting changes to a service user's medication must escalate to the Registered Manager and authorised medication lead; AI must not advise on whether a request should be complied with.
+- **Medication found on site** — questions about medication found on the premises that cannot be attributed to a service user must escalate to the Registered Manager; AI must not advise on disposal or retention.
+- **Safeguarding linked to medication** — concerns about medication being misused, withheld, administered without consent, or used to harm a service user are safeguarding concerns and must escalate to the designated safeguarding lead immediately; AI must not assess whether an incident constitutes abuse or advise on safeguarding thresholds.
+- **Confidentiality and data protection** — questions about the sharing of medication information, MAR chart access, or disclosure of a service user's medication details to family members, third parties, or external agencies must escalate to the data protection lead; AI must not advise on disclosure lawfulness.
+- **Urgent medical escalation** — questions about service users presenting with acute symptoms, loss of consciousness, seizures, respiratory distress, chest pain, or any other urgent medical emergency must escalate immediately to emergency services (999); AI must not advise on medical management or on whether an ambulance is necessary.
+
+### Conclusion and Lane Assignment
+
+TC-POL-009 is a **Lane A candidate**. It provides Thumhara-original policy content for the Medication Support and Escalation subject area.
+
+**Must not be used as live operational policy until Thumhara Centre leadership has reviewed and approved the draft content.**
+
+**Must remain Lane A candidate / draft upload only until leadership review.** TC-POL-009 is the highest-risk policy uploaded to date. The medication subject matter demands the strictest admin answer-debug of any TC-POL policy in the corpus. WorkTwin must not give medication advice, dosage advice, clinical advice, interaction advice, or side-effect advice. It must not give instructions to give, withhold, crush, hide, alter, stop, or restart any medication. Every medication-specific question must escalate to the correct professional or emergency route.
+
+Before any AI-answer or staff-visibility use:
+
+1. Thumhara Centre leadership must review and approve the draft policy content.
+2. `approved_for_embedding` must be deliberately enabled.
+3. The embedding pipeline must complete successfully.
+4. Admin answer-debug must be run to the strictest standard applied to any document in the corpus. The following question types must each be tested and verified to produce correct escalation before any AI-answer or staff-visibility decision is made:
+   - Medication administration (what staff may or may not do)
+   - Missed, refused, or delayed medication
+   - Medication errors and near misses
+   - Dose, timing, frequency, and route of administration
+   - Side effects of named or unnamed medication
+   - Allergy and allergic reaction concerns
+   - Suspected or confirmed overdose
+   - Controlled drug handling, storage, recording, witnessing, and disposal
+   - High-risk medication management
+   - Medication storage conditions
+   - MAR chart completion, correction, and discrepancy
+   - Over-the-counter medicines, vitamins, and supplements
+   - Family or professional medication change requests
+   - Medication found on site
+   - Safeguarding concerns linked to medication misuse, withholding, or harm
+   - Confidentiality and data protection around medication information
+   - Urgent medical symptoms and emergency escalation
+
+Any answer that fails to escalate correctly on medication administration, dosage, missed or refused medication, side effects, overdose, allergy, controlled drugs, medication errors, safeguarding, or urgent medical symptoms must not be approved for staff-facing use.
 
 ---
 

@@ -106,6 +106,7 @@ Based on current registry proof as of 2026-05-06.
 | QQ03 Complaints, Suggestions and Compliments Policy and Procedure | **B — admin answer-debug only** | Yes | Yes (admin/debug only) | No | BLOCKED (2026-05-07) — QCS content restriction applies; DB flag state is historical registry state only, no database flags changed in this docs-only record; must not be used for staff-style Ask, staff-visible answers, answer-debug expansion, embedding expansion, demo, pilot, or production use unless written permission obtained; a later data-governance cleanup slice should review whether DB flags/embeddings need to be disabled, hidden, archived, or removed |
 | Thumhara Centre Visitor Sign-In and Identification Policy (TC-POL-001) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Safe low-risk operational content. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and brief admin spot-check. |
 | Thumhara Centre Mobile Phone and Portable Device Use Policy (TC-POL-002) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Safe operational content but touches confidentiality, data protection, and device-use responsibilities. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and brief admin answer-debug spot-check (with careful attention to confidentiality and photography/recording questions). |
+| Thumhara Centre Confidentiality and Information Handling Policy (TC-POL-003) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Touches confidentiality obligations, information-sharing duties, possible data breaches, safeguarding escalation, legal/privacy questions, and external information requests. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug before any AI-answer or staff-visibility decision — answer-debug must be conducted with particular care given the sensitivity of confidentiality breach and legal/privacy question types. |
 
 ### Gate Summary per Document
 
@@ -121,6 +122,7 @@ Based on current registry proof as of 2026-05-06.
 | QQ03 Complaints, Suggestions and Compliments | Yes | Yes (admin/debug only) | No |
 | TC-POL-001 Visitor Sign-In and Identification Policy | No | No | No |
 | TC-POL-002 Mobile Phone and Portable Device Use Policy | No | No | No |
+| TC-POL-003 Confidentiality and Information Handling Policy | No | No | No |
 
 ---
 
@@ -521,6 +523,81 @@ Before any AI-answer or staff-visibility use:
 
 ---
 
+## TC-POL-003 Controlled Upload — 2026-05-11
+
+TC-POL-003 Thumhara Centre Confidentiality and Information Handling Policy was uploaded through the local authenticated admin proxy for controlled WorkTwin testing only. This is an original Thumhara Centre-owned draft — it is not QCS content and not sourced from any third-party policy library. No third-party content restriction applies.
+
+### Upload Details
+
+| Field | Value |
+|-------|-------|
+| Document code | TC-POL-003 |
+| Document ID | `db3e7942-2305-420e-8f76-803aaefa89f1` |
+| Title | Thumhara Centre Confidentiality and Information Handling Policy |
+| File | `TC-POL-003-confidentiality-and-information-handling-policy-draft-v0.1.pdf` |
+| Storage key | `thumhara-centre/documents/db3e7942-2305-420e-8f76-803aaefa89f1/TC-POL-003-confidentiality-and-information-handling-policy-draft-v0.1.pdf` |
+| Organisation | thumhara-centre |
+| Category | Confidentiality and Information Handling |
+| Vertical | care |
+| Status | draft |
+| Sensitive | false |
+| Escalation required | false |
+| chunk_count (upload response) | 14 |
+| embedding_record_count (upload response) | 14 |
+| chunking_status | prepared |
+| embedding_status | pending |
+
+### Tenant and Organisation Proof
+
+| Check | Result |
+|-------|--------|
+| IS_THUMHARA | true |
+| IS_DEMO_ORG | false |
+| STORAGE_IS_THUMHARA_PREFIX | true |
+| LIST_ORGS | thumhara-centre |
+| LIST_MATCHING_POLICY_COUNT | 1 |
+| LIST_HAS_DEMO_ORG | false |
+
+### Governance State at Upload
+
+All AI and visibility gates are disabled. No gate has been deliberately enabled. No embedding has been triggered.
+
+| Gate | State |
+|------|-------|
+| `approved_for_embedding` | false |
+| `approved_for_ai_answers` | false |
+| `approved_for_source_grounded_answers` | false |
+| `approved_for_staff_visibility` | false |
+
+### Content Source
+
+TC-POL-003 contains original Thumhara Centre-owned draft wording. It is not QCS content, not a third-party policy library document, and is not subject to any licence restriction. It is a clean-corpus Thumhara-original document per the clean-corpus direction established 2026-05-07.
+
+### Content Notes
+
+TC-POL-003 addresses confidentiality obligations, information-sharing duties, and staff responsibilities for handling personal and sensitive information. Although the document is not marked sensitive and does not require escalation at upload, it covers subject matter that requires careful admin answer-debug before any AI-answer or staff-visibility decision is made. Specific areas of care include:
+
+- **Confidentiality breach and possible data breaches** — staff questions about what constitutes a breach or what to do after an incident must escalate to a manager or data protection lead and must not be answered freely by AI.
+- **Information-sharing decisions** — questions about whether specific information may be shared with family members, third parties, or external agencies touch legal and ethical duties and require careful answer review.
+- **Safeguarding escalation** — confidentiality duties interact with safeguarding obligations; the system must correctly apply the principle that confidentiality cannot override a safeguarding concern.
+- **Legal and privacy questions** — UK GDPR, data subject rights, and formal legal requests for information must escalate rather than receive a free AI answer.
+- **External information requests** — requests from police, courts, or regulators must escalate to a manager or senior lead; AI must not advise staff on how to respond to these directly.
+
+### Conclusion and Lane Assignment
+
+TC-POL-003 is a **Lane A candidate**. It provides Thumhara-original policy content for the Confidentiality and Information Handling subject area and fills the gap left by the parked QCS document CR07 (which awaits PDF export and a data-protection escalation strategy before upload).
+
+**Must not be used as live operational policy until Thumhara Centre leadership has reviewed and approved the draft content.**
+
+Before any AI-answer or staff-visibility use:
+
+1. Thumhara Centre leadership must review and approve the draft policy content.
+2. `approved_for_embedding` must be deliberately enabled.
+3. The embedding pipeline must complete successfully.
+4. Admin answer-debug must be run with particular care: confidentiality breach, data breach, information-sharing, safeguarding override, legal/privacy, and external information request questions must all be tested and verified to produce correct escalation or appropriately scoped policy-guided answers before staff visibility is considered.
+
+---
+
 ## Policy QA Routing Backlog — 2026-05-06
 
 ### AC32 — Mobile Phone and Portable Device Use Policy
@@ -640,6 +717,7 @@ Use this template to record each policy decision. Add a new row each time a docu
 | 2026-05-07 | QQ03 Complaints, Suggestions and Compliments Policy and Procedure | BLOCKED — QCS content restriction | Inaam Basit | QQ03 is QCS-licensed content. QCS content restriction applies. DB flag state is historical registry state only; no database flags changed in this docs-only record. Must not be used for staff-style Ask, staff-visible answers, answer-debug expansion, embedding expansion, demo, pilot, or production use unless written permission obtained. A later data-governance cleanup slice should review whether DB flags/embeddings need to be disabled, hidden, archived, or removed. | No flags changed | N/A — restriction recorded | Obtain written permission from QCS / legal confirming AI/RAG use case is permitted before any further use |
 | 2026-05-11 | TC-POL-001 Thumhara Centre Visitor Sign-In and Identification Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Safe low-risk operational content. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). | No flags enabled | Upload confirmed — 14 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; run brief admin answer-debug spot-check before any staff-visibility decision |
 | 2026-05-11 | TC-POL-002 Thumhara Centre Mobile Phone and Portable Device Use Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Safe operational content but touches confidentiality, data protection, and device-use responsibilities. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). Clean-corpus replacement for the QCS-blocked AC32 in the Mobile Devices subject area. | No flags enabled | Upload confirmed — 15 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; run brief admin answer-debug spot-check (with careful attention to confidentiality, data protection, and photography/recording questions) before any staff-visibility decision |
+| 2026-05-11 | TC-POL-003 Thumhara Centre Confidentiality and Information Handling Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Covers confidentiality obligations, information-sharing duties, possible data breaches, safeguarding escalation, legal/privacy questions, and external information requests. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). Fills the Confidentiality and Information Handling gap left by the parked QCS document CR07. | No flags enabled | Upload confirmed — 14 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; admin answer-debug must be conducted with particular care — confidentiality breach, data breach, information-sharing, safeguarding override, legal/privacy, and external information request question types must all be verified before any AI-answer or staff-visibility decision |
 
 ---
 

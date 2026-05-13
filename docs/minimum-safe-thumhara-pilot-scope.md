@@ -102,6 +102,65 @@ Staff-visible approval for each document must still be opened separately, delibe
 
 **High-risk and specialist policies remain excluded.** TC-POL-006 (Accident and Incident Reporting), TC-POL-007 (Complaints), TC-POL-008 (Raising Concerns and Speaking Up), TC-POL-009 (Medication Support and Escalation) and TC-POL-010 (Safeguarding Adults Awareness and Escalation) are not candidates for staff visibility at this stage. They remain escalation-only or admin-test-only.
 
+### 4S.97C proof — Staff Ask baseline blocks candidate documents before staff visibility
+
+**Date:** 2026-05-13
+
+Before opening any staff visibility gate, the staff-facing `/ask` endpoint was inspected and tested to confirm that TC-POL-001 to TC-POL-004 do not surface to staff while `status=draft` and `approved_for_staff_visibility=false`.
+
+#### Code inspection
+
+`/ask` routes through `_can_use_document_for_staff_ask()`, which composes `_can_show_document_to_staff()`. A document is eligible for staff Ask only if all of the following conditions are met simultaneously:
+
+- `is_sensitive=false`
+- `escalation_required=false`
+- `contains_qcs_or_third_party_content` is not true
+- `real_document=true`
+- `dummy_document=false`
+- `status=approved`
+- `approved_for_staff_visibility=true`
+- `approved_for_source_grounded_answers=true`
+- `approved_for_embedding=true`
+- `governance_reviewed_by` set
+- `governance_reviewed_at` set
+- `embedding_status=indexed`
+- `access_roles` includes All Staff or the requesting user's role
+
+If no eligible staff-visible source remains after filtering, `/ask` returns the safe fallback response. The response never returns `document_id`, `chunk_id`, `similarity`, `chunk_index`, governance flags or source preview to staff.
+
+Because all four candidate documents currently have `status=draft` and `approved_for_staff_visibility=false`, none can pass the eligibility check.
+
+#### Auth proof
+
+On the standard local backend (port 8000, `PILOT_AUTH_MODE=true`), an unauthenticated `POST /ask` returned:
+
+```
+HTTP 401 — "Missing Authorization header."
+```
+
+Unauthenticated staff Ask access is blocked.
+
+#### Baseline behaviour proof (temporary local test, port 8001)
+
+A temporary second backend instance was run on port 8001 with process-only environment overrides (`PILOT_AUTH_MODE=false`, `PILOT_ORGANISATION_ID=thumhara-centre`, `PILOT_USER_ROLE=Care Worker`, `ALLOWED_ORGANISATION_IDS=demo-org,thumhara-centre`). No `.env` file, Git history, Render, Vercel or Supabase configuration was modified.
+
+Four questions covering the candidate policy set were submitted before opening any staff visibility gate:
+
+| # | Question | `allowed_to_answer` | `requires_escalation` | `source_count` | `risk_category` |
+|---|----------|--------------------|-----------------------|----------------|-----------------|
+| 1 | How should a visitor sign in at Thumhara Centre? | `false` | `true` | 0 | `standard` |
+| 2 | Can staff use their personal phone during work? | `false` | `true` | 0 | `standard` |
+| 3 | Can staff share confidential information with a family member if they ask for it? | `false` | `true` | 0 | `legal` |
+| 4 | When should staff wash their hands? | `false` | `true` | 0 | `standard` |
+
+All four returned `allowed_to_answer=false`, `requires_escalation=true` and `source_count=0`. The confidentiality question was correctly classified as `risk_category=legal`.
+
+#### Verdict
+
+**PASS.** TC-POL-001 to TC-POL-004 do not leak into staff-facing Ask while `status=draft` and `approved_for_staff_visibility=false`. Lane B / admin answer-debug approval is not sufficient for staff Ask eligibility. Staff visibility must still be opened separately, deliberately and policy-by-policy, after all technical gates in section 7 are satisfied.
+
+Staff visibility is not enabled. The pilot is not live. Staff users cannot access these policies yet.
+
 ---
 
 ## 6. Safety and escalation rules

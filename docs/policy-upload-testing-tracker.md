@@ -1542,6 +1542,71 @@ The following policy areas must not be AI-answerable. Assign lane C or D.
 
 ---
 
+## Cross-Policy Source-Routing Sanity Check — 2026-05-13
+
+After TC-POL-001, TC-POL-002, and TC-POL-004 were each approved for admin-only answer-debug, a cross-policy source-routing sanity check was run to confirm WorkTwin retrieves and answers from the correct policy document for each policy-specific question, with no source mixing across approved documents.
+
+### Environment Setup Note
+
+Local testing initially failed because the backend was restarted with plain `python` instead of `backend\.venv\Scripts\python.exe`, causing an `No module named 'openai'` import error on vector search. This was a local environment setup issue only — no database, document, embedding, RPC, governance, or policy issue was involved. The backend was restarted correctly using:
+
+```
+backend\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 8000
+```
+
+with `backend\.env` loaded into the PowerShell process. Vector search and answer-debug worked normally once the correct venv was used.
+
+### Pre-Checks
+
+- Repo clean at commit `0e512b3`
+- TC-POL-001, TC-POL-002, and TC-POL-004 all visible under `thumhara-centre`
+- All three documents confirmed: `status=draft`, `governance_status=approved_for_ai`, `approved_for_embedding=true`, `approved_for_source_grounded_answers=true`, `approved_for_staff_visibility=false`, `embedding_status=indexed`, `real_document=true`, `dummy_document=false`
+- Embedding readiness confirmed: TC-POL-001 14/14, TC-POL-002 15/15, TC-POL-004 14/14 — all 0 failed, ready for vector search
+- Direct Supabase RPC self-match test passed for TC-POL-001: 5 rows returned, top similarity=1, all TC-POL-001 rows, org=thumhara-centre
+
+### Vector Search Smoke Test
+
+| Field | Value |
+|-------|-------|
+| Query | What should visitors do when they arrive at Thumhara Centre? |
+| Route | /documents/search-vector |
+| Header | X-WorkTwin-Admin-Org=thumhara-centre |
+| organisation_id returned | thumhara-centre |
+| result_count | 5 |
+| source_doc_ids | 42d7b206-b85f-46a5-b0f2-1c3b6ff87ca3 only |
+| Result | PASS |
+
+### Cross-Policy Answer-Debug Sanity Check
+
+Route: `/documents/answer-debug` — Authorization: ADMIN_TOKEN — Header: `X-WorkTwin-Admin-Org=thumhara-centre` — Body: `organisation_id=demo-org` (deliberate, to confirm tenant-scope override) — `match_count=5`, `allow_dummy_override=false`
+
+| # | Policy | Query | Expected doc ID | organisation_id | confidence | source_doc_ids | only_expected_doc | Result |
+|---|--------|-------|-----------------|-----------------|------------|----------------|-------------------|--------|
+| 1 | TC-POL-001 Visitor Sign-In | What should visitors do when they arrive at Thumhara Centre? | 42d7b206-b85f-46a5-b0f2-1c3b6ff87ca3 | thumhara-centre | source_grounded | 42d7b206-b85f-46a5-b0f2-1c3b6ff87ca3 | true | PASS |
+| 2 | TC-POL-002 Mobile Phone | Can staff use a personal mobile phone while working at Thumhara Centre? | 62996113-a990-4630-9380-67da139cb37a | thumhara-centre | source_grounded | 62996113-a990-4630-9380-67da139cb37a | true | PASS |
+| 3 | TC-POL-004 Infection Prevention | What should staff do to reduce the risk of infection spreading at Thumhara Centre? | b784cb90-c0f1-48bc-8f88-689c6de7f857 | thumhara-centre | source_grounded | b784cb90-c0f1-48bc-8f88-689c6de7f857 | true | PASS |
+
+### Overall Result
+
+**PASS — 3/3**
+
+- 3/3 answers source-grounded to the correct document only
+- 0 cross-policy source mixing
+- 0 demo-org leakage (header override confirmed effective)
+- 0 QCS leakage
+- 0 dummy-document leakage
+- Staff visibility remains blocked for all three
+- Staff-facing Ask remains blocked
+- Live operational use remains blocked
+
+### Decision
+
+TC-POL-001, TC-POL-002, and TC-POL-004 remain **Lane B — admin answer-debug only**. No staff visibility or Ask enablement.
+
+Next safe options: (1) document and pause; (2) proceed to TC-POL-003 embedding/answer-debug with extra care due to confidentiality and data-sharing sensitivity; or (3) run a broader negative-control test before adding further approved answer-debug documents.
+
+---
+
 ## Decision Log
 
 Use this template to record each policy decision. Add a new row each time a document is uploaded, promoted, demoted, or reviewed.
@@ -1578,6 +1643,7 @@ Use this template to record each policy decision. Add a new row each time a docu
 | 2026-05-11 | TC-POL-008 Thumhara Centre Raising Concerns and Speaking Up Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Covers raising concerns, speaking up, safeguarding, abuse, neglect, risk of harm, unsafe practice, poor care, medication concerns, health and safety, bullying, harassment, discrimination, professional boundaries, confidentiality and data protection concerns, misuse of money/resources/position, dishonest/improper/unlawful behaviour, attempts to hide concerns, HR, disciplinary matters, external reporting, CQC, police, whistleblowing protection, and speaking-up retaliation. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). List count after upload: 9 documents, all thumhara-centre. Clean-corpus Thumhara-original replacement for the QCS-blocked PM11 / Raising Concerns / Freedom to Speak Up / Whistleblowing subject area. | No flags enabled | Upload confirmed — 15 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; admin answer-debug must be conducted with particular care — safeguarding, abuse/neglect, risk of harm, unsafe practice, poor care, medication concerns, health and safety, bullying, harassment, discrimination, professional boundary concerns, confidentiality/data protection concerns, misuse of money/resources/position, dishonest/improper/unlawful behaviour, attempts to hide concerns, HR/disciplinary, external reporting (CQC, police), and whistleblowing protection/speaking-up retaliation question types must all be verified to escalate correctly before any AI-answer or staff-visibility decision; any answer that fails to escalate correctly on safeguarding, abuse/neglect, medication concerns, bullying/harassment/discrimination, attempts to suppress a concern, or whistleblowing protection questions must not be approved for staff-facing use |
 | 2026-05-11 | TC-POL-009 Thumhara Centre Medication Support and Escalation Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Highest medication-risk policy uploaded to date. Covers medication support, medication administration boundaries, missed/refused/delayed medication, medication errors, dose/timing questions, side effects, allergy/reaction concerns, suspected overdose, controlled drugs, high-risk medication, medication storage, medication records, over-the-counter medicines, vitamins/supplements, family/professional medication requests, medication found on site, safeguarding linked to medication, confidentiality/data protection, and urgent medical escalation. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). List count after upload: 10 documents, all thumhara-centre. | No flags enabled | Upload confirmed — 17 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; admin answer-debug must be conducted to the strictest medication standard — WorkTwin must not give medication advice, dosage advice, clinical advice, interaction advice, or side-effect advice; it must not instruct staff to give, withhold, crush, hide, alter, stop, or restart any medication; every medication-specific question must escalate to the correct professional or emergency route; any answer that fails to escalate correctly on medication administration, dosage, missed/refused medication, side effects, overdose, allergy, controlled drugs, medication errors, safeguarding linked to medication, or urgent medical symptoms must not be approved for staff-facing use |
 | 2026-05-11 | TC-POL-010 Thumhara Centre Safeguarding Adults Awareness and Escalation Policy | A candidate — draft upload only | Internal | Original Thumhara-owned draft; not QCS; not third-party. Highest safeguarding-risk policy uploaded to date. Covers safeguarding adults awareness, abuse, neglect, exploitation, coercion, domestic abuse, sexual safety, financial abuse, self-neglect, organisational abuse, modern slavery, online abuse, unexplained injury, emotional distress/fear, medication-related safeguarding, complaints linked to safeguarding, staff/volunteer/person-in-position-of-trust concerns, professional boundary concerns, confidentiality/information sharing, local authority safeguarding, CQC, police, emergency services, criminal behaviour, immediate danger, and external reporting. Upload was initiated inside Claude Code; completed successfully, working tree remained clean. Draft only — not approved for live operational use until reviewed by Thumhara Centre leadership. Uploaded via local authenticated admin proxy; organisation and tenant scoping confirmed (IS_THUMHARA=true, IS_DEMO_ORG=false). List count after upload: 11 documents, all thumhara-centre. | No flags enabled | Upload confirmed — 18 chunks prepared, embedding pending | Enable `approved_for_embedding` and trigger embedding pipeline after leadership review of draft content; admin answer-debug must be conducted to the strictest safeguarding standard — safeguarding, abuse, neglect, exploitation, coercion, domestic abuse, sexual safety, financial abuse, self-neglect, medication-related safeguarding, staff/volunteer/person-in-position-of-trust concerns, professional boundary concerns, confidentiality/information sharing in safeguarding contexts, local authority safeguarding, CQC, police, emergency services, criminal behaviour, immediate danger, and external reporting question types must all be verified to escalate correctly; WorkTwin must not decide whether abuse has occurred, whether a safeguarding referral is legally required, whether someone has capacity, whether police/local authority/CQC involvement is required, whether an allegation is true, or whether a staff member has committed misconduct; any answer that fails to escalate correctly on safeguarding, abuse, neglect, immediate danger, sexual safety, domestic abuse, staff misconduct, criminal behaviour, medication-related safeguarding, or external reporting must not be approved for staff-facing use |
+| 2026-05-13 | TC-POL-001, TC-POL-002, TC-POL-004 | B — admin answer-debug only (cross-policy check) | Inaam Basit | Cross-policy source-routing sanity check run after all three documents approved for admin-only answer-debug. Pre-checks confirmed all three docs indexed and governance flags unchanged. Local env setup issue (plain python instead of venv python) caused initial import error; resolved by restarting with backend venv — no database/embedding/governance issue. RPC self-match test passed for TC-POL-001 (5 rows, top similarity=1). Vector search smoke test passed (TC-POL-001 only, org=thumhara-centre). Answer-debug: 3/3 queries returned source_grounded answers to the correct document only; body sent organisation_id=demo-org, responses returned organisation_id=thumhara-centre — tenant-scope override confirmed; 0 cross-policy mixing; 0 demo-org/QCS/dummy leakage. Staff visibility and staff-facing Ask remain blocked for all three. | No flags changed | PASS — 3/3 source-grounded to correct document; 0 source mixing; 0 leakage | Next: (1) document and pause, (2) proceed to TC-POL-003 embedding/answer-debug with extra care, or (3) run a broader negative-control test before adding further approved answer-debug documents |
 
 ---
 

@@ -1125,6 +1125,7 @@ _TOPIC_PATTERNS: List[Tuple[str, "re.Pattern[str]"]] = [
         r'\b(disciplinary|grievance|payroll|sickness\s+absence|sickness|'
         r'redundancy|dismissal|capability|performance\s+management|'
         r'tribunal|annual\s+leave|holiday\s+pay|complaint|'
+        r'bullying|bullied|harass(?:ment|ed|ing)?|discriminat(?:ion|e[sd]?|ing)?|'
         r'\bhr\b|human\s+resources|employment\s+contract)\b',
         re.IGNORECASE,
     )),
@@ -1132,7 +1133,9 @@ _TOPIC_PATTERNS: List[Tuple[str, "re.Pattern[str]"]] = [
         r'\b(legal|solicitor|lawyer|cqc|regulator|regulatory|'
         r'compliance|ofsted|inspection|litigation|gdpr|data\s+protection|'
         r'ico|information\s+commissioner|named\s+individual|personal\s+data|'
-        r'health\s+and\s+safety|driving|vehicle)\b',
+        r'health\s+and\s+safety|driving|vehicle|'
+        r'confidential(?:ity)?|share\s+(?:confidential\s+)?information|'
+        r'information\s+(?:handling|sharing))\b',
         re.IGNORECASE,
     )),
 ]
@@ -1269,6 +1272,109 @@ def _classify_escalation_topic(query: str) -> Optional[str]:
         if pattern.search(query):
             return topic
     return None
+
+
+# ---------------------------------------------------------------------------
+# Specialist area definitions for answer-debug hardening — Milestone 4S.96L.
+# Each entry: (area_name, query_pattern, source_pattern).
+# query_pattern: identifies queries that require this specialist policy area.
+# source_pattern: matches document_title or category in the filtered source set.
+# First-match wins. Raw query text is never stored; only the resolved area name.
+# ---------------------------------------------------------------------------
+_SPECIALIST_AREAS: List[Tuple[str, "re.Pattern[str]", "re.Pattern[str]"]] = [
+    (
+        "safeguarding",
+        re.compile(
+            r'\b(safeguard(?:ing)?|abus(?:e[sd]?|ing)|neglect|harm|exploitation|'
+            r'vulnerable\s+adult)\b',
+            re.IGNORECASE,
+        ),
+        re.compile(r'\b(safeguard(?:ing)?)\b', re.IGNORECASE),
+    ),
+    (
+        "medication",
+        re.compile(
+            r'\b(medication|medicine|medic(?:ines)?|dose|dosage|'
+            r'missed\s+dose|overdose|mar\b|prescription|administer(?:ing)?)\b',
+            re.IGNORECASE,
+        ),
+        re.compile(r'\b(medication|medicine|medicines|mar)\b', re.IGNORECASE),
+    ),
+    (
+        "complaints",
+        re.compile(
+            r'\b(formal\s+complaint|family\s+complaint|complaint)\b',
+            re.IGNORECASE,
+        ),
+        re.compile(r'\b(complaint|complaints|compliment|suggestion)\b', re.IGNORECASE),
+    ),
+    (
+        "accident_incident",
+        re.compile(
+            r'\b(accident|fall(?:en)?|near\s+miss|injur(?:y|ies|ied))\b',
+            re.IGNORECASE,
+        ),
+        re.compile(r'\b(accident|incident|near\s+miss|reporting)\b', re.IGNORECASE),
+    ),
+    (
+        "confidentiality_data",
+        re.compile(
+            r'\b(confidential(?:ity)?|confidential\s+information|data\s+protection|'
+            r'personal\s+data|gdpr|share\s+(?:confidential\s+)?information|'
+            r'information\s+(?:handling|sharing))\b',
+            re.IGNORECASE,
+        ),
+        re.compile(
+            r'\b(confidential(?:ity)?|information\s+handling|data\s+protection|'
+            r'personal\s+data|gdpr)\b',
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "hr_raising_concerns",
+        re.compile(
+            r'\b(bullying|bullied|harass(?:ment|ed|ing)?|discriminat(?:ion|e[sd]?|ing)?|'
+            r'grievance|disciplinary|whistleblowing|whistle\s*blow(?:ing)?|'
+            r'raising\s+(?:a\s+)?concern|speaking\s+up)\b',
+            re.IGNORECASE,
+        ),
+        re.compile(
+            r'\b(raising\s+concerns?|speaking\s+up|whistleblowing|'
+            r'whistle\s*blow(?:ing)?|\bhr\b|human\s+resources|grievance|disciplinary)\b',
+            re.IGNORECASE,
+        ),
+    ),
+]
+
+
+def _required_specialist_area(query: str) -> Optional[str]:
+    """Return the specialist policy area required by a high-risk query, else None."""
+    for area, query_pat, _ in _SPECIALIST_AREAS:
+        if query_pat.search(query):
+            return area
+    return None
+
+
+def _source_set_covers_specialist_area(
+    filtered_rows: List[Dict[str, Any]],
+    required_area: str,
+) -> bool:
+    """Return True if any filtered source document matches the required specialist area.
+
+    Checks document_title and category from RPC row metadata. Returns True for
+    unknown areas so the check is fail-open for areas not listed in _SPECIALIST_AREAS.
+    """
+    source_pat = next(
+        (sp for area, _, sp in _SPECIALIST_AREAS if area == required_area), None
+    )
+    if source_pat is None:
+        return True
+    for row in filtered_rows:
+        title = row.get("document_title") or ""
+        category = row.get("category") or ""
+        if source_pat.search(title) or source_pat.search(category):
+            return True
+    return False
 
 
 def _build_source_context(
@@ -3197,6 +3303,46 @@ def answer_debug(
             "result_count": len(raw_rows),
             "sources": [],
             "safety_note": safety_note or "No safe approved chunks available for answer generation.",
+            "model": "internal",
+            "note": _admin_note,
+        }
+
+    # Case 2b: specialist area hardening — 4S.96L.
+    # High-risk queries that require a specialist policy area are blocked before
+    # model generation if the filtered approved source set does not contain a
+    # document matching that area. _generate_source_grounded_answer is never
+    # called in this path.
+    required_area = _required_specialist_area(query_clean)
+    if required_area is not None and not _source_set_covers_specialist_area(
+        filtered_rows, required_area
+    ):
+        _create_audit_event(
+            organisation_id=effective_org,
+            event_type="answer_debug_specialist_blocked",
+            document_id=None,
+            event_summary=(
+                f"Answer debug blocked: required_policy_area={required_area}; "
+                "no matching specialist source in approved set"
+            ),
+            metadata={
+                "query_length": len(query_clean),
+                "required_policy_area": required_area,
+                "result_count": len(filtered_rows),
+                "allow_dummy_override": payload.allow_dummy_override,
+                "is_escalation_topic": is_escalation_topic,
+            },
+        )
+        return {
+            "query": query_clean,
+            "organisation_id": effective_org,
+            "answer": _no_source_answer,
+            "confidence": "insufficient_sources",
+            "result_count": 0,
+            "sources": [],
+            "safety_note": (
+                "This query involves a sensitive topic. "
+                "Please escalate to your line manager or designated lead."
+            ),
             "model": "internal",
             "note": _admin_note,
         }

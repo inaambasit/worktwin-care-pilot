@@ -81,6 +81,27 @@ The following subject areas must not be answered for staff. They are currently a
 
 High-risk queries in these areas must continue to return an escalation response only.
 
+### 4S.97B decision — first staff-visible candidate set
+
+**Date:** 2026-05-13
+
+Following a review of current governance state, the first staff-visible candidate set for the Minimum Safe Thumhara Pilot is confirmed as:
+
+| Policy | Current governance state | Staff visibility |
+|--------|--------------------------|-----------------|
+| TC-POL-001 Thumhara Centre Visitor Sign-In and Identification Policy | `approved_for_ai`, indexed, `real_document=true` | `false` — not yet enabled |
+| TC-POL-002 Thumhara Centre Mobile Phone and Portable Device Use Policy | `approved_for_ai`, indexed, `real_document=true` | `false` — not yet enabled |
+| TC-POL-003 Thumhara Centre Confidentiality and Information Handling Policy | `approved_for_ai`, indexed, `real_document=true` | `false` — not yet enabled |
+| TC-POL-004 Thumhara Centre Infection Prevention and Basic Hygiene Policy | `approved_for_ai`, indexed, `real_document=true` | `false` — not yet enabled |
+
+All four are currently Lane B — admin answer-debug approved only. Staff visibility (`approved_for_staff_visibility`) remains `false` for all four. This decision identifies them as the intended first candidates; it does not enable staff visibility, does not approve them for staff use, and does not make staff Ask live.
+
+Staff-visible approval for each document must still be opened separately, deliberately and explicitly, following the technical gates in section 7.
+
+**TC-POL-005 deferred.** At the time of this decision, TC-POL-005 Professional Boundaries has not completed the required governance and testing path (`real_document=false`, `dummy_document=true`, `governance_status=not_reviewed`, `embedding_status=pending`). It is excluded from the first candidate set until metadata correction, embedding, admin answer-debug testing, negative-control testing and documentation are complete.
+
+**High-risk and specialist policies remain excluded.** TC-POL-006 (Accident and Incident Reporting), TC-POL-007 (Complaints), TC-POL-008 (Raising Concerns and Speaking Up), TC-POL-009 (Medication Support and Escalation) and TC-POL-010 (Safeguarding Adults Awareness and Escalation) are not candidates for staff visibility at this stage. They remain escalation-only or admin-test-only.
+
 ---
 
 ## 6. Safety and escalation rules

@@ -1134,7 +1134,7 @@ _TOPIC_PATTERNS: List[Tuple[str, "re.Pattern[str]"]] = [
         r'compliance|ofsted|inspection|litigation|gdpr|data\s+protection|'
         r'ico|information\s+commissioner|named\s+individual|personal\s+data|'
         r'health\s+and\s+safety|driving|vehicle|'
-        r'confidential(?:ity)?|share\s+(?:confidential\s+)?information|'
+        r'confidential(?:ity)?|shar(?:e|ing)\s+(?:confidential\s+)?information|'
         r'information\s+(?:handling|sharing))\b',
         re.IGNORECASE,
     )),
@@ -1320,7 +1320,7 @@ _SPECIALIST_AREAS: List[Tuple[str, "re.Pattern[str]", "re.Pattern[str]"]] = [
         "confidentiality_data",
         re.compile(
             r'\b(confidential(?:ity)?|confidential\s+information|data\s+protection|'
-            r'personal\s+data|gdpr|share\s+(?:confidential\s+)?information|'
+            r'personal\s+data|gdpr|shar(?:e|ing)\s+(?:confidential\s+)?information|'
             r'information\s+(?:handling|sharing))\b',
             re.IGNORECASE,
         ),
@@ -1375,6 +1375,34 @@ def _source_set_covers_specialist_area(
         if source_pat.search(title) or source_pat.search(category):
             return True
     return False
+
+
+def _reorder_rows_specialist_first(
+    rows: List[Dict[str, Any]],
+    required_area: Optional[str],
+) -> List[Dict[str, Any]]:
+    """Move specialist-matching rows to the front, preserving all rows.
+
+    Rows whose document_title or category match the required area's source
+    pattern are placed first; remaining rows follow in original order.
+    Returns the original list unchanged when required_area is None or unknown.
+    """
+    if required_area is None:
+        return rows
+    source_pat = next(
+        (sp for area, _, sp in _SPECIALIST_AREAS if area == required_area), None
+    )
+    if source_pat is None:
+        return rows
+    specialist, other = [], []
+    for row in rows:
+        title = row.get("document_title") or ""
+        category = row.get("category") or ""
+        if source_pat.search(title) or source_pat.search(category):
+            specialist.append(row)
+        else:
+            other.append(row)
+    return specialist + other
 
 
 def _build_source_context(
@@ -3347,8 +3375,11 @@ def answer_debug(
             "note": _admin_note,
         }
 
-    # Case 3: usable chunks available — build context and generate answer
-    normalised = [_normalise_search_result(r) for r in filtered_rows]
+    # Case 3: usable chunks available — build context and generate answer.
+    # Specialist-first ordering (4S.96N): place matching specialist rows at the
+    # front so the model sees the authoritative policy source first.
+    ordered_rows = _reorder_rows_specialist_first(filtered_rows, required_area)
+    normalised = [_normalise_search_result(r) for r in ordered_rows]
     context_str, sources = _build_source_context(normalised)
     citations_str = _format_source_citations(sources)
 

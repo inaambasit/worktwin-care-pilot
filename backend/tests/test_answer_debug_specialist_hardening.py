@@ -1,5 +1,5 @@
 """
-4S.96L — answer-debug specialist policy area hardening tests.
+4S.96L/4S.96N — answer-debug specialist policy area hardening and ordering tests.
 
 Verifies that /documents/answer-debug does not call _generate_source_grounded_answer
 and returns insufficient_sources when a high-risk query requires a specialist policy
@@ -10,7 +10,8 @@ Also verifies:
 - A positive control: a high-risk query may proceed when the matching specialist
   policy area is present in the filtered source metadata.
 - Updated _TOPIC_PATTERNS short-circuit bullying/harassment/discrimination (hr)
-  and confidentiality queries on staff /ask.
+  and confidentiality queries on staff /ask, including "sharing information" phrasing.
+- Specialist rows are placed first when building answer context (4S.96N ordering).
 """
 import os
 from contextlib import ExitStack
@@ -24,6 +25,7 @@ from app.main import (
     _require_admin,
     _required_specialist_area,
     _source_set_covers_specialist_area,
+    _reorder_rows_specialist_first,
     _classify_escalation_topic,
 )
 
@@ -145,6 +147,11 @@ class TestRequiredSpecialistArea:
         assert _required_specialist_area(
             "What should staff do if they are being bullied by another staff member?"
         ) == "hr_raising_concerns"
+
+    def test_sharing_information_external_professional(self):
+        assert _required_specialist_area(
+            "What should staff check before sharing information with an external professional?"
+        ) == "confidentiality_data"
 
     def test_visitor_policy_query_not_specialist(self):
         assert _required_specialist_area("How does a visitor sign in?") is None
@@ -431,8 +438,149 @@ class TestTopicPatternsImprovements:
     def test_information_sharing_classified_as_legal(self):
         assert _classify_escalation_topic("When can we share information with outside organisations?") == "legal"
 
+    def test_sharing_information_classified_as_legal(self):
+        assert _classify_escalation_topic(
+            "What should staff check before sharing information with an external professional?"
+        ) == "legal"
+
     def test_visitor_query_not_classified(self):
         assert _classify_escalation_topic("How does a visitor sign in to Thumhara Centre?") is None
 
     def test_mobile_phone_query_not_classified(self):
         assert _classify_escalation_topic("Can staff use their mobile phone during a shift?") is None
+
+
+# ---------------------------------------------------------------------------
+# Unit tests: _reorder_rows_specialist_first — 4S.96N
+# ---------------------------------------------------------------------------
+
+class TestReorderRowsSpecialistFirst:
+    def _conf_row(self):
+        return {"document_title": "Confidentiality and Information Handling Policy", "category": "data protection"}
+
+    def _visitor_row(self):
+        return {"document_title": "Visitor Sign-In and Identification Policy", "category": "visitor management"}
+
+    def _safeguarding_row(self):
+        return {"document_title": "Safeguarding Adults Awareness and Escalation Policy", "category": "safeguarding"}
+
+    def test_confidentiality_row_moved_to_front(self):
+        rows = [self._visitor_row(), self._conf_row()]
+        result = _reorder_rows_specialist_first(rows, "confidentiality_data")
+        assert result[0]["document_title"] == "Confidentiality and Information Handling Policy"
+
+    def test_non_specialist_row_preserved_at_back(self):
+        rows = [self._visitor_row(), self._conf_row()]
+        result = _reorder_rows_specialist_first(rows, "confidentiality_data")
+        assert len(result) == 2
+        assert result[1]["document_title"] == "Visitor Sign-In and Identification Policy"
+
+    def test_safeguarding_row_moved_to_front(self):
+        rows = [self._visitor_row(), self._safeguarding_row()]
+        result = _reorder_rows_specialist_first(rows, "safeguarding")
+        assert result[0]["document_title"] == "Safeguarding Adults Awareness and Escalation Policy"
+
+    def test_none_area_returns_original_order(self):
+        rows = [self._visitor_row(), self._conf_row()]
+        result = _reorder_rows_specialist_first(rows, None)
+        assert result[0]["document_title"] == "Visitor Sign-In and Identification Policy"
+
+    def test_unknown_area_returns_original_order(self):
+        rows = [self._visitor_row()]
+        result = _reorder_rows_specialist_first(rows, "unknown_area_xyz")
+        assert result == rows
+
+    def test_all_specialist_rows_preserved(self):
+        rows = [self._conf_row(), self._conf_row()]
+        result = _reorder_rows_specialist_first(rows, "confidentiality_data")
+        assert len(result) == 2
+
+    def test_category_match_is_sufficient(self):
+        rows = [
+            {"document_title": "Operational Procedures", "category": "data protection"},
+            self._visitor_row(),
+        ]
+        result = _reorder_rows_specialist_first(rows, "confidentiality_data")
+        assert result[0]["document_title"] == "Operational Procedures"
+
+
+# ---------------------------------------------------------------------------
+# Integration test: source ordering — specialist rows first in answer context
+# ---------------------------------------------------------------------------
+
+class TestAnswerDebugSourceOrdering:
+    """Confidentiality specialist rows must be placed first in answer context."""
+
+    _QUERY = "Can staff share information with an external professional?"
+    _CONF_DOC_ID = "doc-confidentiality-001"
+    _VISITOR_DOC_ID = "doc-visitor-001"
+
+    def _make_rpc_two_docs(self):
+        m = MagicMock()
+        m.status_code = 200
+        m.json.return_value = [
+            # Visitor row is listed first by the RPC (higher raw similarity)
+            {
+                "document_id": self._VISITOR_DOC_ID,
+                "chunk_id": f"{self._VISITOR_DOC_ID}-chunk-0",
+                "chunk_index": 0,
+                "document_title": "Visitor Sign-In and Identification Policy",
+                "category": "visitor management",
+                "approved_for_ai_answers": True,
+                "escalation_required": False,
+                "is_sensitive": False,
+                "similarity": 0.90,
+                "chunk_text": "Visitor policy text.",
+            },
+            # Confidentiality row second — should be promoted to first
+            {
+                "document_id": self._CONF_DOC_ID,
+                "chunk_id": f"{self._CONF_DOC_ID}-chunk-0",
+                "chunk_index": 0,
+                "document_title": "Confidentiality and Information Handling Policy",
+                "category": "data protection",
+                "approved_for_ai_answers": True,
+                "escalation_required": False,
+                "is_sensitive": False,
+                "similarity": 0.85,
+                "chunk_text": "Confidentiality policy text.",
+            },
+        ]
+        return m
+
+    def _run(self):
+        gov_map = {
+            **_governance_approving(self._VISITOR_DOC_ID),
+            **_governance_approving(self._CONF_DOC_ID),
+        }
+        build_context = MagicMock(return_value=("context", []))
+        gen = MagicMock(return_value={"answer": "Answer."})
+        with ExitStack() as stack:
+            for p in _BASE_PATCHES:
+                stack.enter_context(p)
+            stack.enter_context(patch("httpx.post", return_value=self._make_rpc_two_docs()))
+            stack.enter_context(patch("app.main._get_document_governance_batch", return_value=gov_map))
+            stack.enter_context(patch("app.main._generate_source_grounded_answer", gen))
+            stack.enter_context(patch("app.main._build_source_context", build_context))
+            stack.enter_context(patch("app.main._format_source_citations", return_value=""))
+            stack.enter_context(patch("app.main._validate_grounded_answer_result", return_value="source_grounded"))
+            # Identity normaliser preserves document_title so we can inspect order
+            stack.enter_context(patch("app.main._normalise_search_result", side_effect=lambda r: r))
+            client.post("/documents/answer-debug", json={
+                "query": self._QUERY,
+                "organisation_id": _ORG,
+                "match_count": 5,
+                "allow_dummy_override": False,
+            })
+        return build_context
+
+    def test_confidentiality_row_first_in_context(self):
+        build_context = self._run()
+        chunks = build_context.call_args[0][0]
+        assert chunks[0]["document_title"] == "Confidentiality and Information Handling Policy"
+
+    def test_visitor_row_still_included_in_context(self):
+        build_context = self._run()
+        chunks = build_context.call_args[0][0]
+        titles = [c["document_title"] for c in chunks]
+        assert "Visitor Sign-In and Identification Policy" in titles

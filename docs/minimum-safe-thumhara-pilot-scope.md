@@ -161,6 +161,23 @@ All four returned `allowed_to_answer=false`, `requires_escalation=true` and `sou
 
 Staff visibility is not enabled. The pilot is not live. Staff users cannot access these policies yet.
 
+### 4S.97D check — candidate policies blocked until document approval
+
+**Date:** 2026-05-13
+
+A staff visibility readiness check was run against all four first-candidate policies using `GET /documents/{id}/governance-readiness` on the normal local backend (port 8000) with the Thumhara admin header. This was an inspection-only step. No document was approved; no governance flag was changed.
+
+| Policy | Document ID | `can_show_to_staff_now` | Blocked reason | Next required action |
+|--------|-------------|------------------------|----------------|----------------------|
+| TC-POL-001 | `42d7b206-b85f-46a5-b0f2-1c3b6ff87ca3` | `false` | Document status is draft and must be approved before staff visibility | `POST /documents/42d7b206-b85f-46a5-b0f2-1c3b6ff87ca3/approve` |
+| TC-POL-002 | `62996113-a990-4630-9380-67da139cb37a` | `false` | Document status is draft and must be approved before staff visibility | `POST /documents/62996113-a990-4630-9380-67da139cb37a/approve` |
+| TC-POL-003 | `db3e7942-2305-420e-8f76-803aaefa89f1` | `false` | Document status is draft and must be approved before staff visibility | `POST /documents/db3e7942-2305-420e-8f76-803aaefa89f1/approve` |
+| TC-POL-004 | `b784cb90-c0f1-48bc-8f88-689c6de7f857` | `false` | Document status is draft and must be approved before staff visibility | `POST /documents/b784cb90-c0f1-48bc-8f88-689c6de7f857/approve` |
+
+All four are blocked at `status=draft`. The governance readiness check confirms that no candidate policy can reach staff until `status` is transitioned to `approved` via the documented approval endpoint. The `approved_for_staff_visibility` flag must then also be opened separately.
+
+The next deliberate step is document status approval for TC-POL-001 to TC-POL-004, followed by a repeat readiness check before any staff visibility gate is opened. Staff visibility is not enabled. The pilot is not live. Staff users cannot access these policies yet.
+
 ---
 
 ## 6. Safety and escalation rules

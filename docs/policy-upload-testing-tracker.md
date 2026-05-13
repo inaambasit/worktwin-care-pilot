@@ -1846,6 +1846,72 @@ Future improvement: classifier/source-routing polish for "sharing information" p
 
 ---
 
+## 4S.96N — Answer-Debug Confidentiality Routing Polish — 2026-05-13
+
+### Purpose
+
+Fix two gaps found during TC-POL-003 answer-debug testing:
+
+1. **Classifier gap** — the query "What should staff check before sharing information with an external professional?" returned `safety_note=null`. The legal/confidentiality pattern caught `share information` and `information sharing` but not `sharing information`.
+2. **Source ordering gap** — TC-POL-003 was mixed with TC-POL-001 and TC-POL-002 in answer context; the correct specialist policy was not reliably placed first.
+
+### Files changed (commit 134de65)
+
+- `backend/app/main.py`
+- `backend/tests/test_answer_debug_specialist_hardening.py`
+
+### Implementation summary
+
+**Classifier polish** — `_TOPIC_PATTERNS` legal pattern and `_SPECIALIST_AREAS` `confidentiality_data` query pattern updated:
+- `share\s+(?:confidential\s+)?information` → `shar(?:e|ing)\s+(?:confidential\s+)?information`
+- Now catches: "share information", "sharing information", "share confidential information", "sharing confidential information". Existing "information sharing" / "information handling" forms unchanged.
+- Staff `/ask` also benefits (the shared classifier now raises `legal` escalation for "sharing information" phrases).
+
+**Source ordering** — new helper `_reorder_rows_specialist_first(rows, required_area)` inserted in `main.py`:
+- Moves rows whose `document_title` or `category` match the required specialist area's source pattern to the front.
+- All rows are preserved; only order changes.
+- Applied in `answer_debug()` Case 3 before `_build_source_context`, using the `required_area` already resolved by Case 2b.
+- Does not change governance gates, vector retrieval behaviour, or staff visibility.
+
+### Test proof
+
+| Suite | Result |
+|-------|--------|
+| `tests/test_answer_debug_specialist_hardening.py` | 55 passed |
+| Full backend suite | 243 passed, 0 failed |
+
+New tests added:
+- `_required_specialist_area("...sharing information...")` returns `confidentiality_data`.
+- `_classify_escalation_topic("...sharing information...")` returns `legal`.
+- 7 unit tests for `_reorder_rows_specialist_first` (frontward promotion, category match, None/unknown passthrough, all-specialist, preserve count).
+- 2 integration tests: `_build_source_context` receives confidentiality row first even when RPC returns visitor row first.
+
+### Live API proof (after backend restart, commit 134de65)
+
+Query: *What should staff check before sharing information with an external professional?*
+Route: `POST /documents/answer-debug` — `X-WorkTwin-Admin-Org: thumhara-centre`; body `organisation_id=demo-org`; `match_count=5`; `allow_dummy_override=false`.
+
+| Field | Value |
+|-------|-------|
+| `organisation_id` (response) | `thumhara-centre` |
+| `confidence` | `source_grounded` |
+| `result_count` | 5 |
+| `source_count` | 5 |
+| First source title | Thumhara Centre Confidentiality and Information Handling Policy (TC-POL-003) |
+| Sources 1–4 | TC-POL-003 (`db3e7942`) |
+| Source 5 | TC-POL-001 (`42d7b206`) |
+| `safety_note` | "This query involves a sensitive topic. Please escalate to your line manager or designated lead." |
+
+### Overall result
+
+**PASS.** The "sharing information" safety-note gap is fixed. TC-POL-003 is now placed first in answer context when `confidentiality_data` is the required specialist area. Relevant overlapping sources (TC-POL-001) are preserved, not removed.
+
+### Decision
+
+Record 4S.96N as **PASS**. No governance flags changed. Staff visibility, staff-facing Ask, and live operational use remain blocked. This is a classifier and source-ordering polish only; it does not change any policy decision or specialist-blocking behaviour.
+
+---
+
 ## Decision Log
 
 Use this template to record each policy decision. Add a new row each time a document is uploaded, promoted, demoted, or reviewed.
@@ -1886,6 +1952,7 @@ Use this template to record each policy decision. Add a new row each time a docu
 | 2026-05-13 | TC-POL-001, TC-POL-002, TC-POL-004 (approved corpus) | B — admin answer-debug only (negative-control test) | Inaam Basit | Broader negative-control answer-debug test (4S.96K) run against 6 out-of-scope queries: medication-refusal, safeguarding-neglect, formal-complaint, accident-fall, confidential-info-family, staff-bullying. Route: local backend /documents/answer-debug; body sent organisation_id=demo-org; responses returned organisation_id=thumhara-centre — tenant-scope override confirmed. 3/6 PASS (medication-refusal: insufficient_sources + escalation note; formal-complaint: insufficient_sources + escalation note; staff-bullying: insufficient_sources). 3/6 FAIL: safeguarding-neglect returned source_grounded "Yes, staff should make a safeguarding referral..." from the limited corpus — WorkTwin must not decide safeguarding referral thresholds; accident-fall returned source_grounded procedural guidance before TC-POL-006 is approved; confidential-info-family returned source_grounded confidentiality guidance before TC-POL-003 is approved. The test confirms the endpoint can produce source-grounded answers from partially relevant approved documents when the correct specialist policy is not in the corpus. | No flags changed | FAIL — useful safety finding (3/6 PASS, 3/6 FAIL) | Staff visibility blocked; staff-facing Ask blocked; live operational use blocked; do not proceed to TC-POL-003 approval until hardening plan agreed; next recommended slice: 4S.96L — high-risk negative-control hardening (query category classification must block procedural answers when matching specialist policy is absent) |
 | 2026-05-13 | TC-POL-001, TC-POL-002, TC-POL-004 (approved corpus) | B — admin answer-debug only (4S.96L hardening) | Inaam Basit | 4S.96L implemented in commit 3549eb5. answer_debug() now checks whether the query requires a specialist policy area (safeguarding, medication, complaints, accident_incident, confidentiality_data, hr_raising_concerns) and blocks model generation if the filtered approved source set does not include a matching specialist document. _generate_source_grounded_answer is not called in the blocked path; response returns confidence=insufficient_sources, sources=[], and an escalation safety_note. Metadata-only audit event answer_debug_specialist_blocked emitted; raw query text never stored. Shared classifier improved: confidential/confidentiality/information sharing added to legal detection; bullying/bullied/harassment/discrimination added to hr detection — staff /ask also benefits. Test suite: 44 new focused tests passed; full suite 232 passed, 0 failed. Local API proof: same 6 negative-control queries rerun — 6/6 now return insufficient_sources (safeguarding-neglect, accident-fall, confidential-info-family all fixed). Positive control rerun: TC-POL-001, TC-POL-002, TC-POL-004 still return source_grounded to correct document. | No flags changed | PASS — 6/6 negative-control insufficient_sources; 3/3 positive control source_grounded preserved | Staff visibility blocked; staff-facing Ask blocked; live operational use blocked; next safe option: TC-POL-003 embedding/answer-debug with care |
 | 2026-05-13 | TC-POL-003 Thumhara Centre Confidentiality and Information Handling Policy | B — admin answer-debug only | Inaam Basit | Upload-default metadata corrected (real_document=true, dummy_document=false, source_owner=Thumhara Centre) — metadata correction only, not AI/staff approval. approved_for_embedding enabled (governance_status=pilot_approved); approved_for_source_grounded_answers and approved_for_staff_visibility remain false during embedding. Embedding generated: 14/14 chunks, 0 failed, 3,012 tokens, <$0.01, text-embedding-3-small, allow_dummy_override=false. Vector retrieval proof: body sent organisation_id=demo-org; response returned organisation_id=thumhara-centre; result_count=5; TC-POL-003 present in results alongside TC-POL-001 (overlapping confidentiality wording expected). Answer-debug blocked before approval confirmed: confidence=insufficient_sources, result_count=0, sources=[] when approved_for_source_grounded_answers=false. approved_for_source_grounded_answers then enabled (governance_status=approved_for_ai). Admin answer-debug spot check (4 questions): 4/4 source_grounded; all included TC-POL-003; answers cautious and manager-led. Quality notes: source routing mixed TC-POL-003 with TC-POL-001 and TC-POL-002 due to overlapping confidentiality/device wording; Q2 (external-professional-sharing) returned safety_note=null — "sharing information" classifier polish needed. Post-TC-POL-003 negative-control rerun (5 out-of-scope queries): 5/5 PASS, 4S.96L specialist blocks intact. Final safety proof: document_status=draft, approved_for_staff_visibility=false, real_document=true, dummy_document=false. | approved_for_embedding, approved_for_source_grounded_answers | PASS WITH QUALITY NOTES — 4/4 answer-debug source_grounded; 5/5 post-approval negative controls blocked; 0 leakage | Do not enable staff visibility until Thumhara Centre leadership review, document status approved, and staff visibility gate deliberately enabled; future improvement: classifier polish for "sharing information" phrasing and source citation preference when corpus overlap exists |
+| 2026-05-13 | Backend classifier and source-ordering polish (4S.96N) | B — admin answer-debug only (no lane change) | Inaam Basit | Two gaps found during TC-POL-003 answer-debug: (1) "sharing information" phrasing not caught by legal/confidentiality classifier — safety_note returned null; (2) TC-POL-003 not reliably placed first in answer context when corpus contains overlapping visitor/mobile sources. Fixed by updating high-risk legal pattern and confidentiality_data specialist pattern from `share\s+` to `shar(?:e|ing)\s+`, and by adding `_reorder_rows_specialist_first()` applied before `_build_source_context` in `answer_debug()`. Staff /ask also benefits from classifier polish. No governance flags changed. Commit 134de65. | No flags changed | PASS — 55 focused tests passed; 243 full suite passed; live API confirmed first_source_title=TC-POL-003 and safety_note present for "sharing information" query | No staff visibility change; no live operational use change; classifier and ordering polish only |
 
 ---
 

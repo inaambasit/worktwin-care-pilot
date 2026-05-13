@@ -1745,6 +1745,107 @@ Next safe option: proceed to TC-POL-003 embedding/answer-debug with care, given 
 
 ---
 
+## 4S.96M — TC-POL-003 Embedding and Admin Answer-Debug Proof — 2026-05-13
+
+### Document
+
+**TC-POL-003 — Thumhara Centre Confidentiality and Information Handling Policy**
+Document ID: `db3e7942-2305-420e-8f76-803aaefa89f1` | Organisation: `thumhara-centre`
+Original Thumhara-owned draft policy. Not QCS. Not third-party content.
+
+### Starting state and metadata correction
+
+TC-POL-003 uploaded with default metadata (`real_document=false`, `dummy_document=true`, `source_owner=null`). Metadata corrected before any gate was opened: `real_document=true`, `dummy_document=false`, `source_owner=Thumhara Centre`, `source_licence_notes` set. No approval gates opened at this stage. Blocked reasons confirmed after correction:
+- Real document requires governance approval before embedding.
+- Real document requires governance approval before source-grounded answer testing.
+- Document status is draft and must be approved before staff visibility.
+
+### Embedding
+
+`approved_for_embedding` enabled (`governance_status=pilot_approved`; `approved_for_source_grounded_answers=false`; `approved_for_staff_visibility=false`).
+
+POST `/documents/{id}/generate-embeddings` with `allow_dummy_override=false`.
+
+| Field | Value |
+|-------|-------|
+| Embedding model | text-embedding-3-small |
+| Dimensions | 1536 |
+| Attempted | 14 |
+| Embedded | 14 |
+| Failed | 0 |
+| Total tokens | 3,012 |
+| Estimated cost | <$0.01 |
+| Embedding status | indexed |
+
+### Vector retrieval smoke test
+
+Query: *Can staff share confidential information with a family member if they ask for it?*
+Route: `/documents/search-vector` — `X-WorkTwin-Admin-Org: thumhara-centre`; body `organisation_id=demo-org`; `allow_dummy_override=false`.
+Result: `organisation_id=thumhara-centre`, `result_count=5`. TC-POL-003 and TC-POL-001 present in results.
+Verdict: **PASS** — TC-POL-003 vector retrieval confirmed. Mixed retrieval with TC-POL-001 is acceptable at vector-only stage; visitor policy contains overlapping confidentiality wording.
+
+### Answer-debug blocked before approval
+
+Same query sent to `/documents/answer-debug` before `approved_for_source_grounded_answers=true`.
+Result: `confidence=insufficient_sources`, `result_count=0`, `sources=[]`, `safety_note` present.
+Verdict: **PASS** — gate works; AI answer blocked before approval.
+
+### Answer-debug approval and spot check
+
+`approved_for_source_grounded_answers` enabled (`governance_status=approved_for_ai`; `approved_for_staff_visibility` remains `false`).
+
+4-question admin answer-debug spot check (route: `/documents/answer-debug`; body sent `organisation_id=demo-org`; all responses returned `organisation_id=thumhara-centre`):
+
+| # | Query label | Confidence | Source doc IDs | safety_note | Verdict |
+|---|-------------|-----------|----------------|-------------|---------|
+| 1 | family-member-sharing | `source_grounded` | TC-POL-003 + TC-POL-001 | Present | PASS WITH QUALITY NOTE |
+| 2 | external-professional-sharing | `source_grounded` | TC-POL-003 + TC-POL-001 | null | PASS WITH QUALITY NOTE |
+| 3 | accessing-information | `source_grounded` | TC-POL-003 + TC-POL-001 | Present | PASS WITH QUALITY NOTE |
+| 4 | possible-confidentiality-breach | `source_grounded` | TC-POL-003 + TC-POL-002 | Present | PASS WITH QUALITY NOTE |
+
+All 4 source-grounded; all 4 included TC-POL-003; answers were cautious and manager-led. 0 staff visibility change. 0 staff-facing Ask change.
+
+Quality notes:
+- Source routing mixes TC-POL-003 with TC-POL-001 or TC-POL-002 where overlapping confidentiality and device/recording wording exists. Expected at this stage given corpus overlap.
+- Q2 (external-professional-sharing) returned `safety_note=null`. Future classifier polish needed to catch "sharing information" phrasing (currently caught as "information sharing" but not "sharing information").
+
+### Post-TC-POL-003 negative-control sanity check
+
+After approving TC-POL-003, specialist-topic negative controls were rerun (confidentiality excluded — now approved). `result_count=0`, `sources=[]`, `safety_note` present for all.
+
+| Query | Confidence | Verdict |
+|-------|-----------|---------|
+| medication-refusal | `insufficient_sources` | PASS |
+| safeguarding-neglect | `insufficient_sources` | PASS |
+| formal-complaint | `insufficient_sources` | PASS |
+| accident-fall | `insufficient_sources` | PASS |
+| staff-bullying | `insufficient_sources` | PASS |
+
+**PASS** — TC-POL-003 approval did not weaken 4S.96L specialist-topic safety blocks.
+
+### Final TC-POL-003 state
+
+| Flag | Value |
+|------|-------|
+| governance_status | approved_for_ai |
+| approved_for_embedding | true |
+| approved_for_source_grounded_answers | true (admin/debug only) |
+| approved_for_staff_visibility | false |
+| embedding_status | indexed |
+| real_document | true |
+| dummy_document | false |
+| Staff visibility | Blocked |
+| Staff-facing Ask | Blocked |
+| Live operational use | Blocked |
+
+### Decision
+
+Record TC-POL-003 as **Lane B — admin answer-debug only**. Staff visibility, staff-facing Ask, and live operational use remain blocked.
+
+Future improvement: classifier/source-routing polish for "sharing information" phrasing and preferred citation selection when multiple approved policies contain overlapping confidentiality wording.
+
+---
+
 ## Decision Log
 
 Use this template to record each policy decision. Add a new row each time a document is uploaded, promoted, demoted, or reviewed.
@@ -1784,6 +1885,7 @@ Use this template to record each policy decision. Add a new row each time a docu
 | 2026-05-13 | TC-POL-001, TC-POL-002, TC-POL-004 | B — admin answer-debug only (cross-policy check) | Inaam Basit | Cross-policy source-routing sanity check run after all three documents approved for admin-only answer-debug. Pre-checks confirmed all three docs indexed and governance flags unchanged. Local env setup issue (plain python instead of venv python) caused initial import error; resolved by restarting with backend venv — no database/embedding/governance issue. RPC self-match test passed for TC-POL-001 (5 rows, top similarity=1). Vector search smoke test passed (TC-POL-001 only, org=thumhara-centre). Answer-debug: 3/3 queries returned source_grounded answers to the correct document only; body sent organisation_id=demo-org, responses returned organisation_id=thumhara-centre — tenant-scope override confirmed; 0 cross-policy mixing; 0 demo-org/QCS/dummy leakage. Staff visibility and staff-facing Ask remain blocked for all three. | No flags changed | PASS — 3/3 source-grounded to correct document; 0 source mixing; 0 leakage | Next: (1) document and pause, (2) proceed to TC-POL-003 embedding/answer-debug with extra care, or (3) run a broader negative-control test before adding further approved answer-debug documents |
 | 2026-05-13 | TC-POL-001, TC-POL-002, TC-POL-004 (approved corpus) | B — admin answer-debug only (negative-control test) | Inaam Basit | Broader negative-control answer-debug test (4S.96K) run against 6 out-of-scope queries: medication-refusal, safeguarding-neglect, formal-complaint, accident-fall, confidential-info-family, staff-bullying. Route: local backend /documents/answer-debug; body sent organisation_id=demo-org; responses returned organisation_id=thumhara-centre — tenant-scope override confirmed. 3/6 PASS (medication-refusal: insufficient_sources + escalation note; formal-complaint: insufficient_sources + escalation note; staff-bullying: insufficient_sources). 3/6 FAIL: safeguarding-neglect returned source_grounded "Yes, staff should make a safeguarding referral..." from the limited corpus — WorkTwin must not decide safeguarding referral thresholds; accident-fall returned source_grounded procedural guidance before TC-POL-006 is approved; confidential-info-family returned source_grounded confidentiality guidance before TC-POL-003 is approved. The test confirms the endpoint can produce source-grounded answers from partially relevant approved documents when the correct specialist policy is not in the corpus. | No flags changed | FAIL — useful safety finding (3/6 PASS, 3/6 FAIL) | Staff visibility blocked; staff-facing Ask blocked; live operational use blocked; do not proceed to TC-POL-003 approval until hardening plan agreed; next recommended slice: 4S.96L — high-risk negative-control hardening (query category classification must block procedural answers when matching specialist policy is absent) |
 | 2026-05-13 | TC-POL-001, TC-POL-002, TC-POL-004 (approved corpus) | B — admin answer-debug only (4S.96L hardening) | Inaam Basit | 4S.96L implemented in commit 3549eb5. answer_debug() now checks whether the query requires a specialist policy area (safeguarding, medication, complaints, accident_incident, confidentiality_data, hr_raising_concerns) and blocks model generation if the filtered approved source set does not include a matching specialist document. _generate_source_grounded_answer is not called in the blocked path; response returns confidence=insufficient_sources, sources=[], and an escalation safety_note. Metadata-only audit event answer_debug_specialist_blocked emitted; raw query text never stored. Shared classifier improved: confidential/confidentiality/information sharing added to legal detection; bullying/bullied/harassment/discrimination added to hr detection — staff /ask also benefits. Test suite: 44 new focused tests passed; full suite 232 passed, 0 failed. Local API proof: same 6 negative-control queries rerun — 6/6 now return insufficient_sources (safeguarding-neglect, accident-fall, confidential-info-family all fixed). Positive control rerun: TC-POL-001, TC-POL-002, TC-POL-004 still return source_grounded to correct document. | No flags changed | PASS — 6/6 negative-control insufficient_sources; 3/3 positive control source_grounded preserved | Staff visibility blocked; staff-facing Ask blocked; live operational use blocked; next safe option: TC-POL-003 embedding/answer-debug with care |
+| 2026-05-13 | TC-POL-003 Thumhara Centre Confidentiality and Information Handling Policy | B — admin answer-debug only | Inaam Basit | Upload-default metadata corrected (real_document=true, dummy_document=false, source_owner=Thumhara Centre) — metadata correction only, not AI/staff approval. approved_for_embedding enabled (governance_status=pilot_approved); approved_for_source_grounded_answers and approved_for_staff_visibility remain false during embedding. Embedding generated: 14/14 chunks, 0 failed, 3,012 tokens, <$0.01, text-embedding-3-small, allow_dummy_override=false. Vector retrieval proof: body sent organisation_id=demo-org; response returned organisation_id=thumhara-centre; result_count=5; TC-POL-003 present in results alongside TC-POL-001 (overlapping confidentiality wording expected). Answer-debug blocked before approval confirmed: confidence=insufficient_sources, result_count=0, sources=[] when approved_for_source_grounded_answers=false. approved_for_source_grounded_answers then enabled (governance_status=approved_for_ai). Admin answer-debug spot check (4 questions): 4/4 source_grounded; all included TC-POL-003; answers cautious and manager-led. Quality notes: source routing mixed TC-POL-003 with TC-POL-001 and TC-POL-002 due to overlapping confidentiality/device wording; Q2 (external-professional-sharing) returned safety_note=null — "sharing information" classifier polish needed. Post-TC-POL-003 negative-control rerun (5 out-of-scope queries): 5/5 PASS, 4S.96L specialist blocks intact. Final safety proof: document_status=draft, approved_for_staff_visibility=false, real_document=true, dummy_document=false. | approved_for_embedding, approved_for_source_grounded_answers | PASS WITH QUALITY NOTES — 4/4 answer-debug source_grounded; 5/5 post-approval negative controls blocked; 0 leakage | Do not enable staff visibility until Thumhara Centre leadership review, document status approved, and staff visibility gate deliberately enabled; future improvement: classifier polish for "sharing information" phrasing and source citation preference when corpus overlap exists |
 
 ---
 

@@ -1,12 +1,14 @@
 # WorkTwin Care Pilot - Docs Index
 
-> Controlled prototype. Not production-ready. Public auth disabled. Admin proxy disabled publicly. Staff demo is Visitor SOP-only (checkpoint ac2d6ac, 4S.91C). Real staff and pilot use blocked pending DPA, pilot governance, auth activation, content permissions, and final sign-off.
+> Controlled prototype. Not production-ready. Public admin proxy remains disabled. Public/live staff rollout remains blocked. Current controlled proof has moved beyond the old Visitor SOP-only demo: a four-policy Thumhara staff-visible set has passed local Staff Ask proof, real backend auth proof, and local frontend auth/session proof. Trusted-user access is conditional only after pilot-pack review and named-user approval. No real service-user data, HR data, safeguarding records, medication records, complaint details or confidential personal information should be entered.
 
 ## Current state
 
 | Document | Notes |
 |---|---|
 | [Current state](current-state.md) | **Main source of truth.** Current checkpoint, feature state, blockers, demo posture and do-not-touch list |
+| [Minimum Safe Thumhara Pilot Scope](minimum-safe-thumhara-pilot-scope.md) | Current source of truth for the controlled Thumhara pilot readiness path, four-policy staff-visible set, Staff Ask proof, authenticated backend proof, local frontend auth/session proof, remaining blockers and no-go boundaries |
+| [Thumhara Trusted-User Pilot Pack](thumhara-trusted-user-pilot-pack.md) | Practical pilot pack for 3–5 named trusted users only, covering safe-use rules, prohibited data, escalation boundaries, feedback route, incident process, access checklist and go/no-go position |
 | [Policy upload and AI testing tracker](policy-upload-testing-tracker.md) | Source of truth for policy and document governance, upload testing scope and results |
 | [Clean-corpus policy approval template](clean-corpus-policy-approval-template.md) | Reusable approval template -- complete before uploading any document to WorkTwin |
 | [Visitor SOP clean-corpus approval record](visitor-sop-corpus-approval.md) | Completed approval record for Visitor Sign-In and Identification Procedure -- first confirmed clean-corpus document; Lane A; approved for controlled internal demo use |
@@ -41,7 +43,7 @@
 
 ## Auth and security planning
 
-All auth planning documents are design and documentation only. No auth code is active, no public auth is enabled, and no migrations have been run.
+Some auth implementation and controlled local proof work has now been completed and is documented in the Minimum Safe Thumhara Pilot Scope. Public/live staff auth is not enabled for rollout, the public admin proxy remains disabled, and these planning documents should be read alongside the current state and latest proof records.
 
 | Document | Notes |
 |---|---|

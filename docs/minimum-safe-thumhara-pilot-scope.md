@@ -178,6 +178,40 @@ All four are blocked at `status=draft`. The governance readiness check confirms 
 
 The next deliberate step is document status approval for TC-POL-001 to TC-POL-004, followed by a repeat readiness check before any staff visibility gate is opened. Staff visibility is not enabled. The pilot is not live. Staff users cannot access these policies yet.
 
+### 4S.97E proof — status approval does not open staff visibility
+
+**Date:** 2026-05-14
+
+Before opening any staff visibility gate, TC-POL-001 to TC-POL-004 were transitioned from `status=draft` to `status=approved` using `POST /documents/{id}/approve`. The approval route was first inspected in `backend/app/main.py` and confirmed to update only `status=approved` and `updated_at=now`. It does not set `approved_for_staff_visibility`, does not change `approved_for_embedding`, `approved_for_source_grounded_answers`, `governance_status` or `access_roles`, and does not open Staff Ask.
+
+#### Post-approval registry snapshot
+
+| Policy | `status` | `governance_status` | `approved_for_embedding` | `approved_for_source_grounded_answers` | `approved_for_staff_visibility` | `embedding_status` |
+|--------|----------|--------------------|--------------------------|-----------------------------------------|---------------------------------|--------------------|
+| TC-POL-001 Visitor Sign-In and Identification | `approved` | `approved_for_ai` | `true` | `true` | `false` | `indexed` |
+| TC-POL-002 Mobile Phone and Portable Device Use | `approved` | `approved_for_ai` | `true` | `true` | `false` | `indexed` |
+| TC-POL-003 Confidentiality and Information Handling | `approved` | `approved_for_ai` | `true` | `true` | `false` | `indexed` |
+| TC-POL-004 Infection Prevention and Basic Hygiene | `approved` | `approved_for_ai` | `true` | `true` | `false` | `indexed` |
+
+All four have `approved_for_staff_visibility=false`. Status approval alone does not make documents staff-visible.
+
+#### Staff Ask proof (post-approval)
+
+A Staff Ask proof run was conducted on a temporary local backend (port 8001) with process-only Thumhara staff context (`PILOT_AUTH_MODE=false`, `PILOT_ORGANISATION_ID=thumhara-centre`, `PILOT_USER_ROLE=Care Worker`, `ALLOWED_ORGANISATION_IDS=demo-org,thumhara-centre`). No `.env` file, Git history, Render, Vercel or Supabase configuration was modified.
+
+| # | Question | `allowed_to_answer` | `requires_escalation` | `source_count` | `risk_category` |
+|---|----------|--------------------|-----------------------|----------------|-----------------|
+| 1 | How should a visitor sign in at Thumhara Centre? | `false` | `true` | 0 | `standard` |
+| 2 | Can staff use their personal phone during work? | `false` | `true` | 0 | `standard` |
+| 3 | Can staff share confidential information with a family member if they ask for it? | `false` | `true` | 0 | `legal` |
+| 4 | When should staff wash their hands? | `false` | `true` | 0 | `standard` |
+
+All four returned `allowed_to_answer=false`, `requires_escalation=true` and `source_count=0`. Questions 1, 2 and 4 returned the standard fallback (approved documents not found; speak to line manager or designated lead). Question 3 returned legal/regulatory/compliance escalation wording.
+
+#### Verdict
+
+**PASS.** Status approval alone does not make documents staff-visible. TC-POL-001 to TC-POL-004 still do not appear in Staff Ask while `approved_for_staff_visibility=false`. Staff visibility is not enabled. Staff Ask is not live. The pilot is not live. No trusted users have been granted access. The next deliberate step is a separate staff visibility governance decision, policy-by-policy, followed by Staff Ask positive and negative-control testing.
+
 ---
 
 ## 6. Safety and escalation rules

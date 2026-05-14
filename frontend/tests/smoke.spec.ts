@@ -179,9 +179,9 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(privacyLink).toHaveAttribute('href', '/privacy-model')
   })
 
-  test('ask page always shows demo-mode honesty status line', async ({ page }) => {
+  test('ask page always shows controlled-pilot honesty status line', async ({ page }) => {
     await page.goto('/ask')
-    await expect(page.getByText(/answers use sample documents only/i).first()).toBeVisible()
+    await expect(page.getByText(/answers use approved pilot documents only/i).first()).toBeVisible()
   })
 
   test('/book-pilot confirmation clearly states session-only and no live CRM submission', async ({ page }) => {

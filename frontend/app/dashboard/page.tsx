@@ -10,10 +10,10 @@ const quickActions = [
   { href: '/policies', icon: BookOpen, label: 'Policy Library', desc: 'Browse approved documents' },
   { href: '/onboarding', icon: ClipboardList, label: 'My Onboarding', desc: 'Continue where you left off' },
   { href: '/scenarios', icon: PlayCircle, label: 'Practice Scenarios', desc: 'Build confidence safely' },
-  { href: '/notes', icon: Lock, label: 'Private Notes', desc: 'Session-only demo notes' },
+  { href: '/notes', icon: Lock, label: 'Private Notes', desc: 'Session-only pilot notes' },
 ]
 
-const CONTEXT_CHIPS = ['Care Worker', 'Thumhara Centre', 'Demo Mode', 'Privacy-first support']
+const CONTEXT_CHIPS = ['Staff pilot view', 'Thumhara Centre', 'Controlled Pilot', 'Privacy-first support']
 
 const onboardingTasks = [
   { label: 'Read the Staff Handbook', done: true },
@@ -42,9 +42,9 @@ export default function DashboardPage() {
               <Home size={11} />
               Employee home
             </span>
-            <h1 className="text-3xl font-bold mb-2.5 leading-snug">Welcome back, Demo User</h1>
+            <h1 className="text-3xl font-bold mb-2.5 leading-snug">Welcome back, Pilot User</h1>
             <p className="text-teal-100 text-sm leading-relaxed max-w-lg mb-5">
-              WorkTwin helps you find approved guidance, practise safe scenarios and keep private notes during this pilot demo.
+              WorkTwin helps you find approved guidance, practise safe scenarios and keep private notes during this controlled pilot.
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
               {CONTEXT_CHIPS.map(chip => (
@@ -54,14 +54,14 @@ export default function DashboardPage() {
               ))}
             </div>
             <p className="text-teal-200 text-xs">
-              Private Ask questions and personal notes are not shown to managers in this demo.
+              Private Ask questions and personal notes are not shown to managers in this controlled pilot.
             </p>
           </div>
         </div>
 
-        {/* Demo walkthrough strip */}
+        {/* Pilot walkthrough strip */}
         <div className="bg-white border border-teal-100 rounded-2xl px-5 py-4 shadow-sm">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Suggested demo walkthrough</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Suggested pilot walkthrough</p>
           <div className="flex items-center gap-1.5 flex-wrap">
             {[
               { label: 'Dashboard', href: '/', active: true },
@@ -85,7 +85,7 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
-          <p className="text-xs text-slate-400 mt-2">Follow this path to walk through the Visitor SOP demo from start to finish.</p>
+          <p className="text-xs text-slate-400 mt-2">Follow this path to walk through the controlled pilot flow from guidance to escalation.</p>
         </div>
 
         {/* Summary cards */}
@@ -213,7 +213,7 @@ export default function DashboardPage() {
           <div>
             <h2 className="font-semibold text-slate-800 text-sm mb-1">Privacy-first pilot</h2>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Private notes and personal Ask WorkTwin questions stay private in this demo. Structured visit records may be shared with authorised leads where required.
+              Private notes and personal Ask WorkTwin questions stay private in this controlled pilot. Structured visit records may be shared with authorised leads where required.
             </p>
           </div>
         </div>

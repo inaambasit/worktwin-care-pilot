@@ -121,9 +121,9 @@ function SidebarContent({
         {/* Demo-only view switcher — only shown when admin demo is explicitly enabled */}
         {ADMIN_DEMO_ENABLED && (
           <div className="rounded-xl bg-amber-50 border border-amber-200 p-2.5">
-            <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">Demo Mode — Switch View</p>
+            <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">Host View — Switch Area</p>
             <p className="text-xs text-amber-700 mb-2 leading-tight">
-              Demo host only — staff would not see admin access in a real deployment.
+              Pilot host only — staff users do not see admin access.
             </p>
             <div className="flex gap-1.5">
               <Link
@@ -160,11 +160,11 @@ function SidebarContent({
         )}
         <div className="flex items-center gap-2 px-1">
           <div className="w-8 h-8 rounded-full bg-teal-700 text-white text-xs font-bold flex items-center justify-center shrink-0">
-            DU
+            PU
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-slate-800 truncate">Demo User</p>
-            <p className="text-xs text-slate-500">{isAdmin ? 'Admin' : 'Care Worker'}</p>
+            <p className="text-sm font-medium text-slate-800 truncate">Pilot User</p>
+            <p className="text-xs text-slate-500">{isAdmin ? 'Admin pilot view' : 'Staff pilot view'}</p>
           </div>
           <Link
             href="/logout"
@@ -255,8 +255,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </span>
               <span className="text-slate-300 hidden sm:inline">·</span>
               <span className="text-xs bg-amber-100 text-amber-700 font-medium px-2 py-0.5 rounded-full whitespace-nowrap">
-                <span className="sm:hidden">Demo</span>
-                <span className="hidden sm:inline">Demo Mode — Sample Data Only</span>
+                <span className="sm:hidden">Pilot</span>
+                <span className="hidden sm:inline">Controlled Pilot — No Real Data</span>
               </span>
             </div>
             <Link

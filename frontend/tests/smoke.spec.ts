@@ -12,7 +12,7 @@ test.describe('WorkTwin smoke tests', () => {
 
   test('dashboard loads with staff demo framing', async ({ page }) => {
     await page.goto('/dashboard')
-    await expect(page.getByText(/Demo Mode.*Sample Data Only/i)).toBeVisible()
+    await expect(page.getByText(/Controlled Pilot.*No Real Data/i)).toBeVisible()
     await expect(page.getByText('Safe support reminders')).toBeVisible()
     await expect(page.getByText('Session-only demo notes')).toBeVisible()
     await expect(page.getByRole('link', { name: 'Policy Library Browse approved documents' })).toBeVisible()
@@ -20,7 +20,7 @@ test.describe('WorkTwin smoke tests', () => {
     const adminLinks = await page.locator('a[href^="/admin"], a[href*="/admin/"]').count()
     if (adminLinks > 0) {
       // Admin demo is enabled — links must be inside the demo switcher, not loose in page content
-      await expect(page.getByText('Demo Mode — Switch View').first()).toBeVisible()
+      await expect(page.getByText('Host View — Switch Area').first()).toBeVisible()
     }
     // If adminLinks === 0, admin demo is disabled — that is the expected default state
   })

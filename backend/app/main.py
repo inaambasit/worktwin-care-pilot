@@ -1138,6 +1138,13 @@ _TOPIC_PATTERNS: List[Tuple[str, "re.Pattern[str]"]] = [
         r'information\s+(?:handling|sharing))\b',
         re.IGNORECASE,
     )),
+    # Placed after all other patterns so safeguarding/medication/legal retain first-match priority.
+    ("accident_incident", re.compile(
+        r'\b(fall(?:s|en|ing)?|slip(?:s|ped|ping)?|trip(?:ped|ping)?|'
+        r'near[\s-]miss|injur(?:y|ies|ed|ing)|accident|incident|'
+        r'collaps(?:e[sd]?|ing))\b',
+        re.IGNORECASE,
+    )),
 ]
 
 # Per-topic response configs — answer, next_steps, risk_category, vertical_subcategory.
@@ -1262,6 +1269,29 @@ _TOPIC_RESPONSE: Dict[str, Dict[str, Any]] = {
         ],
         "risk_category": "legal",
         "vertical_subcategory": "legal_compliance",
+    },
+    "accident_incident": {
+        "answer": (
+            "This may involve an accident, incident, injury, fall or urgent care concern. "
+            "WorkTwin cannot advise on care or emergency response directly. "
+            "Please contact your registered manager, line manager or designated lead immediately "
+            "and follow your organisation's accident, incident reporting and emergency procedures. "
+            "If there is immediate danger, serious injury, severe pain, collapse, breathing difficulty, "
+            "confusion or any other urgent concern, seek urgent help or contact emergency services."
+        ),
+        "next_steps": [
+            "Contact your registered manager, line manager or designated lead immediately.",
+            "Follow your organisation's accident and incident reporting procedure.",
+            "Seek emergency help or call 999 if there is immediate risk, serious injury or urgent concern.",
+        ],
+        "contact_routes": [
+            "Registered Manager",
+            "Line Manager / Designated Lead",
+            "First Aider or appropriate trained lead (if available)",
+            "Emergency services - 999 (if immediate danger)",
+        ],
+        "risk_category": "vertical_sensitive",
+        "vertical_subcategory": "accident_incident",
     },
 }
 

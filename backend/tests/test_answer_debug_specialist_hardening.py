@@ -449,6 +449,35 @@ class TestTopicPatternsImprovements:
     def test_mobile_phone_query_not_classified(self):
         assert _classify_escalation_topic("Can staff use their mobile phone during a shift?") is None
 
+    # --- accident_incident escalation ---
+
+    def test_fall_classified_as_accident_incident(self):
+        assert _classify_escalation_topic(
+            "What should I do after a resident has a fall?"
+        ) == "accident_incident"
+
+    def test_fallen_classified_as_accident_incident(self):
+        assert _classify_escalation_topic(
+            "The resident has fallen and seems confused"
+        ) == "accident_incident"
+
+    # --- cross-category regression: accident_incident must not downgrade existing topics ---
+
+    def test_medication_missed_still_classified_as_medication(self):
+        assert _classify_escalation_topic(
+            "What should I do if medication is missed?"
+        ) == "medication"
+
+    def test_abuse_still_classified_as_safeguarding(self):
+        assert _classify_escalation_topic(
+            "What should I do if a service user says they are being abused?"
+        ) == "safeguarding"
+
+    def test_sharing_confidential_with_family_still_classified_as_legal(self):
+        assert _classify_escalation_topic(
+            "Can staff share confidential information with a family member if they ask for it?"
+        ) == "legal"
+
 
 # ---------------------------------------------------------------------------
 # Unit tests: _reorder_rows_specialist_first — 4S.96N

@@ -161,7 +161,7 @@ function isFallbackGuidance(a: DisplayAnswer): boolean {
 // Page component
 // ---------------------------------------------------------------------------
 
-const CONTEXT_CHIPS = ['Policy-grounded answers', 'Private in this demo', 'Human escalation', 'Care staff support']
+const CONTEXT_CHIPS = ['Policy-grounded answers', 'Private in this controlled pilot', 'Human escalation', 'Care staff support']
 
 export default function AskPage() {
   const [input, setInput] = useState('')
@@ -244,8 +244,8 @@ export default function AskPage() {
         <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2">
           <AlertTriangle size={13} className="text-amber-600 shrink-0" />
           <p className="text-xs text-amber-800">
-            <span className="font-semibold">Demo mode</span>{' '}
-            - answers use sample documents only. No real staff or service-user data is used in this demo.
+            <span className="font-semibold">Controlled pilot mode</span>{' '}
+            - answers use approved pilot documents only. No real staff or service-user data should be entered during this controlled pilot.
           </p>
         </div>
 
@@ -274,19 +274,19 @@ export default function AskPage() {
                   ))}
                 </div>
                 <p className="text-teal-200 text-xs">
-                  Private Ask questions are not shown to managers in this demo.
+                  Private Ask questions are not shown to managers in this controlled pilot.
                 </p>
               </div>
             </div>
 
-            {/* Demo safety mode panel */}
+            {/* Controlled pilot safety mode panel */}
             <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 shadow-sm">
               <div className="flex items-start gap-3">
                 <div className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
                   <Shield size={16} className="text-amber-600" />
                 </div>
                 <div className="flex-1">
-                  <h2 className="font-semibold text-amber-900 mb-1">Demo safety mode</h2>
+                  <h2 className="font-semibold text-amber-900 mb-1">Controlled pilot safety mode</h2>
                   <p className="text-sm text-amber-800 leading-relaxed mb-4">
                     Ask WorkTwin can use approved, governed documents only when the backend, database and document gates are ready. If no safe source is available, it gives fallback guidance. Safeguarding, medication, HR, legal and wellbeing topics must be escalated to a human lead.
                   </p>
@@ -323,7 +323,7 @@ export default function AskPage() {
                   <BookOpen size={15} className="text-teal-600" />
                   <h2 className="font-semibold text-teal-900 text-sm">Example of a source-grounded answer</h2>
                 </div>
-                <span className="text-xs bg-amber-100 text-amber-800 font-semibold px-2.5 py-1 rounded-full">Example only - not a live retrieved answer</span>
+                <span className="text-xs bg-amber-100 text-amber-800 font-semibold px-2.5 py-1 rounded-full">Pilot example only - not a live retrieved answer</span>
               </div>
               <div className="p-5">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Question</p>
@@ -332,16 +332,16 @@ export default function AskPage() {
                 <p className="text-sm text-slate-700 leading-relaxed mb-4">For a visitor arriving at reception, staff should follow the visitor sign-in process, confirm the visitor&apos;s identity, record the visit, and escalate if anything feels unsafe or unclear.</p>
                 <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 mb-4">
                   <BookOpen size={12} className="text-teal-600 shrink-0" />
-                  <span className="text-xs text-slate-600"><span className="font-semibold">Source:</span> Visitor Sign-In and Identification Procedure - controlled demo document</span>
+                  <span className="text-xs text-slate-600"><span className="font-semibold">Source:</span> Visitor Sign-In and Identification Procedure - approved pilot document</span>
                 </div>
-                <p className="text-xs text-slate-400">This is a demo example only. It does not imply that this answer was retrieved live during your session.</p>
+                <p className="text-xs text-slate-400">This is a pilot example only. It does not imply that this answer was retrieved live during your session.</p>
               </div>
             </div>
 
             {/* Common questions */}
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-              <h2 className="font-semibold text-slate-900 mb-1">Demo questions</h2>
-              <p className="text-sm text-slate-500 mb-4">Use the Visitor SOP questions for the main demo, or try the escalation demos below.</p>
+              <h2 className="font-semibold text-slate-900 mb-1">Pilot questions</h2>
+              <p className="text-sm text-slate-500 mb-4">Use the Visitor SOP questions for the main pilot walkthrough, or try the escalation examples below.</p>
               <div className="space-y-2">
                 <p className="text-[11px] font-bold text-teal-700 uppercase tracking-wider pb-0.5">Visitor SOP - start here</p>
                 <button
@@ -371,7 +371,7 @@ export default function AskPage() {
                   </div>
                   <span className="text-sm font-medium text-slate-800 group-hover:text-teal-900">Can a visitor go beyond reception without speaking to staff?</span>
                 </button>
-                <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wider pt-2 pb-0.5">Escalation demos</p>
+                <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wider pt-2 pb-0.5">Escalation examples</p>
                 <button
                   onClick={() => handlePrompt(SAFEGUARDING_Q)}
                   className="w-full flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3.5 text-left hover:bg-amber-100 hover:border-amber-300 hover:shadow-sm transition-all group"
@@ -457,7 +457,7 @@ export default function AskPage() {
               <div>
                 <h2 className="font-semibold text-slate-800 text-sm mb-1">Privacy-first design</h2>
                 <p className="text-sm text-slate-600 leading-relaxed">
-                  Private from managers in this demo. WorkTwin does not show raw questions on admin pages.
+                  Private from managers in this controlled pilot. WorkTwin does not show raw questions on admin pages.
                 </p>
               </div>
             </div>
@@ -898,7 +898,7 @@ export default function AskPage() {
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center gap-3">
               <Shield size={15} className="text-teal-600 shrink-0" />
               <p className="text-xs text-slate-500 leading-relaxed">
-                Private from managers in this demo. WorkTwin does not show raw questions on admin pages.
+                Private from managers in this controlled pilot. WorkTwin does not show raw questions on admin pages.
               </p>
             </div>
           </div>
@@ -944,7 +944,7 @@ export default function AskPage() {
             {input.trim().length > 0 && input.trim().length < 3 ? (
               <p className="text-xs text-amber-600">Please enter at least 3 characters.</p>
             ) : (
-              <p className="text-xs text-slate-400">Private from managers in this demo. WorkTwin does not show raw questions on admin pages.</p>
+              <p className="text-xs text-slate-400">Private from managers in this controlled pilot. WorkTwin does not show raw questions on admin pages.</p>
             )}
             <p className={`text-xs tabular-nums shrink-0 ml-3 ${
               input.length >= 500 ? 'text-red-500' :

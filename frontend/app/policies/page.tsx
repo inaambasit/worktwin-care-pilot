@@ -288,7 +288,7 @@ export default function PoliciesPage() {
             </span>
             <h1 className="text-3xl font-bold mb-2.5 leading-snug">Policy Library</h1>
             <p className="text-teal-100 text-sm leading-relaxed max-w-lg mb-5">
-              Browse approved staff-visible documents used by WorkTwin to support policy-grounded answers during the pilot demo.
+              Browse approved staff-visible documents used by WorkTwin to support policy-grounded answers during the controlled pilot.
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
               {CONTEXT_CHIPS.map(chip => (
@@ -320,7 +320,7 @@ export default function PoliciesPage() {
             </div>
             <div>
               <p className="text-sm font-bold text-slate-700 leading-tight">Visitor SOP</p>
-              <p className="text-xs text-slate-500">Approved for this demo</p>
+              <p className="text-xs text-slate-500">Approved for this pilot</p>
             </div>
           </div>
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-3">
@@ -341,7 +341,7 @@ export default function PoliciesPage() {
             <div>
               <p className="text-sm font-semibold text-amber-800">Could not load policy library</p>
               <p className="text-xs text-amber-700 mt-0.5">
-                WorkTwin could not connect to the policy library. Showing the Visitor Sign-In and Identification Procedure — the one approved demo policy. Please try again or speak to your manager.
+                WorkTwin could not connect to the policy library. Showing the approved fallback policy information for this controlled pilot. Please try again or speak to your manager.
               </p>
             </div>
           </div>
@@ -387,7 +387,7 @@ export default function PoliciesPage() {
             <div className="text-center space-y-2">
               <Loader2 size={28} className="mx-auto text-teal-400 animate-spin" />
               <p className="font-semibold text-slate-700">Loading approved policies</p>
-              <p className="text-xs text-slate-400">Checking staff-visible documents for this pilot demo.</p>
+              <p className="text-xs text-slate-400">Checking staff-visible documents for this controlled pilot.</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[1, 2, 3, 4].map(i => (
@@ -515,7 +515,7 @@ export default function PoliciesPage() {
             <li className="flex items-start gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0 mt-[7px]" />
               <span className="text-sm text-slate-600 leading-relaxed">
-                Policy library content is for staff guidance during the pilot demo. Safeguarding, medication, HR, legal, wellbeing or immediate-risk concerns should still be escalated to the right human lead.
+                Policy library content is for staff guidance during the controlled pilot. Safeguarding, medication, HR, legal, wellbeing or immediate-risk concerns should still be escalated to the right human lead.
               </span>
             </li>
             <li className="flex items-start gap-2.5">

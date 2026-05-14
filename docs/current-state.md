@@ -1,6 +1,6 @@
 # WorkTwin Care Pilot - Current State
 
-> Generated: 2026-05-07. Updated: 2026-05-14. Source of truth through checkpoint `c55d951` on branch `main`.
+> Generated: 2026-05-07. Updated: 2026-05-14. Source of truth through checkpoint `94df6ee` on branch `main`.
 > Update this file whenever a milestone changes the status of any item below.
 > Do not edit other files to reconcile with this document - fix those files instead.
 
@@ -50,13 +50,15 @@
 
 > **Docs index alignment (2026-05-14):** `docs/README.md` aligned with current pilot state at `c55d951`. Status note, current-state table and auth section intro updated to reflect current controlled proof position.
 
+> **Pilot shell wording polish (2026-05-14):** Shared staff/admin shell wording polished at checkpoint `94df6ee`. "Demo User" became "Pilot User"; "Care Worker" became "Staff pilot view"; "Demo Mode — Sample Data Only" became "Controlled Pilot — No Real Data"; "Demo Mode — Switch View" became "Host View — Switch Area". Frontend build passed and full smoke suite passed 20/20. No backend, auth, API, admin proxy, RAG, policy, env, SQL or data changes.
+
 ---
 
 ## 1. Current Checkpoint
 
 | Item | Value |
 |---|---|
-| Commit | `c55d951` |
+| Commit | `94df6ee` |
 | Branch | `main` |
 | Repo path | `C:\Projects\worktwin-care-pilot\worktwin-care-pilot-starter` |
 | Backend | FastAPI / `backend/app/main.py` |
@@ -227,12 +229,12 @@ The system demonstrates the intended architecture convincingly: governance gates
 |---|---|---|
 | RAG pipeline | 8 / 10 | End-to-end working; four-policy Thumhara set proven under real auth and org context locally |
 | Governance model | 8 / 10 | Three-gate model solid and enforced; four-policy staff-visible set proven; accident/fall escalation added |
-| UI completeness | 7 / 10 | All staff routes render; admin tooling present but proxy-guarded; UI labels (Demo User/Demo Mode) need polish before stakeholder-facing use |
+| UI completeness | 7.5 / 10 | All staff routes render; shared pilot shell wording has been polished for stakeholder review; admin tooling remains proxy-guarded; final walkthrough-specific page wording may still need review |
 | Test coverage | 7 / 10 | Good backend unit/integration tests; 248 passing; E2E now proven locally with real auth |
 | Controlled trusted-user pilot readiness | 9 / 10 | Four-policy set proven; auth/session proven locally; pilot pack created; remaining step is named-user approval and access setup |
 | Production / live operational readiness | NO-GO | No DPA; QCS use unconfirmed for AI/RAG; production deployment, monitoring, retention/deletion and incident process not proven; not production-ready |
 | Privacy / compliance | 4 / 10 | Privacy-by-design in architecture; no DPA; QCS use unconfirmed; real data must not be entered |
-| Documentation accuracy | 8 / 10 | Pilot scope, pilot pack, proof records and docs index aligned at c55d951 |
+| Documentation accuracy | 8 / 10 | Pilot scope, pilot pack, proof records and docs index aligned at `94df6ee` |
 
 ---
 
@@ -255,7 +257,7 @@ A sandbox Supabase auth E2E setup plan has been created at `docs/4s90i-sandbox-a
 | 3 | Confirm access method and account setup for each named user |
 | 4 | Brief each user; confirm they understand safe-use rules, prohibited data, and escalation boundaries |
 | 5 | Run at least one supervised walkthrough before unsupervised access |
-| 6 | Polish UI labels (Demo User/Demo Mode wording) before any stakeholder-facing use |
+| 6 | Run a quick visual walkthrough of the polished pilot shell and key staff pages before stakeholder-facing use. |
 | 7 | Collect structured feedback from each user after a defined test period |
 | 8 | Do not add more policies until the trusted-user rollout controls are accepted and proven |
 
@@ -276,7 +278,6 @@ A sandbox Supabase auth E2E setup plan has been created at `docs/4s90i-sandbox-a
 | Item | Description | Notes |
 |---|---|---|
 | Admin proxy production rollout | Enable `ADMIN_PROXY_ENABLED` in a controlled non-local environment | Blocked pending production rollout controls, DPA/content permissions, pilot governance, deployment proof |
-| UI label polish | Replace Demo User/Demo Mode wording with Thumhara-appropriate labels | Non-blocker for auth proof; should be done before stakeholder-facing use |
 | QCS DB/embedding cleanup | Review AC32, CC34, QQ03 flags and embeddings | Blocked on written QCS permission decision |
 
 #### Completed technical backlog items
@@ -293,6 +294,7 @@ A sandbox Supabase auth E2E setup plan has been created at `docs/4s90i-sandbox-a
 | Admin proxy CSRF / same-origin guard (4S.90N-E) | Real same-origin / fetch-metadata CSRF guard implemented in `frontend/app/api/admin/[...path]/route.ts`; POST and PATCH protected; GET CSRF-bypassed; DELETE method-blocked before CSRF; fails closed if no valid header present; 13 targeted CSRF tests passed; full E2E public-demo suite 40 passed, 37 skipped, 0 failed. | 4S.90N-E (`185b07e`) |
 | Admin response minimisation (4S.90N-F) | Three commits: upload error paths return safe strings only (6416c37, pytest 138 passed); answer-debug suppresses ANSWER_MODEL and estimated_cost_note (80e9124, pytest 150 passed); per-role strip helper removes internal document fields, upload internals, registry_warning, and embedding model/token/cost fields from organisation_admin proxy responses; worktwin_dev_admin passthrough unchanged; frontend build passed; admin proxy grep tests 21 passed, 31 skipped, 0 failed; strip helper tests 29 passed. | 4S.90N-F (`02f64ea`) |
 | Visitor SOP-only demo journey (4S.91B) | Dashboard guides the demo path; Ask demo path focuses on Visitor SOP questions; Policy Library fallback is Visitor Sign-In and Identification Procedure only; Access Refusal scenario connects to Visitor SOP and escalation; Escalation uses sample/non-personal contact labels; no real staff names in the staff-facing demo journey; build passed; smoke 16/16; live route check passed; public admin proxy 403 confirmed. No backend, DB, auth, admin proxy, env, QCS, migration, or embedding changes made. | 4S.91B (`ac2d6ac`) |
+| Pilot shell wording polish | Shared shell wording changed from generic demo labels to controlled pilot wording; frontend build passed; full smoke suite 20/20 passed | `94df6ee` |
 
 ### QCS data-governance cleanup (deferred -- do not act without explicit approval)
 

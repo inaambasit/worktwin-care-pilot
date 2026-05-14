@@ -673,6 +673,76 @@ All four returned `requires_escalation=false`.
 
 This moves the pilot from process-only local proof to real backend auth proof. The next proof should be local frontend auth and session proof with `NEXT_PUBLIC_PILOT_AUTH_MODE` enabled locally, confirming login, route protection and browser-side Bearer forwarding. This is still not a live pilot. No real staff should be granted access yet.
 
+### 4S.98B proof — local frontend auth and session proof
+
+**Date:** 2026-05-14
+
+**Purpose:** To prove the local frontend can enforce route protection, complete Supabase login and session handling, forward the browser Bearer token to the backend, and clear the session on logout.
+
+**Starting checkpoint:** `38d2d7a` — Record authenticated staff backend proof.
+
+#### Configuration
+
+The backend remained in `PILOT_AUTH_MODE=true` throughout. The frontend was first confirmed auth-off by starting it with the standard `.env.local` — `/dashboard`, `/ask`, `/policies` and `/admin` each returned HTTP 200. The frontend was then restarted for the PowerShell session only with `NEXT_PUBLIC_PILOT_AUTH_MODE=true` and `NEXT_PUBLIC_API_URL=http://localhost:8000`. This was a local proof only. No production or public deployment auth flags were changed.
+
+#### Logged-out route protection proof
+
+With local frontend auth enabled, all four protected routes redirected to `/login` using safe `next` paths:
+
+| Route | Status | Redirect location |
+|-------|--------|-------------------|
+| `/dashboard` | 307 | `/login?next=%2Fdashboard` |
+| `/ask` | 307 | `/login?next=%2Fask` |
+| `/policies` | 307 | `/login?next=%2Fpolicies` |
+| `/admin` | 307 | `/login?next=%2Fadmin` |
+
+#### Login and session proof
+
+A Supabase magic-link response was generated for the dedicated non-real staff test user (`inaam.basit+worktwin-staff-test@gmail.com`). Supabase returned `action_link`, `email_otp` and `hashed_token` at the root response level. The generated `action_link` redirected to the public homepage, so a local callback URL was constructed using the `hashed_token` without printing the raw token:
+
+```
+/auth/callback?token_hash=...&type=magiclink&next=%2Fdashboard
+```
+
+The browser completed the local auth callback and landed on `/dashboard`. This proved the Supabase session cookie was created and the frontend middleware accepted the logged-in user.
+
+#### Frontend `/policies` proof
+
+While logged in, `/policies` loaded without redirecting to login. The Policy Library displayed the expected 4 staff-visible documents:
+
+- Thumhara Centre Infection Prevention and Basic Hygiene Policy
+- Thumhara Centre Confidentiality and Information Handling Policy
+- Thumhara Centre Mobile Phone and Portable Device Use Policy
+- Thumhara Centre Visitor Sign-In and Identification Policy
+
+This proves browser-side Bearer forwarding worked for `/policies`, as the backend would otherwise return HTTP 401.
+
+#### Frontend `/ask` positive proof
+
+While logged in, Ask WorkTwin successfully answered: *How should a visitor sign in at Thumhara Centre?*
+
+The frontend displayed a source-grounded, policy-grounded answer with 5 sources, all from the Thumhara Centre Visitor Sign-In and Identification Policy. This proves browser-side Bearer forwarding worked for `/ask`.
+
+#### Frontend `/ask` escalation proof
+
+While logged in, Ask WorkTwin was asked: *What should I do if medication is missed?*
+
+The frontend displayed an escalation response — no medication, dosing or administration instructions were returned. The response gave guidance to contact the registered manager, medication lead or a medical professional, with escalation contacts including Medication Lead, Registered Manager, Pharmacist or GP, NHS 111, and emergency services (999 if immediate danger). This proved that authenticated frontend Ask preserves the backend escalation controls.
+
+#### Logout proof
+
+After clicking the sign-out icon, the browser landed on the login page. A direct request to `/dashboard` then returned HTTP 307 to `/login?next=%2Fdashboard`, confirming the session was cleared and protected routes remained gated after logout.
+
+#### Verdict
+
+**PASS.** Local frontend auth and session proof passed. With `NEXT_PUBLIC_PILOT_AUTH_MODE=true` locally, protected routes redirect when logged out, the dedicated staff test user can complete the local Supabase auth callback, `/policies` and `/ask` work through the browser session, high-risk medication escalation remains intact, and logout clears protected access.
+
+#### Readiness impact
+
+This moves the pilot from real backend auth proof to local end-to-end frontend session proof. The remaining blocker before any trusted-user access is not core auth or RAG functionality; it is controlled pilot packaging — user instructions, safe-use boundaries, prohibition on entering real personal or service-user data, feedback route, incident process, and a deliberate invited-user plan.
+
+UI polish items noted but not treated as blockers: the employee portal still labels the user as Demo User/Care Worker, and Demo Mode wording remains visible. These should be addressed before a stakeholder-facing pilot but did not block the auth and session proof.
+
 ---
 
 ## 6. Safety and escalation rules

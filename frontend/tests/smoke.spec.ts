@@ -167,8 +167,8 @@ test.describe('WorkTwin smoke tests', () => {
 
   test('/privacy-model page loads and shows privacy boundary messaging', async ({ page }) => {
     await page.goto('/privacy-model')
-    await expect(page.getByRole('heading', { name: 'How this demo handles data and privacy' })).toBeVisible()
-    await expect(page.getByText(/Controlled.*demo.*not production/i).first()).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'How this controlled pilot handles data and privacy' })).toBeVisible()
+    await expect(page.getByText(/Controlled.*pilot preview.*not production/i).first()).toBeVisible()
     await expect(page.getByText(/No real data should be entered/i).first()).toBeVisible()
     await expect(page.getByText(/session-only/i).first()).toBeVisible()
   })

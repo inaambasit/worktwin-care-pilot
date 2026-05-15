@@ -111,7 +111,7 @@ const categories: Category[] = [
   },
 ]
 
-const CONTEXT_CHIPS = ['Human escalation', 'Staff support', 'Thumhara Centre', 'Demo contacts']
+const CONTEXT_CHIPS = ['Human escalation', 'Staff support', 'Thumhara Centre', 'Pilot placeholder contacts']
 
 export default function EscalationPage() {
   return (
@@ -253,7 +253,7 @@ export default function EscalationPage() {
         </div>
 
         <p className="text-xs text-slate-400 text-center pb-2">
-          All contact names and numbers shown here are fictional sample data — this is a demo only.
+          All contact names and numbers shown here are fictional sample data for controlled pilot display only.
         </p>
 
       </div>

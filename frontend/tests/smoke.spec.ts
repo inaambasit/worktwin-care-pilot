@@ -69,11 +69,11 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByText(/View related policies|Demo preview|scenario content/i).first()).toBeVisible()
   })
 
-  test('notes page states session-only demo behaviour', async ({ page }) => {
+  test('notes page states session-only controlled pilot behaviour', async ({ page }) => {
     await page.goto('/notes')
     await expect(page.getByRole('heading', { name: 'Private Notes' })).toBeVisible()
     await expect(page.getByText('Session-only notes')).toBeVisible()
-    await expect(page.getByText('Private notes stay private in this demo and are not shown on admin pages.')).toBeVisible()
+    await expect(page.getByText('Private notes stay private in this controlled pilot and are not shown on admin pages.')).toBeVisible()
     await expect(page.getByText('Session only - not saved between sessions')).toBeVisible()
   })
 

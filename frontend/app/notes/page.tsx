@@ -59,7 +59,7 @@ const tagColours: Record<string, string> = {
   General: 'bg-slate-100 text-slate-600',
 }
 
-const CONTEXT_CHIPS = ['Private reflection', 'Session-only demo', 'Not manager-visible', 'Staff support']
+const CONTEXT_CHIPS = ['Private reflection', 'Session-only pilot', 'Not manager-visible', 'Staff support']
 
 export default function NotesPage() {
   const [notes, setNotes] = useState<Note[]>(initialNotes)
@@ -118,7 +118,7 @@ export default function NotesPage() {
             </span>
             <h1 className="text-3xl font-bold mb-2.5 leading-snug">Private Notes</h1>
             <p className="text-teal-100 text-sm leading-relaxed max-w-lg mb-5">
-              Use this space to collect your own thoughts during the demo. These notes are for private reflection and are not shown to managers in this pilot.
+              Use this space to collect your own thoughts during the controlled pilot. These notes are for private reflection and are not shown to managers in this pilot.
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
               {CONTEXT_CHIPS.map(chip => (
@@ -128,7 +128,7 @@ export default function NotesPage() {
               ))}
             </div>
             <p className="text-teal-200 text-xs">
-              Private notes stay private in this demo and are not shown on admin pages.
+              Private notes stay private in this controlled pilot and are not shown on admin pages.
             </p>
           </div>
         </div>
@@ -149,7 +149,7 @@ export default function NotesPage() {
               <Lock size={18} className="text-teal-600" />
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-700 leading-tight">Private in demo</p>
+              <p className="text-sm font-bold text-slate-700 leading-tight">Private in pilot</p>
               <p className="text-xs text-slate-500">Not shared with anyone</p>
             </div>
           </div>
@@ -173,7 +173,7 @@ export default function NotesPage() {
             <Clock size={15} className="text-amber-600 shrink-0 mt-0.5" />
             <p className="text-xs text-amber-800 leading-relaxed">
               <span className="font-semibold">Session only — notes will not be saved.</span>{' '}
-              These notes are private to you during this demo session. Managers and admins cannot view them.
+              These notes are private to you during this session-only pilot view. Managers and admins cannot view them.
               Closing or refreshing this tab will clear all notes. Do not rely on notes surviving a browser close.
             </p>
           </div>
@@ -298,7 +298,7 @@ export default function NotesPage() {
           <div>
             <h2 className="font-semibold text-slate-800 text-sm mb-1">Private by design</h2>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Your private notes are not shown to managers in this demo. They are not used for performance scoring, staff monitoring or admin review.
+              Your private notes are not shown to managers in this controlled pilot. They are not used for performance scoring, staff monitoring or admin review.
             </p>
           </div>
         </div>
@@ -315,7 +315,7 @@ export default function NotesPage() {
             <li className="flex items-start gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0 mt-[7px]" />
               <span className="text-sm text-slate-600 leading-relaxed">
-                These notes are for your own reflection during the pilot demo. If your note relates to safeguarding, medication, HR, wellbeing, legal or immediate-risk concerns, speak to the right human lead.
+                These notes are for your own reflection during the controlled pilot. If your note relates to safeguarding, medication, HR, wellbeing, legal or immediate-risk concerns, speak to the right human lead.
               </span>
             </li>
             <li className="flex items-start gap-2.5 bg-red-50 rounded-xl px-3 py-2.5 -mx-1">

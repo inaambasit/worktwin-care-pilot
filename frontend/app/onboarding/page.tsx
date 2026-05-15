@@ -293,7 +293,7 @@ export default function OnboardingPage() {
         </div>
 
         <p className="text-xs text-slate-400 text-center">
-          Pilot note: this pathway is for controlled pilot demonstration only. Private notes and Ask questions are not shown to managers in this controlled prototype.
+          Pilot note: this pathway is for controlled pilot preview only. Private notes and Ask questions are not shown to managers in this controlled pilot.
         </p>
 
       </div>

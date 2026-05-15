@@ -38,7 +38,7 @@ export default function BookPilotPage() {
               organisation&rsquo;s context before any pilot begins.
             </p>
             <p className="text-slate-500 text-xs leading-relaxed mb-6 bg-slate-50 rounded-xl p-4">
-              This demo stores nothing. No data from this form is sent to a live CRM, care system, server or
+              This controlled pilot preview stores nothing. No data from this form is sent to a live CRM, care system, server or
               any external service. Nothing leaves your browser session. A real pilot enquiry would be followed
               up directly by the WorkTwin team.
             </p>
@@ -46,7 +46,7 @@ export default function BookPilotPage() {
               href="/"
               className="inline-block px-6 py-2.5 bg-teal-700 hover:bg-teal-800 text-white font-semibold rounded-xl text-sm transition-colors"
             >
-              Back to the demo
+              Back to the pilot overview
             </Link>
           </div>
         </div>
@@ -65,7 +65,7 @@ export default function BookPilotPage() {
             <span className="font-bold text-slate-900 text-lg">WorkTwin</span>
           </Link>
           <Link href="/" className="text-sm text-slate-500 hover:text-slate-800 transition-colors">
-            &larr; Back to demo
+            &larr; Back to pilot overview
           </Link>
         </div>
       </nav>
@@ -156,7 +156,7 @@ export default function BookPilotPage() {
 
           <div className="pt-2 flex items-center justify-between gap-4">
             <p className="text-xs text-slate-400 leading-relaxed">
-              This demo stores nothing. No data is sent to a server, CRM or care system.
+              This controlled pilot preview stores nothing. No data is sent to a server, CRM or care system.
             </p>
             <button
               type="submit"
@@ -170,7 +170,7 @@ export default function BookPilotPage() {
         <p className="text-center mt-6 text-sm text-slate-500">
           Not ready yet?{' '}
           <Link href="/" className="text-teal-700 hover:text-teal-800 font-medium underline underline-offset-2">
-            Return to the demo landing page
+            Return to the pilot overview
           </Link>
         </p>
       </main>

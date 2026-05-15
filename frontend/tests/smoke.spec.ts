@@ -128,8 +128,8 @@ test.describe('WorkTwin smoke tests', () => {
     await page.getByRole('button', { name: 'Submit enquiry' }).click()
 
     await expect(page.getByText('Thank you, Test User')).toBeVisible()
-    await expect(page.getByText(/This demo stores nothing/i).first()).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Back to the demo' })).toBeVisible()
+    await expect(page.getByText(/This controlled pilot preview stores nothing/i).first()).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Back to the pilot overview' })).toBeVisible()
   })
 
   test('admin pages reflect enabled or disabled state', async ({ page }) => {

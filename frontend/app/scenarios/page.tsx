@@ -119,7 +119,7 @@ const statusIconBg: Record<Status, string> = {
   'Completed': 'bg-teal-100',
 }
 
-const CONTEXT_CHIPS = ['Safe practice mode', 'Care-sector scenarios', 'Private learning', 'Demo pathway']
+const CONTEXT_CHIPS = ['Safe practice mode', 'Care-sector scenarios', 'Private learning', 'Pilot pathway']
 
 const categories = ['All', ...Array.from(new Set(scenarios.map(s => s.category)))]
 
@@ -305,7 +305,7 @@ export default function ScenariosPage() {
               {activeScenario === scenario.id && (
                 scenario.id === 1 ? (
                   <div className="border-t border-teal-100 bg-gradient-to-br from-teal-50 to-slate-50 px-6 py-5">
-                    <p className="text-xs font-bold text-teal-700 uppercase tracking-widest mb-3">Demo preview</p>
+                    <p className="text-xs font-bold text-teal-700 uppercase tracking-widest mb-3">Pilot preview</p>
                     <div className="bg-white border border-teal-200 rounded-2xl p-5 text-sm text-slate-700">
                       <p className="font-semibold text-slate-800 mb-2">Scene setting:</p>
                       <p className="leading-relaxed text-slate-600">
@@ -329,19 +329,19 @@ export default function ScenariosPage() {
                       </div>
                     </div>
                     <p className="text-xs text-slate-400 mt-3 leading-relaxed">
-                      This is a demo preview. The full scenario system will guide you through multiple steps with feedback.
+                      This is a controlled pilot preview. The full scenario system will guide you through multiple steps with feedback.
                     </p>
                   </div>
                 ) : (
                   <div className="border-t border-slate-100 bg-slate-50 px-6 py-5">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Demo preview</p>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Pilot preview</p>
                     <p className="text-sm text-slate-600 leading-relaxed">
                       The full interactive scenario for{' '}
                       <span className="font-semibold text-slate-700">{scenario.title}</span> is being
                       prepared and will guide you through realistic steps with branching decisions and feedback.
                     </p>
                     <p className="text-xs text-slate-400 mt-3 leading-relaxed">
-                      Demo-only preview. Scenario content for this topic will be added before the controlled pilot.
+                      Pilot preview only. Scenario content for this topic will be added before wider controlled use.
                     </p>
                   </div>
                 )

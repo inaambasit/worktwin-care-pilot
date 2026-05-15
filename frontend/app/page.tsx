@@ -41,7 +41,7 @@ const features = [
 ]
 
 const trustItems = [
-  'Employee chat content is not shown on manager pages in this demo',
+  'Employee chat content is not shown on manager pages in this controlled pilot preview',
   'Designed for answers grounded in approved documents',
   'Sensitive topics are escalated to a human - never answered automatically',
   'No performance scoring, surveillance or sentiment tracking',
@@ -80,7 +80,7 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-4">
             <Link href="/dashboard" className="text-sm text-slate-600 hover:text-slate-900 font-medium">
-              Explore demo
+              Explore pilot preview
             </Link>
             <Link href="/login" className="text-sm text-slate-600 hover:text-slate-900 font-medium">
               Staff sign in
@@ -110,7 +110,7 @@ export default function LandingPage() {
           </h1>
           <p className="text-lg text-slate-300 leading-relaxed max-w-3xl mx-auto mb-10">
             WorkTwin is a privacy-first AI work, onboarding, policy, workflow and learning companion
-            for employees in regulated SMEs. WorkTwin Care Pilot is the first vertical demo, showing
+            for employees in regulated SMEs. WorkTwin Care Pilot is the first vertical pilot preview, showing
             how the platform can support UK care providers with care-specific policies and scenarios.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -128,15 +128,15 @@ export default function LandingPage() {
             </Link>
           </div>
           <p className="mt-6 text-xs text-slate-500">
-            First internal test: Thumhara Centre | Sample documents only | No real staff, service-user or client data
+            First internal pilot preview: Thumhara Centre | Sample documents only | No real staff, service-user or client data
           </p>
         </div>
       </section>
 
-      {/* Demo links bar */}
+      {/* Pilot preview links bar */}
       <div className="bg-teal-700 py-3">
         <div className="max-w-6xl mx-auto px-6 flex flex-wrap items-center justify-center gap-4 text-sm text-teal-100">
-          <span className="font-medium text-white">Explore the demo:</span>
+          <span className="font-medium text-white">Explore the pilot preview:</span>
           <Link href="/dashboard" className="hover:text-white underline underline-offset-2">Employee Dashboard</Link>
           <Link href="/ask" className="hover:text-white underline underline-offset-2">Ask WorkTwin</Link>
           <Link href="/onboarding" className="hover:text-white underline underline-offset-2">My Onboarding</Link>
@@ -249,7 +249,7 @@ export default function LandingPage() {
             <span className="text-white text-sm font-semibold">WorkTwin</span>
           </div>
           <p className="text-slate-500 text-xs text-center">
-            This is a demo build using sample data only. No real staff, service-user, client or private care data is used.<br />
+            This is a controlled pilot preview using sample data only. No real staff, service-user, client or private care data is used.<br />
             WorkTwin Care Pilot is the first vertical test of the broader WorkTwin platform. &copy; {new Date().getFullYear()} WorkTwin.
           </p>
           <div className="flex gap-4 text-xs text-slate-500">

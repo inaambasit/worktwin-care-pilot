@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test'
 test.describe('WorkTwin smoke tests', () => {
   test('landing page is public and does not link directly into admin pages', async ({ page }) => {
     await page.goto('/')
-    await expect(page.getByRole('link', { name: /Explore demo/i })).toBeVisible()
+    await expect(page.getByRole('link', { name: /Explore pilot preview/i })).toBeVisible()
     await expect(page.getByRole('link', { name: /Book a pilot/i }).first()).toHaveAttribute('href', '/book-pilot')
 
     const adminLinks = await page.locator('a[href^="/admin"], a[href*="/admin/"]').count()

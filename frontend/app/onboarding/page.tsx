@@ -71,7 +71,7 @@ const statusLabel: Record<string, { label: string; colour: string }> = {
   upcoming: { label: 'Upcoming', colour: 'text-slate-500 bg-slate-100' },
 }
 
-const CONTEXT_CHIPS = ['Induction pathway', 'Staff guidance', 'Private learning', 'Demo progress']
+const CONTEXT_CHIPS = ['Induction pathway', 'Staff guidance', 'Private learning', 'Pilot progress']
 
 const allTasks = weeks.flatMap(w => w.tasks)
 const completedCount = allTasks.filter(t => t.done).length
@@ -103,7 +103,7 @@ export default function OnboardingPage() {
             </span>
             <h1 className="text-3xl font-bold mb-2.5 leading-snug">My Onboarding</h1>
             <p className="text-teal-100 text-sm leading-relaxed max-w-lg mb-5">
-              Follow your induction pathway, review key guidance and build confidence during the WorkTwin pilot demo.
+              Follow your induction pathway, review key guidance and build confidence during the controlled WorkTwin pilot.
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
               {CONTEXT_CHIPS.map(chip => (
@@ -113,7 +113,7 @@ export default function OnboardingPage() {
               ))}
             </div>
             <p className="text-teal-200 text-xs">
-              Your private learning notes and Ask WorkTwin questions stay private in this demo.
+              Your private learning notes and Ask WorkTwin questions stay private in this controlled pilot.
             </p>
           </div>
         </div>
@@ -143,7 +143,7 @@ export default function OnboardingPage() {
               <ClipboardList size={18} className="text-slate-500" />
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-700 leading-tight">Demo pathway</p>
+              <p className="text-sm font-bold text-slate-700 leading-tight">Pilot pathway</p>
               <p className="text-xs text-slate-500">Current pathway</p>
             </div>
           </div>
@@ -287,13 +287,13 @@ export default function OnboardingPage() {
           <div>
             <p className="font-semibold text-slate-800 text-sm mb-1">Safe support reminder</p>
             <p className="text-sm text-slate-600 leading-relaxed">
-              This onboarding pathway is for staff support during the pilot demo. Sensitive concerns such as safeguarding, medication, HR, wellbeing, legal or immediate-risk issues should still be escalated to the right human lead.
+              This onboarding pathway is for staff support during the controlled pilot. Sensitive concerns such as safeguarding, medication, HR, wellbeing, legal or immediate-risk issues should still be escalated to the right human lead.
             </p>
           </div>
         </div>
 
         <p className="text-xs text-slate-400 text-center">
-          Prototype note: this pathway is for demonstration only. Private notes and Ask questions are not shown to managers in this prototype.
+          Pilot note: this pathway is for controlled pilot demonstration only. Private notes and Ask questions are not shown to managers in this controlled prototype.
         </p>
 
       </div>

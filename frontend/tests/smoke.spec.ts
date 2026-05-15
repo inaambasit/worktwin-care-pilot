@@ -55,12 +55,12 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByText(/staff-visible|approved/i).first()).toBeVisible()
   })
 
-  test('onboarding page is clearly marked as a demo pathway', async ({ page }) => {
+  test('onboarding page is clearly marked as a controlled pilot pathway', async ({ page }) => {
     await page.goto('/onboarding')
     await expect(page.getByRole('heading', { name: 'My Onboarding' })).toBeVisible()
-    await expect(page.getByText('Follow your induction pathway, review key guidance and build confidence during the WorkTwin pilot demo.')).toBeVisible()
-    await expect(page.getByText('Demo pathway')).toBeVisible()
-    await expect(page.getByText('Prototype note: this pathway is for demonstration only')).toBeVisible()
+    await expect(page.getByText('Follow your induction pathway, review key guidance and build confidence during the controlled WorkTwin pilot.')).toBeVisible()
+    await expect(page.getByText('Pilot pathway')).toBeVisible()
+    await expect(page.getByText('Pilot note: this pathway is for controlled pilot demonstration only')).toBeVisible()
   })
 
   test('scenarios page loads and explains demo preview behaviour', async ({ page }) => {

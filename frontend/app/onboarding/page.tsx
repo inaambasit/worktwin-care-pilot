@@ -23,10 +23,10 @@ const weeks = [
     label: 'Week 2 - Policies and procedures',
     status: 'inprogress',
     tasks: [
-      { label: 'Complete the medication administration module', done: false, type: 'module' },
-      { label: 'Read the Safeguarding Policy', done: false, type: 'read' },
-      { label: 'Review the Infection Control Procedure', done: true, type: 'read' },
-      { label: 'Complete the manual handling refresher', done: false, type: 'module' },
+      { label: 'Medication awareness: know when to escalate to a trained lead', done: false, type: 'module' },
+      { label: 'Safeguarding awareness: know who to contact', done: false, type: 'read' },
+      { label: 'Review approved infection prevention guidance', done: true, type: 'read' },
+      { label: 'Manual handling awareness: follow local training route', done: false, type: 'module' },
       { label: 'Book your 2-week check-in with your manager', done: false, type: 'action' },
     ],
   },
@@ -34,19 +34,19 @@ const weeks = [
     label: 'Week 3 - Scenarios and confidence',
     status: 'upcoming',
     tasks: [
-      { label: 'Practise medication refusal scenario', done: false, type: 'scenario' },
-      { label: 'Practise safeguarding disclosure scenario', done: false, type: 'scenario' },
+      { label: 'Practise safe escalation for medication-related concerns', done: false, type: 'scenario' },
+      { label: 'Practise safe escalation for safeguarding-related concerns', done: false, type: 'scenario' },
       { label: 'Read the Complaints Procedure', done: false, type: 'read' },
       { label: 'Complete health and safety quiz', done: false, type: 'module' },
     ],
   },
   {
-    label: 'Week 4 - Sign-off and review',
+    label: 'Week 4 - Review and next steps',
     status: 'upcoming',
     tasks: [
       { label: 'Probation review with line manager', done: false, type: 'action' },
-      { label: 'Complete all remaining policy reads', done: false, type: 'read' },
-      { label: 'Submit self-assessment form', done: false, type: 'action' },
+      { label: 'Review remaining example guidance items', done: false, type: 'read' },
+      { label: 'Prepare discussion notes for manager review', done: false, type: 'action' },
     ],
   },
 ]
@@ -126,7 +126,7 @@ export default function OnboardingPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-teal-700">{completedCount}</p>
-              <p className="text-xs text-slate-500">Tasks completed</p>
+              <p className="text-xs text-slate-500">Example tasks completed</p>
             </div>
           </div>
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-3">
@@ -135,7 +135,7 @@ export default function OnboardingPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-amber-600">{remainingCount}</p>
-              <p className="text-xs text-slate-500">Tasks remaining</p>
+              <p className="text-xs text-slate-500">Example tasks remaining</p>
             </div>
           </div>
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-3">
@@ -154,7 +154,7 @@ export default function OnboardingPage() {
           <div className="flex items-start justify-between mb-4">
             <div>
               <p className="font-semibold text-slate-900 text-sm mb-0.5">Overall progress</p>
-              <p className="text-xs text-slate-500">{completedCount} of {allTasks.length} tasks completed</p>
+              <p className="text-xs text-slate-500">{completedCount} of {allTasks.length} example tasks completed</p>
             </div>
             <span className="text-2xl font-bold text-teal-700">{pct}%</span>
           </div>
@@ -166,8 +166,8 @@ export default function OnboardingPage() {
           </div>
           <p className="text-xs text-slate-400 mt-2.5">
             {allComplete
-              ? 'All pathway tasks complete - well done!'
-              : `Currently in: ${currentWeek.label}. Keep going to complete your induction pathway.`}
+              ? 'All example pathway tasks complete - ready for manager discussion.'
+              : `Currently in: ${currentWeek.label}. Keep going through this example induction pathway.`}
           </p>
         </div>
 
@@ -187,7 +187,7 @@ export default function OnboardingPage() {
             <div className="w-12 h-12 bg-teal-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
               <CheckCircle size={24} className="text-teal-600" />
             </div>
-            <p className="font-bold text-teal-800 text-lg mb-1">Onboarding pathway complete</p>
+            <p className="font-bold text-teal-800 text-lg mb-1">Example onboarding pathway complete</p>
             <p className="text-sm text-teal-700 max-w-sm mx-auto">
               You can still revisit guidance, practise scenarios or ask WorkTwin policy questions.
             </p>
@@ -196,7 +196,7 @@ export default function OnboardingPage() {
 
         {/* Pathway week sections */}
         <div>
-          <h2 className="font-semibold text-slate-900 mb-3">Pathway weeks</h2>
+          <h2 className="font-semibold text-slate-900 mb-3">Example pathway weeks</h2>
           <div className="space-y-3">
             {weeks.map((week, i) => {
               const { label, colour } = statusLabel[week.status]
@@ -227,7 +227,7 @@ export default function OnboardingPage() {
                       </div>
                       <div>
                         <p className="font-semibold text-slate-900 text-sm">{week.label}</p>
-                        <p className="text-xs text-slate-400">{weekDone} of {week.tasks.length} tasks complete</p>
+                        <p className="text-xs text-slate-400">{weekDone} of {week.tasks.length} example tasks complete</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -287,7 +287,7 @@ export default function OnboardingPage() {
           <div>
             <p className="font-semibold text-slate-800 text-sm mb-1">Safe support reminder</p>
             <p className="text-sm text-slate-600 leading-relaxed">
-              This onboarding pathway is for staff support during the controlled pilot. Sensitive concerns such as safeguarding, medication, HR, wellbeing, legal or immediate-risk issues should still be escalated to the right human lead.
+              This example pathway is not a live training record, compliance sign-off or replacement for required Thumhara Centre training. Sensitive concerns such as safeguarding, medication, HR, wellbeing, legal or immediate-risk issues should still be escalated to the right human lead.
             </p>
           </div>
         </div>

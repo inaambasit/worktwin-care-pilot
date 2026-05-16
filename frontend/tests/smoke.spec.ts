@@ -61,6 +61,11 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByText('Follow your induction pathway, review key guidance and build confidence during the controlled WorkTwin pilot.')).toBeVisible()
     await expect(page.getByText('Pilot pathway')).toBeVisible()
     await expect(page.getByText('Pilot note: this pathway is for controlled pilot preview only')).toBeVisible()
+    await expect(page.getByText('Example tasks completed').first()).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Example pathway weeks' })).toBeVisible()
+    await expect(page.getByText('This example pathway is not a live training record, compliance sign-off or replacement for required Thumhara Centre training.')).toBeVisible()
+    await expect(page.getByText('Medication awareness: know when to escalate to a trained lead')).toBeVisible()
+    await expect(page.getByText('Week 4 - Review and next steps')).toBeVisible()
   })
 
   test('scenarios page loads and explains demo preview behaviour', async ({ page }) => {

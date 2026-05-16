@@ -68,10 +68,15 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByText('Week 4 - Review and next steps')).toBeVisible()
   })
 
-  test('scenarios page loads and explains demo preview behaviour', async ({ page }) => {
+  test('scenarios page is clearly marked as example practice only', async ({ page }) => {
     await page.goto('/scenarios')
     await expect(page.getByRole('heading', { name: 'Practice Scenarios' })).toBeVisible()
-    await expect(page.getByText(/View related policies|Demo preview|scenario content/i).first()).toBeVisible()
+    await expect(page.getByText('Practice hub')).toBeVisible()
+    await expect(page.getByText('Build confidence with example care situations while keeping real decisions with the right human lead.')).toBeVisible()
+    await expect(page.getByText('of 9 practised')).toBeVisible()
+    await expect(page.getByText('Medication-related concern: knowing when to escalate')).toBeVisible()
+    await expect(page.getByText('Open guided practice')).toBeVisible()
+    await expect(page.getByText(/Example practice mode only\. These scenarios are not competency assessments, training sign-offs or operational advice\./)).toBeVisible()
   })
 
   test('notes page states session-only controlled pilot behaviour', async ({ page }) => {

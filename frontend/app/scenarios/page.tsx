@@ -5,7 +5,7 @@ import AppLayout from '@/components/AppLayout'
 import { PlayCircle, CheckCircle, Clock, BookOpen } from 'lucide-react'
 
 type Difficulty = 'Beginner' | 'Intermediate' | 'Advanced'
-type Status = 'Not started' | 'In progress' | 'Completed'
+type Status = 'Not started' | 'In progress' | 'Practised'
 
 interface Scenario {
   id: number
@@ -20,18 +20,18 @@ interface Scenario {
 const scenarios: Scenario[] = [
   {
     id: 1,
-    title: 'Service user refuses medication',
-    category: 'Medication',
-    description: 'Practise how to respond calmly, document correctly and follow the correct escalation steps when a service user refuses prescribed medication.',
+    title: 'Medication-related concern: knowing when to escalate',
+    category: 'Medication awareness',
+    description: 'Practise recognising when a medication-related concern needs recording and escalation to the appropriate trained lead.',
     difficulty: 'Intermediate',
     duration: '8 min',
     status: 'Not started',
   },
   {
     id: 2,
-    title: 'Recognising and responding to a safeguarding concern',
+    title: 'Safeguarding concern: knowing who to contact',
     category: 'Safeguarding',
-    description: 'Work through a realistic scenario in which a service user discloses something that may indicate abuse or neglect. Practise the correct reporting steps.',
+    description: 'Work through an example safeguarding concern and practise when to contact the safeguarding lead rather than trying to investigate alone.',
     difficulty: 'Advanced',
     duration: '12 min',
     status: 'Not started',
@@ -43,7 +43,7 @@ const scenarios: Scenario[] = [
     description: 'Practise de-escalation techniques and learn when to call for help when a service user becomes distressed or difficult to support.',
     difficulty: 'Intermediate',
     duration: '10 min',
-    status: 'Completed',
+    status: 'Practised',
   },
   {
     id: 4,
@@ -56,21 +56,21 @@ const scenarios: Scenario[] = [
   },
   {
     id: 5,
-    title: 'Food and nutrition - identifying concerns',
+    title: 'Food and nutrition - spotting when to escalate',
     category: 'Health & Nutrition',
-    description: 'Practise identifying when a service user may be at nutritional risk, how to record concerns and when to escalate.',
+    description: 'Practise spotting when food or nutrition concerns should be recorded and escalated to the right human lead.',
     difficulty: 'Beginner',
     duration: '6 min',
     status: 'In progress',
   },
   {
     id: 6,
-    title: 'Completing an incident report correctly',
+    title: 'Incident reporting awareness',
     category: 'Incident Reporting',
-    description: 'Step through the incident reporting procedure with a realistic example, including what to record, who to notify and by when.',
+    description: 'Practise what information may need to be captured and escalated after an incident, using local reporting procedures.',
     difficulty: 'Beginner',
     duration: '5 min',
-    status: 'Completed',
+    status: 'Practised',
   },
   {
     id: 7,
@@ -110,13 +110,13 @@ const difficultyColour: Record<Difficulty, string> = {
 const statusColour: Record<Status, string> = {
   'Not started': 'text-slate-400',
   'In progress': 'text-amber-600',
-  'Completed': 'text-teal-600',
+  'Practised': 'text-teal-600',
 }
 
 const statusIconBg: Record<Status, string> = {
   'Not started': 'bg-slate-100',
   'In progress': 'bg-amber-50',
-  'Completed': 'bg-teal-100',
+  'Practised': 'bg-teal-100',
 }
 
 const CONTEXT_CHIPS = ['Safe practice mode', 'Care-sector scenarios', 'Private learning', 'Pilot pathway']
@@ -128,7 +128,7 @@ export default function ScenariosPage() {
   const [activeScenario, setActiveScenario] = useState<number | null>(null)
 
   const filtered = activeCategory === 'All' ? scenarios : scenarios.filter(s => s.category === activeCategory)
-  const completedCount = scenarios.filter(s => s.status === 'Completed').length
+  const practisedCount = scenarios.filter(s => s.status === 'Practised').length
   const inProgressCount = scenarios.filter(s => s.status === 'In progress').length
 
   return (
@@ -144,11 +144,11 @@ export default function ScenariosPage() {
             <div className="flex-1 min-w-0">
               <span className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1 rounded-full text-xs font-semibold mb-4">
                 <BookOpen size={11} />
-                Training hub
+                Practice hub
               </span>
               <h1 className="text-3xl font-bold mb-2.5 leading-snug">Practice Scenarios</h1>
               <p className="text-teal-100 text-sm leading-relaxed max-w-lg mb-5">
-                Build confidence with safe, realistic care situations before you face them for real.
+                Build confidence with example care situations while keeping real decisions with the right human lead.
               </p>
               <div className="flex flex-wrap gap-2">
                 {CONTEXT_CHIPS.map(chip => (
@@ -159,8 +159,8 @@ export default function ScenariosPage() {
               </div>
             </div>
             <div className="shrink-0 bg-white/10 rounded-2xl px-6 py-4 text-center min-w-[110px]">
-              <p className="text-4xl font-bold leading-none">{completedCount}</p>
-              <p className="text-teal-200 text-xs font-semibold mt-1.5">of {scenarios.length} completed</p>
+              <p className="text-4xl font-bold leading-none">{practisedCount}</p>
+              <p className="text-teal-200 text-xs font-semibold mt-1.5">of {scenarios.length} practised</p>
             </div>
           </div>
         </div>
@@ -172,8 +172,8 @@ export default function ScenariosPage() {
               <CheckCircle size={18} className="text-teal-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-teal-700">{completedCount}</p>
-              <p className="text-xs text-slate-500">Completed</p>
+              <p className="text-2xl font-bold text-teal-700">{practisedCount}</p>
+              <p className="text-xs text-slate-500">Practised</p>
             </div>
           </div>
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-3">
@@ -231,7 +231,7 @@ export default function ScenariosPage() {
                 <div className="flex items-start gap-4">
                   {/* Icon tile */}
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${statusIconBg[scenario.status]}`}>
-                    {scenario.status === 'Completed' ? (
+                    {scenario.status === 'Practised' ? (
                       <CheckCircle size={22} className="text-teal-600" />
                     ) : scenario.status === 'In progress' ? (
                       <Clock size={22} className="text-amber-600" />
@@ -279,7 +279,7 @@ export default function ScenariosPage() {
                           className="text-sm bg-teal-700 hover:bg-teal-800 text-white font-semibold px-4 py-2.5 rounded-xl transition-colors flex items-center gap-1.5 shadow-sm"
                         >
                           <PlayCircle size={15} />
-                          Start guided scenario
+                          Open guided practice
                         </Link>
                       ) : (
                         <button
@@ -287,7 +287,7 @@ export default function ScenariosPage() {
                           className="text-sm bg-teal-700 hover:bg-teal-800 text-white font-semibold px-4 py-2.5 rounded-xl transition-colors flex items-center gap-1.5"
                         >
                           <PlayCircle size={15} />
-                          {scenario.status === 'Completed' ? 'Repeat scenario' : scenario.status === 'In progress' ? 'Continue' : 'Start scenario'}
+                          {scenario.status === 'Practised' ? 'Review practice' : scenario.status === 'In progress' ? 'Continue practice' : 'Open practice'}
                         </button>
                       )}
                       <Link
@@ -307,19 +307,17 @@ export default function ScenariosPage() {
                   <div className="border-t border-teal-100 bg-gradient-to-br from-teal-50 to-slate-50 px-6 py-5">
                     <p className="text-xs font-bold text-teal-700 uppercase tracking-widest mb-3">Pilot preview</p>
                     <div className="bg-white border border-teal-200 rounded-2xl p-5 text-sm text-slate-700">
-                      <p className="font-semibold text-slate-800 mb-2">Scene setting:</p>
+                      <p className="font-semibold text-slate-800 mb-2">Example scene:</p>
                       <p className="leading-relaxed text-slate-600">
-                        You are on the afternoon shift. A service user in your care tells you she does not want to
-                        take her blood pressure medication today. She says she &quot;doesn&apos;t feel well&quot; and wants to rest.
-                        She is calm and appears to understand what you are saying.
+                        This is an example practice situation. A person being supported says they do not want to take a prescribed medicine and also says they do not feel well. In real work, staff should follow local medication policy, record concerns through the approved route and escalate to the appropriate trained lead.
                       </p>
                       <p className="font-semibold text-slate-800 mt-4 mb-2">What do you do first?</p>
                       <div className="space-y-2 mt-1">
                         {[
-                          'Try to persuade her by explaining the medication is important',
-                          'Respect her decision, record it on the MAR chart and notify your manager',
-                          'Give her a reduced dose and record that instead',
-                          'Leave the medication and do not record anything yet',
+                          'Stay calm, do not pressure the person, and escalate through the approved medication route',
+                          'Ignore the concern because this is only one missed medicine',
+                          'Change the dose yourself to make the person more comfortable',
+                          'Leave without recording or telling anyone',
                         ].map((opt, i) => (
                           <button key={i} className="w-full text-left text-sm border-2 border-slate-200 hover:border-teal-400 hover:bg-teal-50 rounded-xl px-4 py-3 transition-all">
                             <span className="font-bold text-slate-500 mr-2">{String.fromCharCode(65 + i)}.</span>
@@ -329,7 +327,7 @@ export default function ScenariosPage() {
                       </div>
                     </div>
                     <p className="text-xs text-slate-400 mt-3 leading-relaxed">
-                      This is a controlled pilot preview. The full scenario system will guide you through multiple steps with feedback.
+                      This is a controlled pilot preview. Future practice flows may guide staff through example steps, but real medication, safeguarding, wellbeing or immediate-risk concerns must still be escalated to the right human lead.
                     </p>
                   </div>
                 ) : (
@@ -338,10 +336,10 @@ export default function ScenariosPage() {
                     <p className="text-sm text-slate-600 leading-relaxed">
                       The full interactive scenario for{' '}
                       <span className="font-semibold text-slate-700">{scenario.title}</span> is being
-                      prepared and will guide you through realistic steps with branching decisions and feedback.
+                      prepared and will guide you through example practice steps with safer escalation reminders.
                     </p>
                     <p className="text-xs text-slate-400 mt-3 leading-relaxed">
-                      Pilot preview only. Scenario content for this topic will be added before wider controlled use.
+                      Pilot preview only. Scenario content for this topic must be reviewed before wider controlled use.
                     </p>
                   </div>
                 )
@@ -353,7 +351,7 @@ export default function ScenariosPage() {
         {/* Footer safety note */}
         <div className="bg-white border border-slate-100 rounded-2xl px-5 py-4 shadow-sm">
           <p className="text-xs text-slate-400 leading-relaxed text-center">
-            Practice mode. These scenarios are for safe learning and confidence-building. They do not replace speaking to a manager, safeguarding lead or emergency services where required.
+            Example practice mode only. These scenarios are not competency assessments, training sign-offs or operational advice. They do not replace speaking to a manager, safeguarding lead, trained clinician or emergency services where required.
           </p>
         </div>
 

@@ -14,14 +14,14 @@ interface Note {
 const initialNotes: Note[] = [
   {
     id: 1,
-    title: 'Medication questions to ask my supervisor',
-    content: `Things I want to clarify about medication administration:
-- What happens if a service user hides their medication?
-- How do I record a partially taken dose?
-- Who signs off the MAR chart at end of shift?
+    title: 'Example medication-awareness questions',
+    content: `Example reflections for discussion with a trained lead:
+- What should I do if a medication concern comes up during a visit?
+- Which approved route should I use to record medication-related concerns?
+- Who should I escalate to if I am unsure?
 
-Asked WorkTwin about medication refusal - need to practise the scenario.`,
-    tag: 'Medication',
+This is example reflection only. Do not write real medication records, MAR details or service-user information here.`,
+    tag: 'Awareness',
     date: '23 Apr 2025',
   },
   {
@@ -33,7 +33,7 @@ Asked WorkTwin about medication refusal - need to practise the scenario.`,
 - Always sign in on the paper rota AND the digital system
 - My line manager is happy to answer questions any time
 
-Feeling a bit overwhelmed by the medication policy but the WorkTwin answer helped a lot.`,
+Feeling a bit overwhelmed by policy guidance — I should use WorkTwin for approved guidance only and speak to a human lead where needed.`,
     tag: 'Induction',
     date: '17 Apr 2025',
   },
@@ -41,8 +41,8 @@ Feeling a bit overwhelmed by the medication policy but the WorkTwin answer helpe
     id: 3,
     title: 'Learning ideas - things I want to practise',
     content: `Scenarios I want to work through before I feel confident:
-1. Medication refusal
-2. Safeguarding disclosure
+1. Medication-related escalation awareness
+2. Safeguarding escalation awareness
 3. End of life conversations
 4. Managing distress
 
@@ -53,13 +53,13 @@ Also want to read the full complaints policy - came up in conversation today.`,
 ]
 
 const tagColours: Record<string, string> = {
-  Medication: 'bg-blue-50 text-blue-700',
+  Awareness: 'bg-blue-50 text-blue-700',
   Induction: 'bg-teal-50 text-teal-700',
   Learning: 'bg-violet-50 text-violet-700',
   General: 'bg-slate-100 text-slate-600',
 }
 
-const CONTEXT_CHIPS = ['Private reflection', 'Session-only pilot', 'Not manager-visible', 'Staff support']
+const CONTEXT_CHIPS = ['Example reflection', 'Session-only pilot', 'Not manager-visible', 'Staff support']
 
 export default function NotesPage() {
   const [notes, setNotes] = useState<Note[]>(initialNotes)
@@ -118,7 +118,7 @@ export default function NotesPage() {
             </span>
             <h1 className="text-3xl font-bold mb-2.5 leading-snug">Private Notes</h1>
             <p className="text-teal-100 text-sm leading-relaxed max-w-lg mb-5">
-              Use this space to collect your own thoughts during the controlled pilot. These notes are for private reflection and are not shown to managers in this pilot.
+              Use this session-only space for example reflections during the controlled pilot. Do not enter real staff, service-user, HR, safeguarding, medication, complaint, care-plan or confidential data.
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
               {CONTEXT_CHIPS.map(chip => (
@@ -128,7 +128,7 @@ export default function NotesPage() {
               ))}
             </div>
             <p className="text-teal-200 text-xs">
-              Private notes stay private in this controlled pilot and are not shown on admin pages.
+              These example notes stay in this browser session only and are not shown on admin pages.
             </p>
           </div>
         </div>
@@ -149,8 +149,8 @@ export default function NotesPage() {
               <Lock size={18} className="text-teal-600" />
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-700 leading-tight">Private in pilot</p>
-              <p className="text-xs text-slate-500">Not shared with anyone</p>
+              <p className="text-sm font-bold text-slate-700 leading-tight">Private in this session</p>
+              <p className="text-xs text-slate-500">Do not enter real personal data</p>
             </div>
           </div>
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-3">
@@ -158,22 +158,23 @@ export default function NotesPage() {
               <Shield size={18} className="text-slate-500" />
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-700 leading-tight">Not saved to manager view</p>
-              <p className="text-xs text-slate-500">Staff-only reflection space</p>
+              <p className="text-sm font-bold text-slate-700 leading-tight">Not a formal record</p>
+              <p className="text-xs text-slate-500">Not care, HR or compliance evidence</p>
             </div>
           </div>
         </div>
 
         {/* Note editor section */}
         <div>
-          <h2 className="font-semibold text-slate-900 mb-1">Your private note</h2>
-          <p className="text-sm text-slate-500 mb-3">Write reminders, reflections or questions you want to keep for yourself during this session.</p>
+          <h2 className="font-semibold text-slate-900 mb-1">Your example session note</h2>
+          <p className="text-sm text-slate-500 mb-3">Write example reminders or reflections only. Do not enter real names, incidents, medication details, safeguarding concerns, HR issues, complaints or care notes.</p>
 
           <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-2.5 mb-4">
             <Clock size={15} className="text-amber-600 shrink-0 mt-0.5" />
             <p className="text-xs text-amber-800 leading-relaxed">
               <span className="font-semibold">Session only — notes will not be saved.</span>{' '}
               These notes are private to you during this session-only pilot view. Managers and admins cannot view them.
+              They are not a care record, HR record, medication record, safeguarding record, supervision note or compliance record.
               Closing or refreshing this tab will clear all notes. Do not rely on notes surviving a browser close.
             </p>
           </div>
@@ -195,7 +196,7 @@ export default function NotesPage() {
                     <Lock size={24} className="mx-auto mb-2 text-slate-300" />
                     <p className="text-sm font-medium text-slate-500">No private note written yet.</p>
                     <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                      Start by writing anything you want to remember for yourself during this session.
+                      Start with an example reflection only. Do not enter real confidential or personal data.
                     </p>
                   </div>
                 ) : (
@@ -233,7 +234,7 @@ export default function NotesPage() {
                     <Lock size={36} className="mx-auto mb-3 text-slate-300" />
                     <p className="font-semibold text-slate-500 mb-1.5">No private note written yet.</p>
                     <p className="text-sm text-slate-400 leading-relaxed max-w-xs mx-auto">
-                      Start by writing anything you want to remember for yourself during this session.
+                      Start with an example reflection only. Do not enter real confidential or personal data.
                     </p>
                   </div>
                 </div>
@@ -242,18 +243,18 @@ export default function NotesPage() {
                   {/* Editor header */}
                   <div className="px-6 py-4 border-b border-slate-100 flex items-start gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Current session note</p>
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Example session note</p>
                       <input
                         type="text"
                         value={editTitle}
                         onChange={e => setEditTitle(e.target.value)}
                         className="w-full text-base font-semibold text-slate-900 outline-none bg-transparent placeholder-slate-300"
-                        placeholder="Note title..."
+                        placeholder="Example note title..."
                       />
                     </div>
                     <div className="flex items-center gap-2 shrink-0 pt-5">
                       {saved && (
-                        <span className="text-xs text-teal-600 font-medium">Saved</span>
+                        <span className="text-xs text-teal-600 font-medium">Updated in session</span>
                       )}
                       <button
                         onClick={saveNote}
@@ -275,14 +276,14 @@ export default function NotesPage() {
                   <textarea
                     value={editContent}
                     onChange={e => setEditContent(e.target.value)}
-                    placeholder="Start writing your private note..."
+                    placeholder="Start writing an example session reflection..."
                     className="flex-1 px-6 py-5 text-sm text-slate-700 leading-relaxed outline-none resize-none placeholder-slate-300"
                   />
 
                   {/* Footer */}
                   <div className="px-6 py-3 border-t border-slate-100 flex items-center gap-2">
                     <Lock size={12} className="text-slate-400" />
-                    <p className="text-xs text-slate-400">Session only - not saved between sessions</p>
+                    <p className="text-xs text-slate-400">Session only - not a formal record</p>
                   </div>
                 </>
               )}
@@ -296,9 +297,9 @@ export default function NotesPage() {
             <Shield size={16} className="text-teal-700" />
           </div>
           <div>
-            <h2 className="font-semibold text-slate-800 text-sm mb-1">Private by design</h2>
+            <h2 className="font-semibold text-slate-800 text-sm mb-1">Session-only by design</h2>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Your private notes are not shown to managers in this controlled pilot. They are not used for performance scoring, staff monitoring or admin review.
+              These example session notes are not shown to managers in this controlled pilot. They are not formal records and must not be used for care documentation, HR evidence, compliance evidence, performance scoring, staff monitoring or admin review.
             </p>
           </div>
         </div>
@@ -315,7 +316,7 @@ export default function NotesPage() {
             <li className="flex items-start gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0 mt-[7px]" />
               <span className="text-sm text-slate-600 leading-relaxed">
-                These notes are for your own reflection during the controlled pilot. If your note relates to safeguarding, medication, HR, wellbeing, legal or immediate-risk concerns, speak to the right human lead.
+                These notes are for example reflection during the controlled pilot only. Do not enter real staff, service-user, HR, safeguarding, medication, legal, complaint, care-plan or confidential information. If an issue is real, speak to the right human lead.
               </span>
             </li>
             <li className="flex items-start gap-2.5 bg-red-50 rounded-xl px-3 py-2.5 -mx-1">

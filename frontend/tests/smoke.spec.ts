@@ -83,8 +83,12 @@ test.describe('WorkTwin smoke tests', () => {
     await page.goto('/notes')
     await expect(page.getByRole('heading', { name: 'Private Notes' })).toBeVisible()
     await expect(page.getByText('Session-only notes')).toBeVisible()
-    await expect(page.getByText('Private notes stay private in this controlled pilot and are not shown on admin pages.')).toBeVisible()
-    await expect(page.getByText('Session only - not saved between sessions')).toBeVisible()
+    await expect(page.getByText('These example notes stay in this browser session only and are not shown on admin pages.')).toBeVisible()
+    await expect(page.getByText('Do not enter real staff, service-user, HR, safeguarding, medication, complaint, care-plan or confidential data.')).toBeVisible()
+    await expect(page.getByText('Not a formal record').first()).toBeVisible()
+    await expect(page.getByText('Not care, HR or compliance evidence')).toBeVisible()
+    await expect(page.getByText('Session only - not a formal record')).toBeVisible()
+    await expect(page.getByText('These example session notes are not shown to managers in this controlled pilot.')).toBeVisible()
   })
 
   test('escalation contacts page loads with sample or fictional disclaimer', async ({ page }) => {

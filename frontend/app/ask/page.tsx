@@ -11,8 +11,8 @@ import Link from 'next/link'
 import { askWorktwin, AskTimeoutError, checkHealth } from '@/lib/api'
 import type { AskResponse } from '@/lib/types'
 
-const MEDICATION_Q = 'A service user missed medication. What should I do?'
-const SAFEGUARDING_Q = 'I have a safeguarding concern. What should I do?'
+const MEDICATION_Q = 'Example medication concern: who should I escalate to?'
+const SAFEGUARDING_Q = 'Example safeguarding concern: who should I contact?'
 
 const suggestedPrompts = [
   'What should I do when a visitor arrives?',
@@ -53,7 +53,7 @@ interface DisplayAnswer {
 const medicationAnswer: DisplayAnswer = {
   question: MEDICATION_Q,
   answer:
-    'This is a medication incident. WorkTwin cannot advise on this directly. Please speak to the medication lead, registered manager or senior person on duty immediately.',
+    'This is a medication-related concern. WorkTwin cannot provide medication advice or decide the action for staff. Escalate to the medication lead, registered manager or senior person on duty, and follow the approved local medication route.',
   disclaimer: null,
   nextSteps: [],
   sources: [],
@@ -77,7 +77,7 @@ const medicationAnswer: DisplayAnswer = {
 const safeguardingAnswer: DisplayAnswer = {
   question: SAFEGUARDING_Q,
   answer:
-    'This is a safeguarding concern. WorkTwin cannot advise on this directly. Please report immediately to the Designated Safeguarding Lead or your line manager. Do not investigate yourself.',
+    'This is a safeguarding-related concern. WorkTwin cannot investigate, decide risk or replace safeguarding judgement. Contact the Designated Safeguarding Lead or your line manager immediately. Do not investigate yourself.',
   disclaimer: null,
   nextSteps: [],
   sources: [],
@@ -98,21 +98,20 @@ const safeguardingAnswer: DisplayAnswer = {
 }
 
 const checklistItems = [
-  'Record missed dose on the MAR chart immediately',
-  'Notify your line manager or senior carer on duty',
-  'Contact the GP or pharmacist if there is clinical risk',
-  'Complete a medication incident form',
-  'Do not administer a double dose without clinical direction',
-  'Keep all medication secured',
+  'Use the approved local medication route',
+  'Record concerns through the approved system only if your role/training allows',
+  'Escalate to the medication lead, registered manager or senior person on duty',
+  'Seek urgent clinical or emergency help if there is immediate risk',
+  'Do not change, administer or withhold medication based on WorkTwin',
+  'Do not enter real MAR details or service-user information into this pilot',
 ]
 
 const quizQuestion = {
-  question: 'What is the FIRST thing you must do when a service user misses their medication?',
+  question: 'In this example medication concern, what is the safest WorkTwin-supported response?',
   options: [
-    'Administer the missed dose as soon as you notice',
-    'Record the missed dose on the MAR chart and notify your manager',
-    'Contact the GP immediately before doing anything else',
-    'Leave it and continue with the next scheduled dose',
+    'Use WorkTwin to decide whether to give the medication',
+    'Escalate through the approved medication route and speak to the right trained lead',
+    'Change the medication timing yourself',
   ],
   correct: 1,
 }
@@ -161,7 +160,7 @@ function isFallbackGuidance(a: DisplayAnswer): boolean {
 // Page component
 // ---------------------------------------------------------------------------
 
-const CONTEXT_CHIPS = ['Policy-grounded answers', 'Private in this controlled pilot', 'Human escalation', 'Care staff support']
+const CONTEXT_CHIPS = ['Approved-source answers', 'No real confidential data', 'Human escalation', 'Controlled pilot support']
 
 export default function AskPage() {
   const [input, setInput] = useState('')
@@ -245,7 +244,7 @@ export default function AskPage() {
           <AlertTriangle size={13} className="text-amber-600 shrink-0" />
           <p className="text-xs text-amber-800">
             <span className="font-semibold">Controlled pilot mode</span>{' '}
-            - answers use approved pilot documents only. No real staff or service-user data should be entered during this controlled pilot.
+            - answers use approved pilot documents only. Do not enter real staff, service-user, medication, safeguarding, HR, complaint, care-plan or confidential data.
           </p>
         </div>
 
@@ -264,7 +263,7 @@ export default function AskPage() {
                 </span>
                 <h1 className="text-3xl font-bold mb-2.5 leading-snug">Ask WorkTwin</h1>
                 <p className="text-teal-100 text-sm leading-relaxed max-w-lg mb-5">
-                  Ask approved staff guidance questions in plain English. WorkTwin will answer from approved documents where it can, and route sensitive concerns to the right human lead.
+                  Ask example policy and procedure questions in plain English. WorkTwin can only answer from approved documents where allowed, and sensitive or real-world concerns must go to the right human lead.
                 </p>
                 <div className="flex flex-wrap gap-2 mb-4">
                   {CONTEXT_CHIPS.map(chip => (
@@ -274,7 +273,7 @@ export default function AskPage() {
                   ))}
                 </div>
                 <p className="text-teal-200 text-xs">
-                  Private Ask questions are not shown to managers in this controlled pilot.
+                  Questions are not shown to managers in this controlled pilot, but do not enter real confidential or personal data.
                 </p>
               </div>
             </div>
@@ -288,7 +287,7 @@ export default function AskPage() {
                 <div className="flex-1">
                   <h2 className="font-semibold text-amber-900 mb-1">Controlled pilot safety mode</h2>
                   <p className="text-sm text-amber-800 leading-relaxed mb-4">
-                    Ask WorkTwin can use approved, governed documents only when the backend, database and document gates are ready. If no safe source is available, it gives fallback guidance. Safeguarding, medication, HR, legal and wellbeing topics must be escalated to a human lead.
+                    Ask WorkTwin can use approved, governed documents only when the backend, database and document gates are ready. If no safe source is available, it should say so and point staff to a human lead. Safeguarding, medication, HR, legal, wellbeing and immediate-risk topics must be escalated to a human lead.
                   </p>
                   <h3 className="text-xs font-bold text-amber-900 uppercase tracking-wider mb-2">What this means</h3>
                   <ul className="space-y-1.5">
@@ -302,7 +301,7 @@ export default function AskPage() {
                     </li>
                     <li className="flex items-start gap-2 text-sm text-amber-800">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-[6px]" />
-                      High-risk topics are not answered by AI and should be escalated.
+                      High-risk or real-world concerns are not for AI decision-making and should be escalated.
                     </li>
                   </ul>
                   {backendWarmupStatus !== 'idle' && (
@@ -321,7 +320,7 @@ export default function AskPage() {
               <div className="bg-teal-50 border-b border-teal-100 px-5 py-4 flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
                   <BookOpen size={15} className="text-teal-600" />
-                  <h2 className="font-semibold text-teal-900 text-sm">Example of a source-grounded answer</h2>
+                  <h2 className="font-semibold text-teal-900 text-sm">Example of an approved-source answer</h2>
                 </div>
                 <span className="text-xs bg-amber-100 text-amber-800 font-semibold px-2.5 py-1 rounded-full">Pilot example only - not a live retrieved answer</span>
               </div>
@@ -341,7 +340,7 @@ export default function AskPage() {
             {/* Common questions */}
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
               <h2 className="font-semibold text-slate-900 mb-1">Pilot questions</h2>
-              <p className="text-sm text-slate-500 mb-4">Use the Visitor SOP questions for the main pilot walkthrough, or try the escalation examples below.</p>
+              <p className="text-sm text-slate-500 mb-4">Use the Visitor SOP questions for the main pilot walkthrough. Escalation examples are for safe routing only, not real case advice.</p>
               <div className="space-y-2">
                 <p className="text-[11px] font-bold text-teal-700 uppercase tracking-wider pb-0.5">Visitor SOP - start here</p>
                 <button
@@ -379,7 +378,7 @@ export default function AskPage() {
                   <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0 group-hover:bg-amber-200 transition-colors">
                     <Shield size={15} className="text-amber-700" />
                   </div>
-                  <span className="text-sm font-medium text-amber-900">I have a safeguarding concern. What should I do?</span>
+                  <span className="text-sm font-medium text-amber-900">Example safeguarding concern: who should I contact?</span>
                 </button>
                 <button
                   onClick={() => handlePrompt(MEDICATION_Q)}
@@ -388,21 +387,21 @@ export default function AskPage() {
                   <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0 group-hover:bg-amber-200 transition-colors">
                     <Pill size={15} className="text-amber-700" />
                   </div>
-                  <span className="text-sm font-medium text-amber-900">A service user missed medication. What should I do?</span>
+                  <span className="text-sm font-medium text-amber-900">Example medication concern: who should I escalate to?</span>
                 </button>
               </div>
             </div>
 
             {/* Ask your own question */}
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-              <h2 className="font-semibold text-slate-900 mb-1">Ask your own question</h2>
-              <p className="text-sm text-slate-500 mb-4">Type a policy or procedure question. Sensitive concerns will be routed to human support.</p>
+              <h2 className="font-semibold text-slate-900 mb-1">Ask an example policy question</h2>
+              <p className="text-sm text-slate-500 mb-4">Type an example policy or procedure question. Do not enter real names, incidents, service-user details, medication details, safeguarding disclosures, HR issues, complaints or confidential data.</p>
               <button
                 onClick={() => inputRef.current?.focus()}
                 className="w-full flex items-center gap-3 border border-dashed border-slate-300 rounded-xl px-4 py-3.5 text-left hover:border-teal-400 hover:bg-teal-50 transition-all group"
               >
                 <MessageSquare size={16} className="text-slate-400 group-hover:text-teal-600 shrink-0" />
-                <span className="text-sm text-slate-400 group-hover:text-teal-700">Type in the box below to ask your own question...</span>
+                <span className="text-sm text-slate-400 group-hover:text-teal-700">Type an example policy question below...</span>
               </button>
             </div>
 
@@ -457,7 +456,7 @@ export default function AskPage() {
               <div>
                 <h2 className="font-semibold text-slate-800 text-sm mb-1">Privacy-first design</h2>
                 <p className="text-sm text-slate-600 leading-relaxed">
-                  Private from managers in this controlled pilot. WorkTwin does not show raw questions on admin pages.
+                  Questions are not shown to managers in this controlled pilot, but this is not a care record, HR record, safeguarding record, medication record or confidential reporting route.
                 </p>
               </div>
             </div>
@@ -543,7 +542,7 @@ export default function AskPage() {
             {isDemoFallback && (
               <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-800">
                 <AlertTriangle size={13} className="shrink-0 text-amber-600" />
-                Backend unavailable - showing demo answer. WorkTwin will serve live answers once connected.
+                Backend unavailable - showing a controlled pilot example response. Live answers require approved documents and active safety gates.
               </div>
             )}
 
@@ -551,7 +550,7 @@ export default function AskPage() {
             {!currentAnswer.isDemo && !isDemoFallback && (
               <div className="flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-xl px-4 py-2.5 text-xs text-teal-800">
                 <Zap size={13} className="shrink-0 text-teal-600" />
-                WorkTwin answers from documents your organisation has approved for staff use, and shows the source.
+                WorkTwin answers only from documents your organisation has approved for staff use, and shows the source used.
               </div>
             )}
 
@@ -564,8 +563,8 @@ export default function AskPage() {
                       <Shield size={16} className="text-slate-500" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-slate-800">WorkTwin fallback guidance</p>
-                      <p className="text-xs text-slate-500 mt-0.5">No approved source available</p>
+                      <p className="text-sm font-bold text-slate-800">WorkTwin safe fallback</p>
+                      <p className="text-xs text-slate-500 mt-0.5">No approved source available for an answer</p>
                     </div>
                   </div>
                 </div>
@@ -574,7 +573,7 @@ export default function AskPage() {
                   <p className="text-sm text-slate-600 italic mb-4">&ldquo;{currentAnswer.question}&rdquo;</p>
                   <p className="text-sm text-slate-700 leading-relaxed">
                     {currentAnswer.answer ||
-                      'WorkTwin has no approved source for this topic. Please speak to your manager or refer to the relevant policy.'}
+                      'WorkTwin has no approved source for an answer on this topic. Please speak to your manager or follow the approved local route.'}
                   </p>
                 </div>
                 {currentAnswer.escalateIf.length > 0 && (
@@ -671,11 +670,11 @@ export default function AskPage() {
                     </div>
                     <div>
                       <p className="text-sm font-bold text-teal-900">WorkTwin response</p>
-                      <p className="text-xs text-teal-700 mt-0.5">Source-grounded answer</p>
+                      <p className="text-xs text-teal-700 mt-0.5">Approved-source answer</p>
                     </div>
                     <span className="ml-auto flex items-center gap-1 bg-teal-700 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
                       <BadgeCheck size={11} />
-                      Policy-grounded
+                      Approved-source
                     </span>
                   </div>
                 </div>
@@ -810,7 +809,7 @@ export default function AskPage() {
                 <div className="bg-teal-50 border-b border-teal-100 px-5 py-4">
                   <h3 className="font-semibold text-teal-900 flex items-center gap-2 text-sm">
                     <List size={16} className="text-teal-600" />
-                    Medication incident checklist
+                    Medication escalation awareness checklist
                   </h3>
                 </div>
                 <div className="p-5 space-y-2.5">
@@ -880,8 +879,8 @@ export default function AskPage() {
                         : 'text-red-600 bg-red-50 border border-red-200'
                     }`}>
                       {selectedOption === quizQuestion.correct
-                        ? 'Correct - well done! The MAR chart must be completed immediately.'
-                        : 'Not quite. The correct answer is B - record on the MAR chart and notify your manager first.'}
+                        ? 'Correct - this pilot should support escalation awareness only. Real medication decisions must follow approved local policy and trained human lead guidance.'
+                        : 'Not quite. The safest answer is B - escalate through the approved medication route and speak to the right trained lead.'}
                     </p>
                   )}
                   <button
@@ -898,7 +897,7 @@ export default function AskPage() {
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center gap-3">
               <Shield size={15} className="text-teal-600 shrink-0" />
               <p className="text-xs text-slate-500 leading-relaxed">
-                Private from managers in this controlled pilot. WorkTwin does not show raw questions on admin pages.
+                Questions are not shown to managers in this controlled pilot, but this is not a care record, HR record, safeguarding record, medication record or confidential reporting route.
               </p>
             </div>
           </div>
@@ -944,7 +943,7 @@ export default function AskPage() {
             {input.trim().length > 0 && input.trim().length < 3 ? (
               <p className="text-xs text-amber-600">Please enter at least 3 characters.</p>
             ) : (
-              <p className="text-xs text-slate-400">Private from managers in this controlled pilot. WorkTwin does not show raw questions on admin pages.</p>
+              <p className="text-xs text-slate-400">Questions are not shown to managers in this controlled pilot, but this is not a care record, HR record, safeguarding record, medication record or confidential reporting route.</p>
             )}
             <p className={`text-xs tabular-nums shrink-0 ml-3 ${
               input.length >= 500 ? 'text-red-500' :

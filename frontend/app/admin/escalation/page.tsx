@@ -88,7 +88,7 @@ const categories: EscalationCategory[] = [
         phone: '07700 900 003',
         email: 'hr@thumhara-demo.co.uk',
         availability: 'Mon–Fri, 09:00–17:00',
-        notes: 'All HR conversations are confidential.',
+        notes: 'HR concerns should be handled through the correct authorised route and shared only with appropriate people.',
       },
     ],
   },
@@ -118,7 +118,7 @@ const categories: EscalationCategory[] = [
         phone: '01234 567 890',
         email: '',
         availability: 'Mon–Fri, 08:00–18:30',
-        notes: 'For out-of-hours medical advice call 111. For emergencies call 999.',
+        notes: 'For out-of-hours clinical help, use the appropriate NHS 111 route. For emergencies call 999.',
       },
     ],
   },
@@ -149,20 +149,20 @@ const categories: EscalationCategory[] = [
     title: 'Wellbeing & Mental Health',
     icon: Heart,
     colour: 'green',
-    description: 'Confidential support for your own wellbeing, stress or mental health.',
+    description: 'Support route for your own wellbeing, stress or mental health.',
     whenToEscalate: [
       'You are feeling overwhelmed, stressed or burnt out',
-      'You need confidential support',
+      'You need wellbeing support',
       'You are concerned about a colleague\'s wellbeing',
     ],
     contacts: [
       {
         name: 'Employee Assistance Programme',
-        role: 'Free confidential counselling service',
+        role: 'Employee assistance support service',
         phone: '0800 028 3766',
         email: '',
-        availability: '24 hours / 7 days — completely confidential',
-        notes: 'Free, independent and confidential. Not connected to your employer.',
+        availability: '24 hours / 7 days — independent support route',
+        notes: "Independent support route. Use the provider’s own confidentiality and safeguarding terms.",
       },
     ],
   },
@@ -325,7 +325,7 @@ export default function EscalationPage() {
         <p className="text-xs text-slate-400 text-center pb-2">
           This page is visible to all staff.{' '}
           <Link href="/admin/roles" className="underline">Manage access in Roles &amp; Permissions.</Link>{' '}
-          Contact details are fictional — this is a demo only.
+          Contact details are fictional — this is a controlled admin demo only.
         </p>
       </div>
     </AppLayout>

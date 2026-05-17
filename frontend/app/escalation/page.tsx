@@ -52,7 +52,7 @@ const categories: Category[] = [
   {
     id: 'hr',
     title: 'HR Contact',
-    whenToUse: 'Employment concerns, disciplinary matters, confidential staff issues or wellbeing support',
+    whenToUse: 'Employment concerns, disciplinary matters, sensitive staff issues or wellbeing support',
     icon: Users,
     iconColour: 'bg-blue-100 text-blue-600',
     contact: {

@@ -34,8 +34,8 @@ export default function BookPilotPage() {
               {submittedName ? `Thank you, ${submittedName}` : 'Thank you for your interest'}
             </h2>
             <p className="text-slate-600 text-sm leading-relaxed mb-4">
-              Your pilot enquiry has been noted. The next step is a brief human conversation to understand your
-              organisation&rsquo;s context before any pilot begins.
+              Your pilot enquiry preview has been noted in this browser session. The next step would be a brief human conversation to understand your
+              organisation&rsquo;s context before any real pilot begins.
             </p>
             <p className="text-slate-500 text-xs leading-relaxed mb-6 bg-slate-50 rounded-xl p-4">
               This controlled pilot preview stores nothing. No data from this form is sent to a live CRM, care system, server or
@@ -162,7 +162,7 @@ export default function BookPilotPage() {
               type="submit"
               className="shrink-0 px-6 py-2.5 bg-teal-700 hover:bg-teal-800 text-white font-semibold rounded-xl text-sm transition-colors"
             >
-              Submit enquiry
+              Preview enquiry
             </button>
           </div>
         </form>

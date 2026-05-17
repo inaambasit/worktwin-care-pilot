@@ -143,7 +143,7 @@ test.describe('WorkTwin smoke tests', () => {
     await page.getByLabel('Organisation').fill('Test Org')
     await page.getByLabel('Role').fill('Manager')
     await page.getByLabel('What are you looking to explore?').fill('Exploring onboarding support')
-    await page.getByRole('button', { name: 'Submit enquiry' }).click()
+    await page.getByRole('button', { name: 'Preview enquiry' }).click()
 
     await expect(page.getByText('Thank you, Test User')).toBeVisible()
     await expect(page.getByText(/This controlled pilot preview stores nothing/i).first()).toBeVisible()
@@ -208,7 +208,7 @@ test.describe('WorkTwin smoke tests', () => {
     await page.getByLabel('Organisation').fill('Test Org')
     await page.getByLabel('Role').fill('Manager')
     await page.getByLabel('What are you looking to explore?').fill('Exploring onboarding support')
-    await page.getByRole('button', { name: 'Submit enquiry' }).click()
+    await page.getByRole('button', { name: 'Preview enquiry' }).click()
     await expect(page.getByText(/live CRM, care system/i)).toBeVisible()
     await expect(page.getByText('Nothing leaves your browser session.')).toBeVisible()
   })

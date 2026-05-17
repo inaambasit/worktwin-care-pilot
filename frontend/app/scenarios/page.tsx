@@ -94,7 +94,7 @@ const scenarios: Scenario[] = [
     id: 9,
     title: 'Service user refuses entry at the door',
     category: 'Access / Welfare',
-    description: "A staff member arrives for a visit, but the service user does not want to let them inside. The service user is around 100 years old and the staff member is unsure what to do. Practise calm communication, first contacting the service user's son as advised by Shagufta, and escalating to Shagufta as Registered Manager / Safeguarding Lead if there are any welfare, safety, capacity, distress, neglect, missed medication or immediate-risk concerns.",
+    description: "A staff member arrives for a visit, but the service user does not want to let them inside. The service user is around 100 years old and the staff member is unsure what to do. Practise calm communication, contacting the designated family contact where appropriate, and escalating to the registered manager / safeguarding lead if there are any welfare, safety, capacity, distress, neglect, missed medication or immediate-risk concerns.",
     difficulty: 'Intermediate',
     duration: '7 min',
     status: 'Not started',

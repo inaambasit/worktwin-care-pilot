@@ -8,24 +8,12 @@ import {
 const quickActions = [
   { href: '/ask', icon: MessageCircle, label: 'Ask WorkTwin', desc: 'Ask policy-grounded questions' },
   { href: '/policies', icon: BookOpen, label: 'Policy Library', desc: 'Browse approved documents' },
-  { href: '/onboarding', icon: ClipboardList, label: 'My Onboarding', desc: 'Continue where you left off' },
+  { href: '/onboarding', icon: ClipboardList, label: 'My Onboarding', desc: 'Continue the example pathway' },
   { href: '/scenarios', icon: PlayCircle, label: 'Practice Scenarios', desc: 'Build confidence safely' },
   { href: '/notes', icon: Lock, label: 'Private Notes', desc: 'Session-only pilot notes' },
 ]
 
 const CONTEXT_CHIPS = ['Staff pilot view', 'Thumhara Centre', 'Controlled Pilot', 'Privacy-first support']
-
-const onboardingTasks = [
-  { label: 'Read the Staff Handbook', done: true },
-  { label: 'Meet your line manager', done: true },
-  { label: 'Complete fire safety walkthrough', done: true },
-  { label: 'Shadow a senior carer for a shift', done: true },
-  { label: 'Complete the medication module', done: false },
-  { label: 'Review the safeguarding policy', done: false },
-  { label: 'Book your 2-week check-in', done: false },
-]
-
-const completedCount = onboardingTasks.filter(t => t.done).length
 
 export default function DashboardPage() {
   return (
@@ -95,8 +83,8 @@ export default function DashboardPage() {
               <CheckCircle size={18} className="text-teal-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-teal-700">{completedCount} of {onboardingTasks.length}</p>
-              <p className="text-xs text-slate-500">Onboarding progress</p>
+              <p className="text-2xl font-bold text-teal-700">6 of 17</p>
+              <p className="text-xs text-slate-500">Example tasks completed</p>
             </div>
           </div>
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-3">

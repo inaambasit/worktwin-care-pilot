@@ -49,7 +49,7 @@ const STEP1_OPTIONS = [
   },
   {
     key: 'B' as const,
-    label: "Step back and call the service user's son",
+    label: "Step back and call the designated family contact",
     sub: 'Named family contact for door-refusal.',
     feedback:
       'Right call. Speak calmly from the doorstep, then phone the named contact to reassure the service user before trying again.',
@@ -119,7 +119,7 @@ const HERO_STEPS = [
   },
   {
     icon: <Phone size={22} className="text-white" />,
-    title: "Make contact with the service user's son",
+    title: "Make contact with the designated family contact",
     body: 'Step back from the door, find a quiet spot on the path, and phone the named first contact. Use the checklist below so the call is calm and clear.',
     chips: ['Step 2 of 3', 'Named family contact', 'Calm call', 'Escalate if unsure'],
   },
@@ -313,7 +313,7 @@ export default function AccessRefusalPage() {
           <User size={18} className="text-slate-500" />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-bold text-slate-900">Service user&apos;s son</p>
+          <p className="text-sm font-bold text-slate-900">Designated family contact</p>
           <p className="text-xs text-slate-500 leading-tight">Named first contact</p>
         </div>
       </div>
@@ -773,7 +773,7 @@ export default function AccessRefusalPage() {
                       <User size={20} className="text-slate-500" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-slate-900">Service user&apos;s son</p>
+                      <p className="text-sm font-bold text-slate-900">Designated family contact</p>
                       <p className="text-xs text-slate-500">Named first contact</p>
                       <p className="text-xs font-semibold text-slate-700 mt-0.5">
                         07700 900 188 (demo)
@@ -844,7 +844,7 @@ export default function AccessRefusalPage() {
                 {/* Outcome card */}
                 <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
                   <div>
-                    <h3 className="text-sm font-bold text-slate-900">Did the son answer?</h3>
+                    <h3 className="text-sm font-bold text-slate-900">Did the family contact answer?</h3>
                     <p className="text-xs text-slate-500 mt-0.5">
                       Select what happened on the call.
                     </p>

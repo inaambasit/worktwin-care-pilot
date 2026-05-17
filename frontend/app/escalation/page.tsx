@@ -31,7 +31,7 @@ const categories: Category[] = [
       role: 'Safeguarding Lead / Registered Manager',
       phone: '07700 900 412',
       email: 'safeguarding@example.com',
-      availability: 'Mon–Fri, 09:00–17:00',
+      availability: 'Mon-Fri, 09:00–17:00',
       notes: 'First escalation point for welfare concerns, access refusals and safeguarding. For out-of-hours emergencies, call 999.',
     },
   },
@@ -60,8 +60,8 @@ const categories: Category[] = [
       role: 'HR Coordinator',
       phone: '07700 900 003',
       email: 'hr@example.com',
-      availability: 'Mon–Fri, 09:00–17:00',
-      notes: 'All HR conversations are confidential.',
+      availability: 'Mon-Fri, 09:00–17:00',
+      notes: 'HR concerns should be handled through the correct authorised route and shared only with appropriate people.',
     },
   },
   {
@@ -75,7 +75,7 @@ const categories: Category[] = [
       role: 'Registered Manager',
       phone: '07700 900 005',
       email: 'manager@example.com',
-      availability: 'Mon–Sun, 08:00–20:00',
+      availability: 'Mon-Sun, 08:00–20:00',
       notes: 'For out-of-hours urgent concerns, use the on-call number: 07700 900 999.',
     },
   },
@@ -90,7 +90,7 @@ const categories: Category[] = [
       role: 'Formal complaints lead',
       phone: '07700 900 005',
       email: 'complaints@example.com',
-      availability: 'Mon–Fri, 09:00–17:00',
+      availability: 'Mon-Fri, 09:00–17:00',
       notes: 'You have the right to raise complaints without fear of detriment. Concerns may also be raised in writing.',
     },
   },
@@ -105,7 +105,7 @@ const categories: Category[] = [
       role: 'Health & Safety Officer',
       phone: '07700 900 002',
       email: 'hs@example.com',
-      availability: 'Mon–Fri, 08:30–16:30',
+      availability: 'Mon-Fri, 08:30–16:30',
       notes: 'Report accidents, near-misses and hazards immediately — even if no injury occurred.',
     },
   },
@@ -239,7 +239,7 @@ export default function EscalationPage() {
             <li className="flex items-start gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0 mt-[7px]" />
               <span className="text-sm text-slate-600 leading-relaxed">
-                Conversations with HR and safeguarding leads are confidential.
+                HR and safeguarding concerns should be handled through the correct human route and shared only with appropriate authorised people.
               </span>
             </li>
             <li className="flex items-start gap-2.5 bg-red-50 rounded-xl px-3 py-2.5 -mx-1">

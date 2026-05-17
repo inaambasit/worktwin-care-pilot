@@ -135,7 +135,7 @@ function PolicyModal({ doc, onClose }: { doc: StaffPolicyRecord; onClose: () => 
           <div className="flex items-start gap-2 bg-teal-50 border border-teal-100 rounded-xl px-4 py-3">
             <CheckCircle size={15} className="text-teal-600 mt-0.5 shrink-0" />
             <p className="text-xs text-teal-800 font-medium">
-              Approved policy - all Thumhara Centre staff should follow it.
+              Approved for this controlled pilot preview. In real use, staff should always follow the current approved Thumhara Centre policy and local management guidance.
             </p>
           </div>
 
@@ -356,7 +356,7 @@ export default function PoliciesPage() {
             <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search policies by name, topic or keyword..."
+              placeholder="Search approved pilot policies by name, topic or keyword..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-2.5 text-sm border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-teal-300 placeholder-slate-400"
@@ -496,7 +496,7 @@ export default function PoliciesPage() {
           <div>
             <p className="text-xs font-semibold text-slate-600">Multilingual support</p>
             <p className="text-xs text-slate-400 mt-0.5">
-              Policies are being prepared in Urdu, Punjabi, Arabic, Bengali, Gujarati and other languages.
+              Future pilot versions can support Urdu, Punjabi, Arabic, Bengali, Gujarati and other languages where human-reviewed translations are approved.
               Approved English policies remain the source of truth unless a human-reviewed translation has been approved.
               Per-language approval status is shown in each policy detail.
             </p>

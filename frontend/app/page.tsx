@@ -43,7 +43,7 @@ const features = [
 const trustItems = [
   'Employee chat content is not shown on manager pages in this controlled pilot preview',
   'Designed for answers grounded in approved documents',
-  'Sensitive topics are escalated to a human - never answered automatically',
+  'Sensitive topics are routed safely to human escalation where judgement is needed',
   'No performance scoring, surveillance or sentiment tracking',
   'Designed around UK GDPR principles',
 ]
@@ -52,7 +52,7 @@ const steps = [
   {
     step: '1',
     title: 'Upload approved documents',
-    description: 'Upload existing handbooks, SOPs, policies, workflows and training documents. WorkTwin prepares approved documents for governed retrieval.',
+    description: 'Upload approved handbooks, SOPs, policies, workflows and training documents. WorkTwin prepares them for governed retrieval once the right checks are in place.',
   },
   {
     step: '2',
@@ -175,7 +175,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold text-slate-900 mb-3">How it works</h2>
-            <p className="text-slate-500">Set up in hours, not months.</p>
+            <p className="text-slate-500">Start small with approved documents.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {steps.map(({ step, title, description }) => (

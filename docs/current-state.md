@@ -1,6 +1,6 @@
 # WorkTwin Care Pilot - Current State
 
-> Generated: 2026-05-07. Updated: 2026-05-14. Source of truth through checkpoint `94df6ee` on branch `main`.
+> Generated: 2026-05-07. Updated: 2026-05-14. Source of truth through checkpoint `662b894` on branch `main`.
 > Update this file whenever a milestone changes the status of any item below.
 > Do not edit other files to reconcile with this document - fix those files instead.
 
@@ -52,13 +52,15 @@
 
 > **Pilot shell wording polish (2026-05-14):** Shared staff/admin shell wording polished at checkpoint `94df6ee`. "Demo User" became "Pilot User"; "Care Worker" became "Staff pilot view"; "Demo Mode — Sample Data Only" became "Controlled Pilot — No Real Data"; "Demo Mode — Switch View" became "Host View — Switch Area". Frontend build passed and full smoke suite passed 20/20. No backend, auth, API, admin proxy, RAG, policy, env, SQL or data changes.
 
+> **Frontend route safety/stakeholder audit complete (2026-05-18):** Staff and admin frontend route safety audit completed for the controlled stakeholder demo. Employee/stakeholder routes audited: landing page, login, login-sent, dashboard, Ask WorkTwin, Policy Library, My Onboarding, Practice Scenarios, Access Refusal, Private Notes, Escalation Contacts, Privacy Model, and Book a Pilot. Admin routes audited: Overview, Document Registry, Anonymous Insights, Roles & Permissions, and Escalation Contacts. Final wording polish softened over-absolute privacy/security language, clarified controlled-pilot/demo boundaries, preserved sample/no-real-data framing, and kept admin/RBAC surfaces honest about non-enforcement where applicable. Full Playwright smoke suite passed 20/20 after the final admin wording fixes. Latest checkpoint: `662b894`. This is a stakeholder-safe frontend demo milestone only; it does not activate production readiness, public pilot auth, public admin proxy, real staff use, real service-user data, QCS use, or live operational deployment.
+
 ---
 
 ## 1. Current Checkpoint
 
 | Item | Value |
 |---|---|
-| Commit | `94df6ee` |
+| Commit | `662b894` |
 | Branch | `main` |
 | Repo path | `C:\Projects\worktwin-care-pilot\worktwin-care-pilot-starter` |
 | Backend | FastAPI / `backend/app/main.py` |

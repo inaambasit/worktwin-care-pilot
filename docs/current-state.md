@@ -1,6 +1,6 @@
 # WorkTwin Care Pilot - Current State
 
-> Generated: 2026-05-07. Updated: 2026-05-14. Source of truth through checkpoint `662b894` on branch `main`.
+> Generated: 2026-05-07. Updated: 2026-05-18. Source of truth through checkpoint `7267ab1` on branch `main`.
 > Update this file whenever a milestone changes the status of any item below.
 > Do not edit other files to reconcile with this document - fix those files instead.
 
@@ -54,13 +54,17 @@
 
 > **Frontend route safety/stakeholder audit complete (2026-05-18):** Staff and admin frontend route safety audit completed for the controlled stakeholder demo. Employee/stakeholder routes audited: landing page, login, login-sent, dashboard, Ask WorkTwin, Policy Library, My Onboarding, Practice Scenarios, Access Refusal, Private Notes, Escalation Contacts, Privacy Model, and Book a Pilot. Admin routes audited: Overview, Document Registry, Anonymous Insights, Roles & Permissions, and Escalation Contacts. Final wording polish softened over-absolute privacy/security language, clarified controlled-pilot/demo boundaries, preserved sample/no-real-data framing, and kept admin/RBAC surfaces honest about non-enforcement where applicable. Full Playwright smoke suite passed 20/20 after the final admin wording fixes. Latest checkpoint: `662b894`. This is a stakeholder-safe frontend demo milestone only; it does not activate production readiness, public pilot auth, public admin proxy, real staff use, real service-user data, QCS use, or live operational deployment.
 
+> **Minimum safe pilot readiness scope aligned (2026-05-18):** `docs/minimum-safe-thumhara-pilot-scope.md` aligned with the later completed 4S.97J, 4S.98A and 4S.98B proofs. Historical pre-visibility proof sections were preserved, stale "not started" readiness entries were updated, and current narrow trusted-user pilot readiness was recorded as approximately 8.5/10 subject to final named-user approval, pilot-pack acceptance, public deployment proof, environment flag review, feedback route confirmation and incident process readiness. Docs-only checkpoint: `7ab0592`.
+
+> **Trusted-user pilot go/no-go checklist added (2026-05-18):** `docs/4s99c-trusted-user-go-no-go-checklist.md` created as an internal readiness control before any 3–5 named Thumhara trusted users are invited. It records hard no-go conditions, required pre-access checks, final technical proof requirements, GO/CONDITIONAL GO/NO-GO decision states, access boundaries and a final warning that the checklist is not legal advice, not a DPIA, not regulatory approval and not production approval. No access was granted, no users were created, no environment flags were changed, and public/live rollout remains disabled. Checkpoint: `7267ab1`.
+
 ---
 
 ## 1. Current Checkpoint
 
 | Item | Value |
 |---|---|
-| Commit | `662b894` |
+| Commit | `7267ab1` |
 | Branch | `main` |
 | Repo path | `C:\Projects\worktwin-care-pilot\worktwin-care-pilot-starter` |
 | Backend | FastAPI / `backend/app/main.py` |

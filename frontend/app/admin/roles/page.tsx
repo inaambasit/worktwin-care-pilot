@@ -108,7 +108,7 @@ export default function RolesPage() {
               ))}
             </div>
             <p className="text-slate-300 text-xs">
-              No role can view individual employee conversations or private notes — this is a product-level privacy guarantee.
+              No role can view individual employee conversations or private notes in this controlled pilot preview — this reflects the intended product privacy boundary.
             </p>
           </div>
         </div>
@@ -131,7 +131,7 @@ export default function RolesPage() {
           <Shield size={16} className="text-teal-700 shrink-0 mt-0.5" />
           <p className="text-sm text-teal-800">
             <span className="font-semibold">No role can view individual employee conversations or private notes.</span>{' '}
-            This is a product-level privacy guarantee — not a configurable permission. WorkTwin is private for employees by default.
+            This reflects the intended product privacy boundary — not a configurable permission in this controlled pilot preview. WorkTwin is designed to be private for employees by default.
           </p>
         </div>
 
@@ -190,7 +190,7 @@ export default function RolesPage() {
                       {perm.label === 'View individual staff data' && (
                         <div className="flex items-center gap-1 mt-1">
                           <Info size={11} className="text-red-500" />
-                          <span className="text-xs text-red-600 font-medium">Permanently disabled — privacy guarantee</span>
+                          <span className="text-xs text-red-600 font-medium">Disabled in this controlled pilot preview — intended privacy boundary</span>
                         </div>
                       )}
                     </td>

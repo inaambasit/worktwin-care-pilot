@@ -72,7 +72,7 @@ export default function AdminOverviewPage() {
               ))}
             </div>
             <p className="text-slate-300 text-xs">
-              Individual staff conversations, private notes and personal data are never shown here — this is a product-level privacy guarantee.
+              Individual staff conversations, private notes and personal data are not shown here in this controlled pilot preview — this reflects the intended product privacy boundary.
             </p>
           </div>
         </div>

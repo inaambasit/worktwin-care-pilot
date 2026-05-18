@@ -103,7 +103,7 @@ export default function OnboardingPage() {
             </span>
             <h1 className="text-3xl font-bold mb-2.5 leading-snug">My Onboarding</h1>
             <p className="text-teal-100 text-sm leading-relaxed max-w-lg mb-5">
-              Follow your induction pathway, review key guidance and build confidence during the controlled WorkTwin pilot.
+              Follow an example induction pathway, review key guidance and build confidence during the controlled WorkTwin pilot.
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
               {CONTEXT_CHIPS.map(chip => (

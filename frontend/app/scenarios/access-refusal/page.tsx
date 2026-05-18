@@ -114,8 +114,8 @@ const HERO_STEPS = [
   {
     icon: <User size={22} className="text-white" />,
     title: 'Service user refuses entry at the door',
-    body: 'You arrive for a scheduled visit. The service user, who is around 100 years old, comes to the door but does not want to let you in. He seems unsettled and is asking you to come back another day. You are unsure what to do.',
-    chips: ['Access / Welfare', 'Service user age ~100', 'Doorstep visit', 'Scheduled visit'],
+    body: 'You arrive for a scheduled visit. The service user, who is older and may be vulnerable, comes to the door but does not want to let you in. They seem unsettled and are asking you to come back another day. You are unsure what to do.',
+    chips: ['Access / Welfare', 'Older vulnerable service user', 'Doorstep visit', 'Scheduled visit'],
   },
   {
     icon: <Phone size={22} className="text-white" />,

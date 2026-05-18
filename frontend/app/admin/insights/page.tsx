@@ -207,11 +207,11 @@ export default function InsightsPage() {
         </div>
 
         <div className="bg-teal-50 border border-teal-200 rounded-2xl px-4 py-3">
-          <p className="text-xs text-teal-800 font-semibold mb-1">Privacy guarantee</p>
+          <p className="text-xs text-teal-800 font-semibold mb-1">Privacy boundary</p>
           <p className="text-xs text-teal-700 leading-relaxed">
             Insights are aggregated and anonymised. Small groups are suppressed to reduce the risk of identifying
-            individuals. Managers do not see private employee chat transcripts. WorkTwin never surfaces individual
-            staff names, questions or conversation history in this view.
+            individuals. Managers do not see private employee chat transcripts. This controlled pilot preview does
+            not surface individual staff names, questions or conversation history in this view.
           </p>
         </div>
       </div>

@@ -287,7 +287,7 @@ export default function AskPage() {
                 <div className="flex-1">
                   <h2 className="font-semibold text-amber-900 mb-1">Controlled pilot safety mode</h2>
                   <p className="text-sm text-amber-800 leading-relaxed mb-4">
-                    Ask WorkTwin can use approved, governed documents only when the backend, database and document gates are ready. If no safe source is available, it should say so and point staff to a human lead. Safeguarding, medication, HR, legal, wellbeing and immediate-risk topics must be escalated to a human lead.
+                    Ask WorkTwin can use approved, governed documents only when the right source and governance checks are in place. If no safe source is available, it should say so and point staff to a human lead. Safeguarding, medication, HR, legal, wellbeing and immediate-risk topics must be escalated to a human lead.
                   </p>
                   <h3 className="text-xs font-bold text-amber-900 uppercase tracking-wider mb-2">What this means</h3>
                   <ul className="space-y-1.5">
@@ -308,7 +308,7 @@ export default function AskPage() {
                     <p className="mt-3 text-xs text-amber-700">
                       {backendWarmupStatus === 'warming' && 'Knowledge service warming up'}
                       {backendWarmupStatus === 'ready' && 'Knowledge service ready'}
-                      {backendWarmupStatus === 'unavailable' && 'Knowledge service may wake on first question'}
+                      {backendWarmupStatus === 'unavailable' && 'First answer may take a few seconds while the knowledge service starts'}
                     </p>
                   )}
                 </div>
@@ -897,7 +897,7 @@ export default function AskPage() {
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center gap-3">
               <Shield size={15} className="text-teal-600 shrink-0" />
               <p className="text-xs text-slate-500 leading-relaxed">
-                Questions are not shown to managers in this controlled pilot, but this is not a care record, HR record, safeguarding record, medication record or confidential reporting route.
+                Not a care, HR, safeguarding, medication or confidential reporting route.
               </p>
             </div>
           </div>
@@ -943,7 +943,7 @@ export default function AskPage() {
             {input.trim().length > 0 && input.trim().length < 3 ? (
               <p className="text-xs text-amber-600">Please enter at least 3 characters.</p>
             ) : (
-              <p className="text-xs text-slate-400">Questions are not shown to managers in this controlled pilot, but this is not a care record, HR record, safeguarding record, medication record or confidential reporting route.</p>
+              <p className="text-xs text-slate-400">Not a care, HR, safeguarding, medication or confidential reporting route.</p>
             )}
             <p className={`text-xs tabular-nums shrink-0 ml-3 ${
               input.length >= 500 ? 'text-red-500' :

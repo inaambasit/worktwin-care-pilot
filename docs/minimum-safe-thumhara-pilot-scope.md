@@ -3,6 +3,8 @@
 **Date:** 2026-05-13
 **Status:** Controlled pilot scope — not production approval.
 
+> **Current alignment note — 2026-05-18:** This document contains a chronological proof history. Earlier sections correctly record the state at the time they were written, including when TC-POL-001 to TC-POL-004 were not yet staff-visible. Those earlier statements are now superseded by later controlled proofs: 4S.97J confirmed the four-policy Staff Ask smoke proof, 4S.98A confirmed authenticated backend proof with a non-real staff test user, and 4S.98B confirmed local frontend auth/session proof. Public/live rollout remains disabled. No real staff access has been granted.
+
 ---
 
 ## 1. Purpose
@@ -67,7 +69,7 @@ The following documents are the current candidates for staff-visible approval, s
 | TC-POL-004 Thumhara Centre Infection Prevention and Basic Hygiene Policy | Candidate — pending staff-visibility approval |
 | TC-POL-005 Thumhara Centre Professional Boundaries Policy | Candidate — pending testing and staff-visibility approval |
 
-None of the above are staff-visible yet. Each requires a separate, deliberate governance decision.
+These documents were originally candidates for staff-visible approval. Later controlled proofs recorded below show that TC-POL-001 to TC-POL-004 were opened one by one for controlled local staff-visible proof and passed final Staff Ask smoke testing. TC-POL-005 remains deferred and is not part of the first staff-visible set.
 
 ### Not staff-visible — escalation-only or admin-test-only
 
@@ -101,6 +103,8 @@ Staff-visible approval for each document must still be opened separately, delibe
 **TC-POL-005 deferred.** At the time of this decision, TC-POL-005 Professional Boundaries has not completed the required governance and testing path (`real_document=false`, `dummy_document=true`, `governance_status=not_reviewed`, `embedding_status=pending`). It is excluded from the first candidate set until metadata correction, embedding, admin answer-debug testing, negative-control testing and documentation are complete.
 
 **High-risk and specialist policies remain excluded.** TC-POL-006 (Accident and Incident Reporting), TC-POL-007 (Complaints), TC-POL-008 (Raising Concerns and Speaking Up), TC-POL-009 (Medication Support and Escalation) and TC-POL-010 (Safeguarding Adults Awareness and Escalation) are not candidates for staff visibility at this stage. They remain escalation-only or admin-test-only.
+
+Historical note: Sections 4S.97C to 4S.97E record the earlier blocked/pre-visibility state. They are retained as proof that Lane B/admin approval and status approval alone did not make documents staff-visible. They are superseded for current readiness by 4S.97F to 4S.98B below.
 
 ### 4S.97C proof — Staff Ask baseline blocks candidate documents before staff visibility
 
@@ -802,17 +806,17 @@ The pilot will be considered successful if all of the following conditions are m
 | Area | Rating |
 |------|--------|
 | Admin answer-debug governance (Lane B) | Complete for TC-POL-001 to TC-POL-004 |
-| High-risk specialist blocking (4S.96L) | Complete |
-| Classifier and source-routing polish (4S.96N) | Complete |
-| Staff-visible policy approval | Not started |
-| Staff auth and organisation scoping proof | Not started |
-| Staff Ask negative-control proof | Not started |
-| Staff-facing UI pilot safety wording | Not started |
-| Trusted-user instructions and feedback form | Not started |
+| High-risk specialist blocking | Complete for current controlled proof, including accident/fall escalation fix |
+| Classifier and source-routing polish | Complete for current controlled proof |
+| Staff-visible policy approval | Complete for TC-POL-001 to TC-POL-004 in controlled proof; TC-POL-005 deferred |
+| Staff auth and organisation scoping proof | Complete in controlled backend proof with non-real staff test user |
+| Staff Ask negative-control proof | Complete for current four-policy set |
+| Staff-facing UI pilot safety wording | Complete for stakeholder-safe frontend demo; final live rollout proof still required before named access |
+| Trusted-user instructions and feedback form | Pilot pack created; named-user acceptance and feedback route still required before access |
 
-**Current readiness for the Minimum Safe Thumhara Pilot: approximately 7/10.**
+**Current readiness for a narrow trusted-user pilot: approximately 8.5/10, subject to final named-user approval, pilot-pack acceptance, public deployment proof, environment flag review, feedback route confirmation and incident process readiness.**
 
-After staff-visible policy approval, staff Ask proof, and auth/org-scoping proof are complete, the target readiness is **8.5–9/10**.
+Staff-visible policy approval, Staff Ask proof and auth/org-scoping proof have now passed in controlled proof. Remaining work is controlled rollout packaging and final deployment/go-no-go, not core RAG/auth proof.
 
 This project is not production-ready. It is not a general-purpose SaaS product. It is a narrow, controlled pilot with a single trusted user group at a single care provider.
 

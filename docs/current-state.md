@@ -1,6 +1,6 @@
 # WorkTwin Care Pilot - Current State
 
-> Generated: 2026-05-07. Updated: 2026-05-18. Source of truth through checkpoint `7267ab1` on branch `main`.
+> Generated: 2026-05-07. Updated: 2026-05-18. Source of truth through checkpoint `65c3017` on branch `main`.
 > Update this file whenever a milestone changes the status of any item below.
 > Do not edit other files to reconcile with this document - fix those files instead.
 
@@ -58,13 +58,15 @@
 
 > **Trusted-user pilot go/no-go checklist added (2026-05-18):** `docs/4s99c-trusted-user-go-no-go-checklist.md` created as an internal readiness control before any 3–5 named Thumhara trusted users are invited. It records hard no-go conditions, required pre-access checks, final technical proof requirements, GO/CONDITIONAL GO/NO-GO decision states, access boundaries and a final warning that the checklist is not legal advice, not a DPIA, not regulatory approval and not production approval. No access was granted, no users were created, no environment flags were changed, and public/live rollout remains disabled. Checkpoint: `7267ab1`.
 
+> **4S.99D (2026-05-18):** Trusted-user final access runbook added — PRE-ACCESS ONLY. `docs/4s99d-trusted-user-final-access-runbook.md` created at checkpoint `65c3017`. No access was granted, no users were created, no environment flags were changed, no public pilot auth was enabled, no public admin proxy was enabled, and no production/live operational approval was given. The runbook defines the final technical proof sequence, the go/no-go decision record, the access removal and rollback plan, and a final warning before any 3–5 named trusted-user access. This document is a pre-access planning control only.
+
 ---
 
 ## 1. Current Checkpoint
 
 | Item | Value |
 |---|---|
-| Commit | `7267ab1` |
+| Commit | `65c3017` |
 | Branch | `main` |
 | Repo path | `C:\Projects\worktwin-care-pilot\worktwin-care-pilot-starter` |
 | Backend | FastAPI / `backend/app/main.py` |

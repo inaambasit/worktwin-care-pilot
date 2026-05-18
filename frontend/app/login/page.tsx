@@ -65,10 +65,10 @@ export default function LoginPage({
           </div>
           <span className="font-bold text-slate-900 text-lg">WorkTwin</span>
         </Link>
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">Sign in to WorkTwin</h1>
+        <h1 className="text-2xl font-bold text-slate-900 mb-2">Sign in to WorkTwin pilot</h1>
         <p className="text-sm text-slate-500 max-w-sm">
-          Enter your work email address. We will send you a secure sign-in link.
-          No password required.
+          Enter your invited work email address. If pilot access is enabled for
+          you, we will send a sign-in link. No password required.
         </p>
       </div>
 

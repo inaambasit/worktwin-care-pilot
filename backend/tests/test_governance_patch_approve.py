@@ -153,6 +153,36 @@ class TestDocumentRecordNullCoercion:
         assert r.tags == []
         assert r.access_roles == []
 
+    def test_vertical_titlecase_normalised_to_lowercase(self):
+        r = DocumentRecord(**{**_MODEL_BASE, "vertical": "Care"})
+        assert r.vertical == "care"
+
+    def test_vertical_uppercase_normalised_to_lowercase(self):
+        r = DocumentRecord(**{**_MODEL_BASE, "vertical": "CARE"})
+        assert r.vertical == "care"
+
+    def test_all_valid_verticals_normalised(self):
+        for raw, expected in [
+            ("Care", "care"),
+            ("Finance", "finance"),
+            ("Property", "property"),
+            ("Recruitment", "recruitment"),
+            ("Healthcare_Admin", "healthcare_admin"),
+            ("Training_Provider", "training_provider"),
+            ("General", "general"),
+            ("Custom", "custom"),
+        ]:
+            r = DocumentRecord(**{**_MODEL_BASE, "vertical": raw})
+            assert r.vertical == expected, f"expected {expected!r} for input {raw!r}"
+
+    def test_vertical_already_lowercase_unchanged(self):
+        r = DocumentRecord(**{**_MODEL_BASE, "vertical": "care"})
+        assert r.vertical == "care"
+
+    def test_vertical_truly_invalid_value_raises(self):
+        with pytest.raises(Exception):
+            DocumentRecord(**{**_MODEL_BASE, "vertical": "invalid_value"})
+
 
 # ---------------------------------------------------------------------------
 # 2. POST /documents/{id}/approve -- must return 200 not 500
@@ -200,6 +230,17 @@ class TestApproveEndpoint:
              patch("app.main._update_registry_record", return_value=None):
             resp = client.post("/documents/nonexistent-id-xyz/approve")
         assert resp.status_code == 404
+
+    def test_approve_returns_200_when_db_row_has_titlecased_vertical(self, bypass_admin):
+        """DB row with vertical='Care' (written by multipart upload) must not cause 500."""
+        updated = {**_DB_ROW, "status": "approved", "vertical": "Care"}
+        with patch("app.main._DB_CONFIGURED", True), \
+             patch("app.main._update_registry_record", return_value=updated):
+            resp = client.post("/documents/db-doc-001/approve")
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["vertical"] == "care"
+        assert body["status"] == "approved"
 
 
 # ---------------------------------------------------------------------------
@@ -250,6 +291,20 @@ class TestGovernancePatchEndpoint:
             )
         assert resp.status_code == 200
         assert resp.json()["governance_reviewed_at"] == "2025-01-19T12:00:00+00:00"
+
+    def test_governance_patch_returns_200_when_db_row_has_titlecased_vertical(self, bypass_admin):
+        """PATCH governance with vertical='Care' in DB row must return 200, not 500."""
+        base = {**_DB_ROW, "vertical": "Care"}
+        updated = {**base}
+        with patch("app.main._DB_CONFIGURED", True), \
+             patch("app.main._get_registry_record", return_value=base), \
+             patch("app.main._update_registry_record", return_value=updated):
+            resp = client.patch(
+                "/documents/db-doc-001/governance",
+                json={"governance_reviewed_by": "Reviewer"},
+            )
+        assert resp.status_code == 200
+        assert resp.json()["vertical"] == "care"
 
     def test_governance_patch_returns_503_when_db_not_configured(self, bypass_admin):
         with patch("app.main._DB_CONFIGURED", False):

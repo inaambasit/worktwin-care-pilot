@@ -1785,6 +1785,13 @@ class DocumentRecord(BaseModel):
         ):
             if values.get(_field) is None:
                 values = {**values, _field: _default}
+        # Multipart upload stores vertical as the raw form string, which may be
+        # title-cased (e.g. 'Care') if the browser sent it that way.  DocumentVertical
+        # requires lowercase literals, so normalise here before validation runs.
+        # Truly invalid values (e.g. 'foo') still fail DocumentVertical validation
+        # because 'foo' is not a member of the Literal — only the case is corrected.
+        if isinstance(values.get('vertical'), str):
+            values = {**values, 'vertical': values['vertical'].lower()}
         return values
 
 

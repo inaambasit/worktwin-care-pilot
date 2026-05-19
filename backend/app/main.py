@@ -4,7 +4,7 @@ import io
 from fastapi import FastAPI, Form, UploadFile, File, HTTPException, Depends, Header
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from typing import Literal, Optional, List, Dict, Any, Tuple
 from datetime import datetime
 import uuid
@@ -1764,6 +1764,28 @@ class DocumentRecord(BaseModel):
     approved_for_embedding: Optional[bool] = False
     approved_for_staff_visibility: Optional[bool] = False
     approved_for_source_grounded_answers: Optional[bool] = False
+
+    @model_validator(mode='before')
+    @classmethod
+    def _coerce_db_nulls(cls, values: Any) -> Any:
+        # PostgreSQL arrays/JSONB return JSON null when the column has no stored value.
+        # Pydantic v2 treats null-but-present differently from absent: it does NOT
+        # fall back to the field default, it raises ValidationError.  That causes
+        # FastAPI response-model validation to fail with HTTP 500 even though the
+        # underlying DB write succeeded.  Coerce null → appropriate defaults here so
+        # the response serialisation path is always safe.
+        if not isinstance(values, dict):
+            return values
+        for _field, _default in (
+            ('tags', []),
+            ('access_roles', []),
+            ('personal_data_warnings', []),
+            ('available_languages', ['en']),
+            ('metadata', {}),
+        ):
+            if values.get(_field) is None:
+                values = {**values, _field: _default}
+        return values
 
 
 # Milestone 4S.31 — staff-safe response shape for GET /policies.

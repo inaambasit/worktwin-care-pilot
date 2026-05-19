@@ -156,6 +156,41 @@ function isFallbackGuidance(a: DisplayAnswer): boolean {
   return !a.allowedToAnswer && !(a.requiresEscalation && isHighRisk(a))
 }
 
+function getFollowUpPrompts(answer: DisplayAnswer): string[] {
+  const q = answer.question.toLowerCase()
+  if (
+    q.includes('hygien') || q.includes('handwash') || q.includes('wash') ||
+    q.includes('infect') || q.includes('cough') || q.includes('sneez') ||
+    q.includes('tissue') || q.includes('vomit') || q.includes('diarrhoea') ||
+    q.includes('fever') || q.includes('sympt') || q.includes('ppe') || q.includes('glove')
+  ) {
+    return [
+      'What are the steps for correct handwashing?',
+      'When should I wear gloves or PPE?',
+      'What should I do if a service user has symptoms of infection?',
+    ]
+  }
+  if (
+    q.includes('confidential') || q.includes('record') || q.includes('data') ||
+    q.includes('information') || q.includes('share') || q.includes('store') ||
+    q.includes('access') || q.includes('gdpr')
+  ) {
+    return [
+      'Who can access service-user records?',
+      'What should I do if I accidentally share information?',
+      'What details should be recorded in the visitor log?',
+    ]
+  }
+  if (q.includes('mobile') || q.includes('phone') || q.includes('device') || q.includes('personal')) {
+    return [
+      'What should I do when a visitor arrives?',
+      'What details should be recorded in the visitor log?',
+      'Can a visitor go beyond reception without speaking to staff?',
+    ]
+  }
+  return suggestedPrompts.slice(0, 3)
+}
+
 // ---------------------------------------------------------------------------
 // Page component
 // ---------------------------------------------------------------------------
@@ -477,8 +512,8 @@ export default function AskPage() {
                   <Loader2 size={18} className="text-teal-600 animate-spin" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-700">WorkTwin is checking approved policies</p>
-                  <p className="text-xs text-slate-400 mt-0.5">Searching approved documents and procedures...</p>
+                  <p className="text-sm font-semibold text-slate-700">Looking that up for you…</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Checking approved policy documents…</p>
                 </div>
               </div>
               <div className="mt-4 space-y-2">
@@ -550,7 +585,7 @@ export default function AskPage() {
             {!currentAnswer.isDemo && !isDemoFallback && (
               <div className="flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-xl px-4 py-2.5 text-xs text-teal-800">
                 <Zap size={13} className="shrink-0 text-teal-600" />
-                WorkTwin answers only from documents your organisation has approved for staff use, and shows the source used.
+                Answered from your approved policy documents — sources shown below.
               </div>
             )}
 
@@ -569,7 +604,7 @@ export default function AskPage() {
                   </div>
                 </div>
                 <div className="p-5">
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">You asked</p>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Your question</p>
                   <p className="text-sm text-slate-600 italic mb-4">&ldquo;{currentAnswer.question}&rdquo;</p>
                   <p className="text-sm text-slate-700 leading-relaxed">
                     {currentAnswer.answer ||
@@ -615,7 +650,7 @@ export default function AskPage() {
                   </div>
                 </div>
                 <div className="p-5 border-b border-amber-100">
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">You asked</p>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Your question</p>
                   <p className="text-sm text-slate-700 italic mb-4">&ldquo;{currentAnswer.question}&rdquo;</p>
                   <p className="text-sm text-slate-700 leading-relaxed">
                     {currentAnswer.answer ||
@@ -669,8 +704,7 @@ export default function AskPage() {
                       <span className="text-white text-sm font-bold">W</span>
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-teal-900">WorkTwin response</p>
-                      <p className="text-xs text-teal-700 mt-0.5">Approved-source answer</p>
+                      <p className="text-sm font-bold text-teal-900">Here&apos;s what the approved policy says</p>
                     </div>
                     <span className="ml-auto flex items-center gap-1 bg-teal-700 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
                       <BadgeCheck size={11} />
@@ -681,7 +715,7 @@ export default function AskPage() {
 
                 {/* Answer body */}
                 <div className="p-5 border-b border-slate-100">
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">You asked</p>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Your question</p>
                   <p className="text-sm text-slate-600 italic mb-4">&ldquo;{currentAnswer.question}&rdquo;</p>
                   <p className="text-slate-700 text-sm leading-relaxed">{currentAnswer.answer}</p>
                   {currentAnswer.disclaimer && (
@@ -695,7 +729,7 @@ export default function AskPage() {
                 {currentAnswer.nextSteps.length > 0 && (
                   <div className="p-5 border-b border-slate-100 bg-slate-50">
                     <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
-                      What you should do next
+                      Steps to take
                     </h3>
                     <ol className="space-y-2">
                       {currentAnswer.nextSteps.map((step, i) => (
@@ -742,7 +776,7 @@ export default function AskPage() {
                   <div className="px-5 py-4 border-b border-slate-100 bg-amber-50">
                     <div className="flex items-center gap-2 mb-2.5">
                       <AlertTriangle size={14} className="text-amber-600" />
-                      <p className="text-xs font-bold text-amber-700 uppercase tracking-wider">Escalate if</p>
+                      <p className="text-xs font-bold text-amber-700 uppercase tracking-wider">Speak to a manager if…</p>
                     </div>
                     <ul className="space-y-1.5">
                       {currentAnswer.escalateIf.map((item, i) => (
@@ -766,7 +800,7 @@ export default function AskPage() {
                   <div className="px-5 py-4 border-b border-slate-100 bg-teal-50">
                     <div className="flex items-center gap-2 mb-1.5">
                       <Zap size={14} className="text-teal-600" />
-                      <p className="text-xs font-bold text-teal-700 uppercase tracking-wider">Learning option</p>
+                      <p className="text-xs font-bold text-teal-700 uppercase tracking-wider">Want to learn more?</p>
                     </div>
                     <p className="text-sm text-teal-800">{currentAnswer.learningOption}</p>
                   </div>
@@ -893,21 +927,23 @@ export default function AskPage() {
               </div>
             )}
 
-            {/* Privacy reminder */}
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center gap-3">
-              <Shield size={15} className="text-teal-600 shrink-0" />
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Not a care, HR, safeguarding, medication or confidential reporting route.
-              </p>
-            </div>
+            {/* Privacy reminder - hidden for high-risk escalation (which already carries strong messaging) */}
+            {!(currentAnswer.requiresEscalation && isHighRisk(currentAnswer)) && (
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center gap-3">
+                <Shield size={15} className="text-teal-600 shrink-0" />
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Answers come from approved policy documents only. For real concerns, speak to the right human lead.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
         {/* Input bar */}
         <div className="sticky bottom-0 bg-slate-50 pt-2">
-          {showAnswer && (
+          {showAnswer && currentAnswer && (
             <div className="mb-2 flex flex-wrap gap-2">
-              {suggestedPrompts.slice(0, 3).map((p) => (
+              {getFollowUpPrompts(currentAnswer).map((p) => (
                 <button
                   key={p}
                   onClick={() => handlePrompt(p)}
@@ -943,7 +979,7 @@ export default function AskPage() {
             {input.trim().length > 0 && input.trim().length < 3 ? (
               <p className="text-xs text-amber-600">Please enter at least 3 characters.</p>
             ) : (
-              <p className="text-xs text-slate-400">Not a care, HR, safeguarding, medication or confidential reporting route.</p>
+              <p className="text-xs text-slate-400">Answers come from approved policy documents only.</p>
             )}
             <p className={`text-xs tabular-nums shrink-0 ml-3 ${
               input.length >= 500 ? 'text-red-500' :

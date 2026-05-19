@@ -8,7 +8,7 @@
 | Real staff use | None — no staff have access |
 | Pending review | Shagufta review may occur later; not scheduled |
 | Document visibility | Admin/testing only unless gates are deliberately enabled |
-| Last updated | 2026-05-12 |
+| Last updated | 2026-05-19 |
 | PPE upload | Paused — PPE Policy PDF not yet available; will be requested from Shagufta |
 
 Documents remain in testing state until all required gates are explicitly approved. Enabling a gate is a deliberate act — it does not happen automatically upon upload.
@@ -108,7 +108,7 @@ Based on current registry proof as of 2026-05-06.
 | Thumhara Centre Mobile Phone and Portable Device Use Policy (TC-POL-002) | **B — admin answer-debug only** | Yes | Yes (admin/debug only) | No | **Thumhara-original draft** — not QCS, not third-party content. Touches confidentiality, data protection, and device-use responsibilities. Draft only; not approved for live operational use or staff visibility. Upload-default metadata corrected (real_document=true, dummy_document=false, source_owner=Thumhara Centre). Embedding complete (15/15 chunks, 3,419 tokens). Answer-debug blocked before approval confirmed. Admin-only answer-debug spot-check passed: 3/3 source-grounded to TC-POL-002 only, 0 leakage. Overall spot-check quality: 8.5/10. Staff visibility blocked — document status is draft. |
 | Thumhara Centre Confidentiality and Information Handling Policy (TC-POL-003) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Touches confidentiality obligations, information-sharing duties, possible data breaches, safeguarding escalation, legal/privacy questions, and external information requests. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug before any AI-answer or staff-visibility decision — answer-debug must be conducted with particular care given the sensitivity of confidentiality breach and legal/privacy question types. |
 | Thumhara Centre Infection Prevention and Basic Hygiene Policy (TC-POL-004) | **B — admin answer-debug only** | Yes | Yes (admin/debug only) | No | **Thumhara-original draft** — not QCS, not third-party content. Covers infection prevention, illness symptoms, PPE, hygiene, bodily fluids, contaminated items, suspected outbreaks, public health guidance, health and safety, safeguarding escalation, and emergency escalation. Draft only; not approved for live operational use or staff visibility. Upload-default metadata corrected (real_document=true, dummy_document=false, source_owner=Thumhara Centre). Embedding complete (14/14 chunks, 3,228 tokens). Answer-debug blocked before approval confirmed. Admin-only answer-debug spot-check passed: 3/3 source-grounded to TC-POL-004 only, 0 leakage. Overall spot-check quality: 8.5/10. Staff visibility blocked — document status is draft. |
-| Thumhara Centre Professional Boundaries Policy (TC-POL-005) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Covers professional boundaries, gifts and money, private contact, social media, conflicts of interest, safeguarding, abuse, exploitation, sexual misconduct, harassment, complaints, HR, disciplinary matters, and staff conduct concerns. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug — abuse, exploitation, sexual misconduct, harassment, safeguarding, gifts/money, private contact, HR, and conduct questions must all be verified to escalate correctly before any AI-answer or staff-visibility decision. |
+| Thumhara Centre Professional Boundaries Policy (TC-POL-005) | **B — Staff Ask ready (controlled testing only)** | Yes | Yes | Yes | **Thumhara-original draft** — not QCS, not third-party content. v0.2 (`d9af1705`) uploaded 2026-05-19 under demo-org. All gates approved: embedding indexed (11/11 chunks, text-embedding-3-small, 0 failed), source-grounded answers approved, staff visibility approved. Live Staff Ask checks passed: "Can I accept a gift from someone I support?" and "Can I give my personal phone number to a service user?" — both answered from Thumhara Centre Professional Boundaries Policy. Controlled WorkTwin testing only; not approved for live operational use without Thumhara leadership/registered manager/designated safeguarding lead sign-off. Safety tracker note: approved for general staff guidance only — any real person, allegation, safeguarding concern, financial abuse concern, sexual/romantic boundary concern, HR issue, complaint or immediate risk must escalate to a human lead. Known issues: Admin Portal upload blocked (ADMIN_PROXY_ENABLED disabled on public deployment — intentional safety measure, UX needs improving later); governance PATCH and approve endpoints write successfully but return 500 afterwards (likely response/serialisation issue, needs later fix). |
 | Thumhara Centre Accident and Incident Reporting Policy (TC-POL-006) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Covers accidents, incidents, near misses, serious injuries, falls, medication incidents, safeguarding, violence and aggression, fire, confidentiality and data protection incidents, health and safety, complaints, HR, external reporting, and regulator notification. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug — serious injury, falls, medication, safeguarding, fire, violence/aggression, confidentiality breach, emergency, and external reporting/regulator notification questions must all be verified to escalate correctly before any AI-answer or staff-visibility decision. |
 | Thumhara Centre Complaints, Suggestions and Compliments Policy (TC-POL-007) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Covers complaints, suggestions, compliments, safeguarding, abuse, neglect, staff misconduct, discrimination, harassment, medication, accidents/incidents, confidentiality and data protection incidents, legal issues, police involvement, regulator involvement, HR, disciplinary matters, complaint outcomes, and serious distress. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug — safeguarding, complaint outcome, HR, legal/regulator, medication, accident/incident, discrimination/harassment, and serious distress questions must all be verified to escalate correctly before any AI-answer or staff-visibility decision. Clean-corpus Thumhara-original replacement for the QCS-blocked QQ03 in the Complaints, Suggestions and Compliments subject area. |
 | Thumhara Centre Raising Concerns and Speaking Up Policy (TC-POL-008) | **A candidate — draft upload only** | No | No | No | **Thumhara-original draft** — not QCS, not third-party content. Covers raising concerns, speaking up, safeguarding, abuse, neglect, risk of harm, unsafe practice, poor care, medication concerns, health and safety, bullying, harassment, discrimination, professional boundaries, confidentiality and data protection concerns, misuse of money/resources/position, dishonest/improper/unlawful behaviour, attempts to hide concerns, HR, disciplinary matters, external reporting, CQC, police, whistleblowing protection, and speaking-up retaliation. Draft only; not approved for live operational use until reviewed by Thumhara Centre leadership. No gates enabled. Embedding not yet triggered. Lane A candidate pending leadership review, embedding approval, and careful admin answer-debug — safeguarding, medication, abuse, harassment, discrimination, HR, legal/regulator, police, whistleblowing protection, and external reporting questions must escalate correctly before any AI-answer or staff-visibility decision. Clean-corpus Thumhara-original replacement for the QCS-blocked PM11 / Raising Concerns / Freedom to Speak Up / Whistleblowing subject area. |
@@ -131,7 +131,7 @@ Based on current registry proof as of 2026-05-06.
 | TC-POL-002 Mobile Phone and Portable Device Use Policy | Yes | Yes (admin/debug only) | No |
 | TC-POL-003 Confidentiality and Information Handling Policy | No | No | No |
 | TC-POL-004 Infection Prevention and Basic Hygiene Policy | Yes | Yes (admin/debug only) | No |
-| TC-POL-005 Professional Boundaries Policy | No | No | No |
+| TC-POL-005 Professional Boundaries Policy | Yes | Yes | Yes |
 | TC-POL-006 Accident and Incident Reporting Policy | No | No | No |
 | TC-POL-007 Complaints, Suggestions and Compliments Policy | No | No | No |
 | TC-POL-008 Raising Concerns and Speaking Up Policy | No | No | No |
@@ -963,6 +963,86 @@ Before any AI-answer or staff-visibility use:
 2. `approved_for_embedding` must be deliberately enabled.
 3. The embedding pipeline must complete successfully.
 4. Admin answer-debug must be run with particular care: abuse, exploitation, sexual misconduct, harassment, safeguarding, gifts/money, private contact, social media, conflicts of interest, HR, disciplinary, and staff conduct question types must all be tested and verified to produce correct escalation or appropriately scoped policy-guided answers before staff visibility is considered. Any answer that fails to escalate correctly on abuse, exploitation, sexual misconduct, harassment, or safeguarding questions must not be approved for staff-facing use.
+
+---
+
+## TC-POL-005 v0.2 Controlled Upload, Governance Gates, Embedding, and Staff Ask Testing — 2026-05-19
+
+TC-POL-005 v0.2 was uploaded for controlled WorkTwin testing. This is an original Thumhara Centre-owned draft written from first principles using general adult social care good practice — it is not copied, summarised, adapted, or derived from QCS documentation or any other licensed or template policy. No third-party content restriction applies.
+
+### Upload Details
+
+| Field | Value |
+|-------|-------|
+| Document code | TC-POL-005 |
+| Document ID | `d9af1705-fe40-48d1-967b-559d1e09a933` |
+| Title | Thumhara Centre Professional Boundaries Policy |
+| File | `Thumhara_Centre_Professional_Boundaries_Policy_v0.2.pdf` |
+| Version | v0.2 |
+| Organisation | demo-org |
+| Category | Professional Boundaries |
+| Access role | All Staff |
+| Provenance | Thumhara-owned draft written from first principles using general adult social care good practice; not copied, summarised, adapted, or derived from QCS documentation, licensed material, or any template policy |
+| Use status | Controlled WorkTwin testing only; not approved for live operational use without Thumhara leadership, registered manager, and designated safeguarding lead sign-off |
+
+### Governance State After Upload
+
+| Flag | Value |
+|------|-------|
+| real_document | true |
+| dummy_document | false |
+| contains_qcs_or_third_party_content | false |
+| is_sensitive | false |
+| escalation_required | false |
+| approved_for_embedding | true |
+| approved_for_source_grounded_answers | true |
+| approved_for_staff_visibility | true |
+
+### Embedding Summary
+
+| Field | Value |
+|-------|-------|
+| Embedding model | text-embedding-3-small |
+| attempted_count | 11 |
+| embedded_count | 11 |
+| failed_count | 0 |
+| embedding_status | indexed |
+
+All 11 chunks embedded successfully with no failures.
+
+### Governance Readiness
+
+| Check | Value |
+|-------|-------|
+| can_embed_now | true |
+| can_use_for_answer_debug_now | true |
+| can_show_to_staff_now | true |
+| can_use_for_staff_ask_now | true |
+| staff_ask_blocked_reason | null |
+
+### Live Staff Ask Checks
+
+Both questions were answered live from the Thumhara Centre Professional Boundaries Policy.
+
+| # | Question | Source | Result |
+|---|----------|--------|--------|
+| 1 | Can I accept a gift from someone I support? | Thumhara Centre Professional Boundaries Policy | PASS |
+| 2 | Can I give my personal phone number to a service user? | Thumhara Centre Professional Boundaries Policy | PASS |
+
+### Safety Tracker Note
+
+**Approved for general staff guidance only.** Any real person, allegation, safeguarding concern, financial abuse concern, sexual or romantic boundary concern, HR issue, complaint, or immediate risk must escalate to a human lead. TC-POL-005 must not be used to adjudicate, minimise, or advise on the merits of any live conduct, safeguarding, or HR concern.
+
+### Known Issues
+
+| Issue | Detail |
+|-------|--------|
+| Admin Portal upload blocked | `ADMIN_PROXY_ENABLED` is disabled on the public deployment. This is intentional for safety, but the UX needs improving later to surface a clearer message to users attempting to upload via the portal. |
+| Governance endpoint 500 response | The governance PATCH and approve endpoints write successfully but return 500 afterwards, likely a response or serialisation issue. No data loss — flags are set correctly; only the HTTP response is malformed. Needs a later fix. |
+
+### Conclusion
+
+TC-POL-005 v0.2 is now **Lane B — Staff Ask ready (controlled testing only)**. All governance gates are approved, embeddings are indexed, and live Staff Ask checks have passed for professional boundaries guidance questions. This is controlled WorkTwin testing only; live operational use requires Thumhara Centre leadership, registered manager, and designated safeguarding lead sign-off before any policy is used for real staff decisions.
 
 ---
 
@@ -1953,6 +2033,7 @@ Use this template to record each policy decision. Add a new row each time a docu
 | 2026-05-13 | TC-POL-001, TC-POL-002, TC-POL-004 (approved corpus) | B — admin answer-debug only (4S.96L hardening) | Inaam Basit | 4S.96L implemented in commit 3549eb5. answer_debug() now checks whether the query requires a specialist policy area (safeguarding, medication, complaints, accident_incident, confidentiality_data, hr_raising_concerns) and blocks model generation if the filtered approved source set does not include a matching specialist document. _generate_source_grounded_answer is not called in the blocked path; response returns confidence=insufficient_sources, sources=[], and an escalation safety_note. Metadata-only audit event answer_debug_specialist_blocked emitted; raw query text never stored. Shared classifier improved: confidential/confidentiality/information sharing added to legal detection; bullying/bullied/harassment/discrimination added to hr detection — staff /ask also benefits. Test suite: 44 new focused tests passed; full suite 232 passed, 0 failed. Local API proof: same 6 negative-control queries rerun — 6/6 now return insufficient_sources (safeguarding-neglect, accident-fall, confidential-info-family all fixed). Positive control rerun: TC-POL-001, TC-POL-002, TC-POL-004 still return source_grounded to correct document. | No flags changed | PASS — 6/6 negative-control insufficient_sources; 3/3 positive control source_grounded preserved | Staff visibility blocked; staff-facing Ask blocked; live operational use blocked; next safe option: TC-POL-003 embedding/answer-debug with care |
 | 2026-05-13 | TC-POL-003 Thumhara Centre Confidentiality and Information Handling Policy | B — admin answer-debug only | Inaam Basit | Upload-default metadata corrected (real_document=true, dummy_document=false, source_owner=Thumhara Centre) — metadata correction only, not AI/staff approval. approved_for_embedding enabled (governance_status=pilot_approved); approved_for_source_grounded_answers and approved_for_staff_visibility remain false during embedding. Embedding generated: 14/14 chunks, 0 failed, 3,012 tokens, <$0.01, text-embedding-3-small, allow_dummy_override=false. Vector retrieval proof: body sent organisation_id=demo-org; response returned organisation_id=thumhara-centre; result_count=5; TC-POL-003 present in results alongside TC-POL-001 (overlapping confidentiality wording expected). Answer-debug blocked before approval confirmed: confidence=insufficient_sources, result_count=0, sources=[] when approved_for_source_grounded_answers=false. approved_for_source_grounded_answers then enabled (governance_status=approved_for_ai). Admin answer-debug spot check (4 questions): 4/4 source_grounded; all included TC-POL-003; answers cautious and manager-led. Quality notes: source routing mixed TC-POL-003 with TC-POL-001 and TC-POL-002 due to overlapping confidentiality/device wording; Q2 (external-professional-sharing) returned safety_note=null — "sharing information" classifier polish needed. Post-TC-POL-003 negative-control rerun (5 out-of-scope queries): 5/5 PASS, 4S.96L specialist blocks intact. Final safety proof: document_status=draft, approved_for_staff_visibility=false, real_document=true, dummy_document=false. | approved_for_embedding, approved_for_source_grounded_answers | PASS WITH QUALITY NOTES — 4/4 answer-debug source_grounded; 5/5 post-approval negative controls blocked; 0 leakage | Do not enable staff visibility until Thumhara Centre leadership review, document status approved, and staff visibility gate deliberately enabled; future improvement: classifier polish for "sharing information" phrasing and source citation preference when corpus overlap exists |
 | 2026-05-13 | Backend classifier and source-ordering polish (4S.96N) | B — admin answer-debug only (no lane change) | Inaam Basit | Two gaps found during TC-POL-003 answer-debug: (1) "sharing information" phrasing not caught by legal/confidentiality classifier — safety_note returned null; (2) TC-POL-003 not reliably placed first in answer context when corpus contains overlapping visitor/mobile sources. Fixed by updating high-risk legal pattern and confidentiality_data specialist pattern from `share\s+` to `shar(?:e|ing)\s+`, and by adding `_reorder_rows_specialist_first()` applied before `_build_source_context` in `answer_debug()`. Staff /ask also benefits from classifier polish. No governance flags changed. Commit 134de65. | No flags changed | PASS — 55 focused tests passed; 243 full suite passed; live API confirmed first_source_title=TC-POL-003 and safety_note present for "sharing information" query | No staff visibility change; no live operational use change; classifier and ordering polish only |
+| 2026-05-19 | TC-POL-005 Thumhara Centre Professional Boundaries Policy | B — Staff Ask ready (controlled testing only) | Inaam Basit | v0.2 (document ID: d9af1705-fe40-48d1-967b-559d1e09a933) uploaded under demo-org, file: Thumhara_Centre_Professional_Boundaries_Policy_v0.2.pdf. Provenance confirmed: Thumhara-owned draft written from first principles using general adult social care good practice; not copied, summarised, adapted, or derived from QCS documentation, licensed material, or any template policy. Governance state after upload: real_document=true, dummy_document=false, contains_qcs_or_third_party_content=false, is_sensitive=false, escalation_required=false. All gates approved: approved_for_embedding=true, approved_for_source_grounded_answers=true, approved_for_staff_visibility=true. Embedding: 11/11 chunks embedded, 0 failed, model=text-embedding-3-small, status=indexed. Readiness: can_embed_now=true, can_use_for_answer_debug_now=true, can_show_to_staff_now=true, can_use_for_staff_ask_now=true, staff_ask_blocked_reason=null. Live Staff Ask checks passed: "Can I accept a gift from someone I support?" and "Can I give my personal phone number to a service user?" — both answered from Thumhara Centre Professional Boundaries Policy. Safety tracker note: approved for general staff guidance only; any real person, allegation, safeguarding concern, financial abuse concern, sexual/romantic boundary concern, HR issue, complaint or immediate risk must escalate to a human lead. Known issues: Admin Portal upload blocked (ADMIN_PROXY_ENABLED disabled on public deployment — intentional, UX needs later improvement); governance PATCH/approve endpoints write successfully but return 500 afterwards (likely serialisation issue, no data loss, needs later fix). | approved_for_embedding, approved_for_source_grounded_answers, approved_for_staff_visibility | PASS — 11/11 chunks embedded; live Staff Ask checks passed for gift and personal phone number questions; both source-grounded to TC-POL-005 | Controlled WorkTwin testing only; not approved for live operational use without Thumhara leadership, registered manager, and designated safeguarding lead sign-off; fix Admin Portal UX and governance endpoint 500 in later slices |
 
 ---
 

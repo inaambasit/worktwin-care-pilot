@@ -581,8 +581,8 @@ export default function AskPage() {
               </div>
             )}
 
-            {/* Live answer notice */}
-            {!currentAnswer.isDemo && !isDemoFallback && (
+            {/* Live answer notice — only for source-grounded answers, not escalation or fallback */}
+            {!currentAnswer.isDemo && !isDemoFallback && currentAnswer.allowedToAnswer && currentAnswer.sources.length > 0 && (
               <div className="flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-xl px-4 py-2.5 text-xs text-teal-800">
                 <Zap size={13} className="shrink-0 text-teal-600" />
                 Answered from your approved policy documents — sources shown below.

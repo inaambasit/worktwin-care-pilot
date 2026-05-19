@@ -1594,6 +1594,19 @@ def _generate_source_grounded_answer(
     return {"answer": answer_text, "model": ANSWER_MODEL, "estimated_cost_note": cost_note}
 
 
+def _sanitise_answer_text(text: str) -> str:
+    """Strip markdown formatting from LLM answer text. Preserves [Source N] citations."""
+    if not text:
+        return text
+    text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
+    lines = []
+    for line in text.split('\n'):
+        line = re.sub(r'^#{1,6}\s+', '', line)
+        line = re.sub(r'^-\s+', '', line)
+        lines.append(line)
+    return '\n'.join(lines)
+
+
 def _answer_contains_visible_source_label(answer: str, sources: List[Dict[str, Any]]) -> bool:
     """Return True only if the answer text includes at least one [Source n] label from the retrieved sources."""
     if not answer or not sources:
@@ -2527,7 +2540,7 @@ def ask_worktwin(payload: AskRequest, authorization: Optional[str] = Header(defa
     except Exception:
         return _staff_fallback_response()
 
-    answer_text = answer_result["answer"]
+    answer_text = _sanitise_answer_text(answer_result["answer"])
     confidence = _validate_grounded_answer_result(answer_text, sources)
 
     # ------------------------------------------------------------------

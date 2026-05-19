@@ -1094,12 +1094,23 @@ def _normalise_search_result(row: Dict[str, Any]) -> Dict[str, Any]:
 # Covers all six required categories plus legacy terms from prior milestone.
 # Raw query text is NEVER stored; only the resolved topic label is audited.
 _TOPIC_PATTERNS: List[Tuple[str, "re.Pattern[str]"]] = [
+    # fire_emergency must precede safeguarding: "fire incident" contains "incident"
+    # which would otherwise match the safeguarding pattern first.
+    ("fire_emergency", re.compile(
+        r'\b(fire\s+(?:incident|emergency|exit|alarm|evacuation|safety|procedure|risk|hazard|door)|'
+        r'blocked\s+(?:fire\s+)?exit|fire\s+exit\s+blocked|'
+        r'evacuation\s+route|fire\s+drill|fire\s+warden|fire\s+marshal)\b',
+        re.IGNORECASE,
+    )),
+    # incident and accident removed: they caused pure fire/health-safety queries to
+    # match safeguarding first.  Real safeguarding queries always contain at least one
+    # explicit safeguarding keyword (safeguarding, abuse, neglect, harm, etc.).
+    # Standalone incident/accident queries fall through to accident_incident below.
     ("safeguarding", re.compile(
         r'\b(safeguard(?:ing)?|abus(?:e[sd]?|ing)|neglect|harm|exploitation|'
         r'being\s+hurt|service\s+user.*hurt|hurt.*service\s+user|'
         r'hurting\s+someone|vulnerable\s+adult|child\s+protection|'
-        r'adult\s+at\s+risk|maltreatment|disclosure|'
-        r'incident|accident)\b',
+        r'adult\s+at\s+risk|maltreatment|disclosure)\b',
         re.IGNORECASE,
     )),
     ("whistleblowing", re.compile(
@@ -1155,6 +1166,30 @@ _TOPIC_PATTERNS: List[Tuple[str, "re.Pattern[str]"]] = [
 # Per-topic response configs — answer, next_steps, risk_category, vertical_subcategory.
 # These are deterministic strings: no LLM, no RAG, no source content.
 _TOPIC_RESPONSE: Dict[str, Dict[str, Any]] = {
+    "fire_emergency": {
+        "answer": (
+            "Your site fire and emergency procedure must come first. "
+            "WorkTwin is not a substitute for your fire procedure or evacuation plan. "
+            "If there is immediate danger, raise the alarm, follow your evacuation routes "
+            "and call 999 immediately. "
+            "WorkTwin cannot advise on fire fighting, evacuation decisions or emergency responses directly. "
+            "Report to your Registered Manager or line manager as soon as it is safe to do so."
+        ),
+        "next_steps": [
+            "Follow your site fire and emergency procedure immediately.",
+            "If there is immediate danger, raise the alarm, follow evacuation routes and call 999.",
+            "Use clearly marked emergency exits — do not use lifts.",
+            "Report to your Registered Manager or line manager as soon as it is safe.",
+            "Record the incident in line with your organisation's accident and incident reporting procedure.",
+        ],
+        "contact_routes": [
+            "Registered Manager",
+            "Line Manager / Designated Lead",
+            "Emergency services - 999 (if immediate danger)",
+        ],
+        "risk_category": "vertical_sensitive",
+        "vertical_subcategory": "fire_emergency",
+    },
     "safeguarding": {
         "answer": (
             "This may be a safeguarding concern. I cannot advise on this directly. "

@@ -1138,6 +1138,11 @@ _TOPIC_PATTERNS: List[Tuple[str, "re.Pattern[str]"]] = [
         r'information\s+(?:handling|sharing))\b',
         re.IGNORECASE,
     )),
+    ("violence_aggression", re.compile(
+        r'\b(violen(?:ce|t)|aggress(?:ion|ive(?:ly)?)|threaten(?:ing)?|threats?|'
+        r'intimid(?:ation|ating)|serious\s+distress|staff\s+safety|immediate\s+risk)\b',
+        re.IGNORECASE,
+    )),
     # Placed after all other patterns so safeguarding/medication/legal retain first-match priority.
     ("accident_incident", re.compile(
         r'\b(fall(?:s|en|ing)?|slip(?:s|ped|ping)?|trip(?:ped|ping)?|'
@@ -1292,6 +1297,28 @@ _TOPIC_RESPONSE: Dict[str, Dict[str, Any]] = {
         ],
         "risk_category": "vertical_sensitive",
         "vertical_subcategory": "accident_incident",
+    },
+    "violence_aggression": {
+        "answer": (
+            "This involves a situation of violence, aggression, threatening behaviour or immediate risk to safety. "
+            "WorkTwin cannot advise on this directly. "
+            "Please contact your registered manager or line manager immediately and follow your organisation's "
+            "violence, aggression and lone-worker procedures. "
+            "If someone is in immediate danger, contact emergency services."
+        ),
+        "next_steps": [
+            "Contact your registered manager or line manager immediately.",
+            "Follow your organisation's violence, aggression and lone-worker procedure.",
+            "If someone is in immediate danger, call 999.",
+            "Record and report the incident in line with your organisation's procedure.",
+        ],
+        "contact_routes": [
+            "Registered Manager",
+            "Line Manager / Designated Lead",
+            "Emergency services - 999 (if immediate danger)",
+        ],
+        "risk_category": "vertical_sensitive",
+        "vertical_subcategory": "violence_aggression",
     },
 }
 

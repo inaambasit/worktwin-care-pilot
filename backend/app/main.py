@@ -4070,6 +4070,27 @@ def update_document_governance(doc_id: str, payload: GovernanceUpdateRequest, _:
             )
         updates["approved_for_source_grounded_answers"] = payload.approved_for_source_grounded_answers
 
+        # Require a named reviewer when enabling source-grounded AI answers.
+        # Prevents documents from silently failing the staff /ask gate due to
+        # missing governance_reviewed_by — the strictest condition that
+        # governance-readiness previously did not check.
+        if payload.approved_for_source_grounded_answers is True:
+            existing_reviewer = doc_record.get("governance_reviewed_by")
+            incoming_reviewer = (
+                payload.governance_reviewed_by.strip()
+                if payload.governance_reviewed_by and payload.governance_reviewed_by.strip()
+                else None
+            )
+            if not existing_reviewer and not incoming_reviewer:
+                raise HTTPException(
+                    status_code=400,
+                    detail=(
+                        "governance_reviewed_by is required when approving for "
+                        "source-grounded answers. Provide a non-empty reviewer name "
+                        "in the same request."
+                    ),
+                )
+
     # approved_for_staff_visibility — no additional block (document-level only)
     if payload.approved_for_staff_visibility is not None:
         updates["approved_for_staff_visibility"] = payload.approved_for_staff_visibility
@@ -4255,6 +4276,36 @@ def get_document_governance_readiness(doc_id: str, _: None = Depends(_require_ad
     else:
         can_show_to_staff_now = True
 
+    # --- can_use_for_staff_ask_now ---
+    # Runs the full eleven-condition staff /ask gate so admins can see exactly why
+    # a document that passes /policies still fails live /ask retrieval.
+    # Uses the pilot user role from the environment (default: Care Worker).
+    _pilot_role = os.getenv("PILOT_USER_ROLE", "Care Worker")
+    can_use_for_staff_ask_now, staff_ask_blocked_reason = _can_use_document_for_staff_ask(
+        doc, _pilot_role
+    )
+    if not can_use_for_staff_ask_now and staff_ask_blocked_reason:
+        blocked_reasons.append(f"Staff Ask: {staff_ask_blocked_reason}")
+        if "governance_reviewed_by" in staff_ask_blocked_reason:
+            next_required_actions.append(
+                f"Set governance_reviewed_by via PATCH /documents/{doc_id}/governance "
+                "(governance_reviewed_by=<reviewer-name>, governance_reviewed_at=<ISO-timestamp>)."
+            )
+        elif "governance_reviewed_at" in staff_ask_blocked_reason:
+            next_required_actions.append(
+                f"Set governance_reviewed_at via PATCH /documents/{doc_id}/governance "
+                "(governance_reviewed_at=<ISO-timestamp>)."
+            )
+        elif "contains_qcs_or_third_party_content" in staff_ask_blocked_reason:
+            next_required_actions.append(
+                f"Explicitly set contains_qcs_or_third_party_content=false via "
+                f"PATCH /documents/{doc_id}/governance."
+            )
+        elif "embedding_status" in staff_ask_blocked_reason:
+            next_required_actions.append(
+                f"Generate embeddings via POST /documents/{doc_id}/generate-embeddings."
+            )
+
     return {
         "document_id": doc_id,
         "title": doc.get("title", ""),
@@ -4269,6 +4320,8 @@ def get_document_governance_readiness(doc_id: str, _: None = Depends(_require_ad
         "can_embed_now": can_embed_now,
         "can_use_for_answer_debug_now": can_use_for_answer_debug_now,
         "can_show_to_staff_now": can_show_to_staff_now,
+        "can_use_for_staff_ask_now": can_use_for_staff_ask_now,
+        "staff_ask_blocked_reason": staff_ask_blocked_reason,
         "blocked_reasons": blocked_reasons,
         "next_required_actions": next_required_actions,
         "note": "Governance readiness only. Staff-facing AI answers remain disabled.",

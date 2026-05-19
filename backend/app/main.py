@@ -1332,6 +1332,56 @@ def _classify_escalation_topic(query: str) -> Optional[str]:
 
 
 # ---------------------------------------------------------------------------
+# Focused safety-note patterns — answer-debug only.
+# These do NOT short-circuit answer generation; the answer remains source-grounded.
+# Head injury and fire/exit queries stay in the RAG path but receive a precise
+# safety note that is more actionable than the generic escalation notice.
+# Raw query text is never stored.
+# ---------------------------------------------------------------------------
+_HEAD_INJURY_PAT = re.compile(
+    r'\b(head\s+injur(?:y|ies|ed)|hits?\s+(?:their|his|her|the)?\s*head|'
+    r'bangs?\s+(?:their|his|her|the)?\s*head|head\s+(?:wound|trauma|impact)|'
+    r'hit\s+(?:their|his|her|the)?\s*head|struck\s+(?:their|his|her|the)?\s*head|'
+    r'serious\s+(?:head\s+)?injur(?:y|ies))\b',
+    re.IGNORECASE,
+)
+_FIRE_EXIT_PAT = re.compile(
+    r'\b(fire\s+(?:incident|emergency|exit|alarm|evacuation|safety|procedure|risk|hazard)|'
+    r'blocked\s+(?:fire\s+)?exit|fire\s+exit\s+blocked|'
+    r'evacuation\s+route|fire\s+drill|fire\s+door)\b',
+    re.IGNORECASE,
+)
+
+_HEAD_INJURY_SAFETY_NOTE = (
+    "Head injury or serious injury requires urgent caution. "
+    "If the person is unconscious, confused, in severe pain, has a suspected fracture, "
+    "or you have any urgent medical concern, call 999 immediately and get urgent medical help. "
+    "Inform your manager as soon as possible. "
+    "Do not delay emergency action for paperwork."
+)
+_FIRE_EXIT_SAFETY_NOTE = (
+    "Your site fire and emergency procedure must be followed first. "
+    "WorkTwin is not a substitute for your fire procedure. "
+    "If there is immediate danger, call 999 and follow your evacuation routes. "
+    "Inform your manager."
+)
+
+
+def _classify_focused_safety_note(query: str) -> Optional[str]:
+    """Return a topic-specific safety note for head injury or fire/exit queries, else None.
+
+    These queries remain source-grounded; this note is appended alongside the answer
+    in answer-debug and takes priority over the generic escalation safety note.
+    Never short-circuits RAG. Never called from staff /ask.
+    """
+    if _HEAD_INJURY_PAT.search(query):
+        return _HEAD_INJURY_SAFETY_NOTE
+    if _FIRE_EXIT_PAT.search(query):
+        return _FIRE_EXIT_SAFETY_NOTE
+    return None
+
+
+# ---------------------------------------------------------------------------
 # Specialist area definitions for answer-debug hardening — Milestone 4S.96L.
 # Each entry: (area_name, query_pattern, source_pattern).
 # query_pattern: identifies queries that require this specialist policy area.
@@ -3330,9 +3380,14 @@ def answer_debug(
 
     safe_count = max(1, min(payload.match_count, MAX_ANSWER_CHUNKS))
     is_escalation_topic = _classify_escalation_topic(query_clean) is not None
+    _focused_note = _classify_focused_safety_note(query_clean)
     safety_note: Optional[str] = (
-        "This query involves a sensitive topic. Please escalate to your line manager or designated lead."
-        if is_escalation_topic else None
+        _focused_note
+        if _focused_note is not None
+        else (
+            "This query involves a sensitive topic. Please escalate to your line manager or designated lead."
+            if is_escalation_topic else None
+        )
     )
 
     # Embed query once — key never logged or returned
@@ -3473,7 +3528,7 @@ def answer_debug(
             "confidence": "insufficient_sources",
             "result_count": 0,
             "sources": [],
-            "safety_note": (
+            "safety_note": safety_note or (
                 "This query involves a sensitive topic. "
                 "Please escalate to your line manager or designated lead."
             ),

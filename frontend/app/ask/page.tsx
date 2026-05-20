@@ -313,42 +313,43 @@ export default function AskPage() {
               </div>
             </div>
 
-            {/* Controlled pilot safety mode panel */}
-            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 shadow-sm">
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
+            {/* Controlled pilot safety mode panel — collapsed by default */}
+            <details className="bg-amber-50 border border-amber-200 rounded-2xl shadow-sm group">
+              <summary className="flex items-center gap-3 px-5 py-4 cursor-pointer list-none select-none">
+                <div className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
                   <Shield size={16} className="text-amber-600" />
                 </div>
-                <div className="flex-1">
-                  <h2 className="font-semibold text-amber-900 mb-1">Controlled pilot safety mode</h2>
-                  <p className="text-sm text-amber-800 leading-relaxed mb-4">
-                    Ask WorkTwin can use approved, governed documents only when the right source and governance checks are in place. If no safe source is available, it should say so and point staff to a human lead. Safeguarding, medication, HR, legal, wellbeing and immediate-risk topics must be escalated to a human lead.
+                <span className="flex-1 font-semibold text-amber-900 text-sm">About this pilot — tap to read</span>
+                <ChevronDown size={15} className="text-amber-600 transition-transform group-open:rotate-180 shrink-0" />
+              </summary>
+              <div className="px-5 pb-5 pt-1">
+                <p className="text-sm text-amber-800 leading-relaxed mb-4">
+                  Ask WorkTwin can use approved, governed documents only when the right source and governance checks are in place. If no safe source is available, it should say so and point staff to a human lead. Safeguarding, medication, HR, legal, wellbeing and immediate-risk topics must be escalated to a human lead.
+                </p>
+                <h3 className="text-xs font-bold text-amber-900 uppercase tracking-wider mb-2">What this means</h3>
+                <ul className="space-y-1.5">
+                  <li className="flex items-start gap-2 text-sm text-amber-800">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-[6px]" />
+                    Source-grounded answers should come from approved policy documents.
+                  </li>
+                  <li className="flex items-start gap-2 text-sm text-amber-800">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-[6px]" />
+                    If no approved source is available, WorkTwin should say so and guide staff to a human lead.
+                  </li>
+                  <li className="flex items-start gap-2 text-sm text-amber-800">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-[6px]" />
+                    High-risk or real-world concerns are not for AI decision-making and should be escalated.
+                  </li>
+                </ul>
+                {backendWarmupStatus !== 'idle' && (
+                  <p className="mt-3 text-xs text-amber-700">
+                    {backendWarmupStatus === 'warming' && 'Knowledge service warming up'}
+                    {backendWarmupStatus === 'ready' && 'Knowledge service ready'}
+                    {backendWarmupStatus === 'unavailable' && 'First answer may take a few seconds while the knowledge service starts'}
                   </p>
-                  <h3 className="text-xs font-bold text-amber-900 uppercase tracking-wider mb-2">What this means</h3>
-                  <ul className="space-y-1.5">
-                    <li className="flex items-start gap-2 text-sm text-amber-800">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-[6px]" />
-                      Source-grounded answers should come from approved policy documents.
-                    </li>
-                    <li className="flex items-start gap-2 text-sm text-amber-800">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-[6px]" />
-                      If no approved source is available, WorkTwin should say so and guide staff to a human lead.
-                    </li>
-                    <li className="flex items-start gap-2 text-sm text-amber-800">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-[6px]" />
-                      High-risk or real-world concerns are not for AI decision-making and should be escalated.
-                    </li>
-                  </ul>
-                  {backendWarmupStatus !== 'idle' && (
-                    <p className="mt-3 text-xs text-amber-700">
-                      {backendWarmupStatus === 'warming' && 'Knowledge service warming up'}
-                      {backendWarmupStatus === 'ready' && 'Knowledge service ready'}
-                      {backendWarmupStatus === 'unavailable' && 'First answer may take a few seconds while the knowledge service starts'}
-                    </p>
-                  )}
-                </div>
+                )}
               </div>
-            </div>
+            </details>
 
             {/* Worked example card */}
             <div className="bg-white border border-teal-200 rounded-2xl overflow-hidden shadow-sm">
@@ -556,7 +557,7 @@ export default function AskPage() {
 
         {/* Answer area */}
         {showAnswer && currentAnswer && (
-          <div className="space-y-4 pb-40">
+          <div className="space-y-4 pb-28">
             {/* Back to quick actions */}
             <button
               onClick={handleBackToQuickActions}
@@ -598,8 +599,8 @@ export default function AskPage() {
                       <Shield size={16} className="text-slate-500" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-slate-800">WorkTwin safe fallback</p>
-                      <p className="text-xs text-slate-500 mt-0.5">No approved source available for an answer</p>
+                      <p className="text-sm font-bold text-slate-800">No approved source for this question</p>
+                      <p className="text-xs text-slate-500 mt-0.5">WorkTwin cannot answer this from approved policy documents</p>
                     </div>
                   </div>
                 </div>
@@ -677,12 +678,22 @@ export default function AskPage() {
                   <div className="px-5 py-4 border-b border-amber-100">
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2.5">Who to contact</p>
                     <ul className="space-y-1.5">
-                      {currentAnswer.contactRoutes.map((route, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                          <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0 mt-[6px]" />
-                          {route}
-                        </li>
-                      ))}
+                      {currentAnswer.contactRoutes.map((route, i) => {
+                        const isEmergency = route.includes('999')
+                        return isEmergency ? (
+                          <li key={i} className="flex items-center gap-2 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2">
+                            <span className="text-rose-600 shrink-0">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 9.81a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 5.55 5.55l.96-.96a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 21 15.5l.92 1.42z"/></svg>
+                            </span>
+                            <span className="text-sm font-semibold text-rose-800">{route}</span>
+                          </li>
+                        ) : (
+                          <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                            <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0 mt-[6px]" />
+                            {route}
+                          </li>
+                        )
+                      })}
                     </ul>
                   </div>
                 )}

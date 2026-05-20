@@ -31,15 +31,17 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByText('Pilot questions')).toBeVisible()
     await expect(page.getByRole('button', { name: /What should I do when a visitor arrives/i })).toBeVisible()
     await expect(page.getByRole('button', { name: /Example safeguarding concern: who should I contact/i })).toBeVisible()
-    await expect(page.getByText('Controlled pilot safety mode')).toBeVisible()
     await expect(page.getByText('Example of an approved-source answer')).toBeVisible()
     await expect(page.getByText('Pilot example only - not a live retrieved answer')).toBeVisible()
     await expect(page.getByText('Visitor Sign-In and Identification Procedure').first()).toBeVisible()
     await expect(page.getByText('Do not enter real staff, service-user, medication, safeguarding, HR, complaint, care-plan or confidential data.')).toBeVisible()
     await expect(page.getByText('Ask example policy and procedure questions in plain English.')).toBeVisible()
-    await expect(page.getByText('High-risk or real-world concerns are not for AI decision-making and should be escalated.')).toBeVisible()
     await expect(page.getByText('Ask an example policy question')).toBeVisible()
     await expect(page.getByText('Questions are not shown to managers in this controlled pilot, but this is not a care record, HR record, safeguarding record, medication record or confidential reporting route.').first()).toBeVisible()
+    // Safety panel is now a collapsed disclosure — verify summary is visible, then expand and confirm the safety copy is present
+    await expect(page.getByText('About this pilot')).toBeVisible()
+    await page.getByText('About this pilot').click()
+    await expect(page.getByText('High-risk or real-world concerns are not for AI decision-making and should be escalated.')).toBeVisible()
   })
 
   test('ask page returns a visitor answer when common question is clicked', async ({ page }) => {

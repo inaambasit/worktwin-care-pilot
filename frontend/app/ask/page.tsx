@@ -156,6 +156,20 @@ function isFallbackGuidance(a: DisplayAnswer): boolean {
   return !a.allowedToAnswer && !(a.requiresEscalation && isHighRisk(a))
 }
 
+const EMERGENCY_ESCALATION_TERMS = ['999', 'immediate danger', 'immediate risk', 'serious injury', 'emergency', 'life risk']
+
+function isEmergencyEscalation(a: DisplayAnswer): boolean {
+  const combined = [a.answer, ...a.escalateIf, ...a.contactRoutes].join(' ').toLowerCase()
+  return EMERGENCY_ESCALATION_TERMS.some(term => combined.includes(term))
+}
+
+const EMERGENCY_ITEM_TERMS = ['999', 'immediate danger', 'immediate risk', 'emergency', 'life', 'serious injury', 'collapse', 'breathing difficulty', 'severe pain', 'urgent concern']
+
+function isEmergencyItem(item: string): boolean {
+  const lower = item.toLowerCase()
+  return EMERGENCY_ITEM_TERMS.some(term => lower.includes(term))
+}
+
 function getFollowUpPrompts(answer: DisplayAnswer): string[] {
   const q = answer.question.toLowerCase()
   if (
@@ -341,11 +355,10 @@ export default function AskPage() {
                     High-risk or real-world concerns are not for AI decision-making and should be escalated.
                   </li>
                 </ul>
-                {backendWarmupStatus !== 'idle' && (
+                {(backendWarmupStatus === 'warming' || backendWarmupStatus === 'unavailable') && (
                   <p className="mt-3 text-xs text-amber-700">
-                    {backendWarmupStatus === 'warming' && 'Knowledge service warming up'}
-                    {backendWarmupStatus === 'ready' && 'Knowledge service ready'}
-                    {backendWarmupStatus === 'unavailable' && 'First answer may take a few seconds while the knowledge service starts'}
+                    {backendWarmupStatus === 'warming' && 'Getting ready…'}
+                    {backendWarmupStatus === 'unavailable' && 'First answer may take a moment — if it fails, please try again'}
                   </p>
                 )}
               </div>
@@ -646,7 +659,9 @@ export default function AskPage() {
                     </div>
                     <div>
                       <p className="text-sm font-bold text-amber-900">WorkTwin response</p>
-                      <p className="text-xs text-amber-700 mt-0.5">Escalation required</p>
+                      <p className="text-xs text-amber-700 mt-0.5">
+                        {isEmergencyEscalation(currentAnswer) ? 'Escalation required' : 'Speak to the right human lead'}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -659,15 +674,15 @@ export default function AskPage() {
                   </p>
                 </div>
                 {currentAnswer.escalateIf.length > 0 && (
-                  <div className="px-5 py-4 bg-red-50 border-b border-red-100">
+                  <div className="px-5 py-4 bg-amber-50 border-b border-amber-100">
                     <div className="flex items-center gap-2 mb-2.5">
-                      <AlertTriangle size={14} className="text-red-600" />
-                      <p className="text-xs font-bold text-red-700 uppercase tracking-wider">Escalate immediately if</p>
+                      <AlertTriangle size={14} className="text-amber-600" />
+                      <p className="text-xs font-bold text-amber-700 uppercase tracking-wider">Escalate immediately if</p>
                     </div>
                     <ul className="space-y-1.5">
                       {currentAnswer.escalateIf.map((item, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-red-800">
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-[6px]" />
+                        <li key={i} className={`flex items-start gap-2 text-sm ${isEmergencyItem(item) ? 'text-red-800 font-semibold' : 'text-amber-800'}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-[6px] ${isEmergencyItem(item) ? 'bg-red-500' : 'bg-amber-500'}`} />
                           {item}
                         </li>
                       ))}
@@ -952,7 +967,7 @@ export default function AskPage() {
 
         {/* Input bar */}
         <div className="sticky bottom-0 bg-slate-50 pt-2">
-          {showAnswer && currentAnswer && (
+          {showAnswer && currentAnswer && !(currentAnswer.requiresEscalation && isHighRisk(currentAnswer)) && (
             <div className="mb-2 flex flex-wrap gap-2">
               {getFollowUpPrompts(currentAnswer).map((p) => (
                 <button

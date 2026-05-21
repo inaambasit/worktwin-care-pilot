@@ -140,7 +140,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="pt-24 pb-20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <section className="pt-20 sm:pt-24 pb-12 sm:pb-20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         <div className="max-w-5xl mx-auto px-6 text-center">
           <div className="inline-block mb-5 text-xs font-semibold text-teal-400 border border-teal-800 bg-teal-900/40 px-3 py-1.5 rounded-full uppercase tracking-wider">
             WorkTwin | Care Pilot
@@ -184,7 +184,14 @@ export default function LandingPage() {
 
       {/* Pilot preview links bar */}
       <div className="bg-teal-700 py-3">
-        <div className="max-w-6xl mx-auto px-6 flex flex-wrap items-center justify-center gap-4 text-sm text-teal-100">
+        {/* Mobile: compact single link */}
+        <div className="sm:hidden max-w-6xl mx-auto px-6 flex items-center justify-center text-sm text-teal-100">
+          <Link href="/dashboard" className="font-medium text-white hover:text-teal-100 underline underline-offset-2">
+            Explore the pilot preview →
+          </Link>
+        </div>
+        {/* sm and above: full multi-link bar */}
+        <div className="hidden sm:flex max-w-6xl mx-auto px-6 flex-wrap items-center justify-center gap-4 text-sm text-teal-100">
           <span className="font-medium text-white">Explore the pilot preview:</span>
           <Link href="/dashboard" className="hover:text-white underline underline-offset-2">Employee Dashboard</Link>
           <Link href="/ask" className="hover:text-white underline underline-offset-2">Ask WorkTwin</Link>
@@ -194,9 +201,9 @@ export default function LandingPage() {
       </div>
 
       {/* Features */}
-      <section className="py-20 bg-white">
+      <section className="py-12 sm:py-20 bg-white">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-14">
+          <div className="text-center mb-8 sm:mb-14">
             <h2 className="text-3xl font-bold text-slate-900 mb-3">
               One platform, focused vertical pilots
             </h2>
@@ -220,9 +227,9 @@ export default function LandingPage() {
       </section>
 
       {/* How it works */}
-      <section className="py-20 bg-slate-50">
+      <section className="py-12 sm:py-20 bg-slate-50">
         <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-14">
+          <div className="text-center mb-8 sm:mb-14">
             <h2 className="text-3xl font-bold text-slate-900 mb-3">How it works</h2>
             <p className="text-slate-500">Start small with approved documents.</p>
           </div>
@@ -241,9 +248,9 @@ export default function LandingPage() {
       </section>
 
       {/* Privacy section */}
-      <section id="privacy" className="py-20 bg-white">
+      <section id="privacy" className="py-12 sm:py-20 bg-white">
         <div className="max-w-5xl mx-auto px-6">
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-10 md:p-14 flex flex-col md:flex-row gap-10 items-start">
+          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 sm:p-10 md:p-14 flex flex-col md:flex-row gap-10 items-start">
             <div className="md:w-1/2">
               <div className="inline-flex items-center gap-2 bg-teal-900/40 border border-teal-800 text-teal-400 text-xs font-semibold px-3 py-1.5 rounded-full mb-5 uppercase tracking-wider">
                 <Shield size={12} />
@@ -270,7 +277,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-teal-700">
+      <section className="py-12 sm:py-20 bg-teal-700">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
             Ready to test a focused WorkTwin vertical?

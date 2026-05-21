@@ -120,9 +120,9 @@ export default function EscalationPage() {
 
         {/* Hero card */}
         <div className="bg-gradient-to-br from-teal-700 via-teal-800 to-teal-900 rounded-3xl p-7 text-white relative overflow-hidden shadow-lg">
-          <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full bg-white/5 pointer-events-none" />
-          <div className="absolute right-6 -bottom-14 w-40 h-40 rounded-full bg-teal-600/25 pointer-events-none" />
-          <div className="absolute -left-6 bottom-4 w-24 h-24 rounded-full bg-teal-800/40 pointer-events-none" />
+          <div className="absolute -right-10 -top-10 w-32 h-32 sm:w-56 sm:h-56 rounded-full bg-white/5 pointer-events-none" />
+          <div className="absolute right-6 -bottom-14 w-24 h-24 sm:w-40 sm:h-40 rounded-full bg-teal-600/25 pointer-events-none" />
+          <div className="absolute -left-6 bottom-4 w-14 h-14 sm:w-24 sm:h-24 rounded-full bg-teal-800/40 pointer-events-none" />
           <div className="relative">
             <span className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1 rounded-full text-xs font-semibold mb-5">
               <PhoneCall size={11} />
@@ -143,16 +143,21 @@ export default function EscalationPage() {
         </div>
 
         {/* Emergency */}
-        <div className="bg-red-600 rounded-2xl px-5 py-4 flex items-center gap-4 text-white shadow-sm">
-          <div className="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center shrink-0">
-            <Phone size={20} />
+        <a href="tel:999" className="block bg-red-600 rounded-2xl px-5 py-4 text-white shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center shrink-0">
+              <Phone size={20} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-base">Immediate risk to life — call 999</p>
+              <p className="text-red-200 text-sm mt-0.5">Do not wait. Call 999 and follow your emergency procedures.</p>
+            </div>
+            <div className="text-3xl font-bold tabular-nums hidden sm:block">999</div>
           </div>
-          <div className="flex-1">
-            <p className="font-bold text-base">Immediate risk to life — call 999</p>
-            <p className="text-red-200 text-sm mt-0.5">Do not wait. Call 999 and follow your emergency procedures.</p>
+          <div className="mt-3 flex justify-center sm:hidden">
+            <span className="text-5xl font-bold tabular-nums tracking-widest">999</span>
           </div>
-          <div className="text-3xl font-bold tabular-nums">999</div>
-        </div>
+        </a>
 
         {/* WorkTwin reminder */}
         <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-4 flex items-start gap-3">

@@ -67,7 +67,7 @@ function SidebarContent({
               key={href}
               href={href}
               onClick={onNavClick}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 active
                   ? 'bg-teal-50 text-teal-700 border border-teal-100'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -89,7 +89,7 @@ function SidebarContent({
             <Link
               href="/escalation"
               onClick={onNavClick}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 pathname === '/escalation'
                   ? 'bg-teal-50 text-teal-700 border border-teal-100'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -102,7 +102,7 @@ function SidebarContent({
             <Link
               href="/privacy-model"
               onClick={onNavClick}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 pathname === '/privacy-model'
                   ? 'bg-teal-50 text-teal-700 border border-teal-100'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'

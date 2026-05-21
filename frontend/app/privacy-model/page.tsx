@@ -106,7 +106,7 @@ export default function PrivacyModelPage() {
             <div>
               <p className="text-sm font-bold text-red-800 mb-1">Emergency reminder</p>
               <p className="text-sm text-red-700 leading-relaxed">
-                If anyone is in immediate danger, call <strong>999</strong> immediately.
+                If anyone is in immediate danger, call <a href="tel:999" className="font-bold underline">999</a> immediately.
                 WorkTwin does not replace emergency services or human safeguarding procedures.
               </p>
             </div>

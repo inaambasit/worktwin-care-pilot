@@ -966,7 +966,7 @@ export default function AskPage() {
         )}
 
         {/* Input bar */}
-        <div className="sticky bottom-0 bg-slate-50 pt-2">
+        <div className="sticky bottom-0 bg-slate-50 pt-2 border-t border-slate-200 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
           {showAnswer && currentAnswer && !(currentAnswer.requiresEscalation && isHighRisk(currentAnswer)) && (
             <div className="mb-2 flex flex-wrap gap-2">
               {getFollowUpPrompts(currentAnswer).map((p) => (

@@ -154,13 +154,13 @@ export default function BookPilotPage() {
             />
           </div>
 
-          <div className="pt-2 flex items-center justify-between gap-4">
+          <div className="pt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs text-slate-400 leading-relaxed">
               This controlled pilot preview stores nothing. No data is sent to a server, CRM or care system.
             </p>
             <button
               type="submit"
-              className="shrink-0 px-6 py-2.5 bg-teal-700 hover:bg-teal-800 text-white font-semibold rounded-xl text-sm transition-colors"
+              className="w-full sm:w-auto shrink-0 px-6 py-2.5 bg-teal-700 hover:bg-teal-800 text-white font-semibold rounded-xl text-sm transition-colors"
             >
               Preview enquiry
             </button>

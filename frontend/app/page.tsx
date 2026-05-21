@@ -1,5 +1,7 @@
+'use client'
+import { useState } from 'react'
 import Link from 'next/link'
-import { CheckCircle, Shield, BookOpen, MessageCircle, PlayCircle, BarChart2 } from 'lucide-react'
+import { CheckCircle, Shield, BookOpen, MessageCircle, PlayCircle, BarChart2, Menu, X } from 'lucide-react'
 
 const features = [
   {
@@ -67,18 +69,22 @@ const steps = [
 ]
 
 export default function LandingPage() {
+  const [menuOpen, setMenuOpen] = useState(false)
   return (
     <div className="min-h-screen bg-white font-sans">
       {/* Navbar */}
       <nav className="fixed top-0 inset-x-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          {/* Logo */}
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-teal-700 flex items-center justify-center">
               <span className="text-white text-sm font-bold">W</span>
             </div>
             <span className="font-bold text-slate-900 text-lg">WorkTwin</span>
           </div>
-          <div className="flex items-center gap-4">
+
+          {/* Desktop nav — sm and above */}
+          <div className="hidden sm:flex items-center gap-4">
             <Link href="/dashboard" className="text-sm text-slate-600 hover:text-slate-900 font-medium">
               Explore pilot preview
             </Link>
@@ -92,7 +98,45 @@ export default function LandingPage() {
               Book a pilot
             </Link>
           </div>
+
+          {/* Mobile nav — below sm */}
+          <div className="flex sm:hidden items-center gap-3">
+            <Link
+              href="/book-pilot"
+              className="text-sm bg-teal-700 hover:bg-teal-800 text-white font-semibold px-4 py-2 rounded-lg transition-colors"
+            >
+              Book a pilot
+            </Link>
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
+            >
+              {menuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile dropdown — A2: shortened label */}
+        {menuOpen && (
+          <div className="sm:hidden border-t border-slate-100 bg-white px-6 py-3 flex flex-col">
+            <Link
+              href="/dashboard"
+              onClick={() => setMenuOpen(false)}
+              className="text-sm text-slate-600 hover:text-slate-900 font-medium py-2.5 border-b border-slate-100"
+            >
+              Explore preview
+            </Link>
+            <Link
+              href="/login"
+              onClick={() => setMenuOpen(false)}
+              className="text-sm text-slate-600 hover:text-slate-900 font-medium py-2.5"
+            >
+              Staff sign in
+            </Link>
+          </div>
+        )}
       </nav>
 
       {/* Hero */}
@@ -249,8 +293,7 @@ export default function LandingPage() {
             <span className="text-white text-sm font-semibold">WorkTwin</span>
           </div>
           <p className="text-slate-500 text-xs text-center">
-            This is a controlled pilot preview using sample data only. No real staff, service-user, client or private care data is used.<br />
-            WorkTwin Care Pilot is the first vertical test of the broader WorkTwin platform. &copy; {new Date().getFullYear()} WorkTwin.
+            This is a controlled pilot preview using sample data only. No real staff, service-user, client or private care data is used. WorkTwin Care Pilot is the first vertical test of the broader WorkTwin platform. &copy; {new Date().getFullYear()} WorkTwin.
           </p>
           <div className="flex gap-4 text-xs text-slate-500">
             <Link href="/privacy-model" className="hover:text-slate-300">Privacy model</Link>

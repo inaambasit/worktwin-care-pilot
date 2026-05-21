@@ -50,28 +50,31 @@ export default function DashboardPage() {
         {/* Pilot walkthrough strip */}
         <div className="bg-white border border-teal-100 rounded-2xl px-5 py-4 shadow-sm">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Suggested pilot walkthrough</p>
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {[
-              { label: 'Dashboard', href: '/', active: true },
-              { label: 'Ask WorkTwin', href: '/ask', active: false },
-              { label: 'Policy Library', href: '/policies', active: false },
-              { label: 'Access Refusal', href: '/scenarios/access-refusal', active: false },
-              { label: 'Escalation', href: '/escalation', active: false },
-            ].map((item, i, arr) => (
-              <div key={item.label} className="flex items-center gap-1.5">
-                <Link
-                  href={item.href}
-                  className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
-                    item.active
-                      ? 'bg-teal-700 text-white border-teal-700'
-                      : 'border-slate-200 text-slate-600 hover:border-teal-300 hover:text-teal-700 bg-white'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-                {i < arr.length - 1 && <span className="text-slate-300 text-xs select-none">›</span>}
-              </div>
-            ))}
+          {/* Mobile: horizontal scroll to prevent orphaned arrows; sm+: wrap normally */}
+          <div className="overflow-x-auto -mx-1 px-1 sm:overflow-x-visible sm:mx-0 sm:px-0">
+            <div className="flex items-center gap-1.5 sm:flex-wrap">
+              {[
+                { label: 'Dashboard', href: '/', active: true },
+                { label: 'Ask WorkTwin', href: '/ask', active: false },
+                { label: 'Policy Library', href: '/policies', active: false },
+                { label: 'Access Refusal', href: '/scenarios/access-refusal', active: false },
+                { label: 'Escalation', href: '/escalation', active: false },
+              ].map((item, i, arr) => (
+                <div key={item.label} className="flex items-center gap-1.5 shrink-0">
+                  <Link
+                    href={item.href}
+                    className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all whitespace-nowrap ${
+                      item.active
+                        ? 'bg-teal-700 text-white border-teal-700'
+                        : 'border-slate-200 text-slate-600 hover:border-teal-300 hover:text-teal-700 bg-white'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                  {i < arr.length - 1 && <span className="text-slate-300 text-xs select-none">›</span>}
+                </div>
+              ))}
+            </div>
           </div>
           <p className="text-xs text-slate-400 mt-2">Follow this path to walk through the controlled pilot flow from guidance to escalation.</p>
         </div>

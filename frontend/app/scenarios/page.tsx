@@ -242,9 +242,9 @@ export default function ScenariosPage() {
 
                   <div className="flex-1 min-w-0">
                     {/* Title + badges */}
-                    <div className="flex items-start justify-between gap-3 mb-2">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3 mb-2">
                       <h3 className="font-bold text-slate-900 text-base leading-snug">{scenario.title}</h3>
-                      <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+                      <div className="flex items-center gap-2 flex-wrap sm:shrink-0 sm:justify-end">
                         {scenario.id === 9 && (
                           <span className="text-xs font-bold bg-teal-700 text-white px-2.5 py-1 rounded-full">
                             New guided flow

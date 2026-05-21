@@ -624,6 +624,26 @@ export default function AccessRefusalPage() {
           </Link>
         </div>
 
+        {/* Mobile-only safety strip — visible on mobile, hidden from lg upward */}
+        <div className="lg:hidden grid grid-cols-2 gap-2 mb-4">
+          <a
+            href="tel:999"
+            className="flex flex-col items-center justify-center gap-1 bg-red-700 hover:bg-red-800 text-white px-3 py-3 rounded-xl transition-colors text-center"
+          >
+            <Phone size={16} />
+            <span className="text-xs font-bold leading-tight">Immediate danger?</span>
+            <span className="text-sm font-bold">Call 999</span>
+          </a>
+          <a
+            href="tel:07700900412"
+            className="flex flex-col items-center justify-center gap-1 bg-teal-700 hover:bg-teal-800 text-white px-3 py-3 rounded-xl transition-colors text-center"
+          >
+            <Shield size={16} />
+            <span className="text-xs font-semibold leading-tight">Registered Manager</span>
+            <span className="text-xs text-teal-200">07700 900 412 (demo)</span>
+          </a>
+        </div>
+
         {/* Two-column grid */}
         <div className="lg:grid lg:grid-cols-[1fr_300px] gap-6 items-start">
           {/* ── Left: main scenario content ── */}

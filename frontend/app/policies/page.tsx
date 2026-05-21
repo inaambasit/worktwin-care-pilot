@@ -124,7 +124,7 @@ function PolicyModal({ doc, onClose }: { doc: StaffPolicyRecord; onClose: () => 
               </span>
             </div>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors shrink-0 mt-0.5">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors shrink-0 -mt-1 p-2 rounded-lg hover:bg-slate-100">
             <X size={18} />
           </button>
         </div>

@@ -197,11 +197,11 @@ export default function EscalationPage() {
                     </div>
                     <span className="text-xs text-slate-400 whitespace-nowrap shrink-0 bg-slate-50 border border-slate-100 px-2 py-1 rounded-lg">{contact.availability}</span>
                   </div>
-                  <div className="flex flex-wrap gap-3 mt-2">
+                  <div className="flex flex-wrap gap-1 mt-2">
                     {contact.phone && (
                       <a
                         href={`tel:${contact.phone}`}
-                        className="flex items-center gap-1.5 text-xs font-medium text-teal-700 hover:text-teal-900"
+                        className="flex items-center gap-1.5 text-xs font-medium text-teal-700 hover:text-teal-900 py-2 px-1 -mx-1"
                       >
                         <Phone size={12} />
                         {contact.phone}
@@ -210,7 +210,7 @@ export default function EscalationPage() {
                     {contact.email && (
                       <a
                         href={`mailto:${contact.email}`}
-                        className="flex items-center gap-1.5 text-xs font-medium text-teal-700 hover:text-teal-900"
+                        className="flex items-center gap-1.5 text-xs font-medium text-teal-700 hover:text-teal-900 py-2 px-1 -mx-1"
                       >
                         <Mail size={12} />
                         {contact.email}

@@ -121,12 +121,20 @@ export default function LoginPage({
         </div>
       </div>
 
-      {/* Footer link */}
-      <p className="mt-6 text-xs text-slate-400">
-        <Link href="/" className="hover:text-slate-600 underline underline-offset-2">
-          Back to WorkTwin home
-        </Link>
-      </p>
+      {/* Footer links */}
+      <div className="mt-6 flex flex-col items-center gap-3">
+        <p className="text-xs text-slate-400">
+          <Link href="/" className="hover:text-slate-600 underline underline-offset-2">
+            Back to WorkTwin home
+          </Link>
+        </p>
+        <p className="text-sm text-slate-500">
+          Not set up yet?{' '}
+          <Link href="/dashboard" className="text-teal-700 hover:text-teal-900 font-medium underline underline-offset-2">
+            Explore the pilot preview →
+          </Link>
+        </p>
+      </div>
     </div>
   )
 }

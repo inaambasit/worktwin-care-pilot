@@ -174,6 +174,11 @@ export default function LandingPage() {
           <p className="mt-6 text-xs text-slate-500">
             First internal pilot preview: Thumhara Centre | Sample documents only | No real staff, service-user or client data
           </p>
+          <p className="mt-4 sm:hidden">
+            <Link href="/login" className="text-sm text-teal-400 hover:text-teal-300 underline underline-offset-2">
+              Staff member? Sign in here
+            </Link>
+          </p>
         </div>
       </section>
 

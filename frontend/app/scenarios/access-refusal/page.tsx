@@ -441,57 +441,73 @@ export default function AccessRefusalPage() {
 
   /* ── Stepper ── */
   const stepper = (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
-        STEP {step} OF 3
-      </p>
-      <div className="flex items-start">
-        {STEP_LABELS.map((label, i) => {
-          const n = i + 1
-          const done = n < step
-          const active = n === step
-          return (
-            <div key={n} className="flex items-start flex-1 min-w-0">
-              <div className="flex flex-col items-center shrink-0">
-                <div
-                  className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all ${
-                    done
-                      ? 'bg-teal-600 border-teal-600'
-                      : active
-                      ? 'bg-teal-700 border-teal-700 ring-4 ring-teal-100'
-                      : 'bg-white border-slate-200'
-                  }`}
-                >
-                  {done ? (
-                    <Check size={16} className="text-white" strokeWidth={2.5} />
-                  ) : (
-                    <span
-                      className={`text-sm font-bold ${active ? 'text-white' : 'text-slate-400'}`}
-                    >
-                      {n}
-                    </span>
-                  )}
-                </div>
-                <p
-                  className={`text-xs font-medium mt-2 text-center px-1 leading-tight max-w-[70px] ${
-                    active ? 'text-teal-700' : done ? 'text-teal-600' : 'text-slate-400'
-                  }`}
-                >
-                  {label}
-                </p>
-              </div>
-              {i < STEP_LABELS.length - 1 && (
-                <div
-                  className={`flex-1 h-0.5 mt-[18px] mx-2 rounded-full ${
-                    done ? 'bg-teal-400' : 'bg-slate-200'
-                  }`}
-                />
-              )}
-            </div>
-          )
-        })}
+    <>
+      {/* Mobile: simple step indicator — shown below sm breakpoint */}
+      <div className="sm:hidden bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center gap-3">
+        <div className="w-9 h-9 rounded-full bg-teal-700 flex items-center justify-center shrink-0">
+          <span className="text-sm font-bold text-white">{step}</span>
+        </div>
+        <div className="min-w-0">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+            Step {step} of 3
+          </p>
+          <p className="text-sm font-semibold text-teal-700 truncate">{STEP_LABELS[step - 1]}</p>
+        </div>
       </div>
-    </div>
+
+      {/* Desktop: horizontal stepper — hidden below sm breakpoint */}
+      <div className="hidden sm:block bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
+          STEP {step} OF 3
+        </p>
+        <div className="flex items-start">
+          {STEP_LABELS.map((label, i) => {
+            const n = i + 1
+            const done = n < step
+            const active = n === step
+            return (
+              <div key={n} className="flex items-start flex-1 min-w-0">
+                <div className="flex flex-col items-center shrink-0">
+                  <div
+                    className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all ${
+                      done
+                        ? 'bg-teal-600 border-teal-600'
+                        : active
+                        ? 'bg-teal-700 border-teal-700 ring-4 ring-teal-100'
+                        : 'bg-white border-slate-200'
+                    }`}
+                  >
+                    {done ? (
+                      <Check size={16} className="text-white" strokeWidth={2.5} />
+                    ) : (
+                      <span
+                        className={`text-sm font-bold ${active ? 'text-white' : 'text-slate-400'}`}
+                      >
+                        {n}
+                      </span>
+                    )}
+                  </div>
+                  <p
+                    className={`text-xs font-medium mt-2 text-center px-1 leading-tight max-w-[70px] ${
+                      active ? 'text-teal-700' : done ? 'text-teal-600' : 'text-slate-400'
+                    }`}
+                  >
+                    {label}
+                  </p>
+                </div>
+                {i < STEP_LABELS.length - 1 && (
+                  <div
+                    className={`flex-1 h-0.5 mt-[18px] mx-2 rounded-full ${
+                      done ? 'bg-teal-400' : 'bg-slate-200'
+                    }`}
+                  />
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </>
   )
 
   /* ── Completion screen ── */

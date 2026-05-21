@@ -1026,6 +1026,24 @@ export default function AccessRefusalPage() {
             {/* ===== STEP 3 ===== */}
             {step === 3 && (
               <div className="space-y-4">
+                {/* Step 3 mobile emergency strip — keeps 999 visible when form is in view */}
+                <div className="lg:hidden flex gap-2">
+                  <a
+                    href="tel:999"
+                    className="flex-1 flex flex-col items-center justify-center gap-0.5 bg-red-700 hover:bg-red-800 text-white px-3 py-2.5 rounded-xl text-center transition-colors"
+                  >
+                    <span className="text-xs font-bold leading-tight">Immediate danger?</span>
+                    <span className="text-sm font-bold">Call 999</span>
+                  </a>
+                  <a
+                    href="tel:07700900412"
+                    className="flex-1 flex flex-col items-center justify-center gap-0.5 bg-teal-700 hover:bg-teal-800 text-white px-3 py-2.5 rounded-xl text-center transition-colors"
+                  >
+                    <span className="text-xs font-semibold leading-tight">Registered Manager</span>
+                    <span className="text-xs text-teal-200">07700 900 412 (demo)</span>
+                  </a>
+                </div>
+
                 <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
                   <div>
                     <h2 className="text-lg font-bold text-slate-900">Record the visit</h2>

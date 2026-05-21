@@ -10,6 +10,61 @@ WorkTwin Care Pilot lets care staff ask questions about workplace policies, prac
 
 The first test client is Thumhara Centre (sample data only -- no real staff or service-user data).
 
+## Current controlled preview status
+
+WorkTwin Care Pilot is currently in **controlled preview** — a supervised prototype stage for evaluation in regulated adult social care settings. It is not live operational software and is not currently approved for unsupervised staff use.
+
+**This system must not be used with real confidential information**, including real staff records, service-user data, medication details, safeguarding cases, complaints, care plans, HR records, or incident reports.
+
+### What is live in the controlled preview
+
+- Five approved pilot documents are loaded and staff-queryable (see policy boundary below)
+- Ask WorkTwin has been verified on controlled test questions: visitor arrival guidance, gift acceptance (answered from Professional Boundaries), and medication error (correctly escalated — no AI medication advice returned)
+- Mobile polish improvements are in place: landing navigation, staff sign-in escape link, access-refusal emergency visibility, escalation tap targets, policy modal close button, dashboard walkthrough strip, and private notes layout
+
+### What is not live / not enabled
+
+- Real authentication and RBAC are not active; all routes remain accessible without a session
+- Admin proxy real session validation is outstanding
+- No real staff, service-user, or confidential data is loaded or permitted
+- QCS licence / AI-RAG use for wider rollout is not yet confirmed
+- The system is not approved for use outside of supervised controlled testing
+
+### Current testing gate
+
+**Next gate:** Shagufta / manager controlled mobile preview — a supervised walkthrough to be completed before any wider tester access.
+
+A 3–5 trusted care worker test phase is prepared (onboarding pack and review scripts are ready in the controlled testing documents below) but has not started.
+
+### Current policy boundary
+
+The following five documents are the only approved staff-queryable policies in the current controlled preview:
+
+1. Thumhara Centre Professional Boundaries Policy
+2. Thumhara Centre Infection Prevention and Basic Hygiene Policy
+3. Thumhara Centre Confidentiality and Information Handling Policy
+4. Thumhara Centre Mobile Phone and Portable Device Use Policy
+5. Visitor Sign-In and Identification Procedure
+
+No additional policies are live. No real policy documents are uploaded.
+
+### Controlled testing documents
+
+- [docs/4s98e-controlled-testing-master-index.md](docs/4s98e-controlled-testing-master-index.md) — master index for all controlled testing materials
+- [docs/4s98b-shagufta-review-script-and-feedback-log.md](docs/4s98b-shagufta-review-script-and-feedback-log.md) — reviewer walkthrough script and feedback log
+- [docs/4s98c-controlled-ask-quality-scorecard.md](docs/4s98c-controlled-ask-quality-scorecard.md) — Ask WorkTwin quality scorecard
+- [docs/4s98d-trusted-tester-onboarding-message-pack.md](docs/4s98d-trusted-tester-onboarding-message-pack.md) — tester onboarding messages
+- [docs/4s98a-trusted-care-worker-testing-readiness-pack.md](docs/4s98a-trusted-care-worker-testing-readiness-pack.md) — care worker testing readiness pack
+
+### Safety boundaries
+
+- High-risk topics (safeguarding, medication, HR, payroll, legal) always escalate to human contacts — no AI answer is returned
+- No surveillance, sentiment tracking, or productivity monitoring
+- Private notes are not visible to employers
+- Staff-facing answers are document-grounded and require a qualifying governed document, OpenAI, and a configured database — the system falls back safely when any of these are unavailable
+
+---
+
 ## Live demo
 
 - Staff-facing app: https://worktwin-care-pilot.vercel.app (Vercel)
@@ -93,11 +148,24 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 - [docs/staff-demo-walkthrough.md](docs/staff-demo-walkthrough.md) -- staff demo guide
 - [docs/documentation-maintenance-plan.md](docs/documentation-maintenance-plan.md) -- documentation maintenance plan
 
-## Recent hardening (checkpoint 918a020)
+Controlled testing documents (see [Current controlled preview status](#current-controlled-preview-status) above):
 
-- Admin proxy upload cap corrected from 1 KB to 10 MB
-- Browser Supabase token is now validated with `getUser()` before forwarding (partial hardening; admin proxy real session validation remains outstanding)
-- OpenAI dependency pinned to `openai==2.33.0` in backend requirements
+- [docs/4s98e-controlled-testing-master-index.md](docs/4s98e-controlled-testing-master-index.md)
+- [docs/4s98b-shagufta-review-script-and-feedback-log.md](docs/4s98b-shagufta-review-script-and-feedback-log.md)
+- [docs/4s98c-controlled-ask-quality-scorecard.md](docs/4s98c-controlled-ask-quality-scorecard.md)
+- [docs/4s98d-trusted-tester-onboarding-message-pack.md](docs/4s98d-trusted-tester-onboarding-message-pack.md)
+- [docs/4s98a-trusted-care-worker-testing-readiness-pack.md](docs/4s98a-trusted-care-worker-testing-readiness-pack.md)
+
+## Recent changes (checkpoint 2ce244a)
+
+- Controlled testing master index added (docs/4s98e)
+- Trusted tester onboarding message pack added (docs/4s98d)
+- Controlled Ask quality scorecard added (docs/4s98c)
+- Shagufta review script and feedback log added (docs/4s98b)
+- Trusted care worker testing readiness pack added (docs/4s98a)
+- Mobile polish: landing navigation, staff sign-in escape link, access-refusal emergency visibility, escalation tap targets, policy modal close button, dashboard walkthrough strip, private notes mobile layout
+- Backend health and /policies verified: 5 policies returned
+- Ask WorkTwin verified on controlled test questions (visitor arrival, gift acceptance, medication error escalation)
 
 ## Known gaps
 

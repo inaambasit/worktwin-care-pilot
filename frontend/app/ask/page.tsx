@@ -286,7 +286,7 @@ export default function AskPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-6xl mx-auto px-4 pt-4 pb-8 space-y-6">
+      <div className="max-w-6xl mx-auto px-4 pt-4 pb-4 space-y-6">
 
         {/* Always-visible demo-mode honesty status line */}
         <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2">
@@ -516,7 +516,7 @@ export default function AskPage() {
         {isLoading && (
           <div className="space-y-4">
             <div className="flex justify-end">
-              <div className="bg-gradient-to-br from-teal-700 to-teal-800 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-sm text-sm shadow-sm">
+              <div className="bg-gradient-to-br from-teal-700 to-teal-800 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-[85%] text-sm shadow-sm">
                 {input}
               </div>
             </div>
@@ -543,7 +543,7 @@ export default function AskPage() {
         {apiError && !isLoading && (
           <div className="space-y-4">
             <div className="flex justify-end">
-              <div className="bg-gradient-to-br from-teal-700 to-teal-800 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-sm text-sm shadow-sm">
+              <div className="bg-gradient-to-br from-teal-700 to-teal-800 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-[85%] text-sm shadow-sm">
                 {input}
               </div>
             </div>
@@ -570,7 +570,7 @@ export default function AskPage() {
 
         {/* Answer area */}
         {showAnswer && currentAnswer && (
-          <div className="space-y-4 pb-28">
+          <div className="space-y-4 pb-32">
             {/* Back to quick actions */}
             <button
               onClick={handleBackToQuickActions}
@@ -582,7 +582,7 @@ export default function AskPage() {
 
             {/* Question bubble */}
             <div className="flex justify-end">
-              <div className="bg-gradient-to-br from-teal-700 to-teal-800 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-sm text-sm shadow-sm">
+              <div className="bg-gradient-to-br from-teal-700 to-teal-800 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-[85%] text-sm shadow-sm">
                 {currentAnswer.question}
               </div>
             </div>

@@ -216,7 +216,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="flex items-center justify-end px-3 py-3 border-b border-slate-200 shrink-0">
           <button
             onClick={() => setDrawerOpen(false)}
-            className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100"
+            className="p-2.5 rounded-lg text-slate-500 hover:bg-slate-100"
             aria-label="Close menu"
           >
             <X size={18} />
@@ -239,7 +239,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 shrink-0">
           {/* Hamburger — mobile only */}
           <button
-            className="md:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 shrink-0"
+            className="md:hidden p-2.5 rounded-lg text-slate-500 hover:bg-slate-100 shrink-0"
             onClick={() => setDrawerOpen(true)}
             aria-label="Open menu"
             aria-expanded={drawerOpen}

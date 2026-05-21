@@ -104,7 +104,7 @@ export default function NotesPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-6xl mx-auto px-4 pt-4 pb-8 space-y-6">
+      <div className="max-w-6xl mx-auto pt-4 pb-8 space-y-6">
 
         {/* Hero card */}
         <div className="bg-gradient-to-br from-teal-700 via-teal-800 to-teal-900 rounded-3xl p-7 text-white relative overflow-hidden shadow-lg">
@@ -116,7 +116,7 @@ export default function NotesPage() {
               <Lock size={11} />
               Private notes
             </span>
-            <h1 className="text-3xl font-bold mb-2.5 leading-snug">Private Notes</h1>
+            <h1 className="text-2xl md:text-3xl font-bold mb-2.5 leading-snug">Private Notes</h1>
             <p className="text-teal-100 text-sm leading-relaxed max-w-lg mb-5">
               Use this session-only space for example reflections during the controlled pilot. Do not enter real staff, service-user, HR, safeguarding, medication, complaint, care-plan or confidential data.
             </p>
@@ -190,7 +190,7 @@ export default function NotesPage() {
                 <Plus size={16} />
                 New note
               </button>
-              <div className="max-h-44 md:max-h-none md:flex-1 overflow-y-auto space-y-1.5">
+              <div className="max-h-64 md:max-h-none md:flex-1 overflow-y-auto space-y-1.5">
                 {notes.length === 0 ? (
                   <div className="bg-white border border-slate-200 rounded-xl px-4 py-5 text-center">
                     <Lock size={24} className="mx-auto mb-2 text-slate-300" />
@@ -227,7 +227,7 @@ export default function NotesPage() {
             </div>
 
             {/* Note editor panel */}
-            <div className="flex-1 min-h-[320px] md:min-h-0 bg-white border border-slate-200 rounded-3xl flex flex-col overflow-hidden shadow-sm">
+            <div className="flex-1 min-h-[280px] md:min-h-0 bg-white border border-slate-200 rounded-3xl flex flex-col overflow-hidden shadow-sm">
               {notes.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center">
                   <div className="text-center px-8">
@@ -241,8 +241,9 @@ export default function NotesPage() {
               ) : (
                 <>
                   {/* Editor header */}
-                  <div className="px-6 py-4 border-b border-slate-100 flex items-start gap-3">
-                    <div className="flex-1 min-w-0">
+                  <div className="px-6 py-4 border-b border-slate-100 flex flex-col gap-2">
+                    {/* Title row */}
+                    <div>
                       <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Example session note</p>
                       <input
                         type="text"
@@ -252,23 +253,29 @@ export default function NotesPage() {
                         placeholder="Example note title..."
                       />
                     </div>
-                    <div className="flex items-center gap-2 shrink-0 pt-5">
-                      {saved && (
+                    {/* Action row */}
+                    <div className="flex items-center gap-2 justify-between md:justify-end">
+                      {saved ? (
                         <span className="text-xs text-teal-600 font-medium">Updated in session</span>
+                      ) : (
+                        <span />
                       )}
-                      <button
-                        onClick={saveNote}
-                        className="flex items-center gap-1.5 text-sm bg-teal-700 hover:bg-teal-800 text-white px-3 py-1.5 rounded-lg font-medium transition-colors"
-                      >
-                        <Save size={14} />
-                        Save
-                      </button>
-                      <button
-                        onClick={() => deleteNote(selected.id)}
-                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 size={15} />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={saveNote}
+                          className="flex items-center gap-1.5 text-sm bg-teal-700 hover:bg-teal-800 text-white px-3 py-1.5 rounded-lg font-medium transition-colors"
+                        >
+                          <Save size={14} />
+                          Save
+                        </button>
+                        <button
+                          onClick={() => deleteNote(selected.id)}
+                          aria-label="Delete note"
+                          className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
                     </div>
                   </div>
 

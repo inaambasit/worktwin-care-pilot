@@ -25,10 +25,10 @@ WorkTwin Care Pilot is in **controlled preview only**.
 | Item | Current position |
 |---|---|
 | Operational use | Not live. No real care delivery decisions should be based on this tool. |
-| Testing stage | Awaiting Shagufta and/or manager review before any 3–5 trusted care worker testing begins. |
+| Testing stage | Shagufta controlled preview complete (4S.100A); implementing guidance-led scenarios (4S.100C–E) before any 3–5 trusted care worker testing begins. |
 | Confidential information | No real staff names, service-user names, care plans, medication details, safeguarding cases, HR records or incident reports should be entered at any point. |
 | Policy library | Limited to five approved pilot documents (see Section 6). |
-| Next gate | Shagufta controlled mobile preview and feedback review. |
+| Next gate | Implement 4S.100C guidance-led scenarios based on Shagufta's feedback. Shagufta reviewed the controlled preview and gave positive feedback on Ask WorkTwin and the policy experience (4S.100A). |
 
 Testing must not expand beyond a single controlled reviewer until the conditions in Section 5 are resolved.
 
@@ -49,11 +49,11 @@ Testing must not expand beyond a single controlled reviewer until the conditions
 
 Follow these steps in order. Do not skip steps or run them out of sequence.
 
-**Step 1 — Shagufta controlled mobile preview**  
-Shagufta uses the live preview on her own mobile device. She reviews the dashboard, navigation, and tone using the script in 4S.98B.
+**Step 1 — Shagufta controlled mobile preview** *(Complete — 4S.100A)*  
+Shagufta reviewed the live preview on her mobile device. She gave positive feedback on Ask WorkTwin and the policy experience. Feedback is recorded at `docs/4s100a-shagufta-feedback-service-user-guidance.md`.
 
-**Step 2 — Record feedback using 4S.98B**  
-Shagufta completes the feedback log in 4S.98B, noting any concerns about layout, wording, escalation, or safety behaviour. She records a Go / Fix / Stop decision.
+**Step 2 — Record feedback using 4S.98B** *(Complete — 4S.100A)*  
+Key feedback from Shagufta: WorkTwin's highest value is guidance on what to do next during a real shift situation, not retrospective recording. Product direction confirmed as guidance-led scenarios. See `docs/4s100a-shagufta-feedback-service-user-guidance.md`.
 
 **Step 3 — Run Ask quality checks using 4S.98C**  
 Using the scorecard in 4S.98C, test a set of representative questions against Ask WorkTwin. Confirm that all critical safety checks pass before proceeding.
@@ -100,9 +100,11 @@ No additional documents should be made live until the policy go-live checklist h
 
 ## 7. Next Decision
 
-The immediate next decision is the **Shagufta review outcome** (Step 1 and Step 2 above).
+Steps 1 and 2 (Shagufta's controlled preview and feedback) are complete. **Current position (4S.100A):** Shagufta gave positive feedback. No safety or governance stop conditions were raised. The direction from her feedback is to implement guidance-led scenarios (Steps 3–6 remain pending while 4S.100C–E are implemented).
 
-There are three possible outcomes:
+The **immediate next development decision** is implementation of two fictional guidance-led scenarios (4S.100C), followed by the fictional service-user guidance card pattern (4S.100D) and dashboard/onboarding alignment (4S.100E).
+
+The three possible outcomes from the original review remain relevant for future stages:
 
 | Outcome | Action |
 |---|---|

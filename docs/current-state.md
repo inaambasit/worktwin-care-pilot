@@ -1,6 +1,6 @@
 # WorkTwin Care Pilot - Current State
 
-> Generated: 2026-05-07. Updated: 2026-05-18. Source of truth through checkpoint `65c3017` on branch `main`.
+> Generated: 2026-05-07. Updated: 2026-05-22. Source of truth through checkpoint `f9f8054` on branch `main`.
 > Update this file whenever a milestone changes the status of any item below.
 > Do not edit other files to reconcile with this document - fix those files instead.
 
@@ -60,13 +60,19 @@
 
 > **4S.99D (2026-05-18):** Trusted-user final access runbook added — PRE-ACCESS ONLY. `docs/4s99d-trusted-user-final-access-runbook.md` created at checkpoint `65c3017`. No access was granted, no users were created, no environment flags were changed, no public pilot auth was enabled, no public admin proxy was enabled, and no production/live operational approval was given. The runbook defines the final technical proof sequence, the go/no-go decision record, the access removal and rollback plan, and a final warning before any 3–5 named trusted-user access. This document is a pre-access planning control only.
 
+> **Ask WorkTwin mobile trust/source polish (2026-05-19–21):** Ask trust and source UI, helper text, sticky input bar, and mobile viewport handling polished across three commits (`f2ea413`, `3466218`, `51ded3c`). No backend, DB, auth, admin proxy, RAG, policy, env, SQL or data changes.
+
+> **4S.100A (2026-05-21):** Shagufta service-user guidance feedback captured — docs-only slice. Shagufta reviewed the controlled preview on her mobile device and gave positive feedback on Ask WorkTwin and the policy experience. She identified that WorkTwin's highest value for care workers is guidance on what to do next in real shift-time situations, not retrospective recording. Six situation types were discussed (fictionalised for documentation); product direction recorded as shifting from recording-led to guidance-led scenarios. Two fictional scenarios and a fictional service-user guidance card concept proposed for implementation. Feedback doc: `docs/4s100a-shagufta-feedback-service-user-guidance.md`. Checkpoint: `671f139`. No code, SQL, auth, RAG, policy or env changes.
+
+> **4S.100B (2026-05-22):** Scenarios redesigned as guidance-led support — docs and frontend alignment. Scenarios are now framed as fictional guidance-led examples that help staff think through what to do next, when to escalate, and what not to do. They are not recording forms, competency sign-offs, training assessments or replacements for existing care-recording systems. Next planned slices: 4S.100C (two fictional Shagufta-inspired scenarios), 4S.100D (fictional service-user guidance card pattern), 4S.100E (dashboard and onboarding journey alignment). Checkpoint: `f9f8054`.
+
 ---
 
 ## 1. Current Checkpoint
 
 | Item | Value |
 |---|---|
-| Commit | `65c3017` |
+| Commit | `f9f8054` |
 | Branch | `main` |
 | Repo path | `C:\Projects\worktwin-care-pilot\worktwin-care-pilot-starter` |
 | Backend | FastAPI / `backend/app/main.py` |
@@ -87,6 +93,7 @@ The system currently demonstrates:
 - Deterministic escalation for high-risk topic categories (safeguarding, whistleblowing, medication, wellbeing, HR, legal/confidentiality, and accident/fall concerns) — no LLM involved in those paths
 - A three-gate governance model controlling which documents reach staff, embeddings, and AI answers independently
 - An admin document registry with upload, embedding generation, vector search, and answer-debug tooling
+- Scenarios redesigned as fictional guidance-led examples — each scenario helps staff think through what to do next, when to escalate, and what not to do in a realistic care situation; they are not recording forms, competency sign-offs or replacements for existing care-recording systems
 - Supabase Auth, JWT validation, membership resolution and browser Bearer forwarding have passed controlled local proof; public/live rollout is not enabled
 
 The pilot client is **Thumhara Centre**. No real staff, service-user, resident, care-plan, HR, safeguarding case-note or named complaint personal data has been introduced. No real service-user, HR, safeguarding, medication, complaint or confidential personal data should be entered. Some controlled internal policy testing has used Thumhara Centre/QCS policy documents under governance restrictions. A content-source review completed on 2026-05-07 established a formal QCS and third-party content restriction; see Section 11.
@@ -100,7 +107,7 @@ Public/live staff rollout remains blocked. Trusted-user access (3–5 named user
 ### Staff-facing surfaces
 - `/ask` — proven with the four-policy Thumhara staff-visible set in controlled local proof, real backend auth proof, and local frontend auth/session proof; returns source-grounded answers from approved documents; escalation short-circuit before any LLM call
 - `/policies` — lists approved, role-visible policy documents; proven in controlled local proof and authenticated backend/frontend proof
-- `/dashboard`, `/notes`, `/escalation`, `/onboarding`, `/scenarios` — all load and render
+- `/dashboard`, `/notes`, `/escalation`, `/onboarding`, `/scenarios` — all load and render; scenarios are redesigned as fictional guidance-led examples (what to do next, when to escalate, what not to do) and are not recording forms, training assessments or care-recording system replacements
 - Escalation topic detection — seven pattern groups (safeguarding, whistleblowing, medication, wellbeing, HR, legal/confidentiality, accident/incident/fall), short-circuits to deterministic safe response before any LLM call
 
 ### Backend pipeline (end-to-end, controlled local and auth proof)
@@ -242,7 +249,7 @@ The system demonstrates the intended architecture convincingly: governance gates
 | Controlled trusted-user pilot readiness | 9 / 10 | Four-policy set proven; auth/session proven locally; pilot pack created; remaining step is named-user approval and access setup |
 | Production / live operational readiness | NO-GO | No DPA; QCS use unconfirmed for AI/RAG; production deployment, monitoring, retention/deletion and incident process not proven; not production-ready |
 | Privacy / compliance | 4 / 10 | Privacy-by-design in architecture; no DPA; QCS use unconfirmed; real data must not be entered |
-| Documentation accuracy | 8 / 10 | Pilot scope, pilot pack, proof records and docs index aligned at `94df6ee` |
+| Documentation accuracy | 8.5 / 10 | Aligned through 4S.100B at `f9f8054`; Shagufta feedback, guidance-led scenario direction, next planned slices, and safety boundaries recorded |
 
 ---
 
@@ -280,6 +287,18 @@ A sandbox Supabase auth E2E setup plan has been created at `docs/4s90i-sandbox-a
 | 4S.97J–4S.98B | Full-policy smoke proof, backend auth proof, frontend auth/session proof | Done |
 | Trusted-user pilot pack | `docs/thumhara-trusted-user-pilot-pack.md` | Done (`7100135`) |
 | Docs index alignment | `docs/README.md` updated | Done (`c55d951`) |
+| Ask WorkTwin mobile trust/source polish | Trust and source UI, helper text, sticky input, mobile viewport | Done (`51ded3c`) |
+| 4S.100A | Shagufta controlled preview feedback captured; guidance-led scenario direction recorded | Done (`671f139`) |
+| 4S.100B | Scenarios redesigned as guidance-led support; docs and frontend aligned | Done (`f9f8054`) |
+
+### Product development track (next planned slices)
+
+| Slice | Description |
+|---|---|
+| 4S.100C | Add two fictional Shagufta-inspired guidance-led scenarios |
+| 4S.100D | Add fictional service-user guidance card pattern |
+| 4S.100E | Dashboard and onboarding journey alignment |
+| Later | Auth / security / governance and documentation truth alignment before any real trusted worker or production use |
 
 ### Technical backlog
 

@@ -444,7 +444,10 @@ export default function AskPage() {
             {/* Ask your own question */}
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
               <h2 className="font-semibold text-slate-900 mb-1">Ask an example policy question</h2>
-              <p className="text-sm text-slate-500 mb-4">Type an example policy or procedure question. Do not enter real names, incidents, service-user details, medication details, safeguarding disclosures, HR issues, complaints or confidential data.</p>
+              <p className="text-sm text-slate-500 mb-3">Type an example policy or procedure question. Do not enter real names, incidents, service-user details, medication details, safeguarding disclosures, HR issues, complaints or confidential data.</p>
+              <p className="text-xs text-teal-700 bg-teal-50 border border-teal-100 rounded-xl px-3 py-2 mb-4">
+                Ask works best with the approved pilot policy areas: visitors, professional boundaries, confidentiality, mobile phone use and basic hygiene.
+              </p>
               <button
                 onClick={() => inputRef.current?.focus()}
                 className="w-full flex items-center gap-3 border border-dashed border-slate-300 rounded-xl px-4 py-3.5 text-left hover:border-teal-400 hover:bg-teal-50 transition-all group"
@@ -570,7 +573,7 @@ export default function AskPage() {
 
         {/* Answer area */}
         {showAnswer && currentAnswer && (
-          <div className="space-y-4 pb-32">
+          <div className="space-y-4 pb-40">
             {/* Back to quick actions */}
             <button
               onClick={handleBackToQuickActions}

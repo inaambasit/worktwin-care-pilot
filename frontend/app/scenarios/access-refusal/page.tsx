@@ -100,7 +100,7 @@ const CONCERNS: { val: Concern; label: string }[] = [
   { val: 'none', label: 'No concerns today' },
 ]
 
-const STEP_LABELS = ['First response', 'Make contact', 'Record the visit']
+const STEP_LABELS = ['First response', 'Make contact', 'Reflect and note']
 
 const CHECKLIST_ITEMS = [
   "Explain you're outside for the scheduled visit",
@@ -125,9 +125,9 @@ const HERO_STEPS = [
   },
   {
     icon: <FileText size={22} className="text-white" />,
-    title: 'Record and escalate if needed',
-    body: 'Write what happened in plain words while it is fresh. If anything in your notes is a welfare or safety concern, phone the registered manager before you leave the visit.',
-    chips: ['Final step', 'Record the visit', 'Escalate if needed', 'Safe route'],
+    title: 'Escalate if needed — then record in your care system',
+    body: 'Think through what you saw and heard during the visit. After following provider process, record the visit in your existing care-recording system as normal — not in WorkTwin.',
+    chips: ['Final step', 'Reflect and note', 'Escalate if needed', 'Safe route'],
   },
 ]
 
@@ -418,7 +418,7 @@ export default function AccessRefusalPage() {
       <div className="relative">
         <span className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1 rounded-full text-xs font-semibold mb-5">
           <Shield size={11} />
-          Practice scenario
+          Guidance scenario
         </span>
         <div className="w-12 h-12 bg-white/15 rounded-2xl flex items-center justify-center mb-4">
           {hero.icon}
@@ -520,7 +520,7 @@ export default function AccessRefusalPage() {
             className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 px-3 py-1.5 rounded-full shadow-sm hover:bg-teal-50 hover:text-teal-700 hover:border-teal-200 transition-all mb-6"
           >
             <ArrowLeft size={13} />
-            Back to Practice Scenarios
+            Back to Scenario Guidance
           </Link>
           <div className="max-w-xl mx-auto space-y-5">
             <div className="bg-gradient-to-br from-teal-600 via-teal-700 to-teal-900 rounded-3xl p-8 text-white text-center relative overflow-hidden shadow-lg">
@@ -534,15 +534,17 @@ export default function AccessRefusalPage() {
                 <p className="text-teal-200 text-sm font-semibold mb-3">
                   You followed the safe route.
                 </p>
-                <p className="text-teal-100 text-sm leading-relaxed max-w-sm mx-auto mb-6">
-                  You stayed calm at the door, contacted the family contact first, and recorded what
-                  happened in plain words.
+                <p className="text-teal-100 text-sm leading-relaxed max-w-sm mx-auto mb-2">
+                  You followed the safe route — staying calm at the door, contacting the family contact, and knowing when to escalate to the registered manager.
+                </p>
+                <p className="text-teal-200/80 text-xs mb-5 max-w-xs mx-auto leading-relaxed">
+                  In a real situation, record the visit in your existing care-recording system as normal.
                 </p>
                 <div className="flex flex-wrap justify-center gap-2">
                   {[
                     'Stayed calm',
                     'Contacted family contact',
-                    'Recorded visit',
+                    'Used correct route',
                     'Escalated if needed',
                   ].map(chip => (
                     <span
@@ -569,7 +571,7 @@ export default function AccessRefusalPage() {
                 href="/scenarios"
                 className="flex-1 text-center text-sm bg-teal-700 hover:bg-teal-800 text-white font-semibold px-4 py-3 rounded-xl transition-colors"
               >
-                Back to Practice Scenarios
+                Back to Scenario Guidance
               </Link>
             </div>
             <Link
@@ -597,10 +599,10 @@ export default function AccessRefusalPage() {
             className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 px-3 py-1.5 rounded-full shadow-sm hover:bg-teal-50 hover:text-teal-700 hover:border-teal-200 transition-all"
           >
             <ArrowLeft size={13} />
-            Back to Practice Scenarios
+            Back to Scenario Guidance
           </Link>
           <p className="text-xs text-slate-400">
-            Practice Scenarios&nbsp;/&nbsp;Doorstep refusal&nbsp;/&nbsp;
+            Scenario Guidance&nbsp;/&nbsp;Doorstep refusal&nbsp;/&nbsp;
             <span className="text-teal-700 font-medium">{STEP_LABELS[step - 1]}</span>
           </p>
         </div>
@@ -1046,10 +1048,9 @@ export default function AccessRefusalPage() {
 
                 <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
                   <div>
-                    <h2 className="text-lg font-bold text-slate-900">Record the visit</h2>
+                    <h2 className="text-lg font-bold text-slate-900">Reflect — what would you record?</h2>
                     <p className="text-sm text-slate-500 mt-1 leading-relaxed">
-                      Stick to what you saw and heard. Use the service user&apos;s words where you
-                      can. You don&apos;t need to write a long story.
+                      Think through what you saw and heard. Use the service user&apos;s words where you can. In a real situation, record this in your existing care-recording system as normal — not in WorkTwin.
                     </p>
                   </div>
 
@@ -1211,7 +1212,7 @@ export default function AccessRefusalPage() {
                   className="w-full flex items-center justify-center gap-2 text-sm font-semibold px-4 py-3.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white transition-colors shadow-sm"
                 >
                   <CheckCircle size={16} />
-                  Finish practice record
+                  Finish scenario
                 </button>
                 {step3Errors.size > 0 && (
                   <p className="text-xs text-center text-red-500">

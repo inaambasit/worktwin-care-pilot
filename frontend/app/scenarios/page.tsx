@@ -2,16 +2,19 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
-import { PlayCircle, CheckCircle, Clock, BookOpen } from 'lucide-react'
+import { PlayCircle, CheckCircle, Clock, BookOpen, AlertCircle } from 'lucide-react'
 
 type Difficulty = 'Beginner' | 'Intermediate' | 'Advanced'
-type Status = 'Not started' | 'In progress' | 'Practised'
+type Status = 'Not started' | 'In progress' | 'Reviewed'
 
 interface Scenario {
   id: number
   title: string
   category: string
-  description: string
+  situation: string
+  worries: string
+  helps: string
+  escalate: string
   difficulty: Difficulty
   duration: string
   status: Status
@@ -22,7 +25,10 @@ const scenarios: Scenario[] = [
     id: 1,
     title: 'Medication-related concern: knowing when to escalate',
     category: 'Medication awareness',
-    description: 'Practise recognising when a medication-related concern needs recording and escalation to the appropriate trained lead.',
+    situation: 'A service user declines their prescribed medication, or you notice a possible medication concern during a visit.',
+    worries: 'Whether to act immediately, whether the concern is serious, and who to contact first.',
+    helps: 'Identifying the correct escalation route and understanding when a medication concern needs immediate action from the trained lead.',
+    escalate: 'Contact the medication lead or senior on duty immediately if medication has been refused, missed or may have been given incorrectly.',
     difficulty: 'Intermediate',
     duration: '8 min',
     status: 'Not started',
@@ -31,7 +37,10 @@ const scenarios: Scenario[] = [
     id: 2,
     title: 'Safeguarding concern: knowing who to contact',
     category: 'Safeguarding',
-    description: 'Work through an example safeguarding concern and practise when to contact the safeguarding lead rather than trying to investigate alone.',
+    situation: 'Something during a visit does not feel right — signs of possible harm, neglect or a situation that concerns you about the safety of a service user.',
+    worries: 'Whether to investigate yourself, who to tell and how to raise it.',
+    helps: 'Understanding the safeguarding escalation route and why staff should not investigate alone.',
+    escalate: 'Contact the safeguarding lead or registered manager immediately. Do not investigate independently.',
     difficulty: 'Advanced',
     duration: '12 min',
     status: 'Not started',
@@ -40,25 +49,34 @@ const scenarios: Scenario[] = [
     id: 3,
     title: 'Managing an aggressive or distressed service user',
     category: 'Communication',
-    description: 'Practise calm communication and learn when to call for help when a service user becomes distressed or difficult to support.',
+    situation: 'A service user becomes distressed or verbally aggressive during a call. You are unsure how to respond safely.',
+    worries: 'How to stay calm, whether to continue the visit, and when to step back and call for help.',
+    helps: 'Calm communication approaches and a clear guide on when to remove yourself and escalate to the senior on duty.',
+    escalate: 'If the situation is unsafe or not resolving, contact the senior on duty. Leave if you are in danger and call 999 if needed.',
     difficulty: 'Intermediate',
     duration: '10 min',
-    status: 'Practised',
+    status: 'Reviewed',
   },
   {
     id: 4,
     title: 'Supporting a service user at end of life',
     category: 'End of Life',
-    description: 'Practise recognising when to follow local guidance and involve the right senior lead when supporting a service user approaching end of life.',
+    situation: 'A service user you support is approaching end of life. The situation feels different from usual and you are unsure of your role.',
+    worries: 'What to do, what not to do, and whether to involve family or the care team.',
+    helps: 'Understanding your role, knowing who to involve, and following the local end-of-life guidance correctly.',
+    escalate: 'Contact the registered manager or senior if there is a change in condition, a family concern or any uncertainty about the care plan.',
     difficulty: 'Advanced',
     duration: '15 min',
     status: 'Not started',
   },
   {
     id: 5,
-    title: 'Food and nutrition - spotting when to escalate',
+    title: 'Food and nutrition — spotting when to escalate',
     category: 'Health & Nutrition',
-    description: 'Practise spotting when food or nutrition concerns should be recorded and escalated to the right human lead.',
+    situation: 'A service user refuses food, is eating very little, or you notice a change in appetite during a visit.',
+    worries: 'Whether the situation is serious, whether to mention it to the care team, and who to tell.',
+    helps: 'Recognising when a food or nutrition concern needs to be escalated and to whom, following provider procedure.',
+    escalate: 'Contact the senior or registered manager if refusal is repeated, the person appears to be losing weight, or there are signs of dehydration.',
     difficulty: 'Beginner',
     duration: '6 min',
     status: 'In progress',
@@ -67,16 +85,22 @@ const scenarios: Scenario[] = [
     id: 6,
     title: 'Incident reporting awareness',
     category: 'Incident Reporting',
-    description: 'Practise what information may need to be captured and escalated after an incident, using local reporting procedures.',
+    situation: 'Something unexpected happens during a visit — a fall, a near miss, or an incident you are unsure how to handle.',
+    worries: 'What counts as a reportable incident, what information to capture, and who needs to know.',
+    helps: 'Understanding what to note and who to involve. Record the incident in your existing care system using your normal provider procedure.',
+    escalate: 'Contact the registered manager if anyone is hurt, at risk, or if the incident involves a possible safeguarding concern.',
     difficulty: 'Beginner',
     duration: '5 min',
-    status: 'Practised',
+    status: 'Reviewed',
   },
   {
     id: 7,
     title: 'Responding to a fire alarm',
     category: 'Health & Safety',
-    description: 'Practise following the local fire evacuation route, understanding your responsibilities for service users with limited mobility, and knowing how to report.',
+    situation: 'A fire alarm sounds at the home or care setting where you are working. You need to act quickly and safely.',
+    worries: 'Your responsibilities for service users with limited mobility and what to do if they cannot move quickly.',
+    helps: 'Following the local fire evacuation procedure and understanding your role in keeping service users safe during an alarm.',
+    escalate: 'Call 999 immediately if there is a real fire. Contact the registered manager once the evacuation is complete.',
     difficulty: 'Beginner',
     duration: '5 min',
     status: 'Not started',
@@ -85,7 +109,10 @@ const scenarios: Scenario[] = [
     id: 8,
     title: 'Handling a complaint from a service user or family member',
     category: 'Complaints',
-    description: 'Practise responding to a formal or informal complaint, recording it correctly and following the complaints procedure.',
+    situation: 'A service user or family member raises a complaint — formally or informally — during or after a visit.',
+    worries: 'Whether to respond immediately, what to say, and how to avoid making the situation worse.',
+    helps: 'Understanding the provider\'s complaints procedure and the correct first steps to take.',
+    escalate: 'Contact the registered manager as soon as possible. Do not make promises or admissions of fault.',
     difficulty: 'Intermediate',
     duration: '10 min',
     status: 'Not started',
@@ -94,7 +121,10 @@ const scenarios: Scenario[] = [
     id: 9,
     title: 'Service user refuses entry at the door',
     category: 'Access / Welfare',
-    description: "A staff member arrives for a visit, but the service user does not want to let them inside. The service user is older and may be vulnerable, and the staff member is unsure what to do. Practise calm communication, contacting the designated family contact where appropriate, and escalating to the registered manager / safeguarding lead if there are any welfare, safety, capacity, distress, neglect, missed medication or immediate-risk concerns.",
+    situation: 'You arrive for a scheduled visit but the service user does not want to let you in. They appear unsettled, distressed or are asking you to leave.',
+    worries: 'Whether to leave, whether the person is safe inside, and what to do when you cannot confirm their welfare.',
+    helps: 'A clear order of actions — calm communication, contacting the named family contact, and escalating to the registered manager if you cannot confirm safety.',
+    escalate: 'Contact the registered manager before leaving if you cannot confirm the service user is safe, or if there are welfare, capacity or safeguarding concerns.',
     difficulty: 'Intermediate',
     duration: '7 min',
     status: 'Not started',
@@ -110,16 +140,16 @@ const difficultyColour: Record<Difficulty, string> = {
 const statusColour: Record<Status, string> = {
   'Not started': 'text-slate-400',
   'In progress': 'text-amber-600',
-  'Practised': 'text-teal-600',
+  'Reviewed': 'text-teal-600',
 }
 
 const statusIconBg: Record<Status, string> = {
   'Not started': 'bg-slate-100',
   'In progress': 'bg-amber-50',
-  'Practised': 'bg-teal-100',
+  'Reviewed': 'bg-teal-100',
 }
 
-const CONTEXT_CHIPS = ['Safe practice mode', 'Care-sector scenarios', 'Private learning', 'Pilot pathway']
+const CONTEXT_CHIPS = ['Fictional demo scenarios', 'Shift-time guidance', 'No real service-user data', 'Controlled pilot']
 
 const categories = ['All', ...Array.from(new Set(scenarios.map(s => s.category)))]
 
@@ -128,7 +158,7 @@ export default function ScenariosPage() {
   const [activeScenario, setActiveScenario] = useState<number | null>(null)
 
   const filtered = activeCategory === 'All' ? scenarios : scenarios.filter(s => s.category === activeCategory)
-  const practisedCount = scenarios.filter(s => s.status === 'Practised').length
+  const reviewedCount = scenarios.filter(s => s.status === 'Reviewed').length
   const inProgressCount = scenarios.filter(s => s.status === 'In progress').length
 
   return (
@@ -144,11 +174,11 @@ export default function ScenariosPage() {
             <div className="flex-1 min-w-0">
               <span className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1 rounded-full text-xs font-semibold mb-4">
                 <BookOpen size={11} />
-                Practice hub
+                Guidance hub
               </span>
-              <h1 className="text-3xl font-bold mb-2.5 leading-snug">Practice Scenarios</h1>
+              <h1 className="text-3xl font-bold mb-2.5 leading-snug">Scenario Guidance</h1>
               <p className="text-teal-100 text-sm leading-relaxed max-w-lg mb-5">
-                Build confidence with example care situations while keeping real decisions with the right human lead.
+                Get safe shift-time guidance for real care situations. These are fictional demo examples to help you think through what to do next — not training assessments or official records.
               </p>
               <div className="flex flex-wrap gap-2">
                 {CONTEXT_CHIPS.map(chip => (
@@ -159,9 +189,23 @@ export default function ScenariosPage() {
               </div>
             </div>
             <div className="shrink-0 bg-white/10 rounded-2xl px-6 py-4 text-center min-w-[110px]">
-              <p className="text-4xl font-bold leading-none">{practisedCount}</p>
-              <p className="text-teal-200 text-xs font-semibold mt-1.5">of {scenarios.length} practised</p>
+              <p className="text-4xl font-bold leading-none">{reviewedCount}</p>
+              <p className="text-teal-200 text-xs font-semibold mt-1.5">of {scenarios.length} reviewed</p>
             </div>
+          </div>
+        </div>
+
+        {/* Guidance notice */}
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 flex gap-4">
+          <AlertCircle size={18} className="text-amber-600 shrink-0 mt-0.5" />
+          <div className="space-y-1.5">
+            <p className="text-sm font-semibold text-amber-900">About these scenarios — controlled pilot</p>
+            <ul className="space-y-1 text-xs text-amber-800 leading-relaxed">
+              <li>• These are fictional examples. Do not enter real service-user names, care plans, medication details or any confidential information.</li>
+              <li>• Continue recording visits in your existing care system as normal — WorkTwin does not replace it.</li>
+              <li>• These scenarios do not replace your registered manager, senior carer, medication lead, safeguarding lead or emergency services.</li>
+              <li>• Guidance here reflects common provider approaches. Always follow your own organisation&apos;s policies and procedures.</li>
+            </ul>
           </div>
         </div>
 
@@ -172,8 +216,8 @@ export default function ScenariosPage() {
               <CheckCircle size={18} className="text-teal-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-teal-700">{practisedCount}</p>
-              <p className="text-xs text-slate-500">Practised</p>
+              <p className="text-2xl font-bold text-teal-700">{reviewedCount}</p>
+              <p className="text-xs text-slate-500">Reviewed</p>
             </div>
           </div>
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-3">
@@ -191,7 +235,7 @@ export default function ScenariosPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-700">{scenarios.length}</p>
-              <p className="text-xs text-slate-500">Available scenarios</p>
+              <p className="text-xs text-slate-500">Guidance scenarios</p>
             </div>
           </div>
         </div>
@@ -231,7 +275,7 @@ export default function ScenariosPage() {
                 <div className="flex items-start gap-4">
                   {/* Icon tile */}
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${statusIconBg[scenario.status]}`}>
-                    {scenario.status === 'Practised' ? (
+                    {scenario.status === 'Reviewed' ? (
                       <CheckCircle size={22} className="text-teal-600" />
                     ) : scenario.status === 'In progress' ? (
                       <Clock size={22} className="text-amber-600" />
@@ -247,7 +291,7 @@ export default function ScenariosPage() {
                       <div className="flex items-center gap-2 flex-wrap sm:shrink-0 sm:justify-end">
                         {scenario.id === 9 && (
                           <span className="text-xs font-bold bg-teal-700 text-white px-2.5 py-1 rounded-full">
-                            New guided flow
+                            Guided scenario
                           </span>
                         )}
                         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${difficultyColour[scenario.difficulty]}`}>
@@ -257,7 +301,7 @@ export default function ScenariosPage() {
                     </div>
 
                     {/* Chips row */}
-                    <div className="flex items-center gap-2 flex-wrap mb-3">
+                    <div className="flex items-center gap-2 flex-wrap mb-4">
                       <span className="text-xs font-medium bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">
                         {scenario.category}
                       </span>
@@ -269,7 +313,25 @@ export default function ScenariosPage() {
                       </span>
                     </div>
 
-                    <p className="text-sm text-slate-500 leading-relaxed mb-4">{scenario.description}</p>
+                    {/* Guidance fields */}
+                    <div className="space-y-2.5 mb-4">
+                      <div>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">Situation</p>
+                        <p className="text-sm text-slate-700 leading-relaxed">{scenario.situation}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">What staff may be worried about</p>
+                        <p className="text-sm text-slate-600 leading-relaxed">{scenario.worries}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-teal-600 uppercase tracking-wide mb-0.5">What WorkTwin helps with</p>
+                        <p className="text-sm text-slate-600 leading-relaxed">{scenario.helps}</p>
+                      </div>
+                      <div className="bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-2.5">
+                        <p className="text-xs font-bold text-amber-700 uppercase tracking-wide mb-0.5">When to escalate</p>
+                        <p className="text-sm text-amber-900 leading-relaxed">{scenario.escalate}</p>
+                      </div>
+                    </div>
 
                     {/* CTA buttons */}
                     <div className="flex gap-2.5 flex-wrap">
@@ -279,7 +341,7 @@ export default function ScenariosPage() {
                           className="text-sm bg-teal-700 hover:bg-teal-800 text-white font-semibold px-4 py-2.5 rounded-xl transition-colors flex items-center gap-1.5 shadow-sm"
                         >
                           <PlayCircle size={15} />
-                          Open guided practice
+                          Open scenario
                         </Link>
                       ) : (
                         <button
@@ -287,7 +349,7 @@ export default function ScenariosPage() {
                           className="text-sm bg-teal-700 hover:bg-teal-800 text-white font-semibold px-4 py-2.5 rounded-xl transition-colors flex items-center gap-1.5"
                         >
                           <PlayCircle size={15} />
-                          {scenario.status === 'Practised' ? 'Review practice' : scenario.status === 'In progress' ? 'Continue practice' : 'Open practice'}
+                          {scenario.status === 'Reviewed' ? 'Review guidance' : scenario.status === 'In progress' ? 'Continue' : 'Open guidance'}
                         </button>
                       )}
                       <Link
@@ -305,13 +367,13 @@ export default function ScenariosPage() {
               {activeScenario === scenario.id && (
                 scenario.id === 1 ? (
                   <div className="border-t border-teal-100 bg-gradient-to-br from-teal-50 to-slate-50 px-6 py-5">
-                    <p className="text-xs font-bold text-teal-700 uppercase tracking-widest mb-3">Pilot preview</p>
+                    <p className="text-xs font-bold text-teal-700 uppercase tracking-widest mb-3">Controlled pilot preview</p>
                     <div className="bg-white border border-teal-200 rounded-2xl p-5 text-sm text-slate-700">
-                      <p className="font-semibold text-slate-800 mb-2">Example scene:</p>
+                      <p className="font-semibold text-slate-800 mb-2">Example situation:</p>
                       <p className="leading-relaxed text-slate-600">
-                        This is an example practice situation. A person being supported says they do not want to take a prescribed medicine and also says they do not feel well. In real work, staff should follow local medication policy, record concerns through the approved route and escalate to the appropriate trained lead.
+                        This is a fictional example. A person being supported says they do not want to take a prescribed medicine and also says they do not feel well. In real work, staff should follow local medication policy, record concerns through the approved route and escalate to the appropriate trained lead.
                       </p>
-                      <p className="font-semibold text-slate-800 mt-4 mb-2">What do you do first?</p>
+                      <p className="font-semibold text-slate-800 mt-4 mb-2">What would you do first?</p>
                       <div className="space-y-2 mt-1">
                         {[
                           'Stay calm, do not pressure the person, and escalate through the approved medication route',
@@ -327,19 +389,19 @@ export default function ScenariosPage() {
                       </div>
                     </div>
                     <p className="text-xs text-slate-400 mt-3 leading-relaxed">
-                      This is a controlled pilot preview. Future practice flows may guide staff through example steps, but real medication, safeguarding, wellbeing or immediate-risk concerns must still be escalated to the right human lead.
+                      Controlled pilot preview — fictional scenario only. Real medication, safeguarding, wellbeing or immediate-risk concerns must be escalated to the right human lead and recorded in your existing care system.
                     </p>
                   </div>
                 ) : (
                   <div className="border-t border-slate-100 bg-slate-50 px-6 py-5">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Pilot preview</p>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Controlled pilot preview</p>
                     <p className="text-sm text-slate-600 leading-relaxed">
-                      The full interactive scenario for{' '}
+                      The full guidance scenario for{' '}
                       <span className="font-semibold text-slate-700">{scenario.title}</span> is being
-                      prepared and will guide you through example practice steps with safer escalation reminders.
+                      prepared and will walk you through example steps with escalation reminders.
                     </p>
                     <p className="text-xs text-slate-400 mt-3 leading-relaxed">
-                      Pilot preview only. Scenario content for this topic must be reviewed before wider controlled use.
+                      Controlled pilot only. Scenario content for this topic must be reviewed before wider use.
                     </p>
                   </div>
                 )
@@ -351,7 +413,7 @@ export default function ScenariosPage() {
         {/* Footer safety note */}
         <div className="bg-white border border-slate-100 rounded-2xl px-5 py-4 shadow-sm">
           <p className="text-xs text-slate-400 leading-relaxed text-center">
-            Example practice mode only. These scenarios are not competency assessments, training sign-offs or operational advice. They do not replace speaking to a manager, safeguarding lead, trained clinician or emergency services where required.
+            Fictional demo scenarios — controlled pilot only. These scenarios are not competency assessments, training sign-offs or operational advice. They do not replace speaking to your registered manager, safeguarding lead, trained clinician or emergency services. Continue recording visits in your existing care system as normal.
           </p>
         </div>
 

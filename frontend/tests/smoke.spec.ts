@@ -74,15 +74,17 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByText('Week 4 - Review and next steps')).toBeVisible()
   })
 
-  test('scenarios page is clearly marked as example practice only', async ({ page }) => {
+  test('scenarios page shows guidance-led product copy and safety framing', async ({ page }) => {
     await page.goto('/scenarios')
-    await expect(page.getByRole('heading', { name: 'Practice Scenarios' })).toBeVisible()
-    await expect(page.getByText('Practice hub')).toBeVisible()
-    await expect(page.getByText('Build confidence with example care situations while keeping real decisions with the right human lead.')).toBeVisible()
-    await expect(page.getByText('of 9 practised')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Scenario Guidance' })).toBeVisible()
+    await expect(page.getByText('Guidance hub')).toBeVisible()
+    await expect(page.getByText(/Get safe shift-time guidance for real care situations/)).toBeVisible()
+    await expect(page.getByText('of 9 reviewed')).toBeVisible()
     await expect(page.getByText('Medication-related concern: knowing when to escalate')).toBeVisible()
-    await expect(page.getByText('Open guided practice')).toBeVisible()
-    await expect(page.getByText(/Example practice mode only\. These scenarios are not competency assessments, training sign-offs or operational advice\./)).toBeVisible()
+    await expect(page.getByText('Open guidance').first()).toBeVisible()
+    await expect(page.getByText('Controlled pilot').first()).toBeVisible()
+    await expect(page.getByText('No real service-user data')).toBeVisible()
+    await expect(page.getByText(/Fictional demo scenarios.*controlled pilot only.*not competency assessments/)).toBeVisible()
   })
 
   test('notes page states session-only controlled pilot behaviour', async ({ page }) => {

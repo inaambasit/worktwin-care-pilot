@@ -595,11 +595,24 @@ export default function AskPage() {
               </div>
             )}
 
-            {/* Live answer notice — only for source-grounded answers, not escalation or fallback */}
-            {!currentAnswer.isDemo && !isDemoFallback && currentAnswer.allowedToAnswer && currentAnswer.sources.length > 0 && (
+            {/* Answer status badge — three states */}
+            {currentAnswer.allowedToAnswer && !currentAnswer.requiresEscalation && currentAnswer.sources.length > 0 && !currentAnswer.isDemo && !isDemoFallback ? (
               <div className="flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-xl px-4 py-2.5 text-xs text-teal-800">
-                <Zap size={13} className="shrink-0 text-teal-600" />
-                Answered from your approved policy documents — sources shown below.
+                <BadgeCheck size={13} className="shrink-0 text-teal-600" />
+                <span>
+                  <span className="font-semibold">Answered from approved pilot documents</span>
+                  {' — sources shown below'}
+                </span>
+              </div>
+            ) : (!currentAnswer.allowedToAnswer || currentAnswer.requiresEscalation) ? (
+              <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-800">
+                <AlertTriangle size={13} className="shrink-0 text-amber-600" />
+                <span className="font-semibold">Escalation required — speak to a human lead</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700">
+                <AlertTriangle size={13} className="shrink-0 text-slate-500" />
+                <span className="font-semibold">Preview guidance — verify with a human lead</span>
               </div>
             )}
 
@@ -658,9 +671,9 @@ export default function AskPage() {
                       <AlertTriangle size={16} className="text-amber-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-amber-900">WorkTwin response</p>
+                      <p className="text-sm font-bold text-amber-900">This needs human support</p>
                       <p className="text-xs text-amber-700 mt-0.5">
-                        {isEmergencyEscalation(currentAnswer) ? 'Escalation required' : 'Speak to the right human lead'}
+                        {isEmergencyEscalation(currentAnswer) ? 'Contact the right lead now' : 'WorkTwin cannot make this decision'}
                       </p>
                     </div>
                   </div>
@@ -671,6 +684,9 @@ export default function AskPage() {
                   <p className="text-sm text-slate-700 leading-relaxed">
                     {currentAnswer.answer ||
                       'WorkTwin does not provide a direct answer on this topic. Please escalate to the appropriate person immediately.'}
+                  </p>
+                  <p className="mt-3 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 leading-relaxed">
+                    WorkTwin cannot replace the registered manager, safeguarding lead, medication lead or emergency services.
                   </p>
                 </div>
                 {currentAnswer.escalateIf.length > 0 && (
@@ -781,15 +797,18 @@ export default function AskPage() {
                     </div>
                     <div className="space-y-2">
                       {currentAnswer.sources.map((src, i) => (
-                        <div key={i} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 flex items-start gap-3">
-                          <div className="w-7 h-7 rounded-lg bg-teal-100 flex items-center justify-center shrink-0 mt-0.5">
-                            <BookOpen size={13} className="text-teal-700" />
+                        <div key={i} className="rounded-xl border border-teal-100 bg-teal-50 px-3 py-2.5 flex items-start gap-2.5">
+                          <div className="w-6 h-6 rounded-lg bg-white border border-teal-100 flex items-center justify-center shrink-0 mt-0.5">
+                            <BookOpen size={12} className="text-teal-700" />
                           </div>
-                          <div>
-                            <p className="text-xs font-bold text-teal-700 mb-0.5">{src.source_label}</p>
-                            <p className="text-sm font-semibold text-slate-800">{src.title}</p>
-                            {src.section && <p className="text-xs text-slate-500 mt-0.5">{src.section}</p>}
-                            {src.page != null && <p className="text-xs text-slate-400 mt-0.5">Page {src.page}</p>}
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-slate-800 leading-snug">{src.title}</p>
+                            <p className="text-[11px] text-teal-700 font-medium mt-0.5">{src.source_label}</p>
+                            {(src.section || src.page != null) && (
+                              <p className="text-[11px] text-slate-400 mt-0.5">
+                                {src.section}{src.section && src.page != null ? ' · ' : ''}{src.page != null ? `Page ${src.page}` : ''}
+                              </p>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -980,6 +999,9 @@ export default function AskPage() {
               ))}
             </div>
           )}
+          <p className="text-[11px] text-slate-400 px-1 pb-1 leading-tight">
+            Do not enter real names, medication details, safeguarding cases or confidential information.
+          </p>
           <div className="flex gap-2 bg-white border border-slate-200 rounded-2xl p-1.5 shadow-sm focus-within:border-teal-300 focus-within:ring-2 focus-within:ring-teal-100 transition-shadow">
             <input
               ref={inputRef}

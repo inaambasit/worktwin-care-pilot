@@ -573,7 +573,7 @@ export default function AskPage() {
 
         {/* Answer area */}
         {showAnswer && currentAnswer && (
-          <div className="space-y-4 pb-40">
+          <div className="space-y-4 pb-44 sm:pb-32">
             {/* Back to quick actions */}
             <button
               onClick={handleBackToQuickActions}
@@ -988,7 +988,7 @@ export default function AskPage() {
         )}
 
         {/* Input bar */}
-        <div className="sticky bottom-0 bg-slate-50 pt-2 border-t border-slate-200 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
+        <div className="sticky bottom-0 bg-white pt-2 border-t border-slate-100 shadow-[0_-1px_4px_rgba(0,0,0,0.04)] pb-2 sm:pb-0">
           {showAnswer && currentAnswer && !(currentAnswer.requiresEscalation && isHighRisk(currentAnswer)) && (
             <div className="mb-2 flex flex-wrap gap-2">
               {getFollowUpPrompts(currentAnswer).map((p) => (

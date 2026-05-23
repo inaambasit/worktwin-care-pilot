@@ -216,4 +216,58 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByText(/live CRM, care system/i)).toBeVisible()
     await expect(page.getByText('Nothing leaves your browser session.')).toBeVisible()
   })
+
+  test('dashboard mobile journey shows controlled pilot framing and journey links at 375px', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.goto('/dashboard')
+    // Controlled pilot / no-real-data framing — scope to main to avoid hidden header spans
+    await expect(page.locator('main').getByText('Controlled Pilot', { exact: true }).first()).toBeVisible()
+    await expect(page.locator('main').getByText('No real data', { exact: true }).first()).toBeVisible()
+    // Dashboard points staff toward all four main journey destinations — scope to main to avoid closed drawer links
+    await expect(page.locator('main a[href="/ask"]').first()).toBeVisible()
+    await expect(page.locator('main a[href="/policies"]').first()).toBeVisible()
+    await expect(page.locator('main a[href="/scenarios"]').first()).toBeVisible()
+    await expect(page.locator('main a[href="/escalation"]').first()).toBeVisible()
+  })
+
+  test('onboarding mobile journey shows example progress framing and guidance links at 375px', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.goto('/onboarding')
+    // Example/demo onboarding progress wording visible
+    await expect(page.getByText('Example tasks completed').first()).toBeVisible()
+    await expect(page.getByText('Example progress only').first()).toBeVisible()
+    // Not presented as a live HR/training/competency record
+    await expect(page.getByText(/not a live HR, training or competency record/i)).toBeVisible()
+    // Page points staff toward Ask WorkTwin, Policy Library and Scenario Guidance — scope to main to avoid closed drawer links
+    await expect(page.locator('main a[href="/ask"]').first()).toBeVisible()
+    await expect(page.locator('main a[href="/policies"]').first()).toBeVisible()
+    await expect(page.locator('main a[href="/scenarios"]').first()).toBeVisible()
+  })
+
+  test('scenarios mobile shows fictional guidance cards and no horizontal scroll at 375px', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.goto('/scenarios')
+    await expect(page.getByRole('heading', { name: 'Scenario Guidance' })).toBeVisible()
+    // Fictional demo / controlled pilot safety framing
+    await expect(page.getByText('No real service-user data').first()).toBeVisible()
+    // Fictional service-user guidance cards present
+    await expect(page.getByText('Fictional service-user guidance cards')).toBeVisible()
+    await expect(page.getByText('Ada Rahman')).toBeVisible()
+    await expect(page.getByText('George Miller')).toBeVisible()
+    // No horizontal overflow at 375px
+    const overflows = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth
+    )
+    expect(overflows).toBe(false)
+  })
+
+  test('/scenarios/access-refusal mobile shows 999 emergency access and practice-mode note at 375px', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.goto('/scenarios/access-refusal')
+    // 999 call link and immediate-danger label visible on the mobile safety strip
+    await expect(page.locator('a[href="tel:999"]').first()).toBeVisible()
+    await expect(page.getByText(/Immediate danger/i).first()).toBeVisible()
+    // Practice-mode note: this record is not submitted to any real care system
+    await expect(page.getByText(/not submitted to any real care system/i)).toBeVisible()
+  })
 })

@@ -1,6 +1,6 @@
 # WorkTwin Care Pilot - Current State
 
-> Generated: 2026-05-07. Updated: 2026-05-22. Source of truth through checkpoint `f9f8054` on branch `main`.
+> Generated: 2026-05-07. Updated: 2026-05-23. Source of truth through checkpoint `c278725` on branch `main`.
 > Update this file whenever a milestone changes the status of any item below.
 > Do not edit other files to reconcile with this document - fix those files instead.
 
@@ -66,13 +66,15 @@
 
 > **4S.100B (2026-05-22):** Scenarios redesigned as guidance-led support — docs and frontend alignment. Scenarios are now framed as fictional guidance-led examples that help staff think through what to do next, when to escalate, and what not to do. They are not recording forms, competency sign-offs, training assessments or replacements for existing care-recording systems. Next planned slices: 4S.100C (two fictional Shagufta-inspired scenarios), 4S.100D (fictional service-user guidance card pattern), 4S.100E (dashboard and onboarding journey alignment). Checkpoint: `f9f8054`.
 
+> **4S.100C–4S.100G (2026-05-22–23):** Shagufta evidence sequence complete. 4S.100C: fictional Shagufta-inspired guidance-led scenarios added. 4S.100D: fictional service-user guidance card pattern added. 4S.100E: dashboard and onboarding staff journey aligned through Dashboard, Ask WorkTwin, Policy Library, Scenario Guidance, Onboarding, and Escalation Contacts. 4S.100F: mobile journey smoke coverage added; Playwright smoke 24/24; dashboard, onboarding, scenario guidance, and access-refusal safety covered. 4S.100G: Shagufta controlled-preview evidence log committed. Build passed. No backend, DB, auth, admin proxy, RAG, policy, env, SQL or data changes. Checkpoint: `c278725`.
+
 ---
 
 ## 1. Current Checkpoint
 
 | Item | Value |
 |---|---|
-| Commit | `f9f8054` |
+| Commit | `c278725` |
 | Branch | `main` |
 | Repo path | `C:\Projects\worktwin-care-pilot\worktwin-care-pilot-starter` |
 | Backend | FastAPI / `backend/app/main.py` |
@@ -94,6 +96,10 @@ The system currently demonstrates:
 - A three-gate governance model controlling which documents reach staff, embeddings, and AI answers independently
 - An admin document registry with upload, embedding generation, vector search, and answer-debug tooling
 - Scenarios redesigned as fictional guidance-led examples — each scenario helps staff think through what to do next, when to escalate, and what not to do in a realistic care situation; they are not recording forms, competency sign-offs or replacements for existing care-recording systems
+- Fictional service-user guidance card pattern — guidance cards for realistic fictional care situations; fictional data only
+- Staff journey aligned through Dashboard, Ask WorkTwin, Policy Library, Scenario Guidance, Onboarding, and Escalation Contacts
+- Shagufta reviewed the controlled preview and gave positive feedback on Ask WorkTwin and the Policy Library; her feedback confirmed the guidance-led scenario direction (4S.100A)
+- Mobile journey smoke coverage added — Playwright smoke 24/24; dashboard, onboarding, scenario guidance, and access-refusal safety covered (4S.100F)
 - Supabase Auth, JWT validation, membership resolution and browser Bearer forwarding have passed controlled local proof; public/live rollout is not enabled
 
 The pilot client is **Thumhara Centre**. No real staff, service-user, resident, care-plan, HR, safeguarding case-note or named complaint personal data has been introduced. No real service-user, HR, safeguarding, medication, complaint or confidential personal data should be entered. Some controlled internal policy testing has used Thumhara Centre/QCS policy documents under governance restrictions. A content-source review completed on 2026-05-07 established a formal QCS and third-party content restriction; see Section 11.
@@ -146,7 +152,7 @@ Public/live staff rollout remains blocked. Trusted-user access (3–5 named user
 - 9 backend test files (JWT auth, membership, staff context, ask identity, policies identity, grounding safety, document registry models, governance gates, test_app_import.py)
 - `backend/tests/test_governance_gates.py` added in 4S.90A: 39 governance gate unit tests passed (8 test classes covering embedding gate, answer-debug gate, staff visibility gate, staff Ask gate, sensitive/escalation/dummy document blocking, role matching, and fully approved document pass-all verification) — no DB, no HTTP, plain dict fixtures only
 - Related tests also passed in 4S.90A: `test_ask_grounding_safety.py` and `test_document_registry_models.py`, 17 passed — no runtime code changed
-- Playwright smoke tests (16 tests, all major staff routes)
+- Playwright smoke tests (24 tests, all major staff routes; mobile journey coverage added for dashboard, onboarding, scenario guidance, and access-refusal safety in 4S.100F)
 - Admin proxy spec (30+ tests, 5 describe blocks)
 
 ---
@@ -249,7 +255,7 @@ The system demonstrates the intended architecture convincingly: governance gates
 | Controlled trusted-user pilot readiness | 9 / 10 | Four-policy set proven; auth/session proven locally; pilot pack created; remaining step is named-user approval and access setup |
 | Production / live operational readiness | NO-GO | No DPA; QCS use unconfirmed for AI/RAG; production deployment, monitoring, retention/deletion and incident process not proven; not production-ready |
 | Privacy / compliance | 4 / 10 | Privacy-by-design in architecture; no DPA; QCS use unconfirmed; real data must not be entered |
-| Documentation accuracy | 8.5 / 10 | Aligned through 4S.100B at `f9f8054`; Shagufta feedback, guidance-led scenario direction, next planned slices, and safety boundaries recorded |
+| Documentation accuracy | 8.5 / 10 | Aligned through 4S.100H at `c278725`; Shagufta feedback, evidence log, completed 4S.100A–4S.100G sequence, guidance-led scenario direction, fictional service-user guidance cards, mobile journey coverage, next planned slices (4S.101A–D), and safety boundaries recorded |
 
 ---
 
@@ -290,15 +296,21 @@ A sandbox Supabase auth E2E setup plan has been created at `docs/4s90i-sandbox-a
 | Ask WorkTwin mobile trust/source polish | Trust and source UI, helper text, sticky input, mobile viewport | Done (`51ded3c`) |
 | 4S.100A | Shagufta controlled preview feedback captured; guidance-led scenario direction recorded | Done (`671f139`) |
 | 4S.100B | Scenarios redesigned as guidance-led support; docs and frontend aligned | Done (`f9f8054`) |
+| 4S.100C | Fictional Shagufta-inspired scenarios added | Done |
+| 4S.100D | Fictional service-user guidance card pattern added | Done |
+| 4S.100E | Dashboard and onboarding staff journey aligned | Done |
+| 4S.100F | Mobile journey smoke coverage added; Playwright smoke 24/24 | Done |
+| 4S.100G | Shagufta controlled-preview evidence log committed | Done (`c278725`) |
 
 ### Product development track (next planned slices)
 
 | Slice | Description |
 |---|---|
-| 4S.100C | Add two fictional Shagufta-inspired guidance-led scenarios |
-| 4S.100D | Add fictional service-user guidance card pattern |
-| 4S.100E | Dashboard and onboarding journey alignment |
-| Later | Auth / security / governance and documentation truth alignment before any real trusted worker or production use |
+| 4S.101A | Claude Design review of Dashboard, Onboarding, and staff journey |
+| 4S.101B | Codex frontend safety/stale wording review |
+| 4S.101C | UI polish fixes from design review |
+| 4S.101D | Mobile visual polish pass |
+| Later | Auth / security / governance readiness before any real staff or service-user data |
 
 ### Technical backlog
 

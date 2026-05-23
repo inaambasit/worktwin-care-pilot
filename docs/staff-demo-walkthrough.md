@@ -1,7 +1,7 @@
 # Staff Demo Walkthrough
 
-**Updated:** 22 May 2026
-**Milestone:** 4S.100B
+**Updated:** 23 May 2026
+**Milestone:** 4S.100H
 **Status:** Controlled pilot prototype — not production-ready; not approved for unsupervised real staff use  
 **Pilot client:** Thumhara Centre
 
@@ -91,18 +91,18 @@ Staff can view a list of escalation contacts relevant to their role — safeguar
 
 ## 5. Demo posture
 
-Current posture at checkpoint `f9f8054`:
+Current posture at checkpoint `c278725`:
 
 - Local build passes (Next.js, no errors or warnings)
-- Playwright smoke tests: 20/20 passed — all major staff routes
+- Playwright smoke tests: 24/24 passed — all major staff routes; mobile journey coverage added for dashboard, onboarding, scenario guidance, and access-refusal safety (4S.100F)
 - Admin API proxy: disabled (ADMIN_PROXY_ENABLED not set); /api/admin/documents returns 403 — `{"detail":"Admin proxy is disabled for this deployment."}`
 - Auth: local proof complete (4S.98A, 4S.98B); `PILOT_AUTH_MODE=true` proven locally with real Supabase Bearer token; public/live rollout remains disabled
-- Shagufta completed controlled preview (4S.100A); gave positive feedback on Ask WorkTwin and the policy experience
+- Shagufta reviewed the controlled preview (4S.100A); Ask WorkTwin and Policy Library positively received; feedback implemented across 4S.100B–4S.100G; controlled-preview evidence log committed (4S.100G)
 
 **Demo posture summary:**
 - Credible for a controlled stakeholder demo using the four approved Thumhara policies (TC-POL-001 to TC-POL-004). AC32, CC34, and QQ03 are BLOCKED (2026-05-07) and must not appear in any demo, demo question, or demo material.
-- Shagufta reviewed the controlled preview on her mobile device and gave positive feedback on Ask WorkTwin and the policy experience (4S.100A).
-- Scenarios are now guidance-led, not recording-led. Each scenario helps staff think through what to do next, when to escalate, and what not to do. They are not recording forms, training assessments or care-recording system replacements.
+- Shagufta reviewed the controlled preview and gave positive feedback on Ask WorkTwin and the Policy Library (4S.100A). Her feedback was implemented across 4S.100B–4S.100G. A controlled-preview evidence log has been committed (4S.100G).
+- Scenarios are guidance-led, not recording-led. Each scenario helps staff think through what to do next, when to escalate, and what not to do. Fictional Shagufta-inspired scenarios and fictional service-user guidance cards are included. Scenarios are not recording forms, training assessments or care-recording system replacements.
 - Not production-ready.
 - Not approved for unsupervised real staff use.
 - Do not demonstrate admin upload/proxy as production-ready — the proxy is disabled publicly; real session guard (4S.90N-C), real CSRF / same-origin guard (4S.90N-E), and admin response minimisation (4S.90N-F) are implemented; production rollout controls, DPA/content permissions, pilot governance, and final controlled pilot sign-off remain outstanding.
@@ -136,6 +136,11 @@ Use natural language. Do not read from slides.
 - **Admin proxy disabled publicly.** The admin proxy is disabled publicly (`ADMIN_PROXY_ENABLED` not set). Real session guard (4S.90N-C) is implemented. Real CSRF / same-origin guard (4S.90N-E) is implemented. Admin response minimisation (4S.90N-F) is implemented. Production rollout controls, DPA/content permissions, pilot governance, and final controlled pilot sign-off remain outstanding. Do not represent admin upload/proxy as production-ready.
 - **QCS content blocked.** AC32, CC34, and QQ03 are QCS-derived content. BLOCKED (2026-05-07) -- QCS content restriction applies; must not be used in demo, pilot, staff-style Ask, answer-debug expansion, embedding expansion, staff visibility, or production until written permission confirms this specific AI/RAG use case is allowed. Their DB flags and embeddings are historical/current registry state only and do not represent approved continuing use. See docs/current-state.md Section 12.
 - **No DPA.** A data processing agreement with Thumhara Centre is required before any real personal data is introduced.
+- **Next planned slices:**
+  - 4S.101A — Claude Design review of Dashboard, Onboarding, and staff journey
+  - 4S.101B — Codex frontend safety/stale wording review
+  - 4S.101C — UI polish fixes from design review
+  - 4S.101D — Mobile visual polish pass
 - **Future work may include:**
   - More granular staff role journeys (senior carer, team leader, coordinator)
   - Bilingual support (e.g. English/Urdu for community care settings)

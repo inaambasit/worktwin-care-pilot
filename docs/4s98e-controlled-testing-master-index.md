@@ -25,10 +25,10 @@ WorkTwin Care Pilot is in **controlled preview only**.
 | Item | Current position |
 |---|---|
 | Operational use | Not live. No real care delivery decisions should be based on this tool. |
-| Testing stage | Shagufta controlled preview complete (4S.100A); implementing guidance-led scenarios (4S.100C–E) before any 3–5 trusted care worker testing begins. |
+| Testing stage | Shagufta controlled preview complete (4S.100A). Guidance-led scenarios (4S.100C), fictional service-user guidance cards (4S.100D), dashboard and onboarding journey alignment (4S.100E), mobile journey smoke coverage — Playwright smoke 24/24 (4S.100F), and controlled-preview evidence log (4S.100G) are all complete. Design review and UI polish (4S.101A–C) is the next development gate before any 3–5 trusted care worker testing begins. |
 | Confidential information | No real staff names, service-user names, care plans, medication details, safeguarding cases, HR records or incident reports should be entered at any point. |
 | Policy library | Limited to five approved pilot documents (see Section 6). |
-| Next gate | Implement 4S.100C guidance-led scenarios based on Shagufta's feedback. Shagufta reviewed the controlled preview and gave positive feedback on Ask WorkTwin and the policy experience (4S.100A). |
+| Next gate | Design review and UI polish pass (4S.101A–4S.101C) before any wider tester access. |
 
 Testing must not expand beyond a single controlled reviewer until the conditions in Section 5 are resolved.
 
@@ -100,9 +100,9 @@ No additional documents should be made live until the policy go-live checklist h
 
 ## 7. Next Decision
 
-Steps 1 and 2 (Shagufta's controlled preview and feedback) are complete. **Current position (4S.100A):** Shagufta gave positive feedback. No safety or governance stop conditions were raised. The direction from her feedback is to implement guidance-led scenarios (Steps 3–6 remain pending while 4S.100C–E are implemented).
+Steps 1 and 2 (Shagufta's controlled preview and feedback) are complete. **Current position (4S.100G):** The full Shagufta evidence sequence is complete. Shagufta gave positive feedback on Ask WorkTwin and the Policy Library. No safety or governance stop conditions were raised. Guidance-led scenarios (4S.100C), fictional service-user guidance cards (4S.100D), dashboard and onboarding journey alignment (4S.100E), mobile journey smoke coverage — Playwright smoke 24/24 (4S.100F), and controlled-preview evidence log (4S.100G) are all committed. Checkpoint: `c278725`.
 
-The **immediate next development decision** is implementation of two fictional guidance-led scenarios (4S.100C), followed by the fictional service-user guidance card pattern (4S.100D) and dashboard/onboarding alignment (4S.100E).
+The **immediate next development decision** is a design review and UI polish pass: 4S.101A (Claude Design review of Dashboard, Onboarding, and staff journey), 4S.101B (Codex frontend safety/stale wording review), 4S.101C (UI polish fixes from design review), and 4S.101D (mobile visual polish pass). Steps 3–6 remain pending until the design review is complete.
 
 The three possible outcomes from the original review remain relevant for future stages:
 

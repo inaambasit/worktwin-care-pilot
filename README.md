@@ -21,6 +21,10 @@ WorkTwin Care Pilot is currently in **controlled preview** — a supervised prot
 - Five approved pilot documents are loaded and staff-queryable (see policy boundary below)
 - Ask WorkTwin has been verified on controlled test questions: visitor arrival guidance, gift acceptance (answered from Professional Boundaries), and medication error (correctly escalated — no AI medication advice returned)
 - Mobile polish improvements are in place: landing navigation, staff sign-in escape link, access-refusal emergency visibility, escalation tap targets, policy modal close button, dashboard walkthrough strip, and private notes layout
+- Shagufta reviewed the controlled preview; Ask WorkTwin and Policy Library positively received; product direction confirmed as guidance-led scenario support for realistic care situations
+- Scenarios are guidance-led examples (what to do next, when to escalate, what not to do); fictional Shagufta-inspired scenarios and fictional service-user guidance card pattern added
+- Staff journey aligned through Dashboard, Ask WorkTwin, Policy Library, Scenario Guidance, Onboarding, and Escalation Contacts
+- Playwright smoke tests 24/24; mobile journey coverage added for dashboard, onboarding, scenario guidance, and access-refusal safety
 
 ### What is not live / not enabled
 
@@ -32,7 +36,9 @@ WorkTwin Care Pilot is currently in **controlled preview** — a supervised prot
 
 ### Current testing gate
 
-**Next gate:** Shagufta / manager controlled mobile preview — a supervised walkthrough to be completed before any wider tester access.
+Shagufta's controlled mobile preview is complete (4S.100A). She reviewed Ask WorkTwin and the Policy Library; both were positively received. Her feedback was implemented across 4S.100B–4S.100G: scenarios redesigned as guidance-led support, fictional Shagufta-inspired scenarios and fictional service-user guidance card pattern added, staff journey aligned, mobile journey smoke coverage added (24/24), and a controlled-preview evidence log committed.
+
+The next gate before any wider tester access is a design review and UI polish pass (4S.101A–4S.101C).
 
 A 3–5 trusted care worker test phase is prepared (onboarding pack and review scripts are ready in the controlled testing documents below) but has not started.
 
@@ -156,16 +162,16 @@ Controlled testing documents (see [Current controlled preview status](#current-c
 - [docs/4s98d-trusted-tester-onboarding-message-pack.md](docs/4s98d-trusted-tester-onboarding-message-pack.md)
 - [docs/4s98a-trusted-care-worker-testing-readiness-pack.md](docs/4s98a-trusted-care-worker-testing-readiness-pack.md)
 
-## Recent changes (checkpoint 2ce244a)
+## Recent changes (checkpoint c278725)
 
-- Controlled testing master index added (docs/4s98e)
-- Trusted tester onboarding message pack added (docs/4s98d)
-- Controlled Ask quality scorecard added (docs/4s98c)
-- Shagufta review script and feedback log added (docs/4s98b)
-- Trusted care worker testing readiness pack added (docs/4s98a)
-- Mobile polish: landing navigation, staff sign-in escape link, access-refusal emergency visibility, escalation tap targets, policy modal close button, dashboard walkthrough strip, private notes mobile layout
-- Backend health and /policies verified: 5 policies returned
-- Ask WorkTwin verified on controlled test questions (visitor arrival, gift acceptance, medication error escalation)
+- 4S.100A — Shagufta controlled preview feedback captured; guidance-led scenario direction recorded
+- 4S.100B — Scenarios redesigned as guidance-led support; docs and frontend aligned
+- 4S.100C — Fictional Shagufta-inspired scenarios added
+- 4S.100D — Fictional service-user guidance card pattern added
+- 4S.100E — Dashboard and onboarding staff journey aligned
+- 4S.100F — Mobile journey smoke coverage added; Playwright smoke 24/24; dashboard, onboarding, scenario guidance, and access-refusal safety covered
+- 4S.100G — Shagufta controlled-preview evidence log committed
+- 4S.100H — README and documentation alignment (this slice)
 
 ## Known gaps
 

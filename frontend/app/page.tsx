@@ -18,9 +18,9 @@ const features = [
   },
   {
     icon: PlayCircle,
-    title: 'Vertical scenario templates',
+    title: 'Guidance-led scenario support',
     description:
-      'Teams can practise realistic scenarios for their sector. In the Care Pilot, this includes medication refusal, safeguarding and incident reporting.',
+      'Teams can try fictional guidance scenarios for their sector. In the Care Pilot, this includes medication refusal, safeguarding and access refusal — helping staff think through what to do next.',
   },
   {
     icon: Shield,
@@ -196,7 +196,7 @@ export default function LandingPage() {
           <Link href="/dashboard" className="hover:text-white underline underline-offset-2">Employee Dashboard</Link>
           <Link href="/ask" className="hover:text-white underline underline-offset-2">Ask WorkTwin</Link>
           <Link href="/onboarding" className="hover:text-white underline underline-offset-2">My Onboarding</Link>
-          <Link href="/scenarios" className="hover:text-white underline underline-offset-2">Practice Scenarios</Link>
+          <Link href="/scenarios" className="hover:text-white underline underline-offset-2">Scenario Guidance</Link>
         </div>
       </div>
 

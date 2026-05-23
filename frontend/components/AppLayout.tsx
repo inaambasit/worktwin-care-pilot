@@ -15,7 +15,7 @@ const employeeNav = [
   { href: '/ask', label: 'Ask WorkTwin', icon: MessageCircle },
   { href: '/policies', label: 'Policy Library', icon: BookOpen },
   { href: '/onboarding', label: 'My Onboarding', icon: ClipboardList },
-  { href: '/scenarios', label: 'Practice Scenarios', icon: PlayCircle },
+  { href: '/scenarios', label: 'Scenario Guidance', icon: PlayCircle },
   { href: '/notes', label: 'Private Notes', icon: Lock },
 ]
 

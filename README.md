@@ -6,7 +6,7 @@ This is a working pilot and demo prototype. It is not production-ready.
 
 ## What it is
 
-WorkTwin Care Pilot lets care staff ask questions about workplace policies, practise scenarios, and access onboarding guidance through a private AI assistant. Staff conversations are not visible to employers. The system is designed to use approved, source-cited documents as its knowledge base.
+WorkTwin Care Pilot lets care staff ask questions about workplace policies, use Scenario Guidance to think through realistic care situations, and access onboarding guidance through a private AI assistant. Staff conversations are not visible to employers. The system is designed to use approved, source-cited documents as its knowledge base.
 
 The first test client is Thumhara Centre (sample data only -- no real staff or service-user data).
 
@@ -88,7 +88,7 @@ The staff app is mobile-responsive with drawer navigation on mobile and a fixed 
 - Ask WorkTwin (governed staff /ask path -- source-grounded answers require OpenAI, a configured database, and a qualifying governed document; falls back safely when infrastructure is unavailable, no qualifying source exists, or a topic is high risk)
 - Policy library
 - Onboarding hub
-- Practice scenarios
+- Scenario Guidance
 - Access-refusal scenario
 - Private notes
 - Escalation contacts

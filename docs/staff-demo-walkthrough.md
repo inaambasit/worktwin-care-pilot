@@ -12,7 +12,7 @@
 This demo shows a working pilot of the WorkTwin staff-facing interface for a domiciliary and residential care setting. It proves that:
 
 - Staff can navigate a clean, credible front-end from a browser.
-- Core features are functional: policy lookup, guided onboarding, practice scenarios, private notes and escalation contacts.
+- Core features are functional: policy lookup, guided onboarding, scenario guidance, private notes and escalation contacts.
 - Admin UI visibility is controlled by `NEXT_PUBLIC_ADMIN_DEMO_ENABLED`; admin API/proxy actions remain disabled/fail-closed publicly unless `ADMIN_PROXY_ENABLED` is deliberately enabled, which must not happen before real auth/session/CSRF/RBAC are in place.
 - High-risk topics route staff to a human, not to autonomous AI advice.
 
@@ -61,7 +61,7 @@ Staff can type a free-text question into the AI assistant. The Ask demo path foc
 Staff can browse and search approved policy documents. Visitor Sign-In and Identification Procedure is currently approved and staff-visible. AC32, CC34, and QQ03 are QCS-derived documents -- BLOCKED (2026-05-07); must not be used in demo. Documents in admin-debug or human-only lanes are not visible here. This is read-only. No policies have been approved for unsupervised real-world use at this stage.
 
 ### Onboarding hub
-New staff or those in their first weeks can follow a structured onboarding path. This includes key policies to read, short tasks to acknowledge, and links to relevant practice scenarios. Content is sample/fictional.
+New staff or those in their first weeks can follow a structured onboarding path. This includes key policies to read, short tasks to acknowledge, and links to relevant scenario guidance. Content is sample/fictional.
 
 ### Guidance-led scenarios
 Scenarios are fictional examples of situations care workers face during a shift. Each scenario presents a realistic situation, offers guidance on what to do next, indicates when to escalate, and states clearly what WorkTwin does not replace. Scenarios are not recording forms, competency sign-offs, training assessments or replacements for existing care-recording systems. No results are stored or shared with the employer. Staff must continue using their existing care-recording systems alongside WorkTwin.
@@ -115,7 +115,7 @@ Use natural language. Do not read from slides.
 
 > "This is WorkTwin — it's designed to sit alongside a care worker during their working day, not replace their manager or their judgement.
 >
-> Staff can see the whole product journey here — from the landing page through the dashboard, policy lookup, onboarding, practice scenarios, private notes, and escalation contacts.
+> Staff can see the whole product journey here — from the landing page through the dashboard, policy lookup, onboarding, scenario guidance, private notes, and escalation contacts.
 >
 > The AI only answers from documents the employer has approved and that have passed our governance gates. Where a document has been approved, answers are source-grounded and the source is always cited. If something touches safeguarding, medication, HR or anything sensitive, the system tells the worker to speak to a person — it doesn't try to handle it.
 >

@@ -223,7 +223,7 @@ export default function OnboardingPage() {
             </div>
             <p className="font-bold text-teal-800 text-lg mb-1">Example onboarding pathway complete</p>
             <p className="text-sm text-teal-700 max-w-sm mx-auto">
-              You can still revisit guidance, practise scenarios or ask WorkTwin policy questions.
+              You can still revisit guidance, try fictional guidance scenarios or ask WorkTwin policy questions.
             </p>
           </div>
         )}

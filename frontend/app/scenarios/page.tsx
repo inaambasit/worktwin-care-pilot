@@ -233,6 +233,88 @@ export default function ScenariosPage() {
           </div>
         </div>
 
+        {/* Fictional service-user guidance cards */}
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-base font-bold text-slate-800 mb-1">Fictional service-user guidance cards</h2>
+            <p className="text-xs text-slate-500 leading-relaxed max-w-2xl">
+              These demo cards show how future versions could organise person-specific guidance safely. Real service-user details, family contacts, medication details and care-plan information must not be entered in this controlled preview.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Card: Ada Rahman */}
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+              <div className="bg-teal-700 px-5 py-3.5 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-white font-bold text-sm leading-snug">Ada Rahman</p>
+                  <p className="text-teal-200 text-xs mt-0.5">Situation focus: Morning routine and reassurance</p>
+                </div>
+                <span className="shrink-0 text-xs font-semibold bg-white/20 text-white px-2.5 py-1 rounded-full whitespace-nowrap">
+                  Fictional demo profile
+                </span>
+              </div>
+              <div className="px-5 py-4 space-y-3 text-sm">
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">Known routine</p>
+                  <p className="text-slate-700 leading-relaxed">Takes time to settle during morning calls and may refuse food or personal care if rushed.</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-teal-600 uppercase tracking-wide mb-0.5">What may help</p>
+                  <p className="text-slate-700 leading-relaxed">Use calm reassurance, give time where safe, offer simple choices and involve the approved senior/manager route if concerns continue.</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">Demo contact route</p>
+                  <p className="text-slate-600 leading-relaxed">Daughter / family contact route would only be shown in a real secure pilot after approval. In this demo, contact the senior or registered manager.</p>
+                </div>
+                <div className="bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-2.5">
+                  <p className="text-xs font-bold text-amber-700 uppercase tracking-wide mb-0.5">Escalate if</p>
+                  <p className="text-amber-900 leading-relaxed">Food, fluids, toilet support, personal care or medication-related routine remains affected, or there are signs of deterioration, distress or immediate risk.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Card: George Miller */}
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+              <div className="bg-teal-700 px-5 py-3.5 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-white font-bold text-sm leading-snug">George Miller</p>
+                  <p className="text-teal-200 text-xs mt-0.5">Situation focus: Garden refusal and outdoor safety</p>
+                </div>
+                <span className="shrink-0 text-xs font-semibold bg-white/20 text-white px-2.5 py-1 rounded-full whitespace-nowrap">
+                  Fictional demo profile
+                </span>
+              </div>
+              <div className="px-5 py-4 space-y-3 text-sm">
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">Known routine</p>
+                  <p className="text-slate-700 leading-relaxed">Enjoys sitting outside and may resist coming inside when he wants more time in the garden.</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-teal-600 uppercase tracking-wide mb-0.5">What may help</p>
+                  <p className="text-slate-700 leading-relaxed">Check comfort, weather, warmth, mobility and falls risk. Use calm conversation and offer a gentle choice where safe.</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">Demo contact route</p>
+                  <p className="text-slate-600 leading-relaxed">Family/contact guidance would only be available in a real secure pilot after approval. In this demo, contact the senior or registered manager if risk increases.</p>
+                </div>
+                <div className="bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-2.5">
+                  <p className="text-xs font-bold text-amber-700 uppercase tracking-wide mb-0.5">Escalate if</p>
+                  <p className="text-amber-900 leading-relaxed">The person appears cold, confused, unwell, distressed, unsafe, at risk of falling or refuses to come inside despite welfare concerns.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Safety boundary text */}
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5">
+            <p className="text-xs text-slate-500 leading-relaxed">
+              <span className="font-semibold text-slate-600">Safety boundaries: </span>
+              Fictional demo profiles only. Not live service-user records. No real names, contacts, care plans or medication details. Staff must continue using existing care-recording systems. WorkTwin does not replace the senior, registered manager, medication lead, safeguarding lead or emergency services.
+            </p>
+          </div>
+        </div>
+
         {/* Summary cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-3">

@@ -129,6 +129,30 @@ const scenarios: Scenario[] = [
     duration: '7 min',
     status: 'Not started',
   },
+  {
+    id: 10,
+    title: 'Morning call: refusing food, personal care and medication routine',
+    category: 'Morning Support',
+    situation: 'A fictional service user is in bed during the morning call and is refusing to get up, refusing food and not wanting personal care. Staff are also concerned because food may be needed before the person\'s medication routine.',
+    worries: 'Whether to keep encouraging, whether the person is unwell or distressed, whether the medication routine is affected, and who to contact when family support may take time to arrive.',
+    helps: 'Thinking through calm reassurance, checking for immediate concerns, allowing time where safe, contacting the senior, registered manager or medication lead when medication or nutrition is involved, and avoiding pressure or force.',
+    escalate: 'Escalate to the senior, registered manager or medication lead if the person continues refusing food, fluids, personal care, toilet support or anything connected to medication. Call 999 if there is immediate danger or serious deterioration.',
+    difficulty: 'Intermediate',
+    duration: '8 min',
+    status: 'Not started',
+  },
+  {
+    id: 11,
+    title: 'Service user refuses to come inside from the garden',
+    category: 'Outdoor Safety',
+    situation: 'A fictional older service user is sitting outside in the garden and does not want to come back inside.',
+    worries: 'Whether the person is safe outside, whether the weather, temperature, mobility, falls risk or confusion creates a concern, and how to respect choice without ignoring risk.',
+    helps: 'Using calm communication, checking whether the person is comfortable and safe, offering reassurance, giving time where safe, contacting the senior or registered manager if risk increases, and involving the approved family or contact route only where the provider process allows.',
+    escalate: 'Escalate if the person appears cold, confused, unwell, at risk of falling, distressed, unsafe, or refuses to come inside despite clear welfare concerns. Call 999 if there is immediate risk.',
+    difficulty: 'Beginner',
+    duration: '6 min',
+    status: 'Not started',
+  },
 ]
 
 const difficultyColour: Record<Difficulty, string> = {

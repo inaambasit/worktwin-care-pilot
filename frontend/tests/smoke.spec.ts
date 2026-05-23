@@ -79,7 +79,7 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByRole('heading', { name: 'Scenario Guidance' })).toBeVisible()
     await expect(page.getByText('Guidance hub')).toBeVisible()
     await expect(page.getByText(/Get safe shift-time guidance for real care situations/)).toBeVisible()
-    await expect(page.getByText('of 9 reviewed')).toBeVisible()
+    await expect(page.getByText('of 11 reviewed')).toBeVisible()
     await expect(page.getByText('Medication-related concern: knowing when to escalate')).toBeVisible()
     await expect(page.getByText('Open guidance').first()).toBeVisible()
     await expect(page.getByText('Controlled pilot').first()).toBeVisible()

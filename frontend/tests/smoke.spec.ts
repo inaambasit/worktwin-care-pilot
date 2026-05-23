@@ -12,7 +12,7 @@ test.describe('WorkTwin smoke tests', () => {
 
   test('dashboard loads with staff demo framing', async ({ page }) => {
     await page.goto('/dashboard')
-    await expect(page.getByText(/Controlled Pilot.*No Real Data/i)).toBeVisible()
+    await expect(page.getByText('Controlled Pilot — No Real Data', { exact: true }).first()).toBeVisible()
     await expect(page.getByText('Safe support reminders')).toBeVisible()
     await expect(page.getByText('Session-only pilot notes')).toBeVisible()
     await expect(page.getByRole('link', { name: 'Policy Library Browse approved documents' })).toBeVisible()

@@ -9,11 +9,11 @@ const quickActions = [
   { href: '/ask', icon: MessageCircle, label: 'Ask WorkTwin', desc: 'Ask policy-grounded questions' },
   { href: '/policies', icon: BookOpen, label: 'Policy Library', desc: 'Browse approved documents' },
   { href: '/onboarding', icon: ClipboardList, label: 'My Onboarding', desc: 'Continue the example pathway' },
-  { href: '/scenarios', icon: PlayCircle, label: 'Practice Scenarios', desc: 'Build confidence safely' },
+  { href: '/scenarios', icon: PlayCircle, label: 'Scenario Guidance', desc: 'Guidance for real care situations' },
   { href: '/notes', icon: Lock, label: 'Private Notes', desc: 'Session-only pilot notes' },
 ]
 
-const CONTEXT_CHIPS = ['Staff pilot view', 'Thumhara Centre', 'Controlled Pilot', 'Privacy-first support']
+const CONTEXT_CHIPS = ['Staff pilot view', 'Thumhara Centre', 'Controlled Pilot', 'No real data', 'Privacy-first support']
 
 export default function DashboardPage() {
   return (
@@ -47,36 +47,31 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Pilot walkthrough strip */}
+        {/* Start here — suggested first steps */}
         <div className="bg-white border border-teal-100 rounded-2xl px-5 py-4 shadow-sm">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Suggested pilot walkthrough</p>
-          {/* Mobile: horizontal scroll to prevent orphaned arrows; sm+: wrap normally */}
-          <div className="overflow-x-auto -mx-1 px-1 sm:overflow-x-visible sm:mx-0 sm:px-0">
-            <div className="flex items-center gap-1.5 sm:flex-wrap">
-              {[
-                { label: 'Dashboard', href: '/', active: true },
-                { label: 'Ask WorkTwin', href: '/ask', active: false },
-                { label: 'Policy Library', href: '/policies', active: false },
-                { label: 'Access Refusal', href: '/scenarios/access-refusal', active: false },
-                { label: 'Escalation', href: '/escalation', active: false },
-              ].map((item, i, arr) => (
-                <div key={item.label} className="flex items-center gap-1.5 shrink-0">
-                  <Link
-                    href={item.href}
-                    className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all whitespace-nowrap ${
-                      item.active
-                        ? 'bg-teal-700 text-white border-teal-700'
-                        : 'border-slate-200 text-slate-600 hover:border-teal-300 hover:text-teal-700 bg-white'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                  {i < arr.length - 1 && <span className="text-slate-300 text-xs select-none">›</span>}
-                </div>
-              ))}
-            </div>
-          </div>
-          <p className="text-xs text-slate-400 mt-2">Follow this path to walk through the controlled pilot flow from guidance to escalation.</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Start here — suggested first steps</p>
+          <ol className="space-y-2">
+            {[
+              { n: 1, label: 'Ask a safe example question', sub: 'Ask WorkTwin', href: '/ask' },
+              { n: 2, label: 'Browse approved pilot policies', sub: 'Policy Library', href: '/policies' },
+              { n: 3, label: 'Try Scenario Guidance', sub: 'Realistic care situations', href: '/scenarios' },
+              { n: 4, label: 'Check escalation contacts', sub: 'Who to call for high-risk situations', href: '/escalation' },
+              { n: 5, label: 'Continue your onboarding preview', sub: 'Example induction pathway', href: '/onboarding' },
+            ].map(({ n, label, sub, href }) => (
+              <li key={n}>
+                <Link href={href} className="flex items-center gap-3 group py-0.5">
+                  <span className="w-5 h-5 rounded-full bg-teal-700 text-white text-[10px] flex items-center justify-center shrink-0 font-bold group-hover:bg-teal-800 transition-colors">{n}</span>
+                  <span className="flex-1 min-w-0">
+                    <span className="text-sm font-semibold text-slate-800 group-hover:text-teal-700 transition-colors">{label}</span>
+                    <span className="text-xs text-slate-400 ml-1.5">— {sub}</span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+          <p className="text-xs text-red-600 font-medium mt-3 bg-red-50 rounded-xl px-3 py-2 leading-relaxed">
+            Do not enter real staff, service-user, medication, safeguarding, HR, complaint, care-plan or confidential information in this controlled preview.
+          </p>
         </div>
 
         {/* Summary cards */}
@@ -96,7 +91,7 @@ export default function DashboardPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-700">9</p>
-              <p className="text-xs text-slate-500">Practice scenarios available</p>
+              <p className="text-xs text-slate-500">Scenario guidance sessions</p>
             </div>
           </div>
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-3">
@@ -138,7 +133,7 @@ export default function DashboardPage() {
             <div className="p-6">
               <div className="mb-4">
                 <span className="text-xs font-bold bg-teal-700 text-white px-2.5 py-1 rounded-full">
-                  New guided scenario
+                  New scenario guidance
                 </span>
               </div>
               <div className="flex items-start gap-4 mb-5">
@@ -159,7 +154,7 @@ export default function DashboardPage() {
                 className="flex items-center justify-center gap-1.5 text-sm bg-teal-700 hover:bg-teal-800 text-white font-semibold px-4 py-2.5 rounded-xl transition-colors shadow-sm w-full"
               >
                 <PlayCircle size={15} />
-                Start guided scenario
+                Open scenario guidance
               </Link>
             </div>
           </div>

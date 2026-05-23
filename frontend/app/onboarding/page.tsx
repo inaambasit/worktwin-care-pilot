@@ -4,7 +4,7 @@ import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
 import {
   CheckCircle, Circle, Calendar, ChevronDown, ChevronRight,
-  ClipboardList, Clock, Shield,
+  ClipboardList, Clock, Shield, AlertCircle,
 } from 'lucide-react'
 
 const weeks = [
@@ -149,6 +149,17 @@ export default function OnboardingPage() {
           </div>
         </div>
 
+        {/* Example progress disclaimer */}
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
+          <AlertCircle size={16} className="text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-amber-800 mb-0.5">Example progress only</p>
+            <p className="text-sm text-amber-700 leading-relaxed">
+              This controlled preview shows how onboarding guidance could work. It is not a live HR, training or competency record and does not replace any required Thumhara Centre sign-offs.
+            </p>
+          </div>
+        </div>
+
         {/* Progress card */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
           <div className="flex items-start justify-between mb-4">
@@ -169,6 +180,29 @@ export default function OnboardingPage() {
               ? 'All example pathway tasks complete - ready for manager discussion.'
               : `Currently in: ${currentWeek.label}. Keep going through this example induction pathway.`}
           </p>
+        </div>
+
+        {/* What to do next */}
+        <div className="bg-white border border-teal-100 rounded-2xl px-5 py-4 shadow-sm">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">What to do next</p>
+          <ul className="space-y-2.5">
+            {[
+              { label: 'Review the example onboarding tasks below', href: null },
+              { label: 'Use Ask WorkTwin for policy questions', href: '/ask' },
+              { label: 'Browse approved documents in Policy Library', href: '/policies' },
+              { label: 'Try Scenario Guidance for realistic care situations', href: '/scenarios' },
+              { label: 'Escalate high-risk issues to the correct human lead', href: '/escalation' },
+            ].map(({ label, href }) => (
+              <li key={label} className="flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0 mt-[7px]" />
+                {href ? (
+                  <Link href={href} className="text-sm text-teal-700 font-medium hover:underline leading-relaxed">{label}</Link>
+                ) : (
+                  <span className="text-sm text-slate-700 leading-relaxed">{label}</span>
+                )}
+              </li>
+            ))}
+          </ul>
         </div>
 
         {/* Check-in banner */}

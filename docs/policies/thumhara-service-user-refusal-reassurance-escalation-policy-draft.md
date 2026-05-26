@@ -9,12 +9,12 @@
 | Field | Detail |
 |-------|--------|
 | **Policy title** | Thumhara Centre Service User Refusal, Reassurance and Escalation Policy |
-| **Policy owner** | Thumhara Centre |
+| **Policy owner** | Registered Manager, Thumhara Centre |
 | **Draft version** | v0.1 |
-| **Last reviewed** | Draft |
-| **Next review date** | To be set after approval |
-| **Approved by** | Not yet approved |
-| **Business impact** | Medium |
+| **Last reviewed** | 26 May 2026 |
+| **Next review date** | To be set after approval. Proposed review cycle: annually, or sooner following incidents, regulatory change, leadership review, safeguarding learning, policy update or controlled WorkTwin testing findings. |
+| **Approved by** | Pending leadership sign-off |
+| **Business impact** | High |
 | **Status** | Draft for controlled review only |
 | **WorkTwin lane** | Lane B — cautious staff-visible support, with escalation rules |
 | **WorkTwin use** | Suitable for fictional/demo testing only until approved |
@@ -351,6 +351,7 @@ Do not treat repeated refusals as a normal routine without raising a concern. Do
 | **Care / support staff** | Apply this policy during planned calls and visits. Respond calmly and with respect. Attempt reasonable reassurance and alternatives. Escalate promptly when risk remains. Record real events in Thumhara Centre's care-recording system. Never enter real care events into WorkTwin. |
 | **Senior care staff / supervisor** | Provide in-call support and guidance when contacted by care workers. Assess the situation and advise on next steps. Escalate to the registered manager if needed. Review records for patterns and flag concerns. |
 | **Registered manager** | Provide final escalation authority. Review care plans and risk assessments where a pattern of refusal is identified. Authorise any change to a service user's care arrangement. Review safeguarding concerns. Lead on learning and policy review. |
+| **Medication lead** | To be contacted by staff where a refusal may affect a service user's medication routine. Staff must follow Thumhara Centre's Medication Policy and the individual service user's care plan, and escalate to the medication lead or registered manager through the approved route. WorkTwin must not be asked for medication timing, dosage or administration advice — any question of this kind must be directed to the medication lead or registered manager, not to WorkTwin. |
 | **Family or approved contact** | May be contacted via the route agreed in the care plan or provider process, where this is specifically approved. Staff must not contact family directly outside of the agreed route. |
 | **Emergency services (999)** | To be contacted directly by the care worker in any situation involving immediate risk to life. Internal escalation must not delay a 999 call. |
 | **Safeguarding lead** | To be contacted if the refusal situation gives rise to a concern that a service user may be at risk of abuse, neglect or harm. Follow Thumhara Centre's Safeguarding Adults Policy in all safeguarding situations. |
@@ -416,13 +417,15 @@ Staff should be trained or briefed on the following before applying this policy 
 - **Local care-recording process** — how to record a refusal event in Thumhara Centre's existing care management system
 - **This policy** — once approved by Thumhara Centre leadership, this policy should be included in the induction programme and reviewed with staff at least annually
 
+Staff competency in this policy should be assessed through practical means appropriate to the setting. Acceptable methods include: an induction briefing covering the main procedure and escalation steps; a scenario discussion based on one or more of the situations in Section 8; reflection during supervision or a team discussion; manager confirmation that the staff member understands the escalation route and recording expectations; and a refresher discussion following an incident or a pattern of repeated refusals. These are not formal clinical competency checks — they are practice-based assessments to confirm that staff can apply the policy confidently in their daily work.
+
 Training completion records should be held in the location specified by Thumhara Centre's training management process *[to be confirmed]*.
 
 ---
 
 ## 13. Monitoring and Audit
 
-**Manager review of repeated refusals:** The registered manager or a nominated senior should review care records where a pattern of refusal is identified for an individual service user, with a view to reviewing the care plan, risk assessment or support approach.
+**Manager review of repeated refusals:** The registered manager or a nominated senior should review care records where a pattern of refusal is identified for an individual service user, with a view to reviewing the care plan, risk assessment or support approach. Repeated refusals should be reviewed through supervision, a care review or a management review, as appropriate to the nature and frequency of the refusal pattern.
 
 **Review of care plans and risk assessments:** Where monitoring identifies a pattern that suggests the current care plan no longer reflects the service user's needs or preferences, a formal care plan review should be initiated.
 
@@ -431,6 +434,8 @@ Training completion records should be held in the location specified by Thumhara
 **Learning from feedback:** Any feedback from staff about this policy — including situations that were not covered, escalation steps that were unclear, or gaps in the procedure — should be fed back through the appropriate internal route and considered in the next policy review.
 
 **Policy review after controlled testing:** Once this policy has been used in the WorkTwin controlled testing programme, findings from that testing should be reviewed by Thumhara Centre leadership alongside any operational feedback before the policy is approved for live use.
+
+**Policy review frequency:** This policy should be reviewed annually after leadership approval. A review should also be triggered sooner where refusal patterns identified through monitoring suggest the policy needs updating; following incidents involving a refusal situation; following any safeguarding learning relevant to refusal handling; in response to regulatory change; or where feedback from controlled WorkTwin testing indicates that the policy guidance is unclear, incomplete or creates risk in use.
 
 ---
 
@@ -574,6 +579,7 @@ The following types of question are outside the scope of what Ask WorkTwin may s
 | Version | Date | Reviewed by | Changes made | Next review due |
 |---------|------|-------------|--------------|-----------------|
 | v0.1 | Draft | WorkTwin project team | Draft created for internal review and WorkTwin controlled testing preparation | To be set after approval |
+| v0.2 | 26 May 2026 | WorkTwin project team | Internal WorkTwin policy standard review edits applied after 4S.102D. Still draft, pending leadership/registered manager review. | To be set after approval |
 
 ---
 

@@ -222,6 +222,169 @@ No trusted worker testing should begin without completing Shagufta's review and 
 
 ---
 
-*Document: 4S.98B — Shagufta Review Script and Feedback Log*  
+## 10. 4S.101K — Second Shagufta Review Script
+
+This section prepares the second controlled walkthrough with Shagufta, focused on whether the changes made across slices 4S.101A–J now feel safe, useful and clear enough to proceed to the next controlled review stage.
+
+---
+
+### 10.1. Current Checkpoint
+
+| Item | Detail |
+|---|---|
+| Latest app checkpoint | `41761ba` — Add mobile safety smoke coverage |
+| Access | Controlled preview only |
+| Operational use | Not live — not for operational care delivery |
+| Staff-visible policies | Limited to approved pilot documents; QCS-derived documents remain blocked |
+| Backend | Read-only pilot RAG — no case data, no live records |
+
+---
+
+### 10.2. What Changed Since Shagufta's First Review
+
+The following improvements were made across slices 4S.101A–J after the first review:
+
+- **Scenario naming** — renamed from "Practice Scenarios" to "Scenario Guidance" to better reflect the guidance-led, non-recording nature of the feature.
+- **Recording boundary clarified** — WorkTwin is now explicitly framed as guidance and reflection only; it is not the official care-recording system and does not replace existing care-recording workflows.
+- **Demo contacts clarified** — escalation contact entries are clearly marked as not live call routes; the only dialable number in the app is 999, which remains callable as the emergency services number.
+- **Book-a-Pilot confirmation** — the confirmation screen now makes clear that it is session-only and that no message, booking or submission was actually sent.
+- **Privacy Model links** — links to the Privacy Model page have been added across the staff journey so staff can reach the privacy explanation from within the workflow.
+- **Landing page preview framing** — the landing page now explains what the controlled preview is and what it is not, so visitors understand the boundary before entering.
+- **Private Notes clarified** — Private Notes are now explicitly described as session-only, not visible to managers, and not official records; notes are cleared on session end.
+- **Policy Library wording** — the Policy Library now states that Ask WorkTwin only answers where governance and safety checks allow, rather than implying unlimited policy access.
+- **Fictional profiles** — Ada and George service-user guidance card profiles now explicitly state they are fictional examples and not real service-user records.
+- **Mobile smoke coverage** — Playwright smoke test coverage increased to 33/33 passing tests, including mobile safety journey coverage.
+
+---
+
+### 10.3. Suggested Review Path (Second Review)
+
+Work through the following areas in order. Spend two to three minutes on each. Note your first impression before exploring further.
+
+| Step | Area | What to look for |
+|---|---|---|
+| 1 | **Landing page** | Does the preview framing clearly explain what this is and what it is not? Is the boundary obvious before entering? |
+| 2 | **Dashboard** | Does the dashboard clearly tell staff what to do first? Is the layout readable on mobile without scrolling? |
+| 3 | **Ask WorkTwin** | Does the input feel natural? Are answers clear, calm and safe? Does it escalate appropriately on high-risk topics? |
+| 4 | **Policy Library** | Does the wording about what Ask can and cannot answer make sense to a care worker? |
+| 5 | **Scenario Guidance** | Is the new name clear? Do the scenarios feel practical for care staff during a real shift? |
+| 6 | **Fictional service-user guidance cards** | Is it obvious Ada and George are fictional? Could any care worker mistake them for real service-user records? |
+| 7 | **Access Refusal scenario** | Is the guidance clear and safe to follow in a real situation? |
+| 8 | **Onboarding** | Is the onboarding journey clear and appropriately scoped for a care worker? |
+| 9 | **Private Notes** | Is it clear that notes are session-only, not visible to managers, and not official records? |
+| 10 | **Escalation Contacts** | Are escalation options visible and easy to reach? Are contacts clearly not live call routes? |
+| 11 | **Book a Pilot / sent confirmation** | Is it clear the confirmation is session-only and that nothing was actually sent? |
+| 12 | **Privacy Model** | Is the privacy explanation understandable to a non-technical care worker? Does it feel reassuring? |
+
+---
+
+### 10.4. Questions to Ask Shagufta
+
+Use these questions during or after the walkthrough. Note responses in the feedback log table below.
+
+1. Does the dashboard clearly tell staff what to do first?
+2. Does Ask WorkTwin feel clear, safe and useful?
+3. Does the Policy Library wording make sense about what Ask can and cannot answer?
+4. Does Scenario Guidance feel practical for care staff in a real shift situation?
+5. Are Ada and George clearly fictional and not real service-user records?
+6. Is it clear that WorkTwin is not the official care-recording system?
+7. Are the escalation contacts clearly not live call routes?
+8. Is Private Notes clearly session-only and not visible to managers?
+9. Is the Book-a-Pilot confirmation clear that nothing was actually sent?
+10. Is anything still confusing, risky, or too "demo-like"?
+11. What would she want changed before showing the app to 3–5 trusted care workers?
+
+---
+
+### 10.5. Feedback Log
+
+Use this table during or immediately after the second review. Priority: High / Medium / Low. Decision: Fix / Monitor / Accept / Escalate to team.
+
+| Area reviewed | Shagufta feedback | Risk raised? | Priority | Decision | Action slice |
+|---|---|---|---|---|---|
+| Landing page | | | | | |
+| Dashboard | | | | | |
+| Ask WorkTwin | | | | | |
+| Policy Library | | | | | |
+| Scenario Guidance | | | | | |
+| Fictional service-user cards (Ada / George) | | | | | |
+| Access Refusal scenario | | | | | |
+| Onboarding | | | | | |
+| Private Notes | | | | | |
+| Escalation Contacts | | | | | |
+| Book a Pilot / sent confirmation | | | | | |
+| Privacy Model | | | | | |
+| Overall mobile layout | | | | | |
+| Overall tone and language | | | | | |
+
+---
+
+### 10.6. Go / Fix / Stop Decision
+
+**Go** — safe to continue controlled preparation for 3–5 trusted care workers if:
+
+- Shagufta confirms the staff journey, privacy boundaries and scenario guidance are clear.
+- No confusion remains about WorkTwin versus the official care-recording system.
+- Demo contacts and the Book-a-Pilot confirmation are understood as non-live.
+- Ada and George are clearly understood as fictional examples.
+- Private Notes session-only boundary is understood.
+- No outstanding risk concern from Shagufta before wider testing.
+
+**Next step:** Create slice 4S.101L as a Shagufta second-review evidence log; record the Go decision; proceed to controlled preparation for 3–5 trusted care workers.
+
+---
+
+**Fix first** — address identified issues before proceeding to 3–5 trusted workers if:
+
+- Any wording confusion remains about recording, contacts, profiles, or privacy boundaries.
+- Scenario Guidance still feels unclear, risky, or too close to a recording form.
+- Ask WorkTwin responses feel unsafe, unclear, or outside their stated scope.
+- Private Notes, Book-a-Pilot, or Policy Library framing is still misunderstood.
+
+**Next step:** Create slice 4S.101L as a targeted fix slice; address each identified issue before proceeding to wider testing.
+
+---
+
+**Stop** — do not proceed to 3–5 trusted workers if:
+
+- Staff could plausibly confuse WorkTwin with the official care-recording system.
+- Any escalation contact is mistaken for a live call route.
+- Ask WorkTwin gives responses that could be mistaken for medication advice, safeguarding guidance, or clinical instruction.
+- Ada or George fictional profiles could be mistaken for real service-user records.
+- Shagufta expresses a concern about the app being shown to care staff at this stage.
+
+**Next step:** Pause all access preparation. Log the specific concern in full. Review with the team before any further access is given.
+
+---
+
+### 10.7. Safety Boundaries
+
+The following boundaries remain in place and must be confirmed before proceeding:
+
+- Controlled preview only — not a production deployment.
+- Not production-ready and not approved for live operational use.
+- No real staff data, service-user data, family contact details, medication details, care-plan details, safeguarding records, HR records, complaints records, incident records, or any other confidential personal data has been introduced and must not be introduced at any point.
+- This preview must not be used by real staff in an unsupervised context.
+- Public pilot authentication is not enabled.
+- Admin proxy remains disabled publicly.
+- Staff must continue using their existing care-recording systems alongside WorkTwin; WorkTwin does not replace those systems.
+- WorkTwin does not replace the registered manager, senior carer, medication lead, safeguarding lead, or emergency services.
+- 999 remains the correct contact in a life-threatening emergency.
+
+---
+
+### 10.8. Next Recommended Action After Review
+
+| Review outcome | Recommended action |
+|---|---|
+| Positive — Shagufta confirms the journey is clear, safe and ready | Create slice 4S.101L as a Shagufta second-review evidence log; record the Go decision; proceed to controlled preparation for 3–5 trusted care workers |
+| Issues found — fixable before wider testing | Create slice 4S.101L as a targeted fix slice; address each issue; do not proceed to 3–5 trusted workers until the second review decision is recorded |
+| Stop condition triggered | Pause all access preparation; log the concern in full; review with the team before any further access is given |
+
+**Do not proceed to 3–5 trusted care workers until the second review decision is recorded in 4S.101L.**
+
+---
+
+*Document: 4S.98B / 4S.101K — Shagufta Review Script and Feedback Log*  
 *Slice: documentation only — no frontend, backend, SQL, env, package, auth, admin proxy, API, RAG or governance changes*  
-*Checkpoint: f36d198*
+*Checkpoints: f36d198 (first review) / 41761ba (second review)*

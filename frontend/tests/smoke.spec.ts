@@ -140,7 +140,7 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(drawer).toHaveAttribute('aria-hidden', 'true')
   })
 
-  test('/book-pilot enquiry page shows form, privacy note, and confirmation on submit', async ({ page }) => {
+  test('/book-pilot enquiry page shows form, privacy note, and routes to /book-pilot/sent on submit', async ({ page }) => {
     await page.goto('/book-pilot')
     await expect(page.getByRole('heading', { name: 'Book a WorkTwin Care Pilot' })).toBeVisible()
     await expect(page.getByLabel('Your name')).toBeVisible()
@@ -155,7 +155,10 @@ test.describe('WorkTwin smoke tests', () => {
     await page.getByLabel('What are you looking to explore?').fill('Exploring onboarding support')
     await page.getByRole('button', { name: 'Preview enquiry' }).click()
 
-    await expect(page.getByText('Thank you, Test User')).toBeVisible()
+    await expect(page).toHaveURL('/book-pilot/sent')
+    await expect(page.getByRole('heading', { name: 'Preview enquiry noted' })).toBeVisible()
+    await expect(page.getByText(/session-only enquiry preview/i)).toBeVisible()
+    await expect(page.getByText(/Your preview enquiry has not been sent/i)).toBeVisible()
     await expect(page.getByText(/This controlled pilot preview stores nothing/i).first()).toBeVisible()
     await expect(page.getByRole('link', { name: 'Back to the pilot overview' })).toBeVisible()
   })
@@ -212,13 +215,14 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByText(/answers use approved pilot documents only/i).first()).toBeVisible()
   })
 
-  test('/book-pilot confirmation clearly states session-only and no live CRM submission', async ({ page }) => {
+  test('/book-pilot/sent confirmation clearly states session-only and no live CRM submission', async ({ page }) => {
     await page.goto('/book-pilot')
     await page.getByLabel('Your name').fill('Test User')
     await page.getByLabel('Organisation').fill('Test Org')
     await page.getByLabel('Role').fill('Manager')
     await page.getByLabel('What are you looking to explore?').fill('Exploring onboarding support')
     await page.getByRole('button', { name: 'Preview enquiry' }).click()
+    await expect(page).toHaveURL('/book-pilot/sent')
     await expect(page.getByText(/live CRM, care system/i)).toBeVisible()
     await expect(page.getByText('Nothing leaves your browser session.')).toBeVisible()
   })

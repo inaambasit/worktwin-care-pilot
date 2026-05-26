@@ -1,57 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { AlertTriangle, CheckCircle } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 
 export default function BookPilotPage() {
-  const [submittedName, setSubmittedName] = useState('')
-  const [submitted, setSubmitted] = useState(false)
+  const router = useRouter()
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    const fd = new FormData(e.currentTarget)
-    setSubmittedName((fd.get('name') as string) || '')
-    setSubmitted(true)
-  }
-
-  if (submitted) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-start justify-center py-20 px-4">
-        <div className="w-full max-w-lg">
-          <Link href="/" className="flex items-center gap-2 mb-10">
-            <div className="w-8 h-8 rounded-lg bg-teal-700 flex items-center justify-center">
-              <span className="text-white text-sm font-bold">W</span>
-            </div>
-            <span className="font-bold text-slate-900 text-lg">WorkTwin</span>
-          </Link>
-
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 text-center">
-            <div className="w-14 h-14 rounded-full bg-teal-50 flex items-center justify-center mx-auto mb-5">
-              <CheckCircle size={28} className="text-teal-700" />
-            </div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-3">
-              {submittedName ? `Thank you, ${submittedName}` : 'Thank you for your interest'}
-            </h2>
-            <p className="text-slate-600 text-sm leading-relaxed mb-4">
-              Your pilot enquiry preview has been noted in this browser session. The next step would be a brief human conversation to understand your
-              organisation&rsquo;s context before any real pilot begins.
-            </p>
-            <p className="text-slate-500 text-xs leading-relaxed mb-6 bg-slate-50 rounded-xl p-4">
-              This controlled pilot preview stores nothing. No data from this form is sent to a live CRM, care system, server or
-              any external service. Nothing leaves your browser session. A real pilot enquiry would be followed
-              up directly by the WorkTwin team.
-            </p>
-            <Link
-              href="/"
-              className="inline-block px-6 py-2.5 bg-teal-700 hover:bg-teal-800 text-white font-semibold rounded-xl text-sm transition-colors"
-            >
-              Back to the pilot overview
-            </Link>
-          </div>
-        </div>
-      </div>
-    )
+    router.push('/book-pilot/sent')
   }
 
   return (

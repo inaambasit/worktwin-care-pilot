@@ -58,7 +58,12 @@ test.describe('WorkTwin smoke tests', () => {
   test('policy library loads as a staff-facing page', async ({ page }) => {
     await page.goto('/policies')
     await expect(page.getByRole('heading', { name: 'Policy Library' })).toBeVisible()
-    await expect(page.getByText(/staff-visible|approved/i).first()).toBeVisible()
+    // Page must show approved staff-visible documents framing
+    await expect(page.getByText(/approved staff-visible documents/i).first()).toBeVisible()
+    // Governance/safety qualifier: Ask only answers where checks allow
+    await expect(page.getByText(/governance and safety checks allow/i).first()).toBeVisible()
+    // No overclaiming that all visible docs are always AI-answerable
+    await expect(page.getByText(/only documents shown here are used to answer staff questions/i)).not.toBeVisible()
   })
 
   test('onboarding page is clearly marked as a controlled pilot pathway', async ({ page }) => {

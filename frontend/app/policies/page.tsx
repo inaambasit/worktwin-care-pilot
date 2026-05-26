@@ -288,7 +288,7 @@ export default function PoliciesPage() {
             </span>
             <h1 className="text-3xl font-bold mb-2.5 leading-snug">Policy Library</h1>
             <p className="text-teal-100 text-sm leading-relaxed max-w-lg mb-5">
-              Browse approved staff-visible documents used by WorkTwin to support policy-grounded answers during the controlled pilot.
+              Policy Library shows approved staff-visible documents for this controlled preview. Ask WorkTwin may use eligible approved documents for answers where governance and safety checks allow.
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
               {CONTEXT_CHIPS.map(chip => (
@@ -298,7 +298,7 @@ export default function PoliciesPage() {
               ))}
             </div>
             <p className="text-teal-200 text-xs">
-              Only approved staff-visible documents should be used for staff-facing answers.
+              Ask WorkTwin only answers where approved sources and safety checks allow. If WorkTwin cannot answer safely, speak to a human lead.
             </p>
           </div>
         </div>
@@ -521,7 +521,7 @@ export default function PoliciesPage() {
             <li className="flex items-start gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0 mt-[7px]" />
               <span className="text-sm text-slate-600 leading-relaxed">
-                Only documents shown here are used to answer staff questions. WorkTwin does not use the internet or external sources.
+                Eligible approved documents may support staff-facing answers where governance checks allow. WorkTwin does not use the internet or external sources.
               </span>
             </li>
             <li className="flex items-start gap-2.5 bg-red-50 rounded-xl px-3 py-2.5 -mx-1">

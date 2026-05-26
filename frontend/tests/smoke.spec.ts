@@ -333,4 +333,92 @@ test.describe('WorkTwin smoke tests', () => {
     const nonEmergencyTelLinks = await page.locator('a[href^="tel:"]:not([href="tel:999"])').count()
     expect(nonEmergencyTelLinks).toBe(0)
   })
+
+  // --- 4S.101J: Mobile safety smoke tests ---
+
+  test('ask page has no horizontal scroll and shows pilot honesty and privacy wording at 375px', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.goto('/ask')
+    const overflows = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth
+    )
+    expect(overflows).toBe(false)
+    // Controlled-pilot honesty status line must remain visible at mobile width
+    await expect(page.getByText(/Controlled pilot mode/i).first()).toBeVisible()
+    await expect(page.getByText(/answers use approved pilot documents only/i).first()).toBeVisible()
+    // No-real-data privacy wording must remain visible
+    await expect(
+      page.getByText(/Do not enter real staff.*service-user.*medication.*safeguarding.*HR.*complaint.*care-plan.*confidential data/i).first()
+    ).toBeVisible()
+  })
+
+  test('policy library mobile modal opens, shows safety wording and closes at 375px', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.goto('/policies')
+    const overflows = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth
+    )
+    expect(overflows).toBe(false)
+    // Governance/safety wording in the hero is always present
+    await expect(page.getByText(/governance and safety checks allow/i).first()).toBeVisible()
+    // Wait for at least one policy card (button containing an h3 heading) to appear after load or fallback
+    await expect(page.locator('button:has(h3)').first()).toBeVisible({ timeout: 10000 })
+    await page.locator('button:has(h3)').first().click()
+    // Modal footer Close button is visible and tappable
+    await expect(page.getByRole('button', { name: 'Close', exact: true })).toBeVisible()
+    // Modal contains pilot safety wording
+    await expect(page.getByText(/controlled pilot preview/i).first()).toBeVisible()
+    // Close the modal
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
+    // Page remains usable after close
+    await expect(page.getByRole('heading', { name: 'Policy Library' })).toBeVisible()
+  })
+
+  test('escalation contacts mobile safety at 375px shows 999 link, demo labelling and no non-999 tel links', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.goto('/escalation')
+    const overflows = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth
+    )
+    expect(overflows).toBe(false)
+    // 999 emergency link visible and callable
+    await expect(page.locator('a[href="tel:999"]').first()).toBeVisible()
+    // Sample contacts are labelled as demo-only / not live routes
+    await expect(page.getByText(/demo contacts only/i).first()).toBeVisible()
+    // No non-999 tel links present (sample numbers are plain text, not hyperlinks)
+    const nonEmergencyTelLinks = await page.locator('a[href^="tel:"]:not([href="tel:999"])').count()
+    expect(nonEmergencyTelLinks).toBe(0)
+  })
+
+  test('stale "Practice Scenarios" label is not visible in main content on key staff pages', async ({ page }) => {
+    for (const path of ['/', '/dashboard', '/scenarios', '/onboarding']) {
+      await page.goto(path)
+      await expect(
+        page.locator('main').getByText('Practice Scenarios', { exact: true })
+      ).not.toBeVisible()
+    }
+  })
+
+  test('/scenarios/access-refusal shows "Review my reflection" and not "Review my record"', async ({ page }) => {
+    await page.goto('/scenarios/access-refusal')
+    // Stale care-record wording must not appear in the initial step view
+    await expect(page.locator('main').getByText('Review my record')).not.toBeVisible()
+    // Advance to completed state via sessionStorage to verify the reflection button label
+    await page.evaluate(() => {
+      sessionStorage.setItem('wt:scenario:doorstep-refusal', JSON.stringify({
+        step: 3, step1Choice: 'B', step2Choice: 'B',
+        step3: {
+          arrivalTime: '10:00',
+          saidOrDid: 'The service user said they did not want to answer the door.',
+          refused: 'refused', familyContacted: 'spoke', familySaid: '',
+          escalationContacted: 'will-call', concerns: ['welfare'],
+        },
+        completed: true,
+      }))
+    })
+    await page.reload()
+    // Completed screen must use "Review my reflection", not any care-record wording
+    await expect(page.getByText('Review my reflection').first()).toBeVisible()
+    await expect(page.locator('main').getByText('Review my record')).not.toBeVisible()
+  })
 })

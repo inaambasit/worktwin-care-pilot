@@ -50,6 +50,15 @@ const trustItems = [
   'Designed around UK GDPR principles',
 ]
 
+const previewBoundaryItems = [
+  'Controlled care-sector preview',
+  'Approved example policies are loaded',
+  'Fictional scenario guidance is included',
+  'No real staff, service-user or care data is connected',
+  'Admin tools and integrations are disabled in this public deployment',
+  'Real pilots begin per-customer with governance, approvals and secure setup',
+]
+
 const steps = [
   {
     step: '1',
@@ -199,6 +208,28 @@ export default function LandingPage() {
           <Link href="/scenarios" className="hover:text-white underline underline-offset-2">Scenario Guidance</Link>
         </div>
       </div>
+
+      {/* What this preview is — and is not */}
+      <section className="py-8 sm:py-10 bg-slate-50 border-b border-slate-200">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="bg-white border border-slate-200 rounded-2xl px-6 py-6 sm:px-10 sm:py-8">
+            <span className="inline-block text-xs font-semibold text-teal-700 border border-teal-200 bg-teal-50 px-3 py-1 rounded-full uppercase tracking-wider mb-4">
+              Preview status
+            </span>
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-5">
+              What this preview is — and is not
+            </h2>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-3">
+              {previewBoundaryItems.map((item) => (
+                <li key={item} className="flex items-start gap-2.5">
+                  <CheckCircle size={16} className="text-teal-600 shrink-0 mt-0.5" />
+                  <span className="text-sm text-slate-600 leading-snug">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
 
       {/* Features */}
       <section className="py-12 sm:py-20 bg-white">

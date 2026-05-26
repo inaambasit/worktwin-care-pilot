@@ -204,6 +204,16 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByText(/session-only/i).first()).toBeVisible()
   })
 
+  test('landing page preview boundary block shows what-this-is wording', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.getByText('What this preview is — and is not')).toBeVisible()
+    await expect(page.getByText('Controlled care-sector preview')).toBeVisible()
+    await expect(page.getByText('No real staff, service-user or care data is connected')).toBeVisible()
+    await expect(page.getByText(/Admin tools and integrations are disabled/i)).toBeVisible()
+    const privacyLink = page.getByRole('link', { name: /Privacy model/i }).first()
+    await expect(privacyLink).toHaveAttribute('href', '/privacy-model')
+  })
+
   test('landing page links to /privacy-model', async ({ page }) => {
     await page.goto('/')
     const privacyLink = page.getByRole('link', { name: /Privacy model/i }).first()

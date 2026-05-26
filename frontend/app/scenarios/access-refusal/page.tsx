@@ -107,7 +107,7 @@ const CHECKLIST_ITEMS = [
   'Explain that the service user has declined entry',
   'Ask if they can speak to or reassure the service user',
   'Ask whether there are any known concerns today',
-  'Record the outcome of the call',
+  'Note the outcome of the call',
 ]
 
 const HERO_STEPS = [
@@ -331,7 +331,7 @@ export default function AccessRefusalPage() {
   const cardPrivacy = (
     <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
       <p className="text-xs text-slate-500 leading-relaxed">
-        Practice mode — session only. This practice record is not submitted to any real care
+        Practice mode — session only. Reflections here are not submitted to any real care
         system and will not be saved between sessions.
       </p>
     </div>
@@ -565,7 +565,7 @@ export default function AccessRefusalPage() {
                 }}
                 className="flex-1 text-sm border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold px-4 py-3 rounded-xl transition-colors"
               >
-                Review my record
+                Review my reflection
               </button>
               <Link
                 href="/scenarios"
@@ -990,7 +990,7 @@ export default function AccessRefusalPage() {
                     <div>
                       <p className="text-sm font-bold text-red-900 mb-1">A concern was raised.</p>
                       <p className="text-sm text-red-800 leading-relaxed">
-                        Phone the registered manager now and record what was said.
+                        Phone the registered manager now and note what was said.
                       </p>
                       <a
                         href="tel:07700900412"
@@ -1048,7 +1048,7 @@ export default function AccessRefusalPage() {
 
                 <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
                   <div>
-                    <h2 className="text-lg font-bold text-slate-900">Reflect — what would you record?</h2>
+                    <h2 className="text-lg font-bold text-slate-900">Reflect — what would you note in the care system?</h2>
                     <p className="text-sm text-slate-500 mt-1 leading-relaxed">
                       Think through what you saw and heard. Use the service user&apos;s words where you can. In a real situation, record this in your existing care-recording system as normal — not in WorkTwin.
                     </p>

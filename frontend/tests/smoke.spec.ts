@@ -267,7 +267,7 @@ test.describe('WorkTwin smoke tests', () => {
     // 999 call link and immediate-danger label visible on the mobile safety strip
     await expect(page.locator('a[href="tel:999"]').first()).toBeVisible()
     await expect(page.getByText(/Immediate danger/i).first()).toBeVisible()
-    // Practice-mode note: this record is not submitted to any real care system
+    // Practice-mode note: reflections are not submitted to any real care system
     await expect(page.getByText(/not submitted to any real care system/i)).toBeVisible()
   })
 })

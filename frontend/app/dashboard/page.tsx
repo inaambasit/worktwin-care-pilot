@@ -145,7 +145,7 @@ export default function DashboardPage() {
                     Service user refuses entry at the door
                   </h3>
                   <p className="text-sm text-slate-500 leading-relaxed">
-                    Practise the safe route: stay calm, contact the named family contact, escalate to the registered manager if needed, and record the visit clearly.
+                    Practise the safe route: stay calm, contact the named family contact, escalate to the registered manager if needed, and follow your provider's recording process.
                   </p>
                 </div>
               </div>
@@ -199,7 +199,7 @@ export default function DashboardPage() {
           <div>
             <h2 className="font-semibold text-slate-800 text-sm mb-1">Privacy-first pilot</h2>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Private notes and personal Ask WorkTwin questions stay private in this controlled pilot. Structured visit records may be shared with authorised leads where required.
+              Private notes and personal Ask WorkTwin questions stay private in this controlled pilot. Real records stay in your existing care-recording system — WorkTwin is for guidance and reflection only.
             </p>
           </div>
         </div>

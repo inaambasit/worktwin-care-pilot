@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import AppLayout from '@/components/AppLayout'
-import { Lock, Plus, Trash2, Save, Shield, ShieldCheck, Clock } from 'lucide-react'
+import { Lock, Plus, Trash2, Shield, ShieldCheck, Clock } from 'lucide-react'
 
 interface Note {
   id: number
@@ -118,7 +118,7 @@ export default function NotesPage() {
             </span>
             <h1 className="text-2xl md:text-3xl font-bold mb-2.5 leading-snug">Private Notes</h1>
             <p className="text-teal-100 text-sm leading-relaxed max-w-lg mb-5">
-              Use this session-only space for example reflections during the controlled pilot. Do not enter real staff, service-user, HR, safeguarding, medication, complaint, care-plan or confidential data.
+              Session-only thinking space. These notes are not submitted to a manager, not saved as official records and not sent to a care system. Use example reflections only — do not enter real staff, service-user or confidential information.
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
               {CONTEXT_CHIPS.map(chip => (
@@ -253,6 +253,10 @@ export default function NotesPage() {
                         placeholder="Example note title..."
                       />
                     </div>
+                    {/* Session-only reminder above input */}
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      Stays in this browser session only. Use example reflections only.
+                    </p>
                     {/* Action row */}
                     <div className="flex items-center gap-2 justify-between md:justify-end">
                       {saved ? (
@@ -265,8 +269,8 @@ export default function NotesPage() {
                           onClick={saveNote}
                           className="flex items-center gap-1.5 text-sm bg-teal-700 hover:bg-teal-800 text-white px-3 py-1.5 rounded-lg font-medium transition-colors"
                         >
-                          <Save size={14} />
-                          Save
+                          <Clock size={14} />
+                          Keep in session
                         </button>
                         <button
                           onClick={() => deleteNote(selected.id)}

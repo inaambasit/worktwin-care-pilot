@@ -92,7 +92,11 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByRole('heading', { name: 'Private Notes' })).toBeVisible()
     await expect(page.getByText('Session-only notes')).toBeVisible()
     await expect(page.getByText('These example notes stay in this browser session only and are not shown on admin pages.')).toBeVisible()
-    await expect(page.getByText('Do not enter real staff, service-user, HR, safeguarding, medication, complaint, care-plan or confidential data.')).toBeVisible()
+    // Hero now states notes are not submitted to a manager and not sent to a care system
+    await expect(page.getByText(/not submitted to a manager/i).first()).toBeVisible()
+    await expect(page.getByText(/not sent to a care system/i).first()).toBeVisible()
+    // Safe-support reminders bullet retains the detailed do-not-enter instruction
+    await expect(page.getByText(/Do not enter real staff.*service-user.*confidential/i).first()).toBeVisible()
     await expect(page.getByText('Not a formal record').first()).toBeVisible()
     await expect(page.getByText('Not care, HR or compliance evidence')).toBeVisible()
     await expect(page.getByText('Session only - not a formal record')).toBeVisible()
@@ -118,6 +122,10 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByText(/Managers and admins cannot view them/i)).toBeVisible()
     await expect(page.getByText(/Closing or refreshing this tab will clear all notes/i)).toBeVisible()
     await expect(page.getByText(/Do not rely on notes surviving a browser close/i)).toBeVisible()
+    // Session-only reminder appears above the note input
+    await expect(page.getByText('Stays in this browser session only. Use example reflections only.')).toBeVisible()
+    // Button avoids implying permanent storage
+    await expect(page.getByRole('button', { name: /Keep in session/i })).toBeVisible()
   })
 
   test('private notes has no horizontal scroll at 375px width', async ({ page }) => {

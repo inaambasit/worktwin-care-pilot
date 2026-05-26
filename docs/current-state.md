@@ -68,13 +68,15 @@
 
 > **4S.100C–4S.100G (2026-05-22–23):** Shagufta evidence sequence complete. 4S.100C: fictional Shagufta-inspired guidance-led scenarios added. 4S.100D: fictional service-user guidance card pattern added. 4S.100E: dashboard and onboarding staff journey aligned through Dashboard, Ask WorkTwin, Policy Library, Scenario Guidance, Onboarding, and Escalation Contacts. 4S.100F: mobile journey smoke coverage added; Playwright smoke 24/24; dashboard, onboarding, scenario guidance, and access-refusal safety covered. 4S.100G: Shagufta controlled-preview evidence log committed. Build passed. No backend, DB, auth, admin proxy, RAG, policy, env, SQL or data changes. Checkpoint: `c278725`.
 
+> **4S.101A–4S.101K (2026-05-26):** Safety, trust, and UI polish sequence complete. 4S.101A: Scenario naming cleanup. 4S.101B: Recording boundary cleanup. 4S.101C: Sample contact safety pass. 4S.101D: Book-a-Pilot confirmation page. 4S.101E: Privacy Model footer/link consistency. 4S.101F: Landing preview boundary block. 4S.101G: Private Notes session-only wording. 4S.101H: Policy Library answer eligibility precision. 4S.101I: Fictional profile trust pass. 4S.101J: Mobile safety smoke tests — latest proven app checkpoint `41761ba`; build passed; Playwright smoke 33/33. 4S.101K: Second Shagufta review script update — latest checkpoint `31bb281`. No backend, DB, auth, admin proxy, RAG, policy, env, SQL or data changes. The staff-facing journey is now significantly stronger and safer across all key surfaces. Next action: second controlled Shagufta review using the updated script. Do not move to 3–5 trusted workers until the second review decision is recorded.
+
 ---
 
 ## 1. Current Checkpoint
 
 | Item | Value |
 |---|---|
-| Commit | `c278725` |
+| Commit | `31bb281` |
 | Branch | `main` |
 | Repo path | `C:\Projects\worktwin-care-pilot\worktwin-care-pilot-starter` |
 | Backend | FastAPI / `backend/app/main.py` |
@@ -99,7 +101,7 @@ The system currently demonstrates:
 - Fictional service-user guidance card pattern — guidance cards for realistic fictional care situations; fictional data only
 - Staff journey aligned through Dashboard, Ask WorkTwin, Policy Library, Scenario Guidance, Onboarding, and Escalation Contacts
 - Shagufta reviewed the controlled preview and gave positive feedback on Ask WorkTwin and the Policy Library; her feedback confirmed the guidance-led scenario direction (4S.100A)
-- Mobile journey smoke coverage added — Playwright smoke 24/24; dashboard, onboarding, scenario guidance, and access-refusal safety covered (4S.100F)
+- Mobile safety smoke coverage expanded — Playwright smoke 33/33 (4S.101J; latest proven app checkpoint: `41761ba`)
 - Supabase Auth, JWT validation, membership resolution and browser Bearer forwarding have passed controlled local proof; public/live rollout is not enabled
 
 The pilot client is **Thumhara Centre**. No real staff, service-user, resident, care-plan, HR, safeguarding case-note or named complaint personal data has been introduced. No real service-user, HR, safeguarding, medication, complaint or confidential personal data should be entered. Some controlled internal policy testing has used Thumhara Centre/QCS policy documents under governance restrictions. A content-source review completed on 2026-05-07 established a formal QCS and third-party content restriction; see Section 11.
@@ -152,7 +154,7 @@ Public/live staff rollout remains blocked. Trusted-user access (3–5 named user
 - 9 backend test files (JWT auth, membership, staff context, ask identity, policies identity, grounding safety, document registry models, governance gates, test_app_import.py)
 - `backend/tests/test_governance_gates.py` added in 4S.90A: 39 governance gate unit tests passed (8 test classes covering embedding gate, answer-debug gate, staff visibility gate, staff Ask gate, sensitive/escalation/dummy document blocking, role matching, and fully approved document pass-all verification) — no DB, no HTTP, plain dict fixtures only
 - Related tests also passed in 4S.90A: `test_ask_grounding_safety.py` and `test_document_registry_models.py`, 17 passed — no runtime code changed
-- Playwright smoke tests (24 tests, all major staff routes; mobile journey coverage added for dashboard, onboarding, scenario guidance, and access-refusal safety in 4S.100F)
+- Playwright smoke tests (33 tests, all major staff routes; mobile safety smoke coverage expanded in 4S.101J)
 - Admin proxy spec (30+ tests, 5 describe blocks)
 
 ---
@@ -255,7 +257,7 @@ The system demonstrates the intended architecture convincingly: governance gates
 | Controlled trusted-user pilot readiness | 9 / 10 | Four-policy set proven; auth/session proven locally; pilot pack created; remaining step is named-user approval and access setup |
 | Production / live operational readiness | NO-GO | No DPA; QCS use unconfirmed for AI/RAG; production deployment, monitoring, retention/deletion and incident process not proven; not production-ready |
 | Privacy / compliance | 4 / 10 | Privacy-by-design in architecture; no DPA; QCS use unconfirmed; real data must not be entered |
-| Documentation accuracy | 8.5 / 10 | Aligned through 4S.100H at `c278725`; Shagufta feedback, evidence log, completed 4S.100A–4S.100G sequence, guidance-led scenario direction, fictional service-user guidance cards, mobile journey coverage, next planned slices (4S.101A–D), and safety boundaries recorded |
+| Documentation accuracy | 8.5 / 10 | Aligned through 4S.101L at `31bb281`; completed 4S.101A–4S.101K safety/trust/UI polish sequence, proven app checkpoint `41761ba` (smoke 33/33), next action (second Shagufta review), decision gate, and safety boundaries recorded |
 
 ---
 
@@ -268,6 +270,14 @@ A sandbox Supabase auth E2E setup plan has been created at `docs/4s90i-sandbox-a
 ---
 
 ## 10. Next Recommended Sequence
+
+### Current gate
+
+The immediate next action is a second controlled Shagufta review using the updated script. Trusted-worker access (3–5 users) must not begin until the second review decision is recorded.
+
+After Shagufta's second review:
+- If positive: create 4S.101M Shagufta second-review evidence log.
+- If issues found: create a targeted 4S.101M fix slice.
 
 ### Immediate next steps (trusted-user access path)
 
@@ -301,16 +311,24 @@ A sandbox Supabase auth E2E setup plan has been created at `docs/4s90i-sandbox-a
 | 4S.100E | Dashboard and onboarding staff journey aligned | Done |
 | 4S.100F | Mobile journey smoke coverage added; Playwright smoke 24/24 | Done |
 | 4S.100G | Shagufta controlled-preview evidence log committed | Done (`c278725`) |
+| 4S.101L | Current-state alignment after 4S.101A–4S.101K | Done |
 
-### Product development track (next planned slices)
+### Product development track (completed slices)
 
-| Slice | Description |
-|---|---|
-| 4S.101A | Claude Design review of Dashboard, Onboarding, and staff journey |
-| 4S.101B | Codex frontend safety/stale wording review |
-| 4S.101C | UI polish fixes from design review |
-| 4S.101D | Mobile visual polish pass |
-| Later | Auth / security / governance readiness before any real staff or service-user data |
+| Slice | Description | Completed |
+|---|---|---|
+| 4S.101A | Scenario naming cleanup | Done |
+| 4S.101B | Recording boundary cleanup | Done |
+| 4S.101C | Sample contact safety pass | Done |
+| 4S.101D | Book-a-Pilot confirmation page | Done |
+| 4S.101E | Privacy Model footer/link consistency | Done |
+| 4S.101F | Landing preview boundary block | Done |
+| 4S.101G | Private Notes session-only wording | Done |
+| 4S.101H | Policy Library answer eligibility precision | Done |
+| 4S.101I | Fictional profile trust pass | Done |
+| 4S.101J | Mobile safety smoke tests | Done (`41761ba` — build passed; Playwright smoke 33/33) |
+| 4S.101K | Second Shagufta review script update | Done (`31bb281`) |
+| Later | Auth / security / governance readiness before any real staff or service-user data | Pending |
 
 ### Technical backlog
 

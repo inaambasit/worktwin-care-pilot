@@ -24,7 +24,8 @@ WorkTwin Care Pilot is currently in **controlled preview** — a supervised prot
 - Shagufta reviewed the controlled preview; Ask WorkTwin and Policy Library positively received; product direction confirmed as guidance-led scenario support for realistic care situations
 - Scenarios are guidance-led examples (what to do next, when to escalate, what not to do); fictional Shagufta-inspired scenarios and fictional service-user guidance card pattern added
 - Staff journey aligned through Dashboard, Ask WorkTwin, Policy Library, Scenario Guidance, Onboarding, and Escalation Contacts
-- Playwright smoke tests 24/24; mobile journey coverage added for dashboard, onboarding, scenario guidance, and access-refusal safety
+- Safety, trust, and UI polish sequence 4S.101A–4S.101K complete: clearer landing preview boundaries, Dashboard journey, Ask WorkTwin trust/source wording, Policy Library governance wording, Scenario Guidance naming and fictional profile clarity, Access Refusal recording boundary cleanup, Escalation demo contact safety, Private Notes and Book-a-Pilot session-only wording, Privacy Model easier to find
+- Playwright smoke tests 33/33; mobile safety smoke coverage expanded (4S.101J; latest proven app checkpoint: `41761ba`)
 
 ### What is not live / not enabled
 
@@ -36,11 +37,11 @@ WorkTwin Care Pilot is currently in **controlled preview** — a supervised prot
 
 ### Current testing gate
 
-Shagufta's controlled mobile preview is complete (4S.100A). She reviewed Ask WorkTwin and the Policy Library; both were positively received. Her feedback was implemented across 4S.100B–4S.100G: scenarios redesigned as guidance-led support, fictional Shagufta-inspired scenarios and fictional service-user guidance card pattern added, staff journey aligned, mobile journey smoke coverage added (24/24), and a controlled-preview evidence log committed.
+Shagufta's controlled mobile preview is complete (4S.100A). She reviewed Ask WorkTwin and the Policy Library; both were positively received. Her feedback was implemented across 4S.100B–4S.100G: scenarios redesigned as guidance-led support, fictional Shagufta-inspired scenarios and fictional service-user guidance card pattern added, staff journey aligned, mobile journey smoke coverage added, and a controlled-preview evidence log committed.
 
-The next gate before any wider tester access is a design review and UI polish pass (4S.101A–4S.101C).
+The safety, trust, and UI polish sequence 4S.101A–4S.101K is complete. The staff-facing journey is significantly stronger and safer: clearer landing page preview boundaries, clearer Dashboard journey, Ask WorkTwin trust and source wording, Policy Library governance wording, Scenario Guidance naming and fictional profile clarity, Access Refusal recording boundary cleanup, Escalation demo contact safety, Private Notes session-only wording, Book-a-Pilot session-only confirmation, Privacy Model easier to find, and mobile safety smoke coverage now at 33 tests. The latest proven app checkpoint is `41761ba` (build passed, Playwright smoke 33/33).
 
-A 3–5 trusted care worker test phase is prepared (onboarding pack and review scripts are ready in the controlled testing documents below) but has not started.
+The next gate before any wider tester access is a second controlled Shagufta review using the updated script. A 3–5 trusted care worker test phase is prepared (onboarding pack and review scripts are ready in the controlled testing documents below) but has not started and must not start until the second review decision is recorded. After Shagufta's second review: if positive, create 4S.101M Shagufta second-review evidence log; if issues found, create a targeted 4S.101M fix slice.
 
 ### Current policy boundary
 
@@ -162,16 +163,20 @@ Controlled testing documents (see [Current controlled preview status](#current-c
 - [docs/4s98d-trusted-tester-onboarding-message-pack.md](docs/4s98d-trusted-tester-onboarding-message-pack.md)
 - [docs/4s98a-trusted-care-worker-testing-readiness-pack.md](docs/4s98a-trusted-care-worker-testing-readiness-pack.md)
 
-## Recent changes (checkpoint c278725)
+## Recent changes (checkpoint 31bb281)
 
-- 4S.100A — Shagufta controlled preview feedback captured; guidance-led scenario direction recorded
-- 4S.100B — Scenarios redesigned as guidance-led support; docs and frontend aligned
-- 4S.100C — Fictional Shagufta-inspired scenarios added
-- 4S.100D — Fictional service-user guidance card pattern added
-- 4S.100E — Dashboard and onboarding staff journey aligned
-- 4S.100F — Mobile journey smoke coverage added; Playwright smoke 24/24; dashboard, onboarding, scenario guidance, and access-refusal safety covered
-- 4S.100G — Shagufta controlled-preview evidence log committed
-- 4S.100H — README and documentation alignment (this slice)
+- 4S.101A — Scenario naming cleanup
+- 4S.101B — Recording boundary cleanup
+- 4S.101C — Sample contact safety pass
+- 4S.101D — Book-a-Pilot confirmation page
+- 4S.101E — Privacy Model footer/link consistency
+- 4S.101F — Landing preview boundary block
+- 4S.101G — Private Notes session-only wording
+- 4S.101H — Policy Library answer eligibility precision
+- 4S.101I — Fictional profile trust pass
+- 4S.101J — Mobile safety smoke tests (proven app checkpoint: `41761ba`; build passed; Playwright smoke 33/33)
+- 4S.101K — Second Shagufta review script update
+- 4S.101L — Current-state alignment after 4S.101A–K (this slice)
 
 ## Known gaps
 

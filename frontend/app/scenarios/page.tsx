@@ -255,6 +255,7 @@ export default function ScenariosPage() {
                 </span>
               </div>
               <div className="px-5 py-4 space-y-3 text-sm">
+                <p className="text-xs text-slate-400 italic leading-relaxed">This is a fictional example, not a real service-user record.</p>
                 <div>
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">Known routine</p>
                   <p className="text-slate-700 leading-relaxed">Takes time to settle during morning calls and may refuse food or personal care if rushed.</p>
@@ -286,6 +287,7 @@ export default function ScenariosPage() {
                 </span>
               </div>
               <div className="px-5 py-4 space-y-3 text-sm">
+                <p className="text-xs text-slate-400 italic leading-relaxed">This is a fictional example, not a real service-user record.</p>
                 <div>
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">Known routine</p>
                   <p className="text-slate-700 leading-relaxed">Enjoys sitting outside and may resist coming inside when he wants more time in the garden.</p>

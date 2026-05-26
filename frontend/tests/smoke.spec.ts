@@ -90,6 +90,11 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByText('Controlled pilot').first()).toBeVisible()
     await expect(page.getByText('No real service-user data')).toBeVisible()
     await expect(page.getByText(/Fictional demo scenarios.*controlled pilot only.*not competency assessments/)).toBeVisible()
+    // Fictional profile trust pass — labels must be visible alongside names
+    await expect(page.getByText('Ada Rahman')).toBeVisible()
+    await expect(page.getByText('George Miller')).toBeVisible()
+    await expect(page.getByText('Fictional demo profile').first()).toBeVisible()
+    await expect(page.getByText('This is a fictional example, not a real service-user record.').first()).toBeVisible()
   })
 
   test('notes page states session-only controlled pilot behaviour', async ({ page }) => {
@@ -305,6 +310,9 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByText('Fictional service-user guidance cards')).toBeVisible()
     await expect(page.getByText('Ada Rahman')).toBeVisible()
     await expect(page.getByText('George Miller')).toBeVisible()
+    // Fictional profile trust pass — label and disclaimer visible on both cards
+    await expect(page.getByText('Fictional demo profile').first()).toBeVisible()
+    await expect(page.getByText('This is a fictional example, not a real service-user record.').first()).toBeVisible()
     // No horizontal overflow at 375px
     const overflows = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth

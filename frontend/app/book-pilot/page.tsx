@@ -130,6 +130,10 @@ export default function BookPilotPage() {
           <Link href="/" className="text-teal-700 hover:text-teal-800 font-medium underline underline-offset-2">
             Return to the pilot overview
           </Link>
+          {' · '}
+          <Link href="/privacy-model" className="hover:text-slate-700 underline underline-offset-2">
+            Privacy model
+          </Link>
         </p>
       </main>
     </div>

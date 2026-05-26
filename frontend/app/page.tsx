@@ -263,6 +263,11 @@ export default function LandingPage() {
                 WorkTwin is built on a simple principle: employees in regulated workplaces should be
                 able to ask questions without fear. That means private conversations stay private by default.
               </p>
+              <p className="mt-4">
+                <Link href="/privacy-model" className="text-sm text-teal-400 hover:text-teal-300 underline underline-offset-2">
+                  Read the full privacy model →
+                </Link>
+              </p>
             </div>
             <div className="md:w-1/2 space-y-3">
               {trustItems.map((item) => (

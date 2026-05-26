@@ -210,6 +210,24 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(privacyLink).toHaveAttribute('href', '/privacy-model')
   })
 
+  test('/book-pilot links to /privacy-model', async ({ page }) => {
+    await page.goto('/book-pilot')
+    const privacyLink = page.getByRole('link', { name: /Privacy model/i }).first()
+    await expect(privacyLink).toHaveAttribute('href', '/privacy-model')
+  })
+
+  test('/book-pilot/sent links to /privacy-model', async ({ page }) => {
+    await page.goto('/book-pilot/sent')
+    const privacyLink = page.getByRole('link', { name: /Privacy model/i }).first()
+    await expect(privacyLink).toHaveAttribute('href', '/privacy-model')
+  })
+
+  test('staff portal has a visible link to /privacy-model on /dashboard', async ({ page }) => {
+    await page.goto('/dashboard')
+    const privacyLink = page.getByRole('link', { name: /Privacy model/i }).first()
+    await expect(privacyLink).toHaveAttribute('href', '/privacy-model')
+  })
+
   test('ask page always shows controlled-pilot honesty status line', async ({ page }) => {
     await page.goto('/ask')
     await expect(page.getByText(/answers use approved pilot documents only/i).first()).toBeVisible()

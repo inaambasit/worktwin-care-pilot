@@ -51,6 +51,11 @@ export default function BookPilotSentPage() {
           >
             Back to the pilot overview
           </Link>
+          <p className="mt-4 text-xs text-slate-500">
+            <Link href="/privacy-model" className="hover:text-slate-700 underline underline-offset-2">
+              Privacy model
+            </Link>
+          </p>
         </div>
       </div>
     </div>

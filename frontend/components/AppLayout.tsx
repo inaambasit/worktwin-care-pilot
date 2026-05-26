@@ -273,6 +273,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <main className="flex-1 overflow-auto p-4 md:p-6">
           {children}
         </main>
+
+        {/* Subtle privacy footer */}
+        <div className="shrink-0 px-4 md:px-6 py-2 border-t border-slate-100 text-right">
+          <Link href="/privacy-model" className="text-xs text-slate-400 hover:text-slate-600 transition-colors">
+            Privacy model
+          </Link>
+        </div>
       </div>
     </div>
   )

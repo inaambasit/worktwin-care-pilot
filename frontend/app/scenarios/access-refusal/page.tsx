@@ -296,13 +296,13 @@ export default function AccessRefusalPage() {
         </div>
       </div>
       <p className="text-xs text-slate-600 mb-3">07700 900 412 (demo)</p>
-      <a
-        href="tel:07700900412"
-        className="flex items-center justify-center gap-2 bg-teal-700 hover:bg-teal-800 text-white font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors w-full"
-      >
-        <Phone size={14} />
-        Call registered manager
-      </a>
+      <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 w-full">
+        <Phone size={14} className="text-slate-400 shrink-0" />
+        <div className="min-w-0">
+          <p className="text-xs font-semibold text-slate-600">Demo contact only</p>
+          <p className="text-xs text-slate-500 leading-tight">For this preview, speak to your registered manager through your normal route.</p>
+        </div>
+      </div>
     </div>
   )
 
@@ -318,13 +318,13 @@ export default function AccessRefusalPage() {
         </div>
       </div>
       <p className="text-xs text-slate-600 mb-3">07700 900 188 (demo)</p>
-      <a
-        href="tel:07700900188"
-        className="flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-800 text-white font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors w-full"
-      >
-        <Phone size={14} />
-        Call family contact
-      </a>
+      <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 w-full">
+        <Phone size={14} className="text-slate-400 shrink-0" />
+        <div className="min-w-0">
+          <p className="text-xs font-semibold text-slate-600">Demo contact only</p>
+          <p className="text-xs text-slate-500 leading-tight">In a real pilot, contact routes come from the provider&apos;s approved process.</p>
+        </div>
+      </div>
     </div>
   )
 
@@ -636,14 +636,11 @@ export default function AccessRefusalPage() {
             <span className="text-xs font-bold leading-tight">Immediate danger?</span>
             <span className="text-sm font-bold">Call 999</span>
           </a>
-          <a
-            href="tel:07700900412"
-            className="flex flex-col items-center justify-center gap-1 bg-teal-700 hover:bg-teal-800 text-white px-3 py-3 rounded-xl transition-colors text-center"
-          >
+          <div className="flex flex-col items-center justify-center gap-1 bg-teal-700 text-white px-3 py-3 rounded-xl text-center">
             <Shield size={16} />
             <span className="text-xs font-semibold leading-tight">Registered Manager</span>
-            <span className="text-xs text-teal-200">07700 900 412 (demo)</span>
-          </a>
+            <span className="text-xs text-teal-200">Demo contact only</span>
+          </div>
         </div>
 
         {/* Two-column grid */}
@@ -818,13 +815,13 @@ export default function AccessRefusalPage() {
                       </p>
                     </div>
                   </div>
-                  <a
-                    href="tel:07700900188"
-                    className="flex items-center justify-center gap-2 bg-teal-700 hover:bg-teal-800 text-white font-semibold text-sm px-4 py-3 rounded-xl transition-colors w-full mb-3"
-                  >
-                    <Phone size={14} />
-                    Call family contact
-                  </a>
+                  <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 w-full mb-3">
+                    <Phone size={14} className="text-slate-400 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-slate-600">Sample contact — not a live number</p>
+                      <p className="text-xs text-slate-500 leading-tight">For this preview, use your provider&apos;s normal contact route.</p>
+                    </div>
+                  </div>
                   <p className="text-xs text-slate-500 leading-relaxed">
                     Step back from the doorstep first. Speak calmly and keep the call factual.
                   </p>
@@ -974,13 +971,10 @@ export default function AccessRefusalPage() {
                       <p className="text-sm text-amber-800 leading-relaxed">
                         Call the registered manager before leaving if you cannot confirm the service user is safe.
                       </p>
-                      <a
-                        href="tel:07700900412"
-                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-800 hover:text-amber-900 mt-2"
-                      >
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800 mt-2">
                         <Phone size={14} />
-                        07700 900 412 (demo) — Registered Manager
-                      </a>
+                        Registered Manager — 07700 900 412 (demo contact only)
+                      </span>
                     </div>
                   </div>
                 )}
@@ -992,13 +986,10 @@ export default function AccessRefusalPage() {
                       <p className="text-sm text-red-800 leading-relaxed">
                         Phone the registered manager now and note what was said.
                       </p>
-                      <a
-                        href="tel:07700900412"
-                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-800 hover:text-red-900 mt-2"
-                      >
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-800 mt-2">
                         <Phone size={14} />
-                        07700 900 412 (demo) — Registered Manager
-                      </a>
+                        Registered Manager — 07700 900 412 (demo contact only)
+                      </span>
                     </div>
                   </div>
                 )}
@@ -1037,13 +1028,10 @@ export default function AccessRefusalPage() {
                     <span className="text-xs font-bold leading-tight">Immediate danger?</span>
                     <span className="text-sm font-bold">Call 999</span>
                   </a>
-                  <a
-                    href="tel:07700900412"
-                    className="flex-1 flex flex-col items-center justify-center gap-0.5 bg-teal-700 hover:bg-teal-800 text-white px-3 py-2.5 rounded-xl text-center transition-colors"
-                  >
+                  <div className="flex-1 flex flex-col items-center justify-center gap-0.5 bg-teal-700 text-white px-3 py-2.5 rounded-xl text-center">
                     <span className="text-xs font-semibold leading-tight">Registered Manager</span>
-                    <span className="text-xs text-teal-200">07700 900 412 (demo)</span>
-                  </a>
+                    <span className="text-xs text-teal-200">Demo contact only</span>
+                  </div>
                 </div>
 
                 <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">

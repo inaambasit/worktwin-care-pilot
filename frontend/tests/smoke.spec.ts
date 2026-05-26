@@ -104,6 +104,12 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByRole('heading', { name: 'Escalation Contacts' })).toBeVisible()
     await expect(page.getByText(/sample|fictional/i).first()).toBeVisible()
     await expect(page.getByText(/999|emergency/i).first()).toBeVisible()
+    // 999 must remain callable
+    await expect(page.locator('a[href="tel:999"]').first()).toBeVisible()
+    // Demo contacts must be labelled — no non-999 tel links
+    await expect(page.getByText(/demo contacts only/i).first()).toBeVisible()
+    const nonEmergencyTelLinks = await page.locator('a[href^="tel:"]:not([href="tel:999"])').count()
+    expect(nonEmergencyTelLinks).toBe(0)
   })
 
   test('private notes includes clear session-only and privacy notice', async ({ page }) => {
@@ -269,5 +275,9 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByText(/Immediate danger/i).first()).toBeVisible()
     // Practice-mode note: reflections are not submitted to any real care system
     await expect(page.getByText(/not submitted to any real care system/i)).toBeVisible()
+    // Demo contacts labelled — no non-999 tel links
+    await expect(page.getByText(/Demo contact only/i).first()).toBeVisible()
+    const nonEmergencyTelLinks = await page.locator('a[href^="tel:"]:not([href="tel:999"])').count()
+    expect(nonEmergencyTelLinks).toBe(0)
   })
 })

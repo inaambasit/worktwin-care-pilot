@@ -175,7 +175,8 @@ export default function EscalationPage() {
         {/* Contact cards */}
         <div>
           <h2 className="font-semibold text-slate-900 mb-1">Contact routes</h2>
-          <p className="text-sm text-slate-500 mb-4">Find the right lead for your situation. Each route includes availability and guidance on when to use it.</p>
+          <p className="text-sm text-slate-500 mb-3">Find the right lead for your situation. Each route includes availability and guidance on when to use it.</p>
+          <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4">Demo contacts only — these are sample numbers, not live routes. In a real pilot, contact details come from the provider&apos;s approved process.</p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {categories.map(({ id, title, whenToUse, icon: Icon, iconColour, contact }) => (
@@ -199,13 +200,10 @@ export default function EscalationPage() {
                   </div>
                   <div className="flex flex-wrap gap-1 mt-2">
                     {contact.phone && (
-                      <a
-                        href={`tel:${contact.phone}`}
-                        className="flex items-center gap-1.5 text-xs font-medium text-teal-700 hover:text-teal-900 py-2 px-1 -mx-1"
-                      >
-                        <Phone size={12} />
+                      <span className="flex items-center gap-1.5 text-xs font-medium text-slate-600 py-2 px-1 -mx-1">
+                        <Phone size={12} className="text-slate-400" />
                         {contact.phone}
-                      </a>
+                      </span>
                     )}
                     {contact.email && (
                       <a
@@ -258,7 +256,7 @@ export default function EscalationPage() {
         </div>
 
         <p className="text-xs text-slate-400 text-center pb-2">
-          All contact names and numbers shown here are fictional sample data for controlled pilot display only.
+          All contact names and numbers are fictional sample data for the controlled pilot preview only — not live routes. In a real pilot, contact details come from the provider&apos;s approved process.
         </p>
 
       </div>

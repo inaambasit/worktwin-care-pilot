@@ -12,6 +12,8 @@ import time
 import threading
 
 from app.staff_context import staff_context_from_header
+from app.jwt_auth import validate_staff_jwt
+from app.membership import resolve_staff_context
 
 app = FastAPI(title="WorkTwin API", version="0.1.0")
 
@@ -106,6 +108,19 @@ del _raw_allowed_orgs
 # Never logged, returned in non-admin responses, or used to confirm role existence.
 # ---------------------------------------------------------------------------
 _ADMIN_SESSION_ALLOWED_ROLES: frozenset = frozenset({"organisation_admin", "worktwin_dev_admin"})
+
+# ---------------------------------------------------------------------------
+# Milestone 4S.103C-1 -- Staff session check: roles permitted to access staff routes
+# Never logged, returned in non-staff responses, or used to confirm role existence.
+# ---------------------------------------------------------------------------
+_STAFF_SESSION_ALLOWED_ROLES: frozenset = frozenset({
+    "staff",
+    "senior_care_staff",
+    "registered_manager",
+})
+
+# Cache-Control header applied to all session-check responses.
+_NO_STORE_HEADERS: dict = {"Cache-Control": "no-store"}
 
 
 def _get_pilot_staff_context() -> tuple:
@@ -4540,3 +4555,86 @@ def admin_session_check(authorization: Optional[str] = Header(default=None)):
         "active": True,
         "reason": "admin_session_allowed",
     }
+
+
+# ---------------------------------------------------------------------------
+# Milestone 4S.103C-1 -- GET /staff/session-check
+# Called by Next.js staff route middleware to confirm the bearer token holder
+# has an active, allowed staff membership before access is granted.
+# JWT validation and membership lookup are the authoritative source of truth;
+# no client-supplied organisation, role or user fields are trusted.
+# Returns only minimal identity fields. Never returns user_id, token, email,
+# membership id, secrets, document data or admin fields.
+# ---------------------------------------------------------------------------
+
+@app.get("/staff/session-check")
+def staff_session_check(authorization: Optional[str] = Header(default=None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        return JSONResponse(
+            status_code=401,
+            content={"allowed": False, "reason": "access_denied"},
+            headers=_NO_STORE_HEADERS,
+        )
+    token = authorization[len("Bearer "):]
+    if not token:
+        return JSONResponse(
+            status_code=401,
+            content={"allowed": False, "reason": "access_denied"},
+            headers=_NO_STORE_HEADERS,
+        )
+
+    # JWT validation — 401 for any token error, 503 when configuration is absent.
+    try:
+        payload = validate_staff_jwt(token)
+    except HTTPException as exc:
+        if exc.status_code == 503:
+            return JSONResponse(
+                status_code=503,
+                content={"allowed": False, "reason": "auth_unavailable"},
+                headers=_NO_STORE_HEADERS,
+            )
+        return JSONResponse(
+            status_code=401,
+            content={"allowed": False, "reason": "access_denied"},
+            headers=_NO_STORE_HEADERS,
+        )
+
+    # Membership resolution — valid token but no/inactive membership → 403.
+    try:
+        ctx = resolve_staff_context(payload)
+    except HTTPException as exc:
+        if exc.status_code == 503:
+            return JSONResponse(
+                status_code=503,
+                content={"allowed": False, "reason": "auth_unavailable"},
+                headers=_NO_STORE_HEADERS,
+            )
+        return JSONResponse(
+            status_code=403,
+            content={"allowed": False, "reason": "access_denied"},
+            headers=_NO_STORE_HEADERS,
+        )
+
+    if ctx.organisation_id not in _ALLOWED_ORGANISATION_IDS:
+        return JSONResponse(
+            status_code=403,
+            content={"allowed": False, "reason": "access_denied"},
+            headers=_NO_STORE_HEADERS,
+        )
+
+    if ctx.role not in _STAFF_SESSION_ALLOWED_ROLES:
+        return JSONResponse(
+            status_code=403,
+            content={"allowed": False, "reason": "access_denied"},
+            headers=_NO_STORE_HEADERS,
+        )
+
+    return JSONResponse(
+        content={
+            "allowed": True,
+            "organisation_id": ctx.organisation_id,
+            "role": ctx.role,
+            "active": True,
+        },
+        headers=_NO_STORE_HEADERS,
+    )

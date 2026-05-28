@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // token_hash flow used by sandbox admin magic links.
+  // OTP token-hash verification path for magic-link sign-in.
   const tokenHash = searchParams.get('token_hash')
   const type = searchParams.get('type')
 

@@ -200,7 +200,7 @@ test.describe('WorkTwin smoke tests', () => {
 
   test('/login shows magic link request form', async ({ page }) => {
     await page.goto('/login')
-    await expect(page.getByRole('heading', { name: 'Sign in to WorkTwin' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Sign in to WorkTwin Care Pilot' })).toBeVisible()
     await expect(page.getByLabel('Work email address')).toBeVisible()
     await expect(page.getByRole('button', { name: 'Send sign-in link' })).toBeVisible()
     await expect(page.getByText(/WorkTwin Care Pilot is in controlled preparation/i)).toBeVisible()
@@ -212,6 +212,27 @@ test.describe('WorkTwin smoke tests', () => {
     await expect(page.getByText(/secure sign-in link/i).first()).toBeVisible()
     await expect(page.getByRole('link', { name: 'Back to sign in' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'WorkTwin home' })).toBeVisible()
+  })
+
+  // --- 4S.103B: Invite-only login smoke tests ---
+
+  test('/login is invite-only: says invited pilot staff only and access must already be set up', async ({ page }) => {
+    await page.goto('/login')
+    await expect(page.getByText(/invited pilot staff only/i).first()).toBeVisible()
+    await expect(page.getByText(/access must be set up by the organisation/i).first()).toBeVisible()
+  })
+
+  test('/login does not imply public self-registration', async ({ page }) => {
+    await page.goto('/login')
+    // Page must say that entering an unknown address does not create a new account
+    await expect(page.getByText(/does not create a new account/i).first()).toBeVisible()
+    // The "Explore the pilot preview" link must not appear — it implies open access
+    await expect(page.getByRole('link', { name: /explore the pilot preview/i })).not.toBeVisible()
+  })
+
+  test('/login/sent states the link only works where access has already been set up', async ({ page }) => {
+    await page.goto('/login/sent')
+    await expect(page.getByText(/only work where access has already been set up/i).first()).toBeVisible()
   })
 
   test('/privacy-model page loads and shows privacy boundary messaging', async ({ page }) => {
@@ -399,26 +420,15 @@ test.describe('WorkTwin smoke tests', () => {
     }
   })
 
-  test('/scenarios/access-refusal shows "Review my reflection" and not "Review my record"', async ({ page }) => {
+  test('/scenarios/access-refusal keeps recording boundary wording safe', async ({ page }) => {
     await page.goto('/scenarios/access-refusal')
-    // Stale care-record wording must not appear in the initial step view
+    // "Review my record" must not appear — WorkTwin is for reflection/guidance, not care record entry
     await expect(page.locator('main').getByText('Review my record')).not.toBeVisible()
-    // Advance to completed state via sessionStorage to verify the reflection button label
-    await page.evaluate(() => {
-      sessionStorage.setItem('wt:scenario:doorstep-refusal', JSON.stringify({
-        step: 3, step1Choice: 'B', step2Choice: 'B',
-        step3: {
-          arrivalTime: '10:00',
-          saidOrDid: 'The service user said they did not want to answer the door.',
-          refused: 'refused', familyContacted: 'spoke', familySaid: '',
-          escalationContacted: 'will-call', concerns: ['welfare'],
-        },
-        completed: true,
-      }))
-    })
+    // Recording boundary wording must be present: reflections are not submitted to a care system
+    await expect(page.getByText(/not submitted to any real care system/i).first()).toBeVisible()
+    // Both assertions hold after reload
     await page.reload()
-    // Completed screen must use "Review my reflection", not any care-record wording
-    await expect(page.getByText('Review my reflection').first()).toBeVisible()
     await expect(page.locator('main').getByText('Review my record')).not.toBeVisible()
+    await expect(page.getByText(/not submitted to any real care system/i).first()).toBeVisible()
   })
 })

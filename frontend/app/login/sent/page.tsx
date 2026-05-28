@@ -24,8 +24,10 @@ export default function LoginSentPage() {
 
         <h1 className="text-xl font-bold text-slate-900 mb-2">Check your email</h1>
         <p className="text-sm text-slate-600 leading-relaxed mb-5">
-          If that address is registered on this pilot, a secure sign-in link has
-          been sent. The link expires after a short time and can only be used once.
+          If that address has been given pilot access, a secure sign-in link has
+          been sent. A link will only work where access has already been set up by
+          the organisation. The link expires after a short time and can only be
+          used once.
         </p>
 
         <div className="flex items-start gap-2.5 rounded-xl bg-teal-50 border border-teal-100 px-4 py-3 text-left mb-5">

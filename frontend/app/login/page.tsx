@@ -37,7 +37,10 @@ async function requestMagicLink(formData: FormData) {
     const supabase = createServerSupabaseClient()
     await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: callbackUrl },
+      options: {
+        emailRedirectTo: callbackUrl,
+        shouldCreateUser: false,
+      },
     })
   } catch {
     // Do not expose internal errors. Always proceed to /login/sent
@@ -65,10 +68,12 @@ export default function LoginPage({
           </div>
           <span className="font-bold text-slate-900 text-lg">WorkTwin</span>
         </Link>
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">Sign in to WorkTwin pilot</h1>
+        <h1 className="text-2xl font-bold text-slate-900 mb-2">Sign in to WorkTwin Care Pilot</h1>
         <p className="text-sm text-slate-500 max-w-sm">
-          Enter your invited work email address. If pilot access is enabled for
-          you, we will send a sign-in link. No password required.
+          This login is for invited pilot staff only. Access must be set up by
+          the organisation. Entering your email address does not create a new
+          account. If access has not been arranged, speak to your organisation
+          lead.
         </p>
       </div>
 
@@ -110,13 +115,14 @@ export default function LoginPage({
           </button>
         </form>
 
-        {/* Pilot notice */}
+        {/* Invite-only notice */}
         <div className="mt-5 flex items-start gap-2.5 rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
           <Shield size={15} className="text-teal-600 shrink-0 mt-0.5" />
           <p className="text-xs text-slate-500 leading-relaxed">
-            WorkTwin Care Pilot is in controlled preparation. Staff access is being
-            set up by arrangement. If you have not been invited yet, your sign-in
-            link may not work at this stage.
+            WorkTwin Care Pilot is in controlled preparation. This is an
+            invite-only staff login — your email must already be set up by
+            the organisation before a sign-in link will work. Entering an
+            unknown address does not create a new account.
           </p>
         </div>
       </div>
@@ -126,12 +132,6 @@ export default function LoginPage({
         <p className="text-xs text-slate-400">
           <Link href="/" className="hover:text-slate-600 underline underline-offset-2">
             Back to WorkTwin home
-          </Link>
-        </p>
-        <p className="text-sm text-slate-500">
-          Not set up yet?{' '}
-          <Link href="/dashboard" className="text-teal-700 hover:text-teal-900 font-medium underline underline-offset-2">
-            Explore the pilot preview →
           </Link>
         </p>
       </div>

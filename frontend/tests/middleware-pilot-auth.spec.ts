@@ -1,5 +1,5 @@
 /**
- * Middleware route protection tests.
+ * Middleware route protection tests — 4S.103C-2.
  *
  * NEXT_PUBLIC_PILOT_AUTH_MODE limitation
  * ──────────────────────────────────────
@@ -16,6 +16,9 @@
  *
  * The test runner process must also carry the var so that the PILOT_AUTH_ENABLED
  * flag below evaluates to true and the skip condition is lifted.
+ *
+ * Login page error-message tests (bottom of file) do not require the server to
+ * be running in pilot-auth mode — the login page is always public.
  */
 
 import { test, expect } from '@playwright/test'
@@ -86,6 +89,20 @@ test.describe('Middleware — pilot-auth mode (NEXT_PUBLIC_PILOT_AUTH_MODE=true)
     expect(url.searchParams.get('next')).toBe('/dashboard')
   })
 
+  test('unauthenticated /ask redirects to /login?next=/ask', async ({ page }) => {
+    await page.goto('/ask')
+    const url = new URL(page.url())
+    expect(url.pathname).toBe('/login')
+    expect(url.searchParams.get('next')).toBe('/ask')
+  })
+
+  test('unauthenticated /policies redirects to /login?next=/policies', async ({ page }) => {
+    await page.goto('/policies')
+    const url = new URL(page.url())
+    expect(url.pathname).toBe('/login')
+    expect(url.searchParams.get('next')).toBe('/policies')
+  })
+
   test('unauthenticated /notes redirects to /login?next=/notes', async ({ page }) => {
     await page.goto('/notes')
     const url = new URL(page.url())
@@ -93,7 +110,7 @@ test.describe('Middleware — pilot-auth mode (NEXT_PUBLIC_PILOT_AUTH_MODE=true)
     expect(url.searchParams.get('next')).toBe('/notes')
   })
 
-  test('unauthenticated /scenarios/access-refusal redirects to /login?next=/scenarios/access-refusal', async ({
+  test('unauthenticated /scenarios/access-refusal preserves safe nested next param', async ({
     page,
   }) => {
     await page.goto('/scenarios/access-refusal')
@@ -114,19 +131,49 @@ test.describe('Middleware — pilot-auth mode (NEXT_PUBLIC_PILOT_AUTH_MODE=true)
     expect(url.pathname).toBe('/book-pilot')
   })
 
-  test('unauthenticated /admin redirects to /login?next=/admin', async ({ page }) => {
+  test('admin routes are not gated by the staff session-check middleware', async ({ page }) => {
+    // Admin routes are not in STAFF_ROOTS — they have their own API-proxy auth layer.
+    // The staff gate must not redirect /admin to /login.
     await page.goto('/admin')
     const url = new URL(page.url())
-    expect(url.pathname).toBe('/login')
-    expect(url.searchParams.get('next')).toBe('/admin')
+    expect(url.pathname).not.toBe('/login')
+  })
+})
+
+// ─── Login page error messages (always runs — login page is always public) ───
+
+test.describe('Login page — staff session-check error messages', () => {
+  test('access_denied error renders safe wording', async ({ page }) => {
+    await page.goto('/login?error=access_denied')
+    await expect(
+      page.getByText(
+        'Access has not been confirmed for this pilot. Please speak to your organisation lead.'
+      )
+    ).toBeVisible()
   })
 
-  test('unauthenticated /admin/documents redirects to /login?next=/admin/documents', async ({
+  test('auth_unavailable error renders safe wording', async ({ page }) => {
+    await page.goto('/login?error=auth_unavailable')
+    await expect(
+      page.getByText(
+        'We could not confirm pilot access just now. Please try again later or speak to your organisation lead.'
+      )
+    ).toBeVisible()
+  })
+
+  test('access_denied message does not reveal membership, role, or organisation details', async ({
     page,
   }) => {
-    await page.goto('/admin/documents')
-    const url = new URL(page.url())
-    expect(url.pathname).toBe('/login')
-    expect(url.searchParams.get('next')).toBe('/admin/documents')
+    await page.goto('/login?error=access_denied')
+    await expect(page.getByText(/membership/i)).not.toBeVisible()
+    await expect(page.getByText(/role/i)).not.toBeVisible()
+    await expect(page.getByText(/organisation_id/i)).not.toBeVisible()
+    await expect(page.getByText(/email.*exist/i)).not.toBeVisible()
+  })
+
+  test('auth_unavailable message does not reveal internal error detail', async ({ page }) => {
+    await page.goto('/login?error=auth_unavailable')
+    await expect(page.getByText(/membership/i)).not.toBeVisible()
+    await expect(page.getByText(/500|503|database|fetch/i)).not.toBeVisible()
   })
 })

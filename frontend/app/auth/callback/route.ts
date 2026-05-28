@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 
-const ALLOWED_NEXT_PATHS = new Set([
+const STAFF_ROOTS = [
   '/dashboard',
   '/ask',
   '/policies',
@@ -9,14 +9,14 @@ const ALLOWED_NEXT_PATHS = new Set([
   '/scenarios',
   '/notes',
   '/escalation',
-  '/admin',
-])
+]
 
 function safeNext(raw: string | null | undefined): string {
   if (!raw) return '/dashboard'
-  if (ALLOWED_NEXT_PATHS.has(raw)) return raw
-  if (raw.startsWith('/admin/')) return raw
-  return '/dashboard'
+  const isSafe = STAFF_ROOTS.some(
+    (root) => raw === root || raw.startsWith(root + '/')
+  )
+  return isSafe ? raw : '/dashboard'
 }
 
 export async function GET(request: NextRequest) {

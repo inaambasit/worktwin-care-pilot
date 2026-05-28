@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Shield } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 
-const ALLOWED_NEXT_PATHS = new Set([
+const STAFF_ROOTS = [
   '/dashboard',
   '/ask',
   '/policies',
@@ -12,11 +12,14 @@ const ALLOWED_NEXT_PATHS = new Set([
   '/scenarios',
   '/notes',
   '/escalation',
-])
+]
 
 function safeNext(raw: string | null | undefined): string {
-  if (raw && ALLOWED_NEXT_PATHS.has(raw)) return raw
-  return '/dashboard'
+  if (!raw) return '/dashboard'
+  const isSafe = STAFF_ROOTS.some(
+    (root) => raw === root || raw.startsWith(root + '/')
+  )
+  return isSafe ? raw : '/dashboard'
 }
 
 async function requestMagicLink(formData: FormData) {
@@ -50,12 +53,21 @@ async function requestMagicLink(formData: FormData) {
   redirect('/login/sent')
 }
 
+function errorMessage(code: string | undefined): string | null {
+  if (!code) return null
+  if (code === 'access_denied')
+    return 'Access has not been confirmed for this pilot. Please speak to your organisation lead.'
+  if (code === 'auth_unavailable')
+    return 'We could not confirm pilot access just now. Please try again later or speak to your organisation lead.'
+  return 'Something went wrong. Please check your email address and try again.'
+}
+
 export default function LoginPage({
   searchParams,
 }: {
   searchParams?: { error?: string; next?: string }
 }) {
-  const hasError = Boolean(searchParams?.error)
+  const errMsg = errorMessage(searchParams?.error)
   const next = safeNext(searchParams?.next)
 
   return (
@@ -79,11 +91,9 @@ export default function LoginPage({
 
       {/* Card */}
       <div className="w-full max-w-sm bg-white rounded-2xl border border-slate-200 shadow-sm p-7">
-        {hasError && (
+        {errMsg && (
           <div className="mb-5 rounded-xl bg-red-50 border border-red-200 px-4 py-3">
-            <p className="text-sm text-red-700">
-              Something went wrong. Please check your email address and try again.
-            </p>
+            <p className="text-sm text-red-700">{errMsg}</p>
           </div>
         )}
 

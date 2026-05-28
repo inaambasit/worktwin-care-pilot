@@ -9,7 +9,6 @@ const STAFF_ROOTS = [
   '/scenarios',
   '/notes',
   '/escalation',
-  '/admin',
 ]
 
 function isProtectedStaffPath(pathname: string): boolean {
@@ -17,6 +16,8 @@ function isProtectedStaffPath(pathname: string): boolean {
     (root) => pathname === root || pathname.startsWith(root + '/')
   )
 }
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   if (process.env.NEXT_PUBLIC_PILOT_AUTH_MODE !== 'true') {
@@ -54,13 +55,46 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   })
 
   const {
-    data: { user },
+    data: { session },
     error,
-  } = await supabase.auth.getUser()
+  } = await supabase.auth.getSession()
 
-  if (error || !user) {
+  if (error || !session?.access_token) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('next', pathname)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  // Backend is the authority: validate JWT, organisation membership, and staff role.
+  let allowed = false
+  let sessionCheckError: 'access_denied' | 'auth_unavailable' = 'auth_unavailable'
+
+  try {
+    const checkResp = await fetch(`${API_BASE}/staff/session-check`, {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+      signal: AbortSignal.timeout(5_000),
+    })
+
+    if (checkResp.ok) {
+      const body = (await checkResp.json()) as { allowed?: boolean }
+      if (body.allowed === true) {
+        allowed = true
+      } else {
+        sessionCheckError = 'access_denied'
+      }
+    } else if (checkResp.status >= 500) {
+      sessionCheckError = 'auth_unavailable'
+    } else {
+      // 401 or 403
+      sessionCheckError = 'access_denied'
+    }
+  } catch {
+    sessionCheckError = 'auth_unavailable'
+  }
+
+  if (!allowed) {
+    const loginUrl = new URL('/login', request.url)
+    loginUrl.searchParams.set('error', sessionCheckError)
     return NextResponse.redirect(loginUrl)
   }
 
@@ -76,7 +110,5 @@ export const config = {
     '/scenarios/:path*',
     '/notes/:path*',
     '/escalation/:path*',
-    '/admin',
-    '/admin/:path*',
   ],
 }

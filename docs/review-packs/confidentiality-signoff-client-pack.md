@@ -428,8 +428,8 @@ Once this review pack is returned with completed checklists and signatures, the 
 | Date prepared | 31 May 2026 |
 | Source policy version | v0.1 draft (31 May 2026) |
 | AI-safe extract version | v0.2 (31 May 2026) |
-| Return completed pack to | *[To be completed before sending — add contact name and address]* |
-| Questions about this pack | *[To be completed before sending — add contact details]* |
+| Return completed pack to | Inaam Basit — inaam_basit@hotmail.co.uk |
+| Questions about this pack | Inaam Basit — inaam_basit@hotmail.co.uk |
 
 ---
 

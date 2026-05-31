@@ -8,7 +8,7 @@
 |-------|--------|
 | **Source document** | Thumhara Centre Confidentiality and Information Handling Policy |
 | **Source document version** | v0.1 draft |
-| **Extract version** | v0.1 |
+| **Extract version** | v0.2 |
 | **Status** | Draft AI-safe extract for controlled testing preparation only |
 | **Approved for live operational use** | No |
 | **Approved for staff visibility** | No |
@@ -23,11 +23,11 @@ This extract is written in original wording. It does not reproduce wording from 
 ## 2. Source Document Reference
 
 **Source:** Thumhara Centre Confidentiality and Information Handling Policy
-**Location:** `docs/policies/thumhara-confidentiality-and-information-handling-draft.md` *(to be authored)*
+**Location:** `docs/policies/thumhara-confidentiality-and-information-handling-draft.md`
 **Version:** v0.1 draft
 **Status:** Draft — not operational until reviewed and approved by Thumhara Centre leadership and/or registered manager.
 
-This extract is prepared ahead of the full source policy draft. Where the source document is not yet available, this extract describes the anticipated scope and rules. The extract must be reconciled against the final source policy before approval.
+This extract has been reconciled against the authored source policy (v0.1 draft, 31 May 2026). It must be re-reconciled against any future version of the source policy before approval.
 
 ---
 
@@ -44,7 +44,7 @@ This extract is designed to:
 - Block and redirect questions about real personal data, disclosures, or identity-linked information to the correct human route
 - Reinforce that real care records and personal information must be kept in Thumhara Centre's approved care-recording system, not in WorkTwin
 
-This extract does not replace the source policy, data protection law, Thumhara Centre's Data Protection Officer guidance, or any specialist regulatory requirement.
+This extract does not replace the source policy, data protection law, the guidance of Thumhara Centre's data-protection responsible person, or any specialist regulatory requirement.
 
 ---
 
@@ -85,7 +85,7 @@ WorkTwin must stop attempting to advise and direct the worker to a human immedia
 | A service user, family member or third party has asked for disclosure of information | Stop. Direct staff not to make a disclosure decision alone. | Senior / shift lead → Registered Manager |
 | Staff member is unsure whether they are permitted to share a piece of information | Stop. Direct staff to contact their senior before sharing anything. | Senior / shift lead → Registered Manager |
 | Staff member thinks another staff member has handled information incorrectly | Stop. Direct staff to contact their senior. Do not advise the staff member to challenge colleagues directly. | Senior / shift lead → Registered Manager |
-| A subject access request or data rights request has been made | Stop. Direct staff to inform the registered manager. WorkTwin must not attempt to guide a response to a legal data request. | Registered Manager → Data Protection Officer (if applicable) |
+| A subject access request or data rights request has been made | Stop. Direct staff to inform the registered manager. WorkTwin must not attempt to guide a response to a legal data request. | Registered Manager → data-protection responsible person (if applicable) |
 
 *All contact details are placeholders and must be confirmed by Thumhara Centre before this extract is approved for use.*
 
@@ -104,7 +104,7 @@ For the following topics WorkTwin must **block direct guidance and route to the 
 | Incident or complaint details | Block. Do not advise. | Senior / shift lead → Registered Manager |
 | HR, disciplinary, payroll, absence or performance details relating to any individual | Block. Do not advise. | HR / people route → Line Manager |
 | Attempts to identify a person from partial information given to WorkTwin | Block. Do not attempt to identify anyone. | No further routing — stop and reset the conversation |
-| Questions about sharing information with media, external organisations, or regulators | Block. Do not advise. | Registered Manager → Data Protection Officer (if applicable) |
+| Questions about sharing information with media, external organisations, or regulators | Block. Do not advise. | Registered Manager → data-protection responsible person (if applicable) |
 
 ---
 
@@ -112,7 +112,7 @@ For the following topics WorkTwin must **block direct guidance and route to the 
 
 The following categories of information must **never** be entered into WorkTwin at any time, including during controlled sandbox or demo testing:
 
-- Real service-user names or any identifier (date of birth, address, NHS number, care ID)
+- Real service-user names or any identifier (date of birth, address, identification or care reference number)
 - Family member, next-of-kin or emergency contact names or contact details
 - Medication names, doses, schedules, administration records or clinical notes relating to a real person
 - Care-plan content, risk assessments, or support plans relating to a real service user
@@ -157,9 +157,9 @@ If a staff member believes a confidentiality breach has occurred or may have occ
 
 **Senior / shift lead:** *[Placeholder — contact details to be confirmed by Thumhara Centre]*
 **Registered Manager:** *[Placeholder — contact details to be confirmed by Thumhara Centre]*
-**Data Protection Officer (if applicable):** *[Placeholder — to be confirmed by Thumhara Centre]*
+**Data-protection responsible person (if applicable):** *[Placeholder — to be confirmed by Thumhara Centre]*
 
-WorkTwin must not advise on whether a breach is reportable to the ICO or any other regulator. That decision must be made by the registered manager and, if applicable, the Data Protection Officer.
+WorkTwin must not advise on whether a breach is reportable to a regulator. That decision must be made by the registered manager and, where applicable, the data-protection responsible person.
 
 ---
 
@@ -171,6 +171,7 @@ WorkTwin may provide the following general guidance on information-sharing with 
 - The service user's own wishes, capacity, and any formal consent or restriction must guide what is shared with family members.
 - If a staff member is uncertain what a family member or contact is permitted to know, the answer is always: do not share without speaking to your senior first.
 - If a family member is placing pressure on a staff member to share information, the staff member should contact their senior and should not act alone.
+- Use only the contact route recorded in the care plan or provider process. Do not use personal devices or routes that have not been agreed.
 
 WorkTwin must not attempt to advise whether a specific family member or contact is permitted to receive specific information. That decision requires human oversight.
 
@@ -223,7 +224,7 @@ The following requirements apply once this extract has been approved, uploaded a
 - Answers must cite this approved extract as the source. Staff must be able to see the basis for any information-handling guidance WorkTwin provides.
 - No guidance answer should be given if no approved source content is retrieved. WorkTwin must not generate advice from general knowledge alone. If retrieval returns no relevant content, WorkTwin must provide the fallback wording and direct staff to their senior or registered manager.
 - If retrieved content is weak or loosely relevant, WorkTwin should provide a cautious, limited response and include a human escalation reminder. It must not fill gaps with inferred or general knowledge.
-- This extract cannot be used for AI answer testing until the source policy has been authored and governance approval has been recorded. Upload, indexing and answer testing must not begin until the governance checklist in Section 16 has been completed by an appropriate person at Thumhara Centre.
+- The source policy has been authored (v0.1 draft, 31 May 2026) and this extract has been reconciled against it. Upload, indexing and answer testing must not begin until the governance checklist in Section 16 has been completed by an appropriate person at Thumhara Centre.
 
 ---
 
@@ -244,9 +245,9 @@ The following checklist must be completed before this extract is uploaded, index
 
 | Checklist item | Complete? |
 |----------------|-----------|
-| Source policy (full draft) authored and reviewed by Thumhara Centre leadership and/or registered manager | No — pending (source policy not yet drafted) |
-| Extract reconciled against final source policy | No — pending |
-| Data protection / ICO-specific obligations reviewed and confirmed as out of scope for WorkTwin answers | No — pending |
+| Source policy (full draft) authored and reviewed by Thumhara Centre leadership and/or registered manager | Partially — source policy authored (v0.1 draft, 31 May 2026); leadership review and approval pending |
+| Extract reconciled against final source policy | Partially — reconciled against v0.1 draft (31 May 2026); re-reconciliation required against approved version |
+| Data-protection / regulator-specific obligations reviewed and confirmed as out of scope for WorkTwin answers | No — pending |
 | Safeguarding and medication exclusions reviewed and confirmed | No — pending |
 | AI-safe extract reviewed by Thumhara Centre leadership and/or registered manager | No — pending |
 | WorkTwin lane confirmed (Lane B — cautious staff-visible support, with escalation and block rules) | No — pending |
@@ -263,7 +264,8 @@ The following checklist must be completed before this extract is uploaded, index
 
 | Version | Date | Reviewed by | Changes made | Next review due |
 |---------|------|-------------|--------------|-----------------|
-| v0.1 | 31 May 2026 | WorkTwin project team | AI-safe extract authored as second dummy document for multi-document retrieval scoping proof (4S.104C-1). Source policy not yet drafted — extract describes anticipated scope and rules. All contact routes are synthetic placeholders. Covers: confidentiality principles, safe information-handling rules, no-real-data boundary, breach routing, family/contact rules, personal device rules, fallback wording, scoping notes for multi-document testing, and governance checklist. Governance flags all OFF. | To be set after source policy is authored and leadership approval is obtained |
+| v0.1 | 31 May 2026 | WorkTwin project team | AI-safe extract authored as second dummy document for multi-document retrieval scoping proof (4S.104C-1). Source policy not yet drafted at time of authoring — extract described anticipated scope and rules. All contact routes are synthetic placeholders. Covers: confidentiality principles, safe information-handling rules, no-real-data boundary, breach routing, family/contact rules, personal device rules, fallback wording, scoping notes for multi-document testing, and governance checklist. Governance flags all OFF. | Superseded by v0.2 |
+| v0.2 | 31 May 2026 | WorkTwin project team | Reconciled against authored source policy v0.1 draft (4S.104D-2). Changes: Section 2 source reference updated (no longer 'to be authored'); Section 2 paragraph updated to reflect source is authored and reconciliation complete; identifier wording in Section 8 aligned to source ('identification or care reference number'); terminology aligned throughout — 'data-protection responsible person' replaces 'Data Protection Officer' in Sections 6, 7, and 10; 'ICO' reference replaced with 'regulator' in Section 10; missing family/contact rule added in Section 11 (use only contact route from care plan/provider process); Section 14 source citation updated to reflect source authored; governance checklist rows 1 and 2 updated. All governance flags remain OFF. | To be set after source policy leadership approval and final reconciliation |
 
 ---
 

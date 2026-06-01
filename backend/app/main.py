@@ -1,7 +1,7 @@
 import os
 import re
 import io
-from fastapi import FastAPI, Form, UploadFile, File, HTTPException, Depends, Header
+from fastapi import FastAPI, Form, UploadFile, File, HTTPException, Depends, Header, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, model_validator
@@ -121,6 +121,27 @@ _STAFF_SESSION_ALLOWED_ROLES: frozenset = frozenset({
 
 # Cache-Control header applied to all session-check responses.
 _NO_STORE_HEADERS: dict = {"Cache-Control": "no-store"}
+
+# ---------------------------------------------------------------------------
+# Milestone 4S.104E-6d — Cache-Control: no-store on staff-facing responses.
+# /policies returns organisation- and role-scoped policy metadata; /ask returns
+# source-grounded answers. Neither must be cached by browsers or shared proxies.
+# This mirrors the per-response no-store guarantee already applied to
+# /staff/session-check (_NO_STORE_HEADERS), but is applied via middleware so the
+# header is present on EVERY response for these paths — success, safe fallback,
+# and auth/error responses (401/403/429/5xx) alike — including those raised as
+# HTTPException, which bypass any header set on an injected Response object.
+# Scoped strictly to these exact paths; no other endpoint is affected.
+# ---------------------------------------------------------------------------
+_NO_STORE_PATHS: frozenset = frozenset({"/policies", "/ask"})
+
+
+@app.middleware("http")
+async def _no_store_on_staff_endpoints(request: Request, call_next):
+    response = await call_next(request)
+    if request.url.path in _NO_STORE_PATHS:
+        response.headers["Cache-Control"] = _NO_STORE_HEADERS["Cache-Control"]
+    return response
 
 
 def _get_pilot_staff_context() -> tuple:

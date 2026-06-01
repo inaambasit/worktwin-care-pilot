@@ -1,7 +1,8 @@
+import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
 import {
   AlertTriangle, CheckCircle, XCircle, ShieldAlert, ClipboardList,
-  FileText, BookOpen, Lock, Ban, AlertCircle,
+  FileText, BookOpen, Lock, Ban, AlertCircle, Pencil,
 } from 'lucide-react'
 
 const STATUS_CHIPS = [
@@ -290,6 +291,30 @@ export default function RehearsalCockpitPage() {
                 </span>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Feedback capture link */}
+        <div className="bg-teal-50 border border-teal-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="px-5 py-5 flex items-start justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-teal-100 flex items-center justify-center shrink-0 mt-0.5">
+                <Pencil size={15} className="text-teal-700" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-teal-900">Operator feedback capture</p>
+                <p className="text-xs text-teal-700 mt-1 leading-relaxed max-w-md">
+                  Record per-question observations, stop conditions, and rehearsal outcome.
+                  No data is saved or transmitted. Operator use only — no real care data.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/rehearsal/feedback"
+              className="flex items-center gap-1.5 bg-teal-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-teal-800 transition-colors shrink-0 whitespace-nowrap"
+            >
+              Open feedback form
+            </Link>
           </div>
         </div>
 

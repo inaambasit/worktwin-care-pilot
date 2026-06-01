@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, MessageCircle, ClipboardList, PlayCircle,
   Lock, FileText, BarChart2, Shield, Phone, ChevronRight,
-  Users, AlertTriangle, BookOpen, Menu, X, LogOut,
+  Users, AlertTriangle, BookOpen, Menu, X, LogOut, FlaskConical,
 } from 'lucide-react'
 
 const ADMIN_DEMO_ENABLED = process.env.NEXT_PUBLIC_ADMIN_DEMO_ENABLED === 'true'
@@ -25,6 +25,7 @@ const adminNav = [
   { href: '/admin/insights', label: 'Anonymous Insights', icon: BarChart2 },
   { href: '/admin/roles', label: 'Roles & Permissions', icon: Shield },
   { href: '/admin/escalation', label: 'Escalation Contacts', icon: Phone },
+  { href: '/rehearsal', label: 'Rehearsal Cockpit', icon: FlaskConical },
 ]
 
 function SidebarContent({

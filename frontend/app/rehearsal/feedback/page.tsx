@@ -126,7 +126,7 @@ function ToggleGroup({
           key={opt.value}
           type="button"
           onClick={() => onChange(value === opt.value ? '' : opt.value)}
-          className={`px-3 py-1 rounded-md text-xs font-semibold border transition-colors ${
+          className={`px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors ${
             value === opt.value
               ? opt.activeClass
               : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
@@ -165,8 +165,8 @@ const textareaClass =
 
 function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-3 py-2.5 border-b border-slate-100 last:border-0">
-      <span className="text-xs text-slate-500 w-44 shrink-0 pt-1.5 leading-tight">{label}</span>
+    <div className="flex flex-col sm:flex-row sm:items-start gap-1.5 sm:gap-3 py-2.5 border-b border-slate-100 last:border-0">
+      <span className="text-xs font-medium text-slate-500 sm:w-44 sm:shrink-0 sm:pt-1.5 leading-tight">{label}</span>
       <div className="flex-1 min-w-0">{children}</div>
     </div>
   )
@@ -279,11 +279,11 @@ export default function RehearsalFeedbackPage() {
       <div className="max-w-4xl mx-auto px-4 pt-4 pb-12 space-y-6">
 
         {/* Hero */}
-        <div className="bg-gradient-to-br from-teal-700 via-teal-800 to-slate-900 rounded-3xl p-7 text-white relative overflow-hidden shadow-lg">
+        <div className="bg-gradient-to-br from-teal-700 via-teal-800 to-slate-900 rounded-3xl p-6 sm:p-7 text-white relative overflow-hidden shadow-lg">
           <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full bg-white/5 pointer-events-none" />
           <div className="absolute right-6 -bottom-14 w-40 h-40 rounded-full bg-teal-600/25 pointer-events-none" />
           <div className="relative">
-            <div className="flex items-start justify-between gap-4 mb-4">
+            <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
               <span className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1 rounded-full text-xs font-semibold">
                 <Lock size={11} />
                 Operator-only — not staff-facing
@@ -296,7 +296,7 @@ export default function RehearsalFeedbackPage() {
                 Back to cockpit
               </Link>
             </div>
-            <h1 className="text-3xl font-bold mb-2.5 leading-snug">Rehearsal Feedback Capture</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2.5 leading-snug">Rehearsal Feedback Capture</h1>
             <p className="text-teal-100 text-sm leading-relaxed max-w-lg mb-5">
               Record per-question observations, stop conditions, and rehearsal outcome.
               This form is for the WorkTwin operator only. No data is saved or transmitted.
@@ -407,7 +407,7 @@ export default function RehearsalFeedbackPage() {
 
         {/* ── 2. QUESTION FEEDBACK ───────────────────────────────────────────── */}
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+          <div className="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center gap-x-2 gap-y-1">
             <ClipboardList size={16} className="text-teal-600" />
             <h2 className="font-semibold text-slate-900 text-sm">2 — Question feedback (Q1–Q8)</h2>
             <span className="ml-auto text-xs text-slate-400">8 approved questions</span>
@@ -499,7 +499,7 @@ export default function RehearsalFeedbackPage() {
 
         {/* ── 3. STOP CONDITIONS ─────────────────────────────────────────────── */}
         <div className={`bg-white border rounded-2xl shadow-sm overflow-hidden ${anyStopFired ? 'border-red-400' : 'border-slate-200'}`}>
-          <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+          <div className="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center gap-x-2 gap-y-1">
             <AlertCircle size={16} className={anyStopFired ? 'text-red-600' : 'text-slate-400'} />
             <h2 className="font-semibold text-slate-900 text-sm">3 — Stop conditions</h2>
             <span className="ml-auto text-xs text-slate-400">
@@ -554,7 +554,7 @@ export default function RehearsalFeedbackPage() {
                 onChange={v => setOutcome(v as Outcome)}
                 options={OUTCOME_OPTIONS}
               />
-              <div className="mt-2 grid grid-cols-2 gap-1 text-xs text-slate-500">
+              <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs text-slate-500">
                 <span>PASS — all questions behaved as expected, no stop conditions.</span>
                 <span>PASS WITH ACTIONS — minor issues; actions required before next rehearsal.</span>
                 <span>STOP — session halted; stop condition fired; no further steps without review.</span>
@@ -609,11 +609,11 @@ export default function RehearsalFeedbackPage() {
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">
             Operator controls — no data is saved or transmitted
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3">
             <button
               type="button"
               onClick={handleCopy}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+              className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors w-full sm:w-auto ${
                 copied
                   ? 'bg-teal-100 text-teal-800 border border-teal-300'
                   : 'bg-teal-700 text-white hover:bg-teal-800'
@@ -625,7 +625,7 @@ export default function RehearsalFeedbackPage() {
             <button
               type="button"
               onClick={handleClear}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+              className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors w-full sm:w-auto"
             >
               <Trash2 size={15} />
               Clear form
@@ -647,11 +647,11 @@ export default function RehearsalFeedbackPage() {
             {ARTEFACT_REFS.map(ref => (
               <div key={ref} className="flex items-start gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-teal-400 shrink-0 mt-1.5" />
-                <p className="text-xs text-slate-600 font-mono leading-relaxed">{ref}</p>
+                <p className="text-xs text-slate-600 font-mono leading-relaxed break-words min-w-0">{ref}</p>
               </div>
             ))}
           </div>
-          <div className="px-5 py-3 border-t border-slate-100 flex items-center justify-between gap-4">
+          <div className="px-5 py-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             <p className="text-xs text-slate-400">All artefacts on main branch — docs/runbooks/</p>
             <Link
               href="/rehearsal"

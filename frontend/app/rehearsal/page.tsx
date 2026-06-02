@@ -134,7 +134,7 @@ export default function RehearsalCockpitPage() {
       <div className="max-w-4xl mx-auto px-4 pt-4 pb-8 space-y-6">
 
         {/* Hero */}
-        <div className="bg-gradient-to-br from-amber-700 via-amber-800 to-orange-900 rounded-3xl p-7 text-white relative overflow-hidden shadow-lg">
+        <div className="bg-gradient-to-br from-amber-700 via-amber-800 to-orange-900 rounded-3xl p-6 sm:p-7 text-white relative overflow-hidden shadow-lg">
           <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full bg-white/5 pointer-events-none" />
           <div className="absolute right-6 -bottom-14 w-40 h-40 rounded-full bg-amber-600/25 pointer-events-none" />
           <div className="absolute -left-6 bottom-4 w-24 h-24 rounded-full bg-amber-800/40 pointer-events-none" />
@@ -143,7 +143,7 @@ export default function RehearsalCockpitPage() {
               <Lock size={11} />
               Internal operator view — not staff-facing
             </span>
-            <h1 className="text-3xl font-bold mb-2.5 leading-snug">Rehearsal Cockpit</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2.5 leading-snug">Rehearsal Cockpit</h1>
             <p className="text-amber-100 text-sm leading-relaxed max-w-lg mb-5">
               Controlled one-user rehearsal overview. This page is for the WorkTwin operator only.
               It is not a claim of readiness, not a staff feature, and does not approve any rehearsal by itself.
@@ -173,7 +173,7 @@ export default function RehearsalCockpitPage() {
 
         {/* Hard gates checklist */}
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+          <div className="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center gap-x-2 gap-y-1">
             <ShieldAlert size={16} className="text-amber-600" />
             <h2 className="font-semibold text-slate-900 text-sm">Hard gates before rehearsal</h2>
             <span className="ml-auto text-xs text-slate-400">{completeCount}/{HARD_GATES.length} complete</span>
@@ -208,7 +208,7 @@ export default function RehearsalCockpitPage() {
 
         {/* Approved safe questions */}
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+          <div className="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center gap-x-2 gap-y-1">
             <ClipboardList size={16} className="text-teal-600" />
             <h2 className="font-semibold text-slate-900 text-sm">Approved safe test questions</h2>
             <span className="ml-auto text-xs text-slate-400">8 pre-approved questions only</span>
@@ -284,7 +284,7 @@ export default function RehearsalCockpitPage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-slate-800">{a.label}</p>
                   <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{a.desc}</p>
-                  <p className="text-xs text-teal-700 font-mono mt-1">{a.path}</p>
+                  <p className="text-xs text-teal-700 font-mono mt-1 break-all">{a.path}</p>
                 </div>
                 <span className="text-xs bg-teal-100 text-teal-700 font-semibold px-2 py-0.5 rounded-full shrink-0 mt-0.5">
                   Merged
@@ -296,7 +296,7 @@ export default function RehearsalCockpitPage() {
 
         {/* Feedback capture link */}
         <div className="bg-teal-50 border border-teal-200 rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-5 py-5 flex items-start justify-between gap-4">
+          <div className="px-5 py-5 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-xl bg-teal-100 flex items-center justify-center shrink-0 mt-0.5">
                 <Pencil size={15} className="text-teal-700" />
@@ -311,7 +311,7 @@ export default function RehearsalCockpitPage() {
             </div>
             <Link
               href="/rehearsal/feedback"
-              className="flex items-center gap-1.5 bg-teal-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-teal-800 transition-colors shrink-0 whitespace-nowrap"
+              className="flex items-center justify-center gap-1.5 bg-teal-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-teal-800 transition-colors shrink-0 whitespace-nowrap w-full sm:w-auto"
             >
               Open feedback form
             </Link>

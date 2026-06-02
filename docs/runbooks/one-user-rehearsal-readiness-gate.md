@@ -54,7 +54,7 @@ If **any** item in this section is **not satisfied**, the answer is **NO-GO**. D
 
 | # | Check | Expected state | Actual state | Pass / Fail |
 |---|-------|---------------|-------------|-------------|
-| 4.1 | **Auth mode aligned** — `PILOT_AUTH_MODE=true`, `NEXT_PUBLIC_PILOT_AUTH_ENABLED=true`. Both flags confirmed in local env and Render. | Both `true` | | |
+| 4.1 | **Auth mode aligned** — `PILOT_AUTH_MODE=true`, `NEXT_PUBLIC_PILOT_AUTH_MODE=true`. Both flags confirmed in local env and Render. | Both `true` | | |
 | 4.2 | **ES256 membership proof passed** — active member → 200, inactive → 403, no-membership → 401/403. Proven end-to-end on sandbox demo-org (4S.104E-6b-fix). | PASS (sandbox) | | |
 | 4.3 | **Cache-Control: no-store on `/policies` and `/ask`** — merged to `main` (commit `98135fc`, PR #1). | Merged | | |
 | 4.4 | **`ADMIN_TOKEN` rotated** — local `backend/.env`, Render, Vercel updated; bogus → 401 (not 503) on Render confirmed. | Rotated | | |

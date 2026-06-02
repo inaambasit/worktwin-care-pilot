@@ -1,7 +1,8 @@
 # One-User Staff Rehearsal — Readiness Gate / Go-No-Go Checklist
 
-**Reference:** 4S.105C
+**Reference:** 4S.105C / 4S.106E
 **Date:** 2026-06-01
+**Last updated:** 2026-06-02 — Supabase credential rotation cleared (4S.106E)
 **Status:** CHECKLIST ONLY — this document does not approve the rehearsal by itself
 
 ---
@@ -18,19 +19,19 @@ Until then, the default is **NO-GO**.
 
 ---
 
-## 2. Current Status Summary (as at 2026-06-01)
+## 2. Current Status Summary (as at 2026-06-02)
 
 | Area | Status |
 |------|--------|
 | Technical — auth mode, membership, no-store, ADMIN_TOKEN, OpenAI | Substantially complete (see Section 4) |
-| Supabase credential rotation | **DEFERRED — BLOCKING** |
+| Supabase credential rotation | **COMPLETE — CLEARED** (4S.106E — 2026-06-02) |
 | Thumhara sign-off | **PENDING — BLOCKING** (return-by 2026-06-14) |
 | Governance — real_document decision, staff visibility, Staff Ask | **All OFF / not yet decided** |
 | Rehearsal artefacts (runbooks, plan, session record) | All present on `main` |
 | Tester identified and briefed | **NOT YET** |
 | Environment / sandbox confirmed | Confirmed demo-org; no production org |
 
-**Current overall status: NO-GO.** Two hard blockers remain open (Supabase rotation, Thumhara sign-off).
+**Current overall status: NO-GO.** One hard blocker remains: Thumhara written sign-off (return-by 2026-06-14). Supabase credential rotation cleared 2026-06-02 (4S.106E — service-role key, JWT secret, anon key rotated; ES256 membership proof PASS; staff visibility remains OFF; Staff Ask remains OFF).
 
 ---
 
@@ -40,7 +41,7 @@ If **any** item in this section is **not satisfied**, the answer is **NO-GO**. D
 
 | # | Blocker | Satisfied? |
 |---|---------|------------|
-| 3.1 | **Supabase credential rotation completed** (service-role key / JWT cascade). Any untreated exposed credential is an absolute blocker. | |
+| 3.1 | **Supabase credential rotation completed** (service-role key / JWT cascade). Any untreated exposed credential is an absolute blocker. | **PASS** — 4S.106E (2026-06-02) |
 | 3.2 | **Thumhara Centre written sign-off returned and reviewed** by the WorkTwin operator. The confidentiality pack must have been returned with a completed sign-off — not just acknowledged. | |
 | 3.3 | **No approved governance path has been skipped.** Any `real_document` promotion, staff-visibility change, or Staff Ask enablement must have gone through a recorded governance decision — not assumed or improvised. | |
 | 3.4 | **Staff visibility and Staff Ask are only enabled (if at all) through a separately recorded operator decision** made after all other gates pass — not defaulted on, not left from a previous test, not toggled without a record. | |
@@ -59,7 +60,7 @@ If **any** item in this section is **not satisfied**, the answer is **NO-GO**. D
 | 4.3 | **Cache-Control: no-store on `/policies` and `/ask`** — merged to `main` (commit `98135fc`, PR #1). | Merged | | |
 | 4.4 | **`ADMIN_TOKEN` rotated** — local `backend/.env`, Render, Vercel updated; bogus → 401 (not 503) on Render confirmed. | Rotated | | |
 | 4.5 | **`OPENAI_API_KEY` rotated** — new WorkTwin Care Pilot Backend key active; old key revoked; post-revoke verify PASS (search-vector 200, `has_error: false`). | Rotated, old key revoked | | |
-| 4.6 | **Supabase credential rotation** — service-role key / JWT cascade. | **PENDING — BLOCKING** | | |
+| 4.6 | **Supabase credential rotation** — service-role key / JWT cascade. | Rotated | PASS — 4S.106E (2026-06-02): service-role, JWT secret, anon key rotated; ES256 membership proof PASS (active 200, inactive 403, nomember 403/401); cleanup verified | Pass |
 | 4.7 | **Render backend healthy** — `GET /health` → 200 `{"status":"ok"}`. | 200 | | |
 | 4.8 | **Vercel frontend reachable** — frontend loads without errors. | Reachable | | |
 | 4.9 | **Staff visibility flag confirmed** — operator has verified the current flag state and recorded the intended state for this session. | Confirm on the day | | |

@@ -177,7 +177,7 @@ export default function RehearsalFeedbackPage() {
   const [operatorName, setOperatorName]           = useState('')
   const [testerName, setTesterName]               = useState('')
   const [environment, setEnvironment]             = useState('Sandbox / demo-org')
-  const [checkpoint, setCheckpoint]               = useState('9eefa43')
+  const [checkpoint, setCheckpoint]               = useState('7ce06db')
   const [hardGatesConfirmed, setHardGatesConfirmed] = useState<YesNo>('')
   const [questions, setQuestions]                 = useState<QuestionEntry[]>(makeInitialQuestions)
   const [stopFired, setStopFired]                 = useState<boolean[]>(new Array(STOP_CONDITIONS.length).fill(false))
@@ -259,7 +259,7 @@ export default function RehearsalFeedbackPage() {
     setOperatorName('')
     setTesterName('')
     setEnvironment('Sandbox / demo-org')
-    setCheckpoint('9eefa43')
+    setCheckpoint('7ce06db')
     setHardGatesConfirmed('')
     setQuestions(makeInitialQuestions())
     setStopFired(new Array(STOP_CONDITIONS.length).fill(false))
@@ -671,8 +671,9 @@ export default function RehearsalFeedbackPage() {
             <p className="text-sm text-amber-800 mt-0.5 leading-relaxed">
               This form does not constitute sign-off, approval, or an audit record.
               It is an operator observation tool for the controlled one-user rehearsal only.
-              Thumhara Centre written sign-off and Supabase credential rotation remain required
-              before any trusted staff-style testing.
+              Supabase credential rotation is cleared (4S.106E), but Thumhara Centre written
+              sign-off and a final recorded GO decision remain required before any trusted
+              staff-style testing.
             </p>
           </div>
         </div>

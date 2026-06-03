@@ -4,6 +4,8 @@
 **Date:** 2026-06-01
 **Status:** CHECKLIST ONLY — this document does not approve the staff rehearsal or change any system state
 
+> **Update 2026-06-03 (4S.106E / 4S.106F-1):** Since the original dry run, the Supabase credential rotation has been **completed and cleared** (4S.106E) and the cockpit/feedback UI was updated to reflect it (4S.106F-1). The expected cockpit state below has been revised accordingly: the hard gates card now shows **1 pending (Thumhara written sign-off) and 5 complete** (Supabase rotation now Complete). Overall status remains **NO-GO** — the rehearsal cannot proceed until the Thumhara written sign-off is returned and a joint GO is recorded.
+
 ---
 
 ## 1. Purpose
@@ -27,7 +29,7 @@ The following can be checked without any flag changes, Supabase access, real dat
 | 2.1 | `/rehearsal` (cockpit) page loads in a browser. |
 | 2.2 | `/rehearsal/feedback` (feedback capture) page loads in a browser. |
 | 2.3 | NO-GO status banner is visible and correctly worded on the cockpit. |
-| 2.4 | Hard gates section shows 2 pending (Thumhara sign-off, Supabase rotation) and 4 complete. |
+| 2.4 | Hard gates section shows 1 pending (Thumhara sign-off) and 5 complete (Supabase rotation cleared 4S.106E). |
 | 2.5 | Approved safe test questions Q1–Q8 are visible and correctly listed. |
 | 2.6 | Stop conditions are visible and correctly listed. |
 | 2.7 | Rehearsal artefacts section lists all four runbooks. |
@@ -95,19 +97,19 @@ Perform these steps in order. Record the result of each in Section 11.
 7. Confirm the "Overall status: NO-GO" red banner is present below the hero.
 8. Confirm the hard gates card shows:
    - **Blocking** — "Thumhara Centre written sign-off returned and reviewed"
-   - **Blocking** — "Supabase credential rotation complete"
+   - **Complete** — "Supabase credential rotation complete" (cleared 4S.106E)
    - **Complete** — "Monitoring and rollback runbook read and accepted"
    - **Complete** — "One-user rehearsal plan read and accepted"
    - **Complete** — "Session record / feedback capture document ready"
    - **Complete** — "Rehearsal readiness gate / go-no-go checklist completed"
-   - Counter shows 4/6 complete.
+   - Counter shows 5/6 complete.
 9. Confirm the approved questions card shows Q1–Q8 with Q7 and Q8 highlighted in amber (sensitive).
 10. Confirm the prohibited questions footer is present (red, "No question involving real service-user names...").
 11. Confirm the stop conditions card lists all 7 conditions.
 12. Confirm the stop conditions footer is present ("On any stop condition: switch staff visibility OFF...").
 13. Confirm the rehearsal artefacts card lists all four runbooks with "Merged" badges.
 14. Confirm the "Operator feedback capture" teal card is present with an "Open feedback form" button.
-15. Confirm the final "Overall status: NO-GO" block at the bottom lists the two remaining blockers.
+15. Confirm the final "Overall status: NO-GO" block at the bottom lists the one remaining blocker (Thumhara written sign-off).
 
 ### 5.3 — Navigate to the feedback page
 
@@ -138,7 +140,7 @@ Perform these steps in order. Record the result of each in Section 11.
 34. Confirm each Q notes field has the placeholder "do not enter real care or personal data".
 35. Confirm "Yes — STOP" label on the real-data-entered toggle.
 36. Confirm the stop conditions footer reads "switch staff visibility OFF, switch Staff Ask OFF, halt the session immediately".
-37. Confirm the governance notice reads "Thumhara Centre written sign-off and Supabase credential rotation remain required".
+37. Confirm the governance notice reads that Supabase credential rotation is cleared (4S.106E) but Thumhara Centre written sign-off and a final recorded GO decision remain required.
 
 ---
 
@@ -255,7 +257,7 @@ To be completed by the operator at the end of the dry run.
 
 | Outcome | Next action |
 |---------|------------|
-| Dry run PASS | Await remaining hard gates: (1) Thumhara written sign-off (return-by 2026-06-14); (2) Supabase credential rotation. Then complete the Rehearsal Readiness Gate (docs/runbooks/one-user-rehearsal-readiness-gate.md) jointly with the Registered Manager before scheduling the staff rehearsal. |
+| Dry run PASS | Await the remaining hard gate: Thumhara written sign-off (return-by 2026-06-14). (Supabase credential rotation was cleared in 4S.106E.) Then complete the Rehearsal Readiness Gate (docs/runbooks/one-user-rehearsal-readiness-gate.md) jointly with the Registered Manager before scheduling the staff rehearsal. |
 | Dry run PASS with issues | Fix identified issues, re-run the affected sections of this checklist, record a revised decision above. |
 | Dry run FAIL (critical issue) | Do not proceed toward the staff rehearsal. Raise the issue with the named operator (Inaam Basit). Fix and re-run. |
 
@@ -263,10 +265,11 @@ To be completed by the operator at the end of the dry run.
 
 ## 15. Governance Reminder
 
-> This dry run does not advance the governance status of the staff rehearsal. Both hard gates remain open:
+> This dry run does not advance the governance status of the staff rehearsal. One hard gate remains open:
 >
 > 1. **Thumhara Centre written sign-off** — pack sent 2026-05-31; return-by 2026-06-14. Do not chase before that date.
-> 2. **Supabase credential rotation** — deferred; must be completed before any trusted staff-style testing.
+>
+> The **Supabase credential rotation** hard gate was cleared in 4S.106E (rotation completed; post-rotation membership proof passed).
 >
 > Staff visibility remains **OFF**. Staff Ask remains **OFF**. No governance flags are changed by this checklist.
 >

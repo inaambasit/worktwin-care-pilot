@@ -13,7 +13,7 @@ PDF upload, text extraction, chunking, embedding preparation, embedding generati
 ### Constraints and open blockers
 
 - `openai` is pinned to `openai==2.33.0` — do not change without running the full backend test suite.
-- JWT validation supports Supabase ES256/JWKS and HS256 legacy/test mode (`backend/app/jwt_auth.py`).
+- JWT validation is Supabase ES256/JWKS only (`backend/app/jwt_auth.py`); the HS256 fallback was removed in 4S.105D — HS256, `alg=none`, and unsupported algorithms fail closed immediately with 401.
 - `backend/sql/008_organisation_memberships.sql` exists, but **4S.88G remains blocked** — this migration has not been safely applied or proved in an approved Supabase target.
 - **Public pilot auth remains disabled.** `PILOT_AUTH_MODE` and `NEXT_PUBLIC_PILOT_AUTH_MODE` are `false` and must not be changed until 4S.88G is resolved.
 - **Admin/debug endpoints must remain protected by backend `ADMIN_TOKEN`.** The frontend admin proxy remains disabled publicly (`ADMIN_PROXY_ENABLED` not set) and is not production-ready.

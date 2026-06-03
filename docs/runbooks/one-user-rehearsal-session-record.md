@@ -34,7 +34,7 @@ All must be **Yes** before proceeding. Any **No** or **Unknown** = **NO-GO**.
 | # | Gate | Yes / No |
 |---|------|----------|
 | B.1 | Thumhara Centre written sign-off on confidentiality pack returned and reviewed. | |
-| B.2 | Supabase credential rotation complete. | |
+| B.2 | Supabase credential rotation complete. | Yes — cleared 4S.106E (2026-06-02); post-rotation membership proof passed |
 | B.3 | Monitoring and rollback runbook read and accepted by operator and RM / Thumhara reviewer (`docs/runbooks/trusted-staff-monitoring-and-rollback-runbook.md`). | |
 | B.4 | Staff visibility confirmed at intended state for this session. | |
 | B.5 | Staff Ask confirmed at intended state for this session. | |

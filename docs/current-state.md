@@ -1,6 +1,6 @@
 # WorkTwin Care Pilot - Current State
 
-> Generated: 2026-05-07. Updated: 2026-06-02. Source of truth through checkpoint `19a090a` on branch `main`.
+> Generated: 2026-05-07. Updated: 2026-06-03. Source of truth through checkpoint `9b0204f` on branch `main`.
 > Update this file whenever a milestone changes the status of any item below.
 > Do not edit other files to reconcile with this document - fix those files instead.
 
@@ -70,7 +70,9 @@
 
 > **4S.101A–4S.101K (2026-05-26):** Safety, trust, and UI polish sequence complete. 4S.101A: Scenario naming cleanup. 4S.101B: Recording boundary cleanup. 4S.101C: Sample contact safety pass. 4S.101D: Book-a-Pilot confirmation page. 4S.101E: Privacy Model footer/link consistency. 4S.101F: Landing preview boundary block. 4S.101G: Private Notes session-only wording. 4S.101H: Policy Library answer eligibility precision. 4S.101I: Fictional profile trust pass. 4S.101J: Mobile safety smoke tests — latest proven app checkpoint `41761ba`; build passed; Playwright smoke 33/33. 4S.101K: Second Shagufta review script update — latest checkpoint `31bb281`. No backend, DB, auth, admin proxy, RAG, policy, env, SQL or data changes. The staff-facing journey is now significantly stronger and safer across all key surfaces. Next action: second controlled Shagufta review using the updated script. Do not move to 3–5 trusted workers until the second review decision is recorded.
 
-> **4S.103D–4S.106D (2026-05-31 to 2026-06-02):** Auth-hardening, rehearsal apparatus, documentation alignment. 4S.103D: env-safety hold lifted. 4S.103E: staff auth readiness PASS. 4S.104A–4S.104D: policy batch planning; confidentiality source policy (`docs/policies/thumhara-confidentiality-and-information-handling-draft.md`) and AI-safe extract authored — dummy docs only, admin-only indexed, not promoted to staff visibility. 4S.104E: confidentiality sign-off pack assembled, contact fields filled, and sent to Shagufta Akhtar (info@thumharacentre.org.uk) on 31 May 2026; return-by 14 June 2026; no chase before then. 4S.104E-6a: both pilot-auth flags confirmed true; local env corrected (ALLOWED_ORGANISATION_IDS=demo-org, NEXT_PUBLIC_ADMIN_DEMO_ENABLED=false). 4S.104E-6b-fix: ES256 membership proof PASS on sandbox demo-org — active→200, inactive→403; blocker cleared; backend must be run via backend/.venv (cryptography/ES256 required). 4S.104E-6c: ADMIN_TOKEN rotated (local, Render, Vercel); OPENAI_API_KEY rotated and old key revoked; Supabase service-role/JWT rotation deferred — hard gate before any trusted staff-style test. 4S.104E-6d: Cache-Control: no-store added to /policies and /ask (PR #1, commit `98135fc`). 4S.104E-6e: trusted-staff monitoring and rollback runbook added (PR #2). 4S.105A: one-user rehearsal plan added (PR #3). 4S.105B: rehearsal session record added (PR #4). 4S.105C: rehearsal readiness gate added — current status NO-GO (PR #5). 4S.105D: HS256 JWT fallback removed — staff auth is now ES256/JWKS only; HS256, alg=none, and unsupported algorithms fail closed immediately (PR #6, commit `24260bf`). 4S.105E: rehearsal operator cockpit at /rehearsal added (PR #7). 4S.105F: rehearsal feedback capture at /rehearsal/feedback added (PR #8). 4S.105G: rehearsal cockpit dry-run checklist added (PR #9); dry run PASS. 4S.105H: live smoke check PASS (/rehearsal and /rehearsal/feedback both 200 on Vercel). 4S.105J: Shagufta demo walkthrough added (PR #10). 4S.106A: live rehearsal smoke check PASS. 4S.106B: pre-rehearsal readiness pass — all technical items checked; doc fix (NEXT_PUBLIC_PILOT_AUTH_ENABLED → NEXT_PUBLIC_PILOT_AUTH_MODE in readiness gate item 4.1) merged (PR #11, commit `998a756`). 4S.106C: mobile demo polish for /rehearsal and /rehearsal/feedback (PR #12, commit `19a090a`). Staff visibility remains OFF. Staff Ask remains OFF. Two hard gates remain: Supabase service-role/JWT rotation (deferred, highest blast radius) and Thumhara Centre written sign-off (due 2026-06-14). No real care data. Checkpoint: `19a090a`.
+> **4S.103D–4S.106D (2026-05-31 to 2026-06-02):** Auth-hardening, rehearsal apparatus, documentation alignment. 4S.103D: env-safety hold lifted. 4S.103E: staff auth readiness PASS. 4S.104A–4S.104D: policy batch planning; confidentiality source policy (`docs/policies/thumhara-confidentiality-and-information-handling-draft.md`) and AI-safe extract authored — dummy docs only, admin-only indexed, not promoted to staff visibility. 4S.104E: confidentiality sign-off pack assembled, contact fields filled, and sent to Shagufta Akhtar (info@thumharacentre.org.uk) on 31 May 2026; return-by 14 June 2026; no chase before then. 4S.104E-6a: both pilot-auth flags confirmed true; local env corrected (ALLOWED_ORGANISATION_IDS=demo-org, NEXT_PUBLIC_ADMIN_DEMO_ENABLED=false). 4S.104E-6b-fix: ES256 membership proof PASS on sandbox demo-org — active→200, inactive→403; blocker cleared; backend must be run via backend/.venv (cryptography/ES256 required). 4S.104E-6c: ADMIN_TOKEN rotated (local, Render, Vercel); OPENAI_API_KEY rotated and old key revoked; Supabase service-role/JWT rotation deferred — hard gate before any trusted staff-style test. 4S.104E-6d: Cache-Control: no-store added to /policies and /ask (PR #1, commit `98135fc`). 4S.104E-6e: trusted-staff monitoring and rollback runbook added (PR #2). 4S.105A: one-user rehearsal plan added (PR #3). 4S.105B: rehearsal session record added (PR #4). 4S.105C: rehearsal readiness gate added — current status NO-GO (PR #5). 4S.105D: HS256 JWT fallback removed — staff auth is now ES256/JWKS only; HS256, alg=none, and unsupported algorithms fail closed immediately (PR #6, commit `24260bf`). 4S.105E: rehearsal operator cockpit at /rehearsal added (PR #7). 4S.105F: rehearsal feedback capture at /rehearsal/feedback added (PR #8). 4S.105G: rehearsal cockpit dry-run checklist added (PR #9); dry run PASS. 4S.105H: live smoke check PASS (/rehearsal and /rehearsal/feedback both 200 on Vercel). 4S.105J: Shagufta demo walkthrough added (PR #10). 4S.106A: live rehearsal smoke check PASS. 4S.106B: pre-rehearsal readiness pass — all technical items checked; doc fix (NEXT_PUBLIC_PILOT_AUTH_ENABLED → NEXT_PUBLIC_PILOT_AUTH_MODE in readiness gate item 4.1) merged (PR #11, commit `998a756`). 4S.106C: mobile demo polish for /rehearsal and /rehearsal/feedback (PR #12, commit `19a090a`). Staff visibility remains OFF. Staff Ask remains OFF. As at this checkpoint (`19a090a`), two hard gates remained: Supabase service-role/JWT rotation (deferred at the time, highest blast radius) and Thumhara Centre written sign-off (due 2026-06-14) — the Supabase gate was subsequently cleared in 4S.106E (see next entry). No real care data. Checkpoint: `19a090a`.
+
+> **4S.106D–4S.106F (2026-06-02 to 2026-06-03):** Documentation alignment, Supabase rotation, and post-rotation UI/doc sweep. 4S.106D: README and current-state aligned to rehearsal-readiness (PR #13, commit `c65ffa0`). 4S.106E: Supabase service-role/JWT credential rotation completed by Inaam (service-role key, JWT secret, anon key rotated in local env, Render and Vercel) — no secret values printed; basic verification PASS (Render /health 200, Vercel /rehearsal and /rehearsal/feedback 200); post-rotation ES256 membership proof PASS on sandbox demo-org (active→200, inactive→403, no-membership→403/401; dummy users cleaned up; demo-org baseline unchanged); the Supabase credential hard gate is **cleared**. 4S.106E-1: rehearsal readiness gate updated to record the Supabase gate cleared (PR #14, commit `7ce06db`). 4S.106F-1: rehearsal operator cockpit and feedback page updated so Supabase rotation shows Complete/Cleared and only the Thumhara written sign-off remains; frontend build passed; live smoke check PASS (PR #15, commit `9b0204f`). Staff visibility remains OFF. Staff Ask remains OFF. The sole remaining hard gate before any one-user rehearsal is Thumhara Centre written/completed sign-off (due 2026-06-14). Overall rehearsal status remains NO-GO until written sign-off is returned and a joint GO is recorded. No real care data. Checkpoint: `9b0204f`.
 
 ---
 
@@ -78,7 +80,7 @@
 
 | Item | Value |
 |---|---|
-| Commit | `19a090a` |
+| Commit | `9b0204f` |
 | Branch | `main` |
 | Repo path | `C:\Projects\worktwin-care-pilot\worktwin-care-pilot-starter` |
 | Backend | FastAPI / `backend/app/main.py` |
@@ -256,10 +258,10 @@ The system demonstrates the intended architecture convincingly: governance gates
 | Governance model | 8 / 10 | Three-gate model solid and enforced; four-policy staff-visible set proven; accident/fall escalation added |
 | UI completeness | 7.5 / 10 | All staff routes render; shared pilot shell wording has been polished for stakeholder review; admin tooling remains proxy-guarded; final walkthrough-specific page wording may still need review |
 | Test coverage | 7 / 10 | Good backend unit/integration tests; 248 passing; E2E now proven locally with real auth |
-| Controlled trusted-user pilot readiness | 6 / 10 | Auth chain proven end-to-end; rehearsal apparatus complete (cockpit, feedback form, runbooks, readiness gate); two hard gates remain (Supabase rotation, Thumhara written sign-off); dummy docs not yet promoted to staff-visible; tester not yet named |
+| Controlled trusted-user pilot readiness | 6.5 / 10 | Auth chain proven end-to-end; rehearsal apparatus complete (cockpit, feedback form, runbooks, readiness gate); Supabase credential rotation cleared and membership proof passed (4S.106E); one hard gate remains (Thumhara written sign-off); dummy docs not yet promoted to staff-visible; tester not yet named |
 | Production / live operational readiness | NO-GO | No DPA; QCS use unconfirmed for AI/RAG; production deployment, monitoring, retention/deletion and incident process not proven; not production-ready |
 | Privacy / compliance | 4 / 10 | Privacy-by-design in architecture; no DPA; QCS use unconfirmed; real data must not be entered |
-| Documentation accuracy | 7 / 10 | README and current-state.md aligned through 4S.106D at `19a090a`; 12 PRs and full auth-hardening + rehearsal track now recorded; QCS restriction, do-not-touch list, and safety boundaries remain accurate |
+| Documentation accuracy | 7.5 / 10 | README and current-state.md aligned through 4S.106F at `9b0204f`; 15 PRs and full auth-hardening + rehearsal track now recorded, including Supabase rotation cleared (4S.106E); QCS restriction, do-not-touch list, and safety boundaries remain accurate |
 
 ---
 
@@ -275,12 +277,11 @@ A sandbox Supabase auth E2E setup plan has been created at `docs/4s90i-sandbox-a
 
 ### Current gate
 
-The auth-hardening and rehearsal apparatus track (4S.103D–4S.106D) is complete. The current readiness gate records **NO-GO**. Two hard gates remain:
+The auth-hardening and rehearsal apparatus track (4S.103D–4S.106F) is complete. The current readiness gate records **NO-GO**. The Supabase service-role/JWT credential rotation hard gate was **cleared** in 4S.106E (rotation completed by Inaam; post-rotation ES256 membership proof passed). One hard gate now remains:
 
-1. **Supabase service-role/JWT credential rotation** — deferred, highest blast radius. Must be completed by Inaam before any real staff interaction with the system.
-2. **Thumhara Centre written sign-off** — confidentiality sign-off pack sent 31 May 2026; return-by 14 June 2026; no chase before that date.
+1. **Thumhara Centre written sign-off** — confidentiality sign-off pack sent 31 May 2026; return-by 14 June 2026; no chase before that date.
 
-Once both gates are cleared:
+Once this gate is cleared:
 - Jointly complete `docs/runbooks/one-user-rehearsal-readiness-gate.md` Section 10 with Shagufta and record an explicit GO.
 - Promote dummy Confidentiality extract to `approved_for_staff_visibility=True` and `approved_for_source_grounded_answers=True` via admin API — as a recorded governance decision for rehearsal scope only.
 - Identify and brief a named tester (not a Thumhara staff member unless RM separately approves in writing).
@@ -290,7 +291,7 @@ Once both gates are cleared:
 
 | Step | Description |
 |---|---|
-| 1 | (Inaam) Rotate Supabase service-role key and JWT cascade in Supabase dashboard; update Render env; status-only verify only — do not print new secrets |
+| 1 | ✅ Done (4S.106E) — Supabase service-role key / JWT cascade rotated by Inaam; Render + Vercel env updated; status-only verify PASS; post-rotation membership proof PASS |
 | 2 | (Shagufta) Return signed confidentiality pack by 14 June 2026; no chase before then |
 | 3 | (Inaam) Review returned sign-off pack; resolve any questions |
 | 4 | (Inaam) Promote dummy Confidentiality extract to staff-visible + Staff Ask via admin API — with recorded governance decision; rehearsal scope only; reverse flags after session |

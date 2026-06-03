@@ -25,7 +25,7 @@ This is an internal operator page — Shagufta would see it in a browser, but it
 It shows:
 
 - **A clear NO-GO status** — a prominent red banner confirming that the system is not yet ready for even a one-person test run, and explaining why.
-- **Hard gates** — a checklist of the things that must be completed before a rehearsal can happen. Two are still open: Thumhara Centre's written sign-off (which is what Shagufta is being asked to return) and a technical credential rotation that Inaam needs to carry out.
+- **Hard gates** — a checklist of the things that must be completed before a rehearsal can happen. One is still open: Thumhara Centre's written sign-off (which is what Shagufta is being asked to return). The technical credential rotation that Inaam needed to carry out has now been completed (4S.106E).
 - **Approved safe questions** — the eight specific, pre-approved questions that would be used in the one-person rehearsal. These cover everyday topics like confidentiality principles and what to do if information is accidentally shared. Two of them (medication and safeguarding) are deliberately designed to be blocked by WorkTwin rather than answered.
 - **Stop conditions** — a list of situations that would immediately halt the rehearsal if they arose (for example, if real service-user data were entered, or if WorkTwin gave advice it should not give).
 - **Rehearsal artefacts** — links to the documents that govern the rehearsal process (the plan, the monitoring runbook, the session record, the readiness gate).
@@ -78,9 +78,9 @@ The following has been built and tested:
 
 ## 5. What Is Still Required Before a One-User Rehearsal
 
-Two hard gates remain open. Neither can be skipped.
+One hard gate remains open (Section 5.1). The Supabase credential rotation (Section 5.2) has been completed. Neither the remaining gate nor the final go/no-go decision can be skipped.
 
-### 5.1 — Thumhara Centre written sign-off
+### 5.1 — Thumhara Centre written sign-off (still required)
 
 The confidentiality pack was sent to Shagufta on **31 May 2026**, return-by **14 June 2026**.
 
@@ -88,13 +88,13 @@ The pack asks Shagufta to review the draft Confidentiality and Information Handl
 
 Until this is returned with a completed sign-off, no rehearsal can take place.
 
-### 5.2 — Supabase credential rotation
+### 5.2 — Supabase credential rotation (completed)
 
-This is a technical step that Inaam carries out — rotating the database access credentials before any real staff interaction with the live system. It has been deliberately deferred until it is needed, to reduce risk.
+This was a technical step that Inaam carried out — rotating the database access credentials before any real staff interaction with the live system. It was completed in 4S.106E (service-role key, JWT secret and anon key rotated), and a post-rotation membership check confirmed the system still behaves correctly. This gate is cleared.
 
 ### 5.3 — Final go/no-go decision
 
-Once both of the above are done, Inaam and Shagufta jointly complete the Rehearsal Readiness Gate document and record an explicit GO decision before the rehearsal is scheduled.
+Once the written sign-off (Section 5.1) is returned, Inaam and Shagufta jointly complete the Rehearsal Readiness Gate document and record an explicit GO decision before the rehearsal is scheduled.
 
 ### 5.4 — No real data confirmation
 
@@ -110,7 +110,7 @@ This is a suggested order for Inaam to show Shagufta the system. It takes approx
 Navigate to `/rehearsal`. Point out the red "NO-GO" banner at the top. Explain that this is intentional — the system is not ready and the page reflects that honestly.
 
 **Step 2 — Show the hard gates**
-Scroll to the hard gates section. Show the two "Blocking" items (written sign-off, Supabase rotation) and the four "Complete" items. Explain that Shagufta returning the confidentiality pack clears one of the two blockers.
+Scroll to the hard gates section. Show the one "Blocking" item (written sign-off) and the five "Complete" items (including the Supabase credential rotation, cleared in 4S.106E). Explain that Shagufta returning the confidentiality pack clears the one remaining blocker.
 
 **Step 3 — Show the approved safe questions**
 Scroll to the approved questions list. Walk through Q1–Q6 briefly. Then show Q7 (medication) and Q8 (safeguarding) and explain that these are included specifically to confirm that WorkTwin refuses to answer them — they should be blocked and escalated, not answered.
@@ -128,7 +128,7 @@ On the "Real data entered" field for any question, click "Yes — STOP" and show
 Click "Copy summary to clipboard" and paste the result into a plain text editor. Explain that this is the only way feedback leaves the system — a plain text paste, no database, no network call.
 
 **Step 8 — Explain what happens next**
-Summarise: once the signed pack is returned and Supabase credentials are rotated, Inaam and Shagufta jointly complete the readiness gate, then one trusted internal person (not a Thumhara staff member in the first instance) asks the eight approved questions and the results are recorded.
+Summarise: the Supabase credential rotation is already done (4S.106E); once the signed pack is returned, Inaam and Shagufta jointly complete the readiness gate, then one trusted internal person (not a Thumhara staff member in the first instance) asks the eight approved questions and the results are recorded.
 
 ---
 
@@ -149,4 +149,4 @@ Summarise: once the signed pack is returned and Supabase credentials are rotated
 > It does not constitute the written sign-off that is being requested from Thumhara Centre.
 > It does not record a GO decision for the rehearsal.
 >
-> The system remains in a controlled, operator-only state. No Thumhara staff member has access to WorkTwin. No real care data is held in the system. The rehearsal cannot proceed until both hard gates (Sections 5.1 and 5.2) are satisfied and a joint GO decision is recorded.
+> The system remains in a controlled, operator-only state. No Thumhara staff member has access to WorkTwin. No real care data is held in the system. The Supabase credential rotation (Section 5.2) is complete; the rehearsal cannot proceed until the remaining hard gate (Section 5.1, written sign-off) is satisfied and a joint GO decision is recorded.

@@ -26,7 +26,7 @@ WorkTwin Care Pilot is currently in **controlled preview** — a supervised prot
 - Staff journey aligned through Dashboard, Ask WorkTwin, Policy Library, Scenario Guidance, Onboarding, and Escalation Contacts
 - Safety, trust, and UI polish sequence 4S.101A–4S.101K complete: clearer landing preview boundaries, Dashboard journey, Ask WorkTwin trust/source wording, Policy Library governance wording, Scenario Guidance naming and fictional profile clarity, Access Refusal recording boundary cleanup, Escalation demo contact safety, Private Notes and Book-a-Pilot session-only wording, Privacy Model easier to find
 - Playwright smoke tests 33/33; mobile safety smoke coverage expanded (4S.101J; latest proven app checkpoint: `41761ba`)
-- Auth hardening complete: ES256/JWKS-only JWT validation (HS256 fallback removed), no-store headers on /policies and /ask; ADMIN_TOKEN and OPENAI_API_KEY rotated (old OPENAI key revoked); Supabase service-role/JWT credential rotation deferred — hard gate before any trusted staff-style test
+- Auth hardening complete: ES256/JWKS-only JWT validation (HS256 fallback removed), no-store headers on /policies and /ask; ADMIN_TOKEN and OPENAI_API_KEY rotated (old OPENAI key revoked); Supabase service-role/JWT credential rotation completed (4S.106E — service-role key, JWT secret and anon key rotated; post-rotation ES256 membership proof passed)
 - Rehearsal operator cockpit at /rehearsal: operator-only page showing NO-GO status, hard gates, approved Q1–Q8, stop conditions, and artefact links; not staff-facing; live on Vercel; local dry run and live smoke check passed; mobile demo polish complete
 - Rehearsal feedback capture at /rehearsal/feedback: per-question observation log, stop condition checkboxes, outcome recording, clipboard copy; no data saved or transmitted; live on Vercel; dry run and live smoke check passed
 - Trusted-staff monitoring and rollback runbook, one-user rehearsal plan, session record, and rehearsal readiness gate all present on main (docs/runbooks/)
@@ -35,7 +35,7 @@ WorkTwin Care Pilot is currently in **controlled preview** — a supervised prot
 
 - Staff route authentication is wired and proven end-to-end: ES256/JWKS JWT validation, organisation membership check, and /staff/session-check; staff paths (dashboard, ask, policies, onboarding, scenarios, notes, escalation) are protected by Next.js middleware when NEXT_PUBLIC_PILOT_AUTH_MODE=true; the system is not approved for general or unsupervised staff use
 - Staff visibility remains OFF; Staff Ask remains OFF; no Thumhara staff member has access; no real care data is in the system
-- Two hard gates remain before any trusted staff-style test: (1) Supabase service-role/JWT credential rotation (deferred — highest blast radius, hard gate); (2) Thumhara Centre written sign-off (sign-off pack sent 31 May 2026; return-by 14 June 2026)
+- One hard gate remains before any trusted staff-style test: Thumhara Centre written sign-off (sign-off pack sent 31 May 2026; return-by 14 June 2026). Supabase service-role/JWT credential rotation was completed (4S.106E) and the post-rotation membership proof passed
 - Admin proxy is disabled in the public deployment (ADMIN_PROXY_ENABLED not set); admin proxy real session guard, CSRF guard, and response minimisation are complete locally but production rollout controls remain outstanding
 - No real staff, service-user, or confidential data is loaded or permitted
 - QCS licence / AI-RAG use for wider rollout is not yet confirmed
@@ -43,9 +43,9 @@ WorkTwin Care Pilot is currently in **controlled preview** — a supervised prot
 
 ### Current testing gate
 
-The auth-hardening and rehearsal apparatus track (4S.103D–4S.106D) is complete. Staff JWT validation is ES256/JWKS only (HS256 fallback removed). A full one-user rehearsal apparatus is in place: monitoring runbook, rehearsal plan, session record, readiness gate, operator cockpit (/rehearsal), and feedback capture (/rehearsal/feedback). A Shagufta demo walkthrough was prepared (4S.105J). The confidentiality sign-off pack was sent to Shagufta Akhtar on 31 May 2026 (return-by 14 June 2026).
+The auth-hardening and rehearsal apparatus track (4S.103D–4S.106F) is complete. Staff JWT validation is ES256/JWKS only (HS256 fallback removed). A full one-user rehearsal apparatus is in place: monitoring runbook, rehearsal plan, session record, readiness gate, operator cockpit (/rehearsal), and feedback capture (/rehearsal/feedback). A Shagufta demo walkthrough was prepared (4S.105J). The confidentiality sign-off pack was sent to Shagufta Akhtar on 31 May 2026 (return-by 14 June 2026). Supabase service-role/JWT credential rotation was completed and proven (4S.106E).
 
-Two hard gates remain before a one-user staff rehearsal can take place: Supabase service-role/JWT credential rotation (deferred — Inaam's call) and Thumhara Centre written sign-off (pending return). The current rehearsal readiness gate records NO-GO. No trusted staff-style test can proceed until both gates are cleared and a joint GO is recorded in docs/runbooks/one-user-rehearsal-readiness-gate.md Section 10.
+One hard gate remains before a one-user staff rehearsal can take place: Thumhara Centre written sign-off (pending return). Supabase service-role/JWT credential rotation was completed (4S.106E) and the post-rotation membership proof passed. The current rehearsal readiness gate records NO-GO. No trusted staff-style test can proceed until this gate is cleared and a joint GO is recorded in docs/runbooks/one-user-rehearsal-readiness-gate.md Section 10.
 
 ### Current policy boundary
 
@@ -167,7 +167,7 @@ Controlled testing documents (see [Current controlled preview status](#current-c
 - [docs/4s98d-trusted-tester-onboarding-message-pack.md](docs/4s98d-trusted-tester-onboarding-message-pack.md)
 - [docs/4s98a-trusted-care-worker-testing-readiness-pack.md](docs/4s98a-trusted-care-worker-testing-readiness-pack.md)
 
-## Recent changes (checkpoint 19a090a)
+## Recent changes (checkpoint 9b0204f)
 
 - 4S.101A–4S.101L — Safety, trust, and UI polish sequence; Playwright smoke 33/33; current-state alignment (through checkpoint `31bb281`)
 - 4S.103D–4S.104E — Env-safety hold lifted; staff auth readiness PASS; confidentiality source policy and extract authored (dummy docs only, admin-only, not promoted); sign-off pack sent to Shagufta Akhtar 31 May 2026 (return-by 14 June 2026)
@@ -178,11 +178,14 @@ Controlled testing documents (see [Current controlled preview status](#current-c
 - 4S.105F — Rehearsal feedback capture at /rehearsal/feedback (PR #8, commit `467e9a1`)
 - 4S.105G–4S.106A — Rehearsal dry-run checklist; dry run PASS; Shagufta demo walkthrough (PR #10); live smoke check PASS
 - 4S.106B–4S.106C — Pre-rehearsal readiness pass; doc fix (PR #11, commit `998a756`); mobile demo polish (PR #12, commit `19a090a`)
+- 4S.106D — README and current-state aligned to rehearsal-readiness (PR #13, commit `c65ffa0`)
+- 4S.106E — Supabase service-role/JWT credential rotation completed and proven; post-rotation ES256 membership proof passed; readiness gate updated to record the Supabase hard gate cleared (PR #14, commit `7ce06db`)
+- 4S.106F-1 — Rehearsal cockpit and feedback page updated to reflect Supabase rotation cleared; live smoke check PASS (PR #15, commit `9b0204f`)
 
 ## Known gaps
 
 - Authentication is wired and proven end-to-end for the staff path (ES256/JWKS JWT, organisation membership lookup, /staff/session-check, Next.js middleware); the system is not approved for general or unsupervised staff use; no real Thumhara staff accounts exist
-- Two hard gates remain before any trusted staff-style test: Supabase service-role/JWT credential rotation (deferred) and Thumhara Centre written sign-off (due 14 June 2026); current readiness gate records NO-GO
+- One hard gate remains before any trusted staff-style test: Thumhara Centre written sign-off (due 14 June 2026); Supabase service-role/JWT credential rotation was completed (4S.106E) with the post-rotation membership proof passing; current readiness gate records NO-GO
 - Dummy policy documents (Confidentiality extract, Escalation extract) are indexed admin-only; staff visibility and Staff Ask remain OFF; promotion requires a separate recorded governance decision
 - Book a Pilot (/book-pilot) is a controlled demo enquiry page only; it is session-only and does not yet submit to a backend, CRM, email workflow or database
 - Staff-facing document-grounded answers require a qualifying governed document with all governance flags set and pilot-auth mode active before real staff use

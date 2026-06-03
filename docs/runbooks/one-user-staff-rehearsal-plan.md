@@ -20,10 +20,10 @@ A rehearsal is a single observed session — one trusted internal tester, a smal
 
 All items below are absolute blockers. Any single "No" or "Unknown" is a **NO-GO**. Do not proceed.
 
-| # | Hard gate | Status (2026-06-01) |
+| # | Hard gate | Status (updated 2026-06-03) |
 |---|-----------|----------------------|
-| 2.1 | **Thumhara Centre written sign-off** on the confidentiality pack returned and reviewed by the WorkTwin operator. | **PENDING** — pack sent; awaiting return by 2026-06-14. |
-| 2.2 | **Supabase credential rotation** complete (service-role key / JWT cascade). | **DEFERRED** — not yet done; controlling blocker. |
+| 2.1 | **Thumhara Centre written sign-off** on the confidentiality pack returned and reviewed by the WorkTwin operator. | **PENDING** — pack sent; awaiting return by 2026-06-14. Sole remaining hard gate. |
+| 2.2 | **Supabase credential rotation** complete (service-role key / JWT cascade). | **COMPLETE — CLEARED** (4S.106E, 2026-06-02): service-role key, JWT secret and anon key rotated; post-rotation ES256 membership proof passed. |
 | 2.3 | **Monitoring and rollback runbook** read and accepted by the operator and the Registered Manager / Thumhara reviewer (`docs/runbooks/trusted-staff-monitoring-and-rollback-runbook.md`). | Must be confirmed on the day. |
 | 2.4 | **Staff visibility** is deliberately set and confirmed — controlled to the scope of this rehearsal only. | Currently OFF. |
 | 2.5 | **Staff Ask** is deliberately set and confirmed — controlled to the scope of this rehearsal only. | Currently OFF. |

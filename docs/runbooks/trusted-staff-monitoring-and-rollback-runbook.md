@@ -22,10 +22,10 @@ This runbook is **not** for full production, not for live operational use, not f
 
 A rehearsal **must not begin** while any of the following remains open. Each is an absolute blocker.
 
-| # | Hard gate | Current state (2026-06-01) |
+| # | Hard gate | Current state (updated 2026-06-03) |
 |---|-----------|----------------------------|
-| 2.1 | **Supabase credential rotation** completed (service-role / JWT cascade). | **PENDING — DEFERRED.** Still the controlling blocker. |
-| 2.2 | **Written sign-off from Thumhara Centre** on the confidentiality pack returned. | **NOT YET RETURNED** (pack sent; awaiting response). |
+| 2.1 | **Supabase credential rotation** completed (service-role / JWT cascade). | **COMPLETE — CLEARED** (4S.106E, 2026-06-02): service-role key, JWT secret and anon key rotated; post-rotation ES256 membership proof passed. |
+| 2.2 | **Written sign-off from Thumhara Centre** on the confidentiality pack returned. | **NOT YET RETURNED** (pack sent; awaiting response). Sole remaining hard gate. |
 | 2.3 | **No real care data** of any kind is to be used (no service-user, staff, family, medication, safeguarding, incident, complaint or HR data). | Must remain true throughout. |
 | 2.4 | **Staff visibility** remains OFF. | **OFF.** |
 | 2.5 | **Staff Ask** remains OFF. | **OFF.** |
@@ -183,4 +183,4 @@ Complete after the rehearsal (or after a halt) to decide what happens next. This
 
 **This runbook does not approve staff access. It does not enable staff visibility. It does not enable Staff Ask. It does not authorise the use of any real data.**
 
-It is a monitoring and rollback procedure to be applied **only if** a controlled staff-style rehearsal is separately and explicitly authorised, **after** all hard gates in Section 2 are satisfied — including completion of the deferred Supabase credential rotation and return of Thumhara's written sign-off. Until then, the controlling state remains: everything OFF, no staff visibility, no Staff Ask, no real care data.
+It is a monitoring and rollback procedure to be applied **only if** a controlled staff-style rehearsal is separately and explicitly authorised, **after** all hard gates in Section 2 are satisfied. The Supabase credential rotation gate was completed in 4S.106E; the sole remaining hard gate is the return of Thumhara's written sign-off. Until then, the controlling state remains: everything OFF, no staff visibility, no Staff Ask, no real care data.

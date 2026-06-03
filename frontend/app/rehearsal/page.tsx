@@ -22,8 +22,8 @@ const HARD_GATES = [
   },
   {
     label: 'Supabase credential rotation complete (service-role / JWT cascade)',
-    status: 'pending' as const,
-    note: 'Deferred — highest blast radius. Must be done before any rehearsal.',
+    status: 'complete' as const,
+    note: 'Cleared 2 June 2026 (4S.106E). Service-role key, JWT secret and anon key rotated; ES256 membership proof passed; staff gates remained OFF.',
   },
   {
     label: 'Monitoring and rollback runbook read and accepted',
@@ -164,8 +164,8 @@ export default function RehearsalCockpitPage() {
           <div>
             <p className="text-sm font-bold text-red-900">Overall status: NO-GO</p>
             <p className="text-sm text-red-800 mt-0.5 leading-relaxed">
-              {blockerCount} hard gate{blockerCount !== 1 ? 's' : ''} remain open. The rehearsal cannot proceed until
-              Thumhara Centre's written sign-off is received and Supabase credentials are rotated.
+              {blockerCount} hard gate{blockerCount !== 1 ? 's' : ''} remain{blockerCount === 1 ? 's' : ''} open. The rehearsal cannot proceed until
+              Thumhara Centre's written sign-off is received and reviewed.
               {' '}{completeCount} of {HARD_GATES.length} readiness checks are complete.
             </p>
           </div>

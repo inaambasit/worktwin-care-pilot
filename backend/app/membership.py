@@ -14,7 +14,18 @@ class StaffContext:
 
 
 def _fetch_membership(user_id: str) -> Optional[dict]:
-    """Query organisation_memberships via PostgREST and return the first row, or None."""
+    """Query organisation_memberships via PostgREST and return the first row, or None.
+
+    Fail-safe: external dependency failures (network/connection error, timeout,
+    PostgREST non-2xx status, or a malformed/non-list response body) are converted
+    into a controlled HTTPException(503) so staff routes fail closed with a safe,
+    predictable response instead of a 500. The detail is generic and never includes
+    the token, service-role key, URL, or any personal data. A dependency failure
+    never returns a membership row, so it can never grant access.
+
+    Only expected external-dependency errors are caught — genuine programming
+    errors are not swallowed.
+    """
     url = os.getenv("SUPABASE_URL", "")
     key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 
@@ -30,14 +41,23 @@ def _fetch_membership(user_id: str) -> Optional[dict]:
         "select": "user_id,organisation_id,role,active",
         "limit": "1",
     }
-    resp = httpx.get(
-        f"{url}/rest/v1/organisation_memberships",
-        params=params,
-        headers=headers,
-        timeout=10,
-    )
-    resp.raise_for_status()
-    rows = resp.json()
+    try:
+        resp = httpx.get(
+            f"{url}/rest/v1/organisation_memberships",
+            params=params,
+            headers=headers,
+            timeout=10,
+        )
+        resp.raise_for_status()
+        rows = resp.json()
+    except (httpx.HTTPError, ValueError):
+        # Network/timeout/PostgREST-status/malformed-body — fail closed.
+        raise HTTPException(status_code=503, detail="Membership lookup unavailable.")
+
+    if not isinstance(rows, list):
+        # Unexpected response shape — fail closed rather than risk a later crash.
+        raise HTTPException(status_code=503, detail="Membership lookup unavailable.")
+
     return rows[0] if rows else None
 
 

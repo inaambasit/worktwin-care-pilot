@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+import httpx
 import pytest
 from fastapi.testclient import TestClient
 
@@ -10,6 +11,27 @@ client = TestClient(app)
 
 _FAKE_CTX = StaffContext(user_id="user-abc", organisation_id="demo-org", role="Care Worker")
 _QUESTION = {"question": "What is the holiday policy?"}
+
+
+# ---------------------------------------------------------------------------
+# Membership-lookup dependency failure fails closed (4S.108C)
+# A network/PostgREST failure during membership resolution must produce a safe
+# 503, never a 500, and never an answer with sources.
+# ---------------------------------------------------------------------------
+
+def test_membership_lookup_failure_fails_closed_not_500(monkeypatch):
+    monkeypatch.setenv("PILOT_AUTH_MODE", "true")
+    monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
+    monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "test-service-key")
+    with patch("app.staff_context.validate_staff_jwt", return_value={"sub": "u-test"}), \
+         patch("app.membership.httpx.get", side_effect=httpx.ConnectError("down")):
+        resp = client.post("/ask", json=_QUESTION, headers={"Authorization": "Bearer fake.jwt"})
+    assert resp.status_code == 503
+    assert resp.status_code != 500
+    body = resp.json()
+    # Controlled error detail only — no answer or sources are served on failure.
+    assert "sources" not in body
+    assert "answer" not in body
 
 
 # ---------------------------------------------------------------------------

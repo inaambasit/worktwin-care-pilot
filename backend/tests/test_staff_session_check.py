@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+import httpx
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
@@ -163,3 +164,19 @@ def test_cache_control_no_store_on_denied():
     resp = client.get(_URL)  # no auth header → 401
     assert resp.status_code == 401
     assert "no-store" in (resp.headers.get("cache-control") or "")
+
+
+# 14. Membership-lookup dependency failure fails closed with a safe 503
+#     auth_unavailable response — never a 500, never an allowed grant. (4S.108C)
+def test_membership_lookup_failure_returns_auth_unavailable(monkeypatch):
+    monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
+    monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "test-service-key")
+    with patch("app.main.validate_staff_jwt", return_value=_VALID_PAYLOAD), \
+         patch("app.membership.httpx.get", side_effect=httpx.ConnectError("down")):
+        resp = client.get(_URL, headers=_AUTH)
+    assert resp.status_code == 503
+    assert resp.status_code != 500
+    body = resp.json()
+    assert body["allowed"] is False
+    assert body["reason"] == "auth_unavailable"
+    assert resp.headers.get("cache-control") == "no-store"

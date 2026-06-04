@@ -1,7 +1,7 @@
 import AppLayout from '@/components/AppLayout'
 import { Shield, BarChart2, AlertCircle, TrendingUp, FileText, HelpCircle } from 'lucide-react'
 
-const INSIGHTS_CHIPS = ['Anonymised data only', 'No individual records', 'Sample figures', 'Admin view']
+const INSIGHTS_CHIPS = ['Illustrative example', 'No individual records', 'Staff Ask off', 'Admin view']
 
 const topQuestions = [
   { topic: 'Medication administration', pct: 34, count: 47 },
@@ -68,7 +68,7 @@ export default function InsightsPage() {
             </span>
             <h1 className="text-3xl font-bold mb-2.5 leading-snug">Staff Question Insights</h1>
             <p className="text-slate-200 text-sm leading-relaxed max-w-lg mb-5">
-              Anonymised, aggregated question trends across the organisation. No individual staff names, conversations or private data are shown here.
+              An illustrative example of the anonymised question themes managers would see once Staff Ask is enabled. Staff Ask is currently off, so no real questions are collected. No individual staff names, conversations or private data are ever shown here.
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
               {INSIGHTS_CHIPS.map(chip => (
@@ -88,7 +88,7 @@ export default function InsightsPage() {
           <AlertCircle size={16} className="text-amber-600 shrink-0 mt-0.5" />
           <p className="text-sm text-amber-800">
             <span className="font-semibold">Sample data only — illustrative themes, not real staff usage.</span>{' '}
-            These figures do not represent real staff activity at Thumhara Centre or any other organisation.
+            Staff Ask is currently off, so no real questions are collected. These figures do not represent real staff activity at Thumhara Centre or any other organisation, and the example topics are not limited to the current approved document set.
             In a real deployment, this view is restricted to authorised managers only.
           </p>
         </div>
@@ -112,7 +112,7 @@ export default function InsightsPage() {
         <div className="bg-white border border-slate-200 rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-1">
             <BarChart2 size={16} className="text-teal-600" />
-            <h2 className="font-semibold text-slate-900">Top staff question areas — April 2025</h2>
+            <h2 className="font-semibold text-slate-900">Example: top staff question areas</h2>
           </div>
           <p className="text-xs text-slate-400 mb-4">
             Illustrative example — what topics might staff ask about most in a typical month.

@@ -1,14 +1,14 @@
 import AppLayout from '@/components/AppLayout'
 import Link from 'next/link'
-import { Users, FileText, BarChart2, Shield, Phone, AlertTriangle, TrendingUp, BookOpen, Lock } from 'lucide-react'
+import { FileText, BarChart2, Shield, Phone, TrendingUp, BookOpen, Lock } from 'lucide-react'
 
 const ADMIN_CHIPS = ['Admin host', 'Demo mode', 'Sample data only', 'Not staff-facing']
 
 const summaryCards = [
-  { label: 'Pilot participants', value: '24', sub: 'Organisation usage', icon: Users, colour: 'teal' },
-  { label: 'Approved documents', value: '18', sub: '2 under review', icon: FileText, colour: 'blue' },
-  { label: 'Escalations this month', value: '3', sub: 'All resolved', icon: AlertTriangle, colour: 'amber' },
-  { label: 'Onboarding cohorts', value: '4', sub: 'New starters', icon: BookOpen, colour: 'violet' },
+  { label: 'Staff-visible documents', value: '5', sub: 'Controlled preview set', icon: FileText, colour: 'teal' },
+  { label: 'Guidance scenarios', value: '11', sub: 'Available in preview', icon: BookOpen, colour: 'blue' },
+  { label: 'Staff Ask', value: 'Off', sub: 'Disabled in preview', icon: Shield, colour: 'amber' },
+  { label: 'Staff visibility', value: 'Off', sub: 'Disabled in preview', icon: Lock, colour: 'violet' },
 ]
 
 const adminSections = [
@@ -39,10 +39,10 @@ const adminSections = [
 ]
 
 const topTrends = [
-  { topic: 'Medication administration', count: 34 },
-  { topic: 'Safeguarding procedures', count: 22 },
-  { topic: 'Leave and rota management', count: 18 },
-  { topic: 'Incident reporting', count: 14 },
+  { topic: 'Visitor sign-in and identification', count: 32 },
+  { topic: 'Professional boundaries', count: 24 },
+  { topic: 'Confidentiality and information handling', count: 20 },
+  { topic: 'Infection prevention and hygiene', count: 16 },
 ]
 
 export default function AdminOverviewPage() {
@@ -146,14 +146,14 @@ export default function AdminOverviewPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <TrendingUp size={16} className="text-teal-600" />
-              <h2 className="font-semibold text-slate-900 text-sm">Top question areas this month</h2>
+              <h2 className="font-semibold text-slate-900 text-sm">Example question themes</h2>
             </div>
             <Link href="/admin/insights" className="text-xs text-teal-700 hover:text-teal-800 font-medium">
               Full report →
             </Link>
           </div>
           <p className="text-xs text-slate-400 mb-3">
-            Sample topic trends — illustrative figures only
+            Illustrative only — Staff Ask is off, so no real staff questions are collected yet. This shows how themes could appear once it is enabled.
           </p>
           <div className="space-y-3">
             {topTrends.map(({ topic, count }) => (

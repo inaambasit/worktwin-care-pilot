@@ -81,8 +81,8 @@ export default function DashboardPage() {
               <CheckCircle size={18} className="text-teal-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-teal-700">5</p>
-              <p className="text-xs text-slate-500">Approved pilot documents</p>
+              <p className="text-sm font-bold text-slate-700 leading-tight">Policy Library</p>
+              <p className="text-xs text-slate-500">Approved staff-visible documents shown when available</p>
             </div>
           </div>
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-3">

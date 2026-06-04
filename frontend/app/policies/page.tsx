@@ -1,13 +1,13 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import AppLayout from '@/components/AppLayout'
-import { fetchPolicies } from '@/lib/api'
+import { fetchPolicies, checkHealth } from '@/lib/api'
 import type { StaffPolicyRecord } from '@/lib/types'
 import { LANGUAGE_NAMES } from '@/lib/types'
 import {
   BookOpen, Search, CheckCircle, Globe, MessageCircle,
   X, Calendar, AlertTriangle, FileText, ChevronRight,
-  Archive, ShieldCheck, Loader2,
+  Archive, ShieldCheck, Loader2, RefreshCw,
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -252,15 +252,33 @@ export default function PoliciesPage() {
   const [activeCategory, setActiveCategory] = useState('All')
   const [selected, setSelected] = useState<StaffPolicyRecord | null>(null)
 
-  useEffect(() => {
-    fetchPolicies()
-      .then(setDocs)
-      .catch(() => {
+  // The public backend (Render free tier) can spin down when idle and take tens
+  // of seconds to wake. We warm it with a health check, then fetch with one
+  // automatic retry before showing the limited offline sample as a last resort.
+  const loadPolicies = useCallback(async () => {
+    setLoading(true)
+    setUsingFallback(false)
+    // Warm the backend first; don't hard-fail if the health check itself times out.
+    await checkHealth(30_000)
+    try {
+      setDocs(await fetchPolicies())
+    } catch {
+      try {
+        // Backend may still be waking — warm once more and retry before falling back.
+        await checkHealth(30_000)
+        setDocs(await fetchPolicies())
+      } catch {
         setDocs(SAMPLE_DOCS)
         setUsingFallback(true)
-      })
-      .finally(() => setLoading(false))
+      }
+    } finally {
+      setLoading(false)
+    }
   }, [])
+
+  useEffect(() => {
+    loadPolicies()
+  }, [loadPolicies])
 
   const categories = ['All', ...Array.from(new Set(docs.map(d => d.category))).sort()]
 
@@ -338,11 +356,19 @@ export default function PoliciesPage() {
         {usingFallback && (
           <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
             <AlertTriangle size={16} className="text-amber-600 mt-0.5 shrink-0" />
-            <div>
-              <p className="text-sm font-semibold text-amber-800">Could not load policy library</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-amber-800">WorkTwin is still waking up</p>
               <p className="text-xs text-amber-700 mt-0.5">
-                WorkTwin could not connect to the policy library. Showing the approved fallback policy information for this controlled pilot. Please try again or speak to your manager.
+                The policy service can take up to a minute to wake after a period of inactivity. This is a limited offline sample for this controlled pilot, not the full approved library. Please try again in a moment, or speak to your manager if it does not load.
               </p>
+              <button
+                onClick={loadPolicies}
+                disabled={loading}
+                className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800 bg-white border border-amber-300 hover:bg-amber-100 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-lg transition-colors"
+              >
+                {loading ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
+                {loading ? 'Loading…' : 'Try again'}
+              </button>
             </div>
           </div>
         )}
@@ -387,7 +413,7 @@ export default function PoliciesPage() {
             <div className="text-center space-y-2">
               <Loader2 size={28} className="mx-auto text-teal-400 animate-spin" />
               <p className="font-semibold text-slate-700">Loading approved policies</p>
-              <p className="text-xs text-slate-400">Checking staff-visible documents for this controlled pilot.</p>
+              <p className="text-xs text-slate-400">Checking staff-visible documents for this controlled pilot. The first load after a quiet period can take up to a minute while the service wakes up.</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[1, 2, 3, 4].map(i => (

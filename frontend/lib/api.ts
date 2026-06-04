@@ -106,7 +106,9 @@ export async function fetchPolicies(params?: {
   const token = await getSupabaseAccessToken()
   const headers: Record<string, string> = {}
   if (token) headers['Authorization'] = `Bearer ${token}`
-  const response = await fetch(url, { headers, signal: AbortSignal.timeout(5_000) })
+  // 30s timeout tolerates Render free-tier cold starts (the public backend can
+  // spin down when idle and take tens of seconds to wake on the first request).
+  const response = await fetch(url, { headers, signal: AbortSignal.timeout(30_000) })
   if (!response.ok) throw new Error(`API error: ${response.status}`)
   return response.json() as Promise<StaffPolicyRecord[]>
 }

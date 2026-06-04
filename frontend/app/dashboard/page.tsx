@@ -81,8 +81,8 @@ export default function DashboardPage() {
               <CheckCircle size={18} className="text-teal-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-teal-700">6 of 17</p>
-              <p className="text-xs text-slate-500">Example tasks completed</p>
+              <p className="text-2xl font-bold text-teal-700">5</p>
+              <p className="text-xs text-slate-500">Approved pilot documents</p>
             </div>
           </div>
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-3">
@@ -90,8 +90,8 @@ export default function DashboardPage() {
               <PlayCircle size={18} className="text-slate-500" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-700">9</p>
-              <p className="text-xs text-slate-500">Scenario guidance sessions</p>
+              <p className="text-2xl font-bold text-slate-700">11</p>
+              <p className="text-xs text-slate-500">Guidance scenarios</p>
             </div>
           </div>
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-3">

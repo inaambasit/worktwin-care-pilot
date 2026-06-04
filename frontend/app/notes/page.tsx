@@ -22,7 +22,7 @@ const initialNotes: Note[] = [
 
 This is example reflection only. Do not write real medication records, MAR details or service-user information here.`,
     tag: 'Awareness',
-    date: '23 Apr 2025',
+    date: 'Preview example',
   },
   {
     id: 2,
@@ -35,7 +35,7 @@ This is example reflection only. Do not write real medication records, MAR detai
 
 Feeling a bit overwhelmed by policy guidance — I should use WorkTwin for approved guidance only and speak to a human lead where needed.`,
     tag: 'Induction',
-    date: '17 Apr 2025',
+    date: 'Preview example',
   },
   {
     id: 3,
@@ -48,7 +48,7 @@ Feeling a bit overwhelmed by policy guidance — I should use WorkTwin for appro
 
 Also want to read the full complaints policy - came up in conversation today.`,
     tag: 'Learning',
-    date: '21 Apr 2025',
+    date: 'Preview example',
   },
 ]
 

@@ -13,140 +13,40 @@ import {
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
-// Sample fallback data (all statuses for admin view)
+// Sample fallback data — mirrors the two sandbox indexed dummy documents only.
+// Shown when the backend is unreachable. Does NOT represent the approved pilot
+// document set. All entries are dummy/sample and carry no live actions.
 // ---------------------------------------------------------------------------
 const SAMPLE_DOCS: DocumentRecord[] = [
   {
-    id: 'doc-001', organisation_id: 'demo-org', title: 'Staff Handbook',
-    description: 'Comprehensive guide for all staff.', file_name: 'staff_handbook_v3.pdf',
-    file_type: 'pdf', file_size_bytes: 1468006, storage_key: 'placeholder/demo-org/staff_handbook_v3.pdf',
-    vertical: 'care', category: 'HR', tags: ['onboarding', 'conduct'], status: 'approved',
-    access_roles: ['All Staff'], is_sensitive: false, escalation_required: false,
-    approved_for_ai_answers: true, contains_personal_data_warning: false,
-    primary_language: 'en', available_languages: ['en', 'ur', 'pa'], translation_status: 'complete',
-    human_review_required: false, version: '3.0', review_due_date: '2026-01-12',
-    embedding_status: 'indexed', created_by: 'admin', created_at: '2025-01-12T00:00:00Z', updated_at: '2025-01-12T00:00:00Z', metadata: {},
-  },
-  {
-    id: 'doc-002', organisation_id: 'demo-org', title: 'Medication Administration Policy',
-    description: 'Safe medication administration procedure.', file_name: 'medication_admin_policy_v2.pdf',
-    file_type: 'pdf', file_size_bytes: 911360, storage_key: 'placeholder/demo-org/medication_admin_policy_v2.pdf',
-    vertical: 'care', category: 'Medication', tags: ['medication', 'MAR'], status: 'approved',
-    access_roles: ['Care Worker', 'Senior Carer', 'Nurse'], is_sensitive: true, escalation_required: true,
-    approved_for_ai_answers: true, contains_personal_data_warning: false,
-    primary_language: 'en', available_languages: ['en'], translation_status: 'not_required',
-    human_review_required: false, version: '2.1', review_due_date: '2026-01-20',
-    embedding_status: 'indexed', created_by: 'admin', created_at: '2025-01-20T00:00:00Z', updated_at: '2025-01-20T00:00:00Z', metadata: {},
-  },
-  {
-    id: 'doc-003', organisation_id: 'demo-org', title: 'Safeguarding Policy and Procedure',
-    description: 'Adults and children safeguarding policy.', file_name: 'safeguarding_policy_v4.pdf',
-    file_type: 'pdf', file_size_bytes: 1153433, storage_key: 'placeholder/demo-org/safeguarding_policy_v4.pdf',
-    vertical: 'care', category: 'Safeguarding', tags: ['safeguarding', 'CQC'], status: 'approved',
-    access_roles: ['All Staff'], is_sensitive: true, escalation_required: true,
-    approved_for_ai_answers: false, contains_personal_data_warning: false,
-    primary_language: 'en', available_languages: ['en', 'ur'], translation_status: 'in_progress',
-    human_review_required: true, version: '4.0', review_due_date: '2026-02-05',
-    embedding_status: 'not_started', created_by: 'admin', created_at: '2025-02-05T00:00:00Z', updated_at: '2025-02-05T00:00:00Z', metadata: {},
-  },
-  {
-    id: 'doc-004', organisation_id: 'demo-org', title: 'Health and Safety Policy',
-    description: 'Workplace health and safety policy.', file_name: 'health_safety_policy_v2.pdf',
-    file_type: 'pdf', file_size_bytes: 778240, storage_key: 'placeholder/demo-org/health_safety_policy_v2.pdf',
-    vertical: 'care', category: 'Health and Safety', tags: ['H&S', 'risk assessment'], status: 'under_review',
+    id: 'doc-fallback-001', organisation_id: 'demo-org',
+    title: 'Escalation & Emergency Contact Pathway AI Extract',
+    description: 'Illustrative sample only — not an approved pilot document. Mirrors the sandbox dummy extract used for admin embedding and retrieval testing.',
+    file_name: 'thumhara-escalation-pathway-ai-extract-v0.1.pdf',
+    file_type: 'pdf', file_size_bytes: 42000, storage_key: 'placeholder/demo-org/escalation-extract-v0.1.pdf',
+    vertical: 'care', category: 'Escalation', tags: ['escalation', 'dummy'], status: 'approved',
     access_roles: ['All Staff'], is_sensitive: false, escalation_required: false,
     approved_for_ai_answers: false, contains_personal_data_warning: false,
     primary_language: 'en', available_languages: ['en'], translation_status: 'not_required',
-    human_review_required: true, version: '2.0', review_due_date: '2026-03-08',
-    embedding_status: 'not_started', created_by: 'admin', created_at: '2025-03-08T00:00:00Z', updated_at: '2025-03-08T00:00:00Z', metadata: {},
+    human_review_required: true, version: '0.1', review_due_date: '2026-12-01',
+    embedding_status: 'indexed', created_by: 'admin',
+    created_at: '2026-05-31T00:00:00Z', updated_at: '2026-05-31T00:00:00Z',
+    dummy_document: true, real_document: false, metadata: {},
   },
   {
-    id: 'doc-005', organisation_id: 'demo-org', title: 'Complaints Procedure',
-    description: 'Handling service user and family complaints.', file_name: 'complaints_procedure_v1.pdf',
-    file_type: 'pdf', file_size_bytes: 440320, storage_key: 'placeholder/demo-org/complaints_procedure_v1.pdf',
-    vertical: 'care', category: 'Complaints', tags: ['complaints'], status: 'approved',
+    id: 'doc-fallback-002', organisation_id: 'demo-org',
+    title: 'Confidentiality & Information Handling AI Extract',
+    description: 'Illustrative sample only — not an approved pilot document. Mirrors the sandbox dummy extract used for admin embedding and retrieval testing.',
+    file_name: 'thumhara-confidentiality-ai-extract-v0.2.pdf',
+    file_type: 'pdf', file_size_bytes: 38000, storage_key: 'placeholder/demo-org/confidentiality-extract-v0.2.pdf',
+    vertical: 'care', category: 'Confidentiality', tags: ['confidentiality', 'dummy'], status: 'approved',
     access_roles: ['All Staff'], is_sensitive: false, escalation_required: false,
-    approved_for_ai_answers: true, contains_personal_data_warning: false,
-    primary_language: 'en', available_languages: ['en', 'ur', 'pa', 'ar'], translation_status: 'complete',
-    human_review_required: false, version: '1.2', review_due_date: '2026-02-14',
-    embedding_status: 'indexed', created_by: 'admin', created_at: '2025-02-14T00:00:00Z', updated_at: '2025-02-14T00:00:00Z', metadata: {},
-  },
-  {
-    id: 'doc-006', organisation_id: 'demo-org', title: 'Infection Control Procedure',
-    description: 'Infection prevention and control standards.', file_name: 'infection_control_v3.pdf',
-    file_type: 'pdf', file_size_bytes: 696320, storage_key: 'placeholder/demo-org/infection_control_v3.pdf',
-    vertical: 'care', category: 'Health and Safety', tags: ['infection control', 'PPE'], status: 'approved',
-    access_roles: ['All Staff'], is_sensitive: false, escalation_required: false,
-    approved_for_ai_answers: true, contains_personal_data_warning: false,
-    primary_language: 'en', available_languages: ['en'], translation_status: 'not_required',
-    human_review_required: false, version: '3.1', review_due_date: '2026-03-01',
-    embedding_status: 'indexed', created_by: 'admin', created_at: '2025-03-01T00:00:00Z', updated_at: '2025-03-01T00:00:00Z', metadata: {},
-  },
-  {
-    id: 'doc-007', organisation_id: 'demo-org', title: 'Mental Capacity Act Guidance',
-    description: 'Applying the Mental Capacity Act 2005 in care settings.', file_name: 'mental_capacity_act_guidance_v2.pdf',
-    file_type: 'pdf', file_size_bytes: 532480, storage_key: 'placeholder/demo-org/mental_capacity_act_guidance_v2.pdf',
-    vertical: 'care', category: 'Training', tags: ['MCA', 'mental capacity'], status: 'approved',
-    access_roles: ['Care Worker', 'Senior Carer', 'Nurse'], is_sensitive: false, escalation_required: false,
-    approved_for_ai_answers: true, contains_personal_data_warning: false,
-    primary_language: 'en', available_languages: ['en'], translation_status: 'pending',
-    human_review_required: false, version: '2.0', review_due_date: '2025-11-22',
-    embedding_status: 'pending', created_by: 'admin', created_at: '2024-11-22T00:00:00Z', updated_at: '2024-11-22T00:00:00Z', metadata: {},
-  },
-  {
-    id: 'doc-008', organisation_id: 'demo-org', title: 'Incident Reporting Procedure',
-    description: 'Reporting accidents, near misses and incidents.', file_name: 'incident_reporting_v2.pdf',
-    file_type: 'pdf', file_size_bytes: 348160, storage_key: 'placeholder/demo-org/incident_reporting_v2.pdf',
-    vertical: 'care', category: 'Health and Safety', tags: ['incident', 'RIDDOR'], status: 'approved',
-    access_roles: ['All Staff'], is_sensitive: false, escalation_required: false,
-    approved_for_ai_answers: true, contains_personal_data_warning: false,
-    primary_language: 'en', available_languages: ['en'], translation_status: 'not_required',
-    human_review_required: false, version: '2.0', review_due_date: '2026-04-03',
-    embedding_status: 'indexed', created_by: 'admin', created_at: '2025-04-03T00:00:00Z', updated_at: '2025-04-03T00:00:00Z', metadata: {},
-  },
-  {
-    id: 'doc-009', organisation_id: 'demo-org', title: 'Disciplinary and Grievance Policy',
-    description: 'Handling disciplinary matters and employee grievances.', file_name: 'disciplinary_grievance_v2.pdf',
-    file_type: 'pdf', file_size_bytes: 624640, storage_key: 'placeholder/demo-org/disciplinary_grievance_v2.pdf',
-    vertical: 'care', category: 'HR', tags: ['disciplinary', 'grievance', 'ACAS'], status: 'approved',
-    access_roles: ['Manager', 'HR Coordinator'], is_sensitive: true, escalation_required: true,
-    approved_for_ai_answers: false, contains_personal_data_warning: true,
-    primary_language: 'en', available_languages: ['en'], translation_status: 'not_required',
-    human_review_required: true, version: '2.0', review_due_date: '2026-01-10',
-    embedding_status: 'not_started', created_by: 'admin', created_at: '2025-01-10T00:00:00Z', updated_at: '2025-01-10T00:00:00Z', metadata: {},
-  },
-  {
-    id: 'doc-010', organisation_id: 'demo-org', title: 'End of Life Care Policy',
-    description: 'Compassionate end of life care guidance.', file_name: 'end_of_life_care_v1.pdf',
-    file_type: 'pdf', file_size_bytes: 491520, storage_key: 'placeholder/demo-org/end_of_life_care_v1.pdf',
-    vertical: 'care', category: 'Training', tags: ['end of life', 'DNACPR', 'palliative'], status: 'under_review',
-    access_roles: ['Senior Carer', 'Nurse', 'Manager'], is_sensitive: true, escalation_required: false,
     approved_for_ai_answers: false, contains_personal_data_warning: false,
     primary_language: 'en', available_languages: ['en'], translation_status: 'not_required',
-    human_review_required: true, version: '1.0', review_due_date: '2026-03-15',
-    embedding_status: 'not_started', created_by: 'admin', created_at: '2025-03-15T00:00:00Z', updated_at: '2025-03-15T00:00:00Z', metadata: {},
-  },
-  {
-    id: 'doc-011', organisation_id: 'demo-org', title: 'Rota and Leave Management SOP',
-    description: 'Rota planning, annual leave requests and absence recording.', file_name: 'rota_leave_sop_draft.docx',
-    file_type: 'docx', file_size_bytes: 215040, storage_key: 'placeholder/demo-org/rota_leave_sop_draft.docx',
-    vertical: 'care', category: 'HR', tags: ['rota', 'leave', 'absence'], status: 'draft',
-    access_roles: ['Manager', 'HR Coordinator'], is_sensitive: false, escalation_required: false,
-    approved_for_ai_answers: false, contains_personal_data_warning: false,
-    primary_language: 'en', available_languages: ['en'], translation_status: 'not_required',
-    human_review_required: true, version: '0.1', review_due_date: '2026-04-22',
-    embedding_status: 'not_started', created_by: 'admin', created_at: '2025-04-22T00:00:00Z', updated_at: '2025-04-22T00:00:00Z', metadata: {},
-  },
-  {
-    id: 'doc-012', organisation_id: 'demo-org', title: 'New Staff Induction Checklist',
-    description: 'Onboarding checklist for new starters.', file_name: 'induction_checklist_v2.pdf',
-    file_type: 'pdf', file_size_bytes: 184320, storage_key: 'placeholder/demo-org/induction_checklist_v2.pdf',
-    vertical: 'care', category: 'Onboarding', tags: ['induction', 'DBS'], status: 'approved',
-    access_roles: ['All Staff', 'Manager'], is_sensitive: false, escalation_required: false,
-    approved_for_ai_answers: true, contains_personal_data_warning: false,
-    primary_language: 'en', available_languages: ['en', 'ur', 'pa', 'bn'], translation_status: 'in_progress',
-    human_review_required: false, version: '2.0', review_due_date: '2026-06-01',
-    embedding_status: 'indexed', created_by: 'admin', created_at: '2025-03-20T00:00:00Z', updated_at: '2025-03-20T00:00:00Z', metadata: {},
+    human_review_required: true, version: '0.2', review_due_date: '2026-12-01',
+    embedding_status: 'indexed', created_by: 'admin',
+    created_at: '2026-05-31T00:00:00Z', updated_at: '2026-05-31T00:00:00Z',
+    dummy_document: true, real_document: false, metadata: {},
   },
 ]
 
@@ -1168,7 +1068,9 @@ export default function DocumentRegistryPage() {
           <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-700">
             <AlertTriangle size={13} className="shrink-0 mt-0.5" />
             <span>
-              Demo mode — showing sample data. Start the backend (<code className="font-mono">uvicorn app.main:app --reload</code>) to load the live registry.
+              <strong>Illustrative sample data only</strong> — this does not reflect the approved pilot document set.
+              In live use the registry shows only the sandbox indexed dummy documents (Escalation + Confidentiality extracts).
+              Start the backend (<code className="font-mono">uvicorn app.main:app --reload</code>) to load the live registry.
               If the backend is running, ensure <code className="font-mono">backend/sql/001_document_registry.sql</code> has been run in Supabase SQL Editor.
             </span>
           </div>

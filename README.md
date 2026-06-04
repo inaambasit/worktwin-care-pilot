@@ -18,7 +18,7 @@ WorkTwin Care Pilot is currently in **controlled preview** — a supervised prot
 
 ### What is live in the controlled preview
 
-- Five approved pilot documents are loaded and staff-queryable (see policy boundary below)
+- A controlled pilot document set is being finalised; the Policy Library shows approved staff-visible documents when they are published, and the count it shows is derived from live data rather than a fixed number. Staff visibility and Staff Ask remain OFF, so no document is currently published to staff (see policy boundary below)
 - Ask WorkTwin has been verified on controlled test questions: visitor arrival guidance, gift acceptance (answered from Professional Boundaries), and medication error (correctly escalated — no AI medication advice returned)
 - Mobile polish improvements are in place: landing navigation, staff sign-in escape link, access-refusal emergency visibility, escalation tap targets, policy modal close button, dashboard walkthrough strip, and private notes layout
 - Shagufta reviewed the controlled preview; Ask WorkTwin and Policy Library positively received; product direction confirmed as guidance-led scenario support for realistic care situations
@@ -49,15 +49,11 @@ One hard gate remains before a one-user staff rehearsal can take place: Thumhara
 
 ### Current policy boundary
 
-The following five documents are the only approved staff-queryable policies in the current controlled preview:
+Staff visibility and Staff Ask are currently **OFF**. No document is published to staff in the live deployment, and the Policy Library count is derived from live data rather than a fixed number.
 
-1. Thumhara Centre Professional Boundaries Policy
-2. Thumhara Centre Infection Prevention and Basic Hygiene Policy
-3. Thumhara Centre Confidentiality and Information Handling Policy
-4. Thumhara Centre Mobile Phone and Portable Device Use Policy
-5. Visitor Sign-In and Identification Procedure
+A small candidate set of clean, organisation-owned policies has been prepared and, in part, proven locally under controlled auth in the `thumhara-centre` organisation — for example the Visitor Sign-In and Identification Procedure (the proven clean Lane A baseline) and a Confidentiality and Information Handling draft. QCS-licensed content (including the Mobile Phone and Portable Device Use Policy) remains **blocked** for AI/RAG and staff serving without written permission. See `docs/current-state.md` Section 5 for the authoritative proven-set record.
 
-No additional policies are live. No real policy documents are uploaded.
+No real policy documents are uploaded. No real care data is present. Promotion of any candidate document to staff visibility requires a separate recorded governance decision and Thumhara Centre written sign-off.
 
 ### Controlled testing documents
 

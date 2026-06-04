@@ -5,7 +5,7 @@ import { FileText, BarChart2, Shield, Phone, TrendingUp, BookOpen, Lock } from '
 const ADMIN_CHIPS = ['Admin host', 'Demo mode', 'Sample data only', 'Not staff-facing']
 
 const summaryCards = [
-  { label: 'Staff-visible documents', value: '5', sub: 'Controlled preview set', icon: FileText, colour: 'teal' },
+  { label: 'Staff-visible documents', value: 'None', sub: 'Not yet published (visibility off)', icon: FileText, colour: 'teal' },
   { label: 'Guidance scenarios', value: '11', sub: 'Available in preview', icon: BookOpen, colour: 'blue' },
   { label: 'Staff Ask', value: 'Off', sub: 'Disabled in preview', icon: Shield, colour: 'amber' },
   { label: 'Staff visibility', value: 'Off', sub: 'Disabled in preview', icon: Lock, colour: 'violet' },

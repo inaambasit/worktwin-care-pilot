@@ -14,10 +14,23 @@ import jwt
 import pytest
 from fastapi import HTTPException
 
-from app.jwt_auth import validate_staff_jwt
+from app.jwt_auth import validate_staff_jwt, _reset_jwks_cache_for_tests
 
 _SECRET = "test-supabase-jwt-secret-for-pytest"
 _SUPABASE_URL = "https://example.supabase.co"
+
+
+@pytest.fixture(autouse=True)
+def _clear_jwks_cache():
+    """Ensure the module-level JWKS client cache never leaks between tests.
+
+    The JWKS client is cached per JWKS URL at runtime for performance; tests
+    that patch PyJWKClient need a clean cache each time so a client mocked in
+    one test is never reused in another.
+    """
+    _reset_jwks_cache_for_tests()
+    yield
+    _reset_jwks_cache_for_tests()
 
 
 def _make_hs256_token(payload: dict) -> str:
@@ -263,3 +276,66 @@ def test_es256_expired_token_raises_401(monkeypatch):
             validate_staff_jwt(token)
     assert exc.value.status_code == 401
     assert "expired" in exc.value.detail.lower()
+
+
+# ---------------------------------------------------------------------------
+# JWKS client caching (4S.108B) — the client is constructed once per JWKS URL
+# and reused across requests; the reset helper forces reconstruction.
+# Caching never weakens verification: every token still runs full jwt.decode.
+# ---------------------------------------------------------------------------
+
+def test_jwks_client_is_cached_across_calls(monkeypatch):
+    """Two valid verifications for the same SUPABASE_URL construct PyJWKClient once."""
+    monkeypatch.setenv("SUPABASE_URL", _SUPABASE_URL)
+    payload = _valid_payload()
+    token = _make_fake_es256_token(payload)
+
+    mock_signing_key = MagicMock()
+    mock_signing_key.key = "mock-ec-key"
+
+    with patch("app.jwt_auth.PyJWKClient") as MockClient, \
+         patch("jwt.decode", return_value=payload):
+        MockClient.return_value.get_signing_key_from_jwt.return_value = mock_signing_key
+        validate_staff_jwt(token)
+        validate_staff_jwt(token)
+        # Constructed once, reused on the second call.
+        assert MockClient.call_count == 1
+        # The signing key is still fetched per token (verification is not skipped).
+        assert MockClient.return_value.get_signing_key_from_jwt.call_count == 2
+
+
+def test_reset_jwks_cache_forces_new_client(monkeypatch):
+    """After _reset_jwks_cache_for_tests(), a new PyJWKClient is constructed."""
+    monkeypatch.setenv("SUPABASE_URL", _SUPABASE_URL)
+    payload = _valid_payload()
+    token = _make_fake_es256_token(payload)
+
+    mock_signing_key = MagicMock()
+    mock_signing_key.key = "mock-ec-key"
+
+    with patch("app.jwt_auth.PyJWKClient") as MockClient, \
+         patch("jwt.decode", return_value=payload):
+        MockClient.return_value.get_signing_key_from_jwt.return_value = mock_signing_key
+        validate_staff_jwt(token)
+        _reset_jwks_cache_for_tests()
+        validate_staff_jwt(token)
+        assert MockClient.call_count == 2
+
+
+def test_different_supabase_url_uses_separate_client(monkeypatch):
+    """A different SUPABASE_URL must not reuse another URL's cached client."""
+    payload = _valid_payload()
+    token = _make_fake_es256_token(payload)
+
+    mock_signing_key = MagicMock()
+    mock_signing_key.key = "mock-ec-key"
+
+    with patch("app.jwt_auth.PyJWKClient") as MockClient, \
+         patch("jwt.decode", return_value=payload):
+        MockClient.return_value.get_signing_key_from_jwt.return_value = mock_signing_key
+        monkeypatch.setenv("SUPABASE_URL", _SUPABASE_URL)
+        validate_staff_jwt(token)
+        monkeypatch.setenv("SUPABASE_URL", "https://other.supabase.co")
+        validate_staff_jwt(token)
+        # One client per distinct JWKS URL.
+        assert MockClient.call_count == 2

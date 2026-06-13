@@ -1,8 +1,8 @@
 # One-User Staff Rehearsal — Readiness Gate / Go-No-Go Checklist
 
-**Reference:** 4S.105C / 4S.106E
+**Reference:** 4S.105C / 4S.106E / 4S.109A
 **Date:** 2026-06-01
-**Last updated:** 2026-06-02 — Supabase credential rotation cleared (4S.106E)
+**Last updated:** 2026-06-13 — 4S.109A staging recorded (one-user rehearsal is a safety checkpoint; the controlled trusted-staff cohort pilot is the intended next stage)
 **Status:** CHECKLIST ONLY — this document does not approve the rehearsal by itself
 
 > **Bridge note (2026-06-13, 4S.109A):** this gate covers the **one-user rehearsal only**, which is a safety checkpoint, not the destination. A GO recorded here authorises only that single rehearsal. The intended next stage after a rehearsal PASS is a **controlled trusted-staff cohort pilot**, which has its own gates and its own joint GO/NO-GO decision — see `docs/runbooks/trusted-staff-cohort-pilot-plan.md`.
@@ -21,7 +21,7 @@ Until then, the default is **NO-GO**.
 
 ---
 
-## 2. Current Status Summary (as at 2026-06-02)
+## 2. Current Status Summary (as at 2026-06-13)
 
 | Area | Status |
 |------|--------|
@@ -34,6 +34,8 @@ Until then, the default is **NO-GO**.
 | Environment / sandbox confirmed | Confirmed demo-org; no production org |
 
 **Current overall status: NO-GO.** One hard blocker remains: Thumhara written sign-off (return-by 2026-06-14). Supabase credential rotation cleared 2026-06-02 (4S.106E — service-role key, JWT secret, anon key rotated; ES256 membership proof PASS; staff visibility remains OFF; Staff Ask remains OFF).
+
+**Staging (4S.109A):** this gate covers the **one-user rehearsal only**, which is a safety checkpoint, not the destination. A GO recorded in Section 10 authorises that single rehearsal and nothing further. The intended next stage — only after a recorded rehearsal PASS and a **separate** joint GO/NO-GO decision — is a **controlled trusted-staff cohort pilot** (3 testers recommended, maximum 5; no real care data), which has its own hard gates: see `docs/runbooks/trusted-staff-cohort-pilot-plan.md`. Wider staff rollout and production/commercial use are **not approved**.
 
 ---
 
@@ -175,3 +177,5 @@ A rehearsal may only proceed when:
 - a joint GO is explicitly recorded in Section 10 by the WorkTwin operator and the Registered Manager / Thumhara reviewer.
 
 **This checklist does not approve staff access, staff visibility, Staff Ask, `real_document` promotion, real care data use, or wider rollout.** Any of those requires a separate, explicitly recorded decision over and above this gate.
+
+**A GO here authorises the one-user rehearsal only.** It does not authorise the controlled trusted-staff cohort pilot, which is the intended next stage after a recorded rehearsal PASS. The cohort pilot has its own hard gates and its own joint GO/NO-GO decision — see `docs/runbooks/trusted-staff-cohort-pilot-plan.md`.

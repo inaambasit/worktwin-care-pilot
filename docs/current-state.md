@@ -1,6 +1,6 @@
 # WorkTwin Care Pilot - Current State
 
-> Generated: 2026-05-07. Updated: 2026-06-03. Source of truth through checkpoint `9b0204f` on branch `main`.
+> Generated: 2026-05-07. Updated: 2026-06-13. Source of truth through checkpoint `04d2bd6` on branch `main`.
 > Update this file whenever a milestone changes the status of any item below.
 > Do not edit other files to reconcile with this document - fix those files instead.
 
@@ -74,13 +74,17 @@
 
 > **4S.106D–4S.106F (2026-06-02 to 2026-06-03):** Documentation alignment, Supabase rotation, and post-rotation UI/doc sweep. 4S.106D: README and current-state aligned to rehearsal-readiness (PR #13, commit `c65ffa0`). 4S.106E: Supabase service-role/JWT credential rotation completed by Inaam (service-role key, JWT secret, anon key rotated in local env, Render and Vercel) — no secret values printed; basic verification PASS (Render /health 200, Vercel /rehearsal and /rehearsal/feedback 200); post-rotation ES256 membership proof PASS on sandbox demo-org (active→200, inactive→403, no-membership→403/401; dummy users cleaned up; demo-org baseline unchanged); the Supabase credential hard gate is **cleared**. 4S.106E-1: rehearsal readiness gate updated to record the Supabase gate cleared (PR #14, commit `7ce06db`). 4S.106F-1: rehearsal operator cockpit and feedback page updated so Supabase rotation shows Complete/Cleared and only the Thumhara written sign-off remains; frontend build passed; live smoke check PASS (PR #15, commit `9b0204f`). Staff visibility remains OFF. Staff Ask remains OFF. The sole remaining hard gate before any one-user rehearsal is Thumhara Centre written/completed sign-off (due 2026-06-14). Overall rehearsal status remains NO-GO until written sign-off is returned and a joint GO is recorded. No real care data. Checkpoint: `9b0204f`.
 
+> **4S.106F-2–4S.108C (2026-06-03 to 2026-06-04):** Post-rotation doc sweep, frontend honesty pass, and backend hardening. 4S.106F-2: eight docs swept so all consistently show the Supabase rotation cleared, ES256/JWKS-only auth, and the remaining Thumhara sign-off gate (PR #16, commit `2b5673d`). 4S.107A: Policy Library cold-start resilience improved (PR #17, commit `3547a6c`); live smoke PASS. 4S.107B-1: admin/dashboard honesty sweep — misleading metrics removed or relabelled, fake activity removed, admin insights reframed as illustrative, stale 2025 dates replaced (PR #18, commit `2e8d8be`); live smoke PASS. 4S.107B-2: misleading 12-entry admin registry fallback replaced with two dummy extract entries mirroring the sandbox, fallback banner marked illustrative-only (PR #19, commit `dbee8e5`); live smoke PASS. Dashboard/admin preview metrics reconciled with live policy state (PR #20, commit `8485e24`). JWKS client now cached across requests — no decoded payloads, tokens, or membership data cached; full token verification unchanged (PR #21, commit `05d4516`). **4S.108C: membership lookup dependency failures now fail closed** — network error, timeout, non-2xx PostgREST status, or malformed body during the `organisation_memberships` lookup returns a controlled **503** instead of a 500; `/staff/session-check` returns `auth_unavailable` with `Cache-Control: no-store`; `/policies` and `/ask` fail closed with 503; active / inactive / no-membership behaviour preserved; a dependency failure can never grant access (PR #22, commit `04d2bd6`). Backend test suite 501 passing at `04d2bd6`. Staff visibility remains OFF. Staff Ask remains OFF. No real care data. Checkpoint: `04d2bd6`.
+
+> **4S.109A (2026-06-13):** Documentation truth pass and trusted-staff cohort pilot plan — docs-only slice; no code, env, Supabase, upload, or governance flag changes. **Strategy correction recorded:** the one-user rehearsal is a **safety checkpoint, not the destination**. The intended next stage after Thumhara Centre written sign-off, a rehearsal PASS, and a further joint GO/NO-GO decision is a **controlled trusted-staff cohort pilot** (3 testers recommended, maximum 5, no real care data) — not "one-user rehearsal forever", and not wider staff rollout, production rollout, or real care data use, none of which are approved. New runbook: `docs/runbooks/trusted-staff-cohort-pilot-plan.md`. Stale wording fixed: `backend/README.md` no longer claims public pilot auth is disabled or that 4S.88G blocks the membership migration (pilot-auth mode is enabled and proven — 4S.104E-6a; membership proof passed — 4S.104E-6b-fix/4S.106E; membership lookup fails closed — 4S.108C); `.env.example` now marks `SUPABASE_JWT_SECRET` as legacy/no longer used (ES256/JWKS only). Bridge notes added to the one-user rehearsal runbooks pointing to the cohort plan. Overall status remains **NO-GO**; sole remaining external hard gate is Thumhara Centre written sign-off (due 2026-06-14).
+
 ---
 
 ## 1. Current Checkpoint
 
 | Item | Value |
 |---|---|
-| Commit | `9b0204f` |
+| Commit | `04d2bd6` |
 | Branch | `main` |
 | Repo path | `C:\Projects\worktwin-care-pilot\worktwin-care-pilot-starter` |
 | Backend | FastAPI / `backend/app/main.py` |
@@ -277,17 +281,25 @@ A sandbox Supabase auth E2E setup plan has been created at `docs/4s90i-sandbox-a
 
 ### Current gate
 
-The auth-hardening and rehearsal apparatus track (4S.103D–4S.106F) is complete. The current readiness gate records **NO-GO**. The Supabase service-role/JWT credential rotation hard gate was **cleared** in 4S.106E (rotation completed by Inaam; post-rotation ES256 membership proof passed). One hard gate now remains:
+The auth-hardening and rehearsal apparatus track (4S.103D–4S.106F) is complete, followed by the honesty/hardening slices through 4S.108C. The current readiness gate records **NO-GO**. The Supabase service-role/JWT credential rotation hard gate was **cleared** in 4S.106E (rotation completed by Inaam; post-rotation ES256 membership proof passed). One hard gate now remains:
 
 1. **Thumhara Centre written sign-off** — confidentiality sign-off pack sent 31 May 2026; return-by 14 June 2026; no chase before that date.
 
-Once this gate is cleared:
+**Staging (strategy correction, 4S.109A):** the one-user rehearsal is a **safety checkpoint**, not the destination. The intended sequence is:
+
+1. Thumhara written sign-off returned and reviewed.
+2. One-user rehearsal — joint GO recorded in the readiness gate, session run, outcome recorded. This stage exists to catch problems with one observed person before any group is involved.
+3. **Controlled trusted-staff cohort pilot** — only after a recorded rehearsal PASS and a further explicit joint GO/NO-GO decision. See `docs/runbooks/trusted-staff-cohort-pilot-plan.md` (3 testers recommended, maximum 5; no real care data; supervised sessions; every flag change a recorded governance decision).
+
+Wider staff rollout, production rollout, and real care data use are **not approved** at any of these stages.
+
+Once the sign-off gate is cleared:
 - Jointly complete `docs/runbooks/one-user-rehearsal-readiness-gate.md` Section 10 with Shagufta and record an explicit GO.
 - Promote dummy Confidentiality extract to `approved_for_staff_visibility=True` and `approved_for_source_grounded_answers=True` via admin API — as a recorded governance decision for rehearsal scope only.
 - Identify and brief a named tester (not a Thumhara staff member unless RM separately approves in writing).
 - Run the one-user rehearsal using the operator cockpit (/rehearsal) and feedback form (/rehearsal/feedback).
 
-### Immediate next steps (one-user rehearsal path)
+### Immediate next steps (one-user rehearsal as safety checkpoint, then cohort)
 
 | Step | Description |
 |---|---|
@@ -298,6 +310,7 @@ Once this gate is cleared:
 | 5 | (Inaam + Shagufta) Identify named tester; confirm not a Thumhara staff member (or get Shagufta's written approval if they are) |
 | 6 | (Inaam + Shagufta) Complete readiness gate document Section 10 jointly; record GO |
 | 7 | Run one-user rehearsal using /rehearsal cockpit and /rehearsal/feedback; record results |
+| 8 | (Inaam + Shagufta) Review rehearsal outcome; if PASS, take an explicit joint GO/NO-GO decision on the **controlled trusted-staff cohort pilot** per `docs/runbooks/trusted-staff-cohort-pilot-plan.md` |
 
 ### Historical documentation track (completed)
 

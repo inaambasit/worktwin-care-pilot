@@ -2,7 +2,7 @@
 
 FastAPI backend for WorkTwin MVP.
 
-## Current backend status — 2026-05-07
+## Current backend status — 2026-06-13 (checkpoint `04d2bd6`)
 
 The backend is a **controlled prototype, not production-ready** and is **not approved for unsupervised use by real staff**.
 
@@ -10,17 +10,25 @@ The backend is a **controlled prototype, not production-ready** and is **not app
 
 PDF upload, text extraction, chunking, embedding preparation, embedding generation, admin-only vector search, admin-only answer-debug, governed staff `/ask`, staff `/policies`, governance gates, JWT validation, and audit/safety controls.
 
+### Auth and membership — current state
+
+- Staff JWT validation is **Supabase ES256/JWKS only** (`backend/app/jwt_auth.py`). The HS256 fallback was removed in 4S.105D — HS256, `alg=none`, and unsupported algorithms fail closed immediately with 401. `SUPABASE_JWT_SECRET` is **no longer used** for staff JWT verification (see `.env.example`).
+- **Pilot-auth mode has been enabled and proven in the controlled sandbox/demo-org proof environment** (4S.104E-6a): with `PILOT_AUTH_MODE=true`, `/staff/session-check`, `/policies` and `/ask` require a valid ES256 Bearer token resolving to an active `organisation_memberships` row; unauthenticated requests fail closed with 401. The earlier 4S.88G blocker is resolved — the membership schema is applied in the controlled Supabase target and the end-to-end ES256 membership proof passed (4S.104E-6b-fix; re-proven after credential rotation in 4S.106E). This does not approve wider staff rollout, production use, or any change to Staff visibility / Staff Ask flags without a recorded governance decision.
+- **Membership lookup fails closed (4S.108C):** any dependency failure during the `organisation_memberships` lookup (network error, timeout, non-2xx PostgREST status, malformed body) returns a controlled **503** instead of a 500 — `/staff/session-check` returns `auth_unavailable` with `Cache-Control: no-store`, and `/policies` and `/ask` fail closed with 503. A dependency failure can never grant access. Active / inactive / no-membership behaviour is unchanged.
+- Do not change `PILOT_AUTH_MODE` or `NEXT_PUBLIC_PILOT_AUTH_MODE` in any deployment without a recorded decision.
+
 ### Constraints and open blockers
 
 - `openai` is pinned to `openai==2.33.0` — do not change without running the full backend test suite.
-- JWT validation is Supabase ES256/JWKS only (`backend/app/jwt_auth.py`); the HS256 fallback was removed in 4S.105D — HS256, `alg=none`, and unsupported algorithms fail closed immediately with 401.
-- `backend/sql/008_organisation_memberships.sql` exists, but **4S.88G remains blocked** — this migration has not been safely applied or proved in an approved Supabase target.
-- **Public pilot auth remains disabled.** `PILOT_AUTH_MODE` and `NEXT_PUBLIC_PILOT_AUTH_MODE` are `false` and must not be changed until 4S.88G is resolved.
+- **Staff visibility remains OFF and Staff Ask remains OFF.** No document is currently published to staff in the controlled deployment, and no document passes the 11-condition staff `/ask` gate. Both remain OFF until explicit, separately recorded governance decisions are made — after Thumhara Centre written sign-off and a joint GO.
 - **Admin/debug endpoints must remain protected by backend `ADMIN_TOKEN`.** The frontend admin proxy remains disabled publicly (`ADMIN_PROXY_ENABLED` not set) and is not production-ready.
 - **No real staff, service-user, resident, care-plan, HR, safeguarding case-note or named complaint personal data should be uploaded.**
 - **QCS AI/RAG use not yet confirmed.** Thumhara Centre holds a QCS licence, but use of QCS content inside an external AI/RAG pipeline has not been confirmed as permitted. Do not expand AI answer or staff visibility for QCS-derived policies (AC32, CC34, QQ03) until confirmed.
+- **Next intended stage:** after Thumhara Centre written sign-off, a one-user rehearsal runs first as a **safety checkpoint**, followed — only on a recorded rehearsal PASS and a further joint decision — by a **controlled trusted-staff cohort pilot** (see `docs/runbooks/trusted-staff-cohort-pilot-plan.md`). Wider staff rollout and production/commercial use are **not approved**.
 
 ### Current document governance state
+
+> **Context (2026-06-13):** the lane table below records the registry state of the previously used `worktwin-care-pilot` Supabase project, where the TC-POL controlled proofs were run. The current controlled deployment points at the sandbox project (`demo-org`), where only dummy test extracts are indexed admin-only and **no document is staff-visible**. Staff visibility and Staff Ask remain OFF in every environment.
 
 - **Visitor Sign-In and Identification Procedure** — Lane A; first clean Lane A proof; staff-visible.
 - **AC32 Mobile Phone and Portable Device Use Policy** — Lane A, controlled internal Thumhara staff-style testing only; not wider rollout; QCS AI/RAG use must be confirmed before wider production deployment.
@@ -61,11 +69,10 @@ curl http://localhost:8000/health
 # Root
 curl http://localhost:8000/
 
-# Staff-safe policy library (all approved policies)
+# Staff-safe policy library (approved, staff-visible documents only).
+# Organisation and role are derived server-side — the caller cannot supply them.
+# In pilot-auth mode (PILOT_AUTH_MODE=true) this requires a valid ES256 Bearer token.
 curl "http://localhost:8000/policies"
-
-# Filter by role
-curl "http://localhost:8000/policies?user_role=Care+Worker"
 
 # Filter by category
 curl "http://localhost:8000/policies?category=Medication"
@@ -1905,7 +1912,9 @@ The server-side admin API proxy at `frontend/app/api/admin/[...path]/route.ts` h
 - `governance_reviewed_by` and `governance_reviewed_at` are null on the visitor SOP — must be set before staff RAG goes live
 - No real Thumhara/QCS documents should be embedded until `approved_for_embedding=true` is confirmed by a human reviewer
 
-## Next steps (Milestone 4S+)
+## Next steps (Milestone 4S+) — historical snapshot
+
+> **Superseded (2026-06-13):** the list below is a historical snapshot from the Milestone 4S era. Several items it describes as outstanding — real Supabase Auth session validation, real `organisation_memberships` lookup, staff route protection — have since been implemented and proven (see "Current backend status" at the top of this file). For the current position and next steps, see `docs/current-state.md` and `docs/runbooks/trusted-staff-cohort-pilot-plan.md`.
 
 - **4S.4:** Set `governance_reviewed_by` and `governance_reviewed_at` on the Visitor Sign-In and Identification Procedure — required by the Milestone 4R gate list before staff RAG can go live. After this the Visitor SOP passes all 4R gates.
 - **4S.5 (complete):** The governed staff `/ask` RAG path is built using the Milestone 4R gate list; a real staff pilot still requires authentication, RBAC, admin session protection, full safety tests, and pilot governance sign-off.

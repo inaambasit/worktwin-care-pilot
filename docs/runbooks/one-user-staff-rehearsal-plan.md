@@ -4,6 +4,8 @@
 **Date:** 2026-06-01
 **Status:** PLANNING ONLY — this document does not approve or enable anything
 
+> **Bridge note (2026-06-13, 4S.109A):** the one-user rehearsal is a **safety checkpoint, not the destination**. The intended next stage after a recorded rehearsal PASS — and a further explicit joint GO/NO-GO decision — is a **controlled trusted-staff cohort pilot** (3 testers recommended, maximum 5). See `docs/runbooks/trusted-staff-cohort-pilot-plan.md`. Wider rollout and production use remain not approved.
+
 ---
 
 ## 1. Purpose
@@ -266,3 +268,5 @@ Once this rehearsal has been completed and a **GO** recorded in Section 12, the 
 2. **Decide whether the dummy/extract document base is sufficient** or whether the real Confidentiality source policy should be promoted (requires separate governance sign-off, supersede/re-index of the dummy doc, and Thumhara's written sign-off returned).
 3. **Plan a second controlled step** if the GO is clean — potentially a second tester or a broader question set, under the same monitoring/rollback framework.
 4. **Do not proceed to general staff rollout** without a separate, explicit, jointly recorded authorisation.
+
+> **Update (2026-06-13, 4S.109A):** step 3's "second controlled step" is now defined: the intended next stage after a clean GO is the **controlled trusted-staff cohort pilot** described in `docs/runbooks/trusted-staff-cohort-pilot-plan.md` — subject to its own hard gates and a further joint GO/NO-GO decision. Step 4 stands unchanged.

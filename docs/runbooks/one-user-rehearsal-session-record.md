@@ -8,6 +8,8 @@
 > Complete it sequentially during and immediately after the session.
 > No real service-user, staff, family, medication, safeguarding, incident, complaint or HR data may appear anywhere in this document.
 
+> **Bridge note (2026-06-13, 4S.109A):** the rehearsal this record captures is a **safety checkpoint, not the destination**. A recorded PASS here feeds the separate joint GO/NO-GO decision for the intended next stage — a **controlled trusted-staff cohort pilot** (`docs/runbooks/trusted-staff-cohort-pilot-plan.md`). It does not authorise that stage by itself.
+
 ---
 
 ## A. Session Header

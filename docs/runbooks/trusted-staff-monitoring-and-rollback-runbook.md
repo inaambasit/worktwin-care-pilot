@@ -14,6 +14,8 @@ A rehearsal means: a single observed user trying the system in a deliberately li
 
 This runbook is **not** for full production, not for live operational use, not for real case handling, and not for wider rollout. It is a safety scaffold to be used **only if and when a rehearsal is separately authorised**.
 
+> **Bridge note (2026-06-13, 4S.109A):** the one-user rehearsal is a **safety checkpoint, not the destination**. After a rehearsal PASS and a further joint GO/NO-GO decision, the intended next stage is a **controlled trusted-staff cohort pilot**, which reuses and extends this runbook's monitoring and rollback framework — see `docs/runbooks/trusted-staff-cohort-pilot-plan.md` Sections 17–19.
+
 > This document is documentation only. It changes no code, no environment flags, no data, and no governance settings. It grants no access.
 
 ---

@@ -5,6 +5,8 @@
 **Last updated:** 2026-06-02 — Supabase credential rotation cleared (4S.106E)
 **Status:** CHECKLIST ONLY — this document does not approve the rehearsal by itself
 
+> **Bridge note (2026-06-13, 4S.109A):** this gate covers the **one-user rehearsal only**, which is a safety checkpoint, not the destination. A GO recorded here authorises only that single rehearsal. The intended next stage after a rehearsal PASS is a **controlled trusted-staff cohort pilot**, which has its own gates and its own joint GO/NO-GO decision — see `docs/runbooks/trusted-staff-cohort-pilot-plan.md`.
+
 ---
 
 ## 1. Purpose

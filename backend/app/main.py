@@ -153,6 +153,30 @@ def _get_pilot_staff_context() -> tuple:
     )
 
 
+# ---------------------------------------------------------------------------
+# Milestone 4S.109B — staff auth-mode resolution (fail closed)
+# Staff protected routes (/ask, /policies) require verified auth BY DEFAULT.
+# The demo (static server-side identity) path is selected ONLY when
+# PILOT_AUTH_MODE is explicitly set to a recognised demo value. Any missing,
+# empty, mistyped, or otherwise unrecognised value — including "true", "1",
+# "yes", "on" — fails closed to auth-required, removing the previous silent
+# fail-open where any value other than "true" dropped to unauthenticated demo.
+# Comparison is case- and surrounding-whitespace-insensitive.
+# ---------------------------------------------------------------------------
+_PILOT_AUTH_EXPLICIT_DEMO_VALUES: frozenset = frozenset({"false", "0", "off", "no", "demo"})
+
+
+def _pilot_auth_required() -> bool:
+    """Return True when staff routes must require a verified token.
+
+    Returns False (use explicit demo staff context) ONLY when PILOT_AUTH_MODE is
+    explicitly set to a recognised demo value (false / 0 / off / no / demo).
+    Every other value — missing, empty, "true", "True", "1", "yes", a typo —
+    returns True (fail closed). Read at call time so tests can patch the env.
+    """
+    return os.getenv("PILOT_AUTH_MODE", "").strip().lower() not in _PILOT_AUTH_EXPLICIT_DEMO_VALUES
+
+
 def _require_admin(authorization: Optional[str] = Header(default=None)) -> None:
     if not _ADMIN_TOKEN:
         raise HTTPException(status_code=503, detail="Admin auth not configured.")
@@ -2555,6 +2579,12 @@ def debug_storage_config(_: None = Depends(_require_admin)):
         "environment": "production" if os.getenv("RENDER") else os.getenv("ENVIRONMENT", "development"),
         "key_prefix_detected": key_prefix_detected,
         "storage_upload_method": _STORAGE_METHOD,
+        # 4S.109B — staff auth-mode posture indicator. Non-secret: reports only
+        # whether staff routes require auth (fail-closed default) or are in
+        # explicit demo mode, plus whether the JWKS source (SUPABASE_URL) is set.
+        # Never exposes any token, key, JWT secret, or org/role/user value.
+        "staff_auth_mode": "auth-required" if _pilot_auth_required() else "explicit-demo",
+        "staff_auth_configured": bool(os.getenv("SUPABASE_URL", "")),
     }
 
 
@@ -2581,7 +2611,7 @@ def ask_worktwin(payload: AskRequest, authorization: Optional[str] = Header(defa
       and full chunk text are never returned to the staff response.
     - OpenAI key and admin token are never returned or logged.
     """
-    if os.getenv("PILOT_AUTH_MODE", "") == "true":
+    if _pilot_auth_required():
         ctx = staff_context_from_header(authorization)
         organisation_id = ctx.organisation_id
         user_id = ctx.user_id
@@ -3692,7 +3722,7 @@ def list_policies(
       are still listed here so staff can read the policy, but the frontend
       must block the "Ask WorkTwin" CTA for those documents.
     """
-    if os.getenv("PILOT_AUTH_MODE", "") == "true":
+    if _pilot_auth_required():
         ctx = staff_context_from_header(authorization)
         organisation_id = ctx.organisation_id
         pilot_role = ctx.role

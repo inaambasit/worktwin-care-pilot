@@ -19,8 +19,21 @@ function isProtectedStaffPath(pathname: string): boolean {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
+// 4S.109B — staff route protection fails closed by default.
+// The staff auth gate is SKIPPED only when NEXT_PUBLIC_PILOT_AUTH_MODE is
+// explicitly set to a recognised demo value (false / 0 / off / no / demo,
+// case/space-insensitive). A missing, empty, mistyped, or otherwise
+// unrecognised value — including "true" — keeps the gate ON, removing the
+// previous silent fail-open where any value other than "true" disabled gating.
+const PILOT_AUTH_EXPLICIT_DEMO_VALUES = new Set(['false', '0', 'off', 'no', 'demo'])
+
+function pilotAuthRequired(): boolean {
+  const raw = (process.env.NEXT_PUBLIC_PILOT_AUTH_MODE ?? '').trim().toLowerCase()
+  return !PILOT_AUTH_EXPLICIT_DEMO_VALUES.has(raw)
+}
+
 export async function middleware(request: NextRequest): Promise<NextResponse> {
-  if (process.env.NEXT_PUBLIC_PILOT_AUTH_MODE !== 'true') {
+  if (!pilotAuthRequired()) {
     return NextResponse.next()
   }
 

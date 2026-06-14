@@ -35,19 +35,40 @@ def test_membership_lookup_failure_fails_closed_not_500(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# (a) PILOT_AUTH_MODE absent or false -- demo path is used
+# (a) Fail-closed default (4S.109B): demo path is used ONLY for explicit
+# recognised demo values. Missing / empty / mistyped / truthy values require auth.
 # ---------------------------------------------------------------------------
 
-def test_demo_path_used_when_pilot_auth_mode_absent(monkeypatch):
+def test_absent_pilot_auth_mode_requires_auth(monkeypatch):
+    # Missing env var must fail closed: no auth header -> 401, demo NOT used.
     monkeypatch.delenv("PILOT_AUTH_MODE", raising=False)
-    with patch("app.main._get_pilot_staff_context", return_value=("demo-org", "demo-user", "Care Worker")) as mock_demo:
+    with patch("app.main._get_pilot_staff_context") as mock_demo:
         resp = client.post("/ask", json=_QUESTION)
-    assert resp.status_code == 200
-    mock_demo.assert_called_once()
+    assert resp.status_code == 401
+    mock_demo.assert_not_called()
 
 
-def test_demo_path_used_when_pilot_auth_mode_false(monkeypatch):
-    monkeypatch.setenv("PILOT_AUTH_MODE", "false")
+def test_empty_pilot_auth_mode_requires_auth(monkeypatch):
+    monkeypatch.setenv("PILOT_AUTH_MODE", "")
+    with patch("app.main._get_pilot_staff_context") as mock_demo:
+        resp = client.post("/ask", json=_QUESTION)
+    assert resp.status_code == 401
+    mock_demo.assert_not_called()
+
+
+@pytest.mark.parametrize("value", ["ture", "True", "TRUE", "1", "yes", "on", "enabled"])
+def test_unrecognised_pilot_auth_mode_requires_auth(monkeypatch, value):
+    # Mistyped / truthy-but-unrecognised values must fail closed (auth required).
+    monkeypatch.setenv("PILOT_AUTH_MODE", value)
+    with patch("app.main._get_pilot_staff_context") as mock_demo:
+        resp = client.post("/ask", json=_QUESTION)
+    assert resp.status_code == 401
+    mock_demo.assert_not_called()
+
+
+@pytest.mark.parametrize("value", ["false", "0", "off", "no", "demo"])
+def test_explicit_demo_values_use_demo_path(monkeypatch, value):
+    monkeypatch.setenv("PILOT_AUTH_MODE", value)
     with patch("app.main._get_pilot_staff_context", return_value=("demo-org", "demo-user", "Care Worker")) as mock_demo:
         resp = client.post("/ask", json=_QUESTION)
     assert resp.status_code == 200
@@ -55,7 +76,7 @@ def test_demo_path_used_when_pilot_auth_mode_false(monkeypatch):
 
 
 def test_staff_context_from_header_not_called_in_demo_mode(monkeypatch):
-    monkeypatch.delenv("PILOT_AUTH_MODE", raising=False)
+    monkeypatch.setenv("PILOT_AUTH_MODE", "false")
     with patch("app.main._get_pilot_staff_context", return_value=("demo-org", "demo-user", "Care Worker")), \
          patch("app.main.staff_context_from_header") as mock_ctx:
         client.post("/ask", json=_QUESTION)
@@ -131,7 +152,7 @@ def test_verified_context_fields_used(monkeypatch):
 # ---------------------------------------------------------------------------
 
 def test_body_identity_fields_ignored_in_demo_mode(monkeypatch):
-    monkeypatch.delenv("PILOT_AUTH_MODE", raising=False)
+    monkeypatch.setenv("PILOT_AUTH_MODE", "false")
     with patch("app.main._get_pilot_staff_context", return_value=("demo-org", "demo-user", "Care Worker")) as mock_demo:
         resp = client.post(
             "/ask",

@@ -24,7 +24,7 @@ def _rpc_mock():
 
 
 _PIPELINE_PATCHES = [
-    patch.dict(os.environ, {"PILOT_AUTH_MODE": ""}),
+    patch.dict(os.environ, {"PILOT_AUTH_MODE": "false"}),
     patch("app.main._get_pilot_staff_context", return_value=("demo-org", "demo-user", "Care Worker")),
     patch("app.main._check_ask_rate_limit"),
     patch("app.main._OPENAI_CONFIGURED", True),

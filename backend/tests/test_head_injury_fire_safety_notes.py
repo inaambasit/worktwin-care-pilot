@@ -522,7 +522,7 @@ class TestStaffAskGovernanceGate:
     def _run_staff_ask(self, question: str) -> dict:
         """Run POST /ask with auth bypassed via _get_pilot_staff_context patch."""
         with ExitStack() as stack:
-            stack.enter_context(patch.dict(os.environ, {"PILOT_AUTH_MODE": ""}))
+            stack.enter_context(patch.dict(os.environ, {"PILOT_AUTH_MODE": "false"}))
             stack.enter_context(
                 patch(
                     "app.main._get_pilot_staff_context",

@@ -45,7 +45,7 @@ _ORG = "demo-org"
 
 def _base_infra_patches():
     return [
-        patch.dict(os.environ, {"PILOT_AUTH_MODE": ""}),
+        patch.dict(os.environ, {"PILOT_AUTH_MODE": "false"}),
         patch(
             "app.main._get_pilot_staff_context",
             return_value=(_ORG, "demo-user", "Care Worker"),

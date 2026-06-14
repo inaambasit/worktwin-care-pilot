@@ -1,29 +1,41 @@
 /**
- * Middleware route protection tests — 4S.103C-2.
+ * Middleware route protection tests — 4S.103C-2, updated 4S.109B.
+ *
+ * Fail-closed rule (4S.109B)
+ * ──────────────────────────
+ * Staff routes are GATED by default. The gate is skipped only when
+ * NEXT_PUBLIC_PILOT_AUTH_MODE is explicitly a recognised demo value
+ * (false / 0 / off / no / demo). Missing / empty / mistyped / "true" all keep
+ * the gate ON. This mirrors middleware.ts:pilotAuthRequired().
  *
  * NEXT_PUBLIC_PILOT_AUTH_MODE limitation
  * ──────────────────────────────────────
  * Next.js embeds NEXT_PUBLIC_* vars at dev-server / build start time.
- * Playwright cannot toggle this env var between tests without restarting
- * the dev server.  The second describe block (pilot-auth mode) is therefore
- * skipped by default.
+ * Playwright cannot toggle this env var between tests without restarting the
+ * dev server, so the two describe blocks below are selected by the value the
+ * server (and runner) were started with: the explicit-demo block runs when the
+ * gate is OFF; the auth-gated block runs when the gate is ON (the default,
+ * including when the var is unset).
  *
- * To run pilot-auth tests locally:
+ * To run the auth-gated assertions locally:
  *   cd frontend
+ *   # the gate is ON by default (var unset) — or set it explicitly:
  *   NEXT_PUBLIC_PILOT_AUTH_MODE=true npm run dev
- *   # in a second terminal (or with reuseExistingServer: false):
  *   NEXT_PUBLIC_PILOT_AUTH_MODE=true npx playwright test tests/middleware-pilot-auth.spec.ts
  *
- * The test runner process must also carry the var so that the PILOT_AUTH_ENABLED
- * flag below evaluates to true and the skip condition is lifted.
+ * To run the explicit-demo assertions, start both the dev server and the runner
+ * with a recognised demo value, e.g. NEXT_PUBLIC_PILOT_AUTH_MODE=false.
  *
- * Login page error-message tests (bottom of file) do not require the server to
- * be running in pilot-auth mode — the login page is always public.
+ * Login page error-message tests (bottom of file) do not depend on the mode —
+ * the login page is always public.
  */
 
 import { test, expect } from '@playwright/test'
 
-const PILOT_AUTH_ENABLED = process.env.NEXT_PUBLIC_PILOT_AUTH_MODE === 'true'
+const PILOT_AUTH_EXPLICIT_DEMO_VALUES = new Set(['false', '0', 'off', 'no', 'demo'])
+const PILOT_AUTH_GATED = !PILOT_AUTH_EXPLICIT_DEMO_VALUES.has(
+  (process.env.NEXT_PUBLIC_PILOT_AUTH_MODE ?? '').trim().toLowerCase()
+)
 
 const STAFF_PATHS = [
   '/dashboard',
@@ -35,12 +47,12 @@ const STAFF_PATHS = [
   '/escalation',
 ]
 
-// ─── Default / public-demo mode (fail-open) ──────────────────────────────────
+// ─── Explicit demo mode (gate OFF — requires a recognised demo value) ─────────
 
-test.describe('Middleware — public demo mode (NEXT_PUBLIC_PILOT_AUTH_MODE not set)', () => {
+test.describe('Middleware — explicit demo mode (NEXT_PUBLIC_PILOT_AUTH_MODE=false/0/off/no/demo)', () => {
   test.skip(
-    PILOT_AUTH_ENABLED,
-    'Server is running in pilot-auth mode — skip public-demo assertions'
+    PILOT_AUTH_GATED,
+    'Staff gate is ON (default / not an explicit demo value) — skip demo-open assertions'
   )
 
   test('all staff pages remain accessible (no redirect to /login)', async ({ page }) => {
@@ -74,12 +86,12 @@ test.describe('Middleware — public demo mode (NEXT_PUBLIC_PILOT_AUTH_MODE not 
   })
 })
 
-// ─── Pilot-auth mode (requires NEXT_PUBLIC_PILOT_AUTH_MODE=true server) ──────
+// ─── Auth-gated mode (gate ON — the fail-closed default, incl. unset/true) ───
 
-test.describe('Middleware — pilot-auth mode (NEXT_PUBLIC_PILOT_AUTH_MODE=true)', () => {
+test.describe('Middleware — auth-gated mode (gate ON: unset / true / unrecognised)', () => {
   test.skip(
-    !PILOT_AUTH_ENABLED,
-    'Start both the dev server and the Playwright runner with NEXT_PUBLIC_PILOT_AUTH_MODE=true to run these tests'
+    !PILOT_AUTH_GATED,
+    'Server is in explicit demo mode (gate OFF) — skip auth-gated assertions'
   )
 
   test('unauthenticated /dashboard redirects to /login?next=/dashboard', async ({ page }) => {

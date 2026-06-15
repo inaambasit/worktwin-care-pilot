@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type { EmailOtpType } from '@supabase/supabase-js'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 
 const STAFF_ROOTS = [
@@ -36,14 +37,21 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // OTP token-hash verification path for magic-link sign-in.
+  // OTP token-hash verification path for staff email sign-in links.
+  // Supabase's standard token-hash email template emits type=email, while some
+  // magic-link configurations emit type=magiclink. Accept only these two staff
+  // sign-in types and pass the validated value through to verifyOtp, instead of
+  // a single hardcoded type. Other email-OTP types (signup, invite, recovery)
+  // are intentionally NOT accepted by this staff sign-in route — they would need
+  // separate justification/approval — so they fail closed below.
   const tokenHash = searchParams.get('token_hash')
   const type = searchParams.get('type')
+  const ALLOWED_EMAIL_OTP_TYPES = ['email', 'magiclink'] as const
 
-  if (tokenHash && type === 'magiclink') {
+  if (tokenHash && type && (ALLOWED_EMAIL_OTP_TYPES as readonly string[]).includes(type)) {
     try {
       const supabase = createServerSupabaseClient()
-      const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'magiclink' })
+      const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: type as EmailOtpType })
       if (!error) {
         const next = safeNext(searchParams.get('next'))
         return NextResponse.redirect(`${origin}${next}`)

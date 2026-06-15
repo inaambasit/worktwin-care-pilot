@@ -4,6 +4,7 @@ import {
   MessageCircle, ClipboardList, PlayCircle, Lock, BookOpen,
   CheckCircle, ShieldCheck, Shield, Home,
 } from 'lucide-react'
+import { getVerifiedSession } from '@/lib/session'
 
 const quickActions = [
   { href: '/ask', icon: MessageCircle, label: 'Ask WorkTwin', desc: 'Ask policy-grounded questions' },
@@ -15,7 +16,13 @@ const quickActions = [
 
 const CONTEXT_CHIPS = ['Staff pilot view', 'Thumhara Centre', 'Controlled Pilot', 'No real data', 'Privacy-first support']
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  // Display-only: greet the signed-in user by their own email where a verified
+  // session exists; otherwise fall back to a clearly-demo label. Never renders
+  // user id or organisation id.
+  const session = await getVerifiedSession()
+  const greetingName = session?.email ? session.email : 'Demo user'
+
   return (
     <AppLayout>
       <div className="max-w-6xl mx-auto px-4 pt-4 pb-8 space-y-6">
@@ -30,7 +37,7 @@ export default function DashboardPage() {
               <Home size={11} />
               Employee home
             </span>
-            <h1 className="text-3xl font-bold mb-2.5 leading-snug">Welcome back, Pilot User</h1>
+            <h1 className="text-3xl font-bold mb-2.5 leading-snug">Welcome back, {greetingName}</h1>
             <p className="text-teal-100 text-sm leading-relaxed max-w-lg mb-5">
               WorkTwin helps you find approved guidance, practise safe scenarios and keep private notes during this controlled pilot.
             </p>

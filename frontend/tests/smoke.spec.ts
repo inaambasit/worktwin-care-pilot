@@ -23,6 +23,14 @@ test.describe('WorkTwin smoke tests', () => {
       await expect(page.getByText('Host View — Switch Area').first()).toBeVisible()
     }
     // If adminLinks === 0, admin demo is disabled — that is the expected default state
+
+    // 4S.109C — identity display. In demo mode (no verified Supabase session)
+    // the layout must show the clearly-demo fallback, never the old hardcoded
+    // "Pilot User" / "PU" placeholder.
+    await expect(page.getByText('Demo user').first()).toBeVisible()
+    await expect(page.getByText('Welcome back, Demo user')).toBeVisible()
+    await expect(page.getByText('Pilot User')).toHaveCount(0)
+    await expect(page.getByText('PU', { exact: true })).toHaveCount(0)
   })
 
   test('ask page shows common questions and safe privacy wording', async ({ page }) => {

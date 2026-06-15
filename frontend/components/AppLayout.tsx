@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -7,8 +7,32 @@ import {
   Lock, FileText, BarChart2, Shield, Phone, ChevronRight,
   Users, AlertTriangle, BookOpen, Menu, X, LogOut, FlaskConical,
 } from 'lucide-react'
+import { getSessionIdentity, type SessionIdentity } from '@/lib/supabase-browser'
 
 const ADMIN_DEMO_ENABLED = process.env.NEXT_PUBLIC_ADMIN_DEMO_ENABLED === 'true'
+
+// Display-only identity derivation. When no verified session is present
+// (explicit demo/public mode), fall back to a clearly-demo label rather than
+// implying a real staff account. Never derived from user id / org id / token.
+function deriveDisplayName(identity: SessionIdentity | null): string {
+  if (!identity) return 'Demo user'
+  if (identity.displayName) return identity.displayName
+  if (identity.email) return identity.email
+  return 'Signed-in user'
+}
+
+function deriveInitials(identity: SessionIdentity | null): string {
+  if (!identity) return 'D'
+  if (identity.displayName) {
+    const parts = identity.displayName.trim().split(/\s+/)
+    const first = parts[0]?.[0] ?? ''
+    const last = parts.length > 1 ? parts[parts.length - 1][0] : ''
+    const initials = (first + last).toUpperCase()
+    if (initials) return initials
+  }
+  if (identity.email) return identity.email[0].toUpperCase()
+  return 'U'
+}
 
 const employeeNav = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -32,11 +56,15 @@ function SidebarContent({
   isAdmin,
   pathname,
   nav,
+  userName,
+  userInitials,
   onNavClick,
 }: {
   isAdmin: boolean
   pathname: string
   nav: typeof employeeNav
+  userName: string
+  userInitials: string
   onNavClick?: () => void
 }) {
   return (
@@ -161,10 +189,10 @@ function SidebarContent({
         )}
         <div className="flex items-center gap-2 px-1">
           <div className="w-8 h-8 rounded-full bg-teal-700 text-white text-xs font-bold flex items-center justify-center shrink-0">
-            PU
+            {userInitials}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-slate-800 truncate">Pilot User</p>
+            <p className="text-sm font-medium text-slate-800 truncate">{userName}</p>
             <p className="text-xs text-slate-500">{isAdmin ? 'Admin pilot view' : 'Staff pilot view'}</p>
           </div>
           <Link
@@ -186,12 +214,32 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const isAdmin = pathname.startsWith('/admin')
   const nav = isAdmin ? adminNav : employeeNav
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [identity, setIdentity] = useState<SessionIdentity | null>(null)
+
+  useEffect(() => {
+    let active = true
+    getSessionIdentity().then((result) => {
+      if (active) setIdentity(result)
+    })
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const userName = deriveDisplayName(identity)
+  const userInitials = deriveInitials(identity)
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
       {/* Desktop sidebar — hidden on mobile */}
       <aside className="hidden md:flex md:flex-col w-60 shrink-0 bg-white border-r border-slate-200">
-        <SidebarContent isAdmin={isAdmin} pathname={pathname} nav={nav} />
+        <SidebarContent
+          isAdmin={isAdmin}
+          pathname={pathname}
+          nav={nav}
+          userName={userName}
+          userInitials={userInitials}
+        />
       </aside>
 
       {/* Mobile drawer overlay */}
@@ -229,6 +277,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             isAdmin={isAdmin}
             pathname={pathname}
             nav={nav}
+            userName={userName}
+            userInitials={userInitials}
             onNavClick={() => setDrawerOpen(false)}
           />
         </div>

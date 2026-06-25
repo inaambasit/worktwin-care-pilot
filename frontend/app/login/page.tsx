@@ -22,6 +22,11 @@ function safeNext(raw: string | null | undefined): string {
   return isSafe ? raw : '/dashboard'
 }
 
+function safeDiagnosticText(value: string | null | undefined): string | null {
+  if (!value) return null
+  return value.replace(/[\r\n\t]/g, ' ').slice(0, 200)
+}
+
 async function requestMagicLink(formData: FormData) {
   'use server'
   const email = (formData.get('email') as string | null)?.trim() ?? ''
@@ -38,14 +43,37 @@ async function requestMagicLink(formData: FormData) {
 
   try {
     const supabase = createServerSupabaseClient()
-    await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         emailRedirectTo: callbackUrl,
         shouldCreateUser: false,
       },
     })
+
+    const diagnosticContext = {
+      has_email_input: Boolean(email),
+      redirect_host: safeDiagnosticText(host),
+      redirect_proto: safeDiagnosticText(proto),
+    }
+
+    if (error) {
+      console.warn('staff_login_otp_error', {
+        ...diagnosticContext,
+        error_name: safeDiagnosticText(error.name),
+        error_status: error.status ?? null,
+        error_code: safeDiagnosticText(error.code),
+        error_message: safeDiagnosticText(error.message),
+      })
+    } else {
+      console.info('staff_login_otp_request_completed', diagnosticContext)
+    }
   } catch {
+    console.warn('staff_login_otp_exception', {
+      has_email_input: Boolean(email),
+      redirect_host: safeDiagnosticText(host),
+      redirect_proto: safeDiagnosticText(proto),
+    })
     // Do not expose internal errors. Always proceed to /login/sent
     // so the form does not reveal whether an address is registered.
   }

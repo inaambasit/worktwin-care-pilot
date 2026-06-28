@@ -19,6 +19,14 @@ function isProtectedStaffPath(pathname: string): boolean {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
+function apiHostOnly(): string {
+  try {
+    return new URL(API_BASE).host
+  } catch {
+    return 'invalid-api-host'
+  }
+}
+
 // 4S.109B — staff route protection fails closed by default.
 // The staff auth gate is SKIPPED only when NEXT_PUBLIC_PILOT_AUTH_MODE is
 // explicitly set to a recognised demo value (false / 0 / off / no / demo,
@@ -43,11 +51,25 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     return NextResponse.next()
   }
 
+  const gateStartedAt = Date.now()
+  const apiHost = apiHostOnly()
+  console.info('staff_route_gate_start', {
+    pathname,
+    api_host: apiHost,
+  })
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
     // Supabase not configured in pilot-auth mode: fail closed.
+    console.warn('staff_route_gate_no_session', {
+      pathname,
+      api_host: apiHost,
+      has_access_token: false,
+      elapsed_ms: Date.now() - gateStartedAt,
+      final_redirect_reason: 'auth_unavailable',
+    })
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
@@ -73,6 +95,13 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   } = await supabase.auth.getSession()
 
   if (error || !session?.access_token) {
+    console.warn('staff_route_gate_no_session', {
+      pathname,
+      api_host: apiHost,
+      has_access_token: Boolean(session?.access_token),
+      elapsed_ms: Date.now() - gateStartedAt,
+      final_redirect_reason: 'access_denied',
+    })
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('next', pathname)
     return NextResponse.redirect(loginUrl)
@@ -101,8 +130,25 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
       // 401 or 403
       sessionCheckError = 'access_denied'
     }
+
+    console.info('staff_route_gate_check_result', {
+      pathname,
+      api_host: apiHost,
+      has_access_token: true,
+      response_status: checkResp.status,
+      elapsed_ms: Date.now() - gateStartedAt,
+      allowed,
+      final_redirect_reason: allowed ? null : sessionCheckError,
+    })
   } catch {
     sessionCheckError = 'auth_unavailable'
+    console.warn('staff_route_gate_fetch_error', {
+      pathname,
+      api_host: apiHost,
+      has_access_token: true,
+      elapsed_ms: Date.now() - gateStartedAt,
+      final_redirect_reason: sessionCheckError,
+    })
   }
 
   if (!allowed) {

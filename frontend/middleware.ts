@@ -114,7 +114,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   try {
     const checkResp = await fetch(`${API_BASE}/staff/session-check`, {
       headers: { Authorization: `Bearer ${session.access_token}` },
-      signal: AbortSignal.timeout(5_000),
+      signal: AbortSignal.timeout(15_000),
     })
 
     if (checkResp.ok) {

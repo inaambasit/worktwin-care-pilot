@@ -1,15 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { NextRequest } from 'next/server'
 
-// Mock the server Supabase client so verifyOtp / exchangeCodeForSession are
-// observable and we never touch real Supabase.
-const verifyOtp = vi.fn()
-const exchangeCodeForSession = vi.fn()
+// Mock @supabase/ssr directly. The callback route builds its own Supabase
+// client with createServerClient, so mocking the older server helper would not
+// exercise the real callback code path.
+const { verifyOtp, exchangeCodeForSession, createServerClient } = vi.hoisted(() => ({
+  verifyOtp: vi.fn(),
+  exchangeCodeForSession: vi.fn(),
+  createServerClient: vi.fn(),
+}))
 
-vi.mock('@/lib/supabase-server', () => ({
-  createServerSupabaseClient: () => ({
-    auth: { verifyOtp, exchangeCodeForSession },
-  }),
+vi.mock('@supabase/ssr', () => ({
+  createServerClient,
 }))
 
 import { GET } from './route'
@@ -17,7 +19,12 @@ import { GET } from './route'
 const ORIGIN = 'https://example.com'
 
 function request(query: string): NextRequest {
-  return { url: `${ORIGIN}/auth/callback${query}` } as unknown as NextRequest
+  return {
+    url: `${ORIGIN}/auth/callback${query}`,
+    cookies: {
+      getAll: () => [],
+    },
+  } as unknown as NextRequest
 }
 
 function location(res: Response): string | null {
@@ -25,11 +32,19 @@ function location(res: Response): string | null {
 }
 
 beforeEach(() => {
+  process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://supabase.example.test'
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key'
+
   verifyOtp.mockReset()
   exchangeCodeForSession.mockReset()
+  createServerClient.mockReset()
+
+  createServerClient.mockReturnValue({
+    auth: { verifyOtp, exchangeCodeForSession },
+  })
 })
 
-describe('GET /auth/callback — token_hash verifyOtp allowlist', () => {
+describe('GET /auth/callback - token_hash verifyOtp allowlist', () => {
   it('type=email: calls verifyOtp with type=email and redirects to next', async () => {
     verifyOtp.mockResolvedValue({ error: null })
     const res = await GET(request('?token_hash=HASH&type=email&next=/dashboard'))
@@ -46,44 +61,44 @@ describe('GET /auth/callback — token_hash verifyOtp allowlist', () => {
     expect(location(res)).toBe(`${ORIGIN}/notes`)
   })
 
-  it('type=signup: fails closed (verifyOtp not called) -> /login?error=auth', async () => {
+  it('type=signup: fails closed and verifyOtp is not called', async () => {
     const res = await GET(request('?token_hash=HASH&type=signup&next=/dashboard'))
     expect(verifyOtp).not.toHaveBeenCalled()
     expect(location(res)).toBe(`${ORIGIN}/login?error=auth`)
   })
 
-  it('type=invite: fails closed (verifyOtp not called) -> /login?error=auth', async () => {
+  it('type=invite: fails closed and verifyOtp is not called', async () => {
     const res = await GET(request('?token_hash=HASH&type=invite&next=/dashboard'))
     expect(verifyOtp).not.toHaveBeenCalled()
     expect(location(res)).toBe(`${ORIGIN}/login?error=auth`)
   })
 
-  it('type=recovery: fails closed (verifyOtp not called) -> /login?error=auth', async () => {
+  it('type=recovery: fails closed and verifyOtp is not called', async () => {
     const res = await GET(request('?token_hash=HASH&type=recovery&next=/dashboard'))
     expect(verifyOtp).not.toHaveBeenCalled()
     expect(location(res)).toBe(`${ORIGIN}/login?error=auth`)
   })
 
-  it('unsupported/random type: fails closed (verifyOtp not called) -> /login?error=auth', async () => {
+  it('unsupported/random type: fails closed and verifyOtp is not called', async () => {
     const res = await GET(request('?token_hash=HASH&type=totally-made-up&next=/dashboard'))
     expect(verifyOtp).not.toHaveBeenCalled()
     expect(location(res)).toBe(`${ORIGIN}/login?error=auth`)
   })
 
-  it('valid type but verifyOtp errors: fails closed -> /login?error=auth', async () => {
+  it('valid type but verifyOtp errors: fails closed', async () => {
     verifyOtp.mockResolvedValue({ error: { message: 'invalid token' } })
     const res = await GET(request('?token_hash=HASH&type=email&next=/dashboard'))
     expect(verifyOtp).toHaveBeenCalledTimes(1)
     expect(location(res)).toBe(`${ORIGIN}/login?error=auth`)
   })
 
-  it('missing token_hash (type only): fails closed (verifyOtp not called)', async () => {
+  it('missing token_hash: fails closed and verifyOtp is not called', async () => {
     const res = await GET(request('?type=email&next=/dashboard'))
     expect(verifyOtp).not.toHaveBeenCalled()
     expect(location(res)).toBe(`${ORIGIN}/login?error=auth`)
   })
 
-  it('missing type (token_hash only): fails closed (verifyOtp not called)', async () => {
+  it('missing type: fails closed and verifyOtp is not called', async () => {
     const res = await GET(request('?token_hash=HASH&next=/dashboard'))
     expect(verifyOtp).not.toHaveBeenCalled()
     expect(location(res)).toBe(`${ORIGIN}/login?error=auth`)
@@ -102,7 +117,7 @@ describe('GET /auth/callback — token_hash verifyOtp allowlist', () => {
   })
 })
 
-describe('GET /auth/callback — ?code= PKCE path', () => {
+describe('GET /auth/callback - code PKCE path', () => {
   it('uses exchangeCodeForSession and redirects to next on success', async () => {
     exchangeCodeForSession.mockResolvedValue({ error: null })
     const res = await GET(request('?code=THECODE&next=/policies'))
@@ -112,7 +127,7 @@ describe('GET /auth/callback — ?code= PKCE path', () => {
     expect(location(res)).toBe(`${ORIGIN}/policies`)
   })
 
-  it('code exchange error falls through to /login?error=auth', async () => {
+  it('code exchange error fails closed', async () => {
     exchangeCodeForSession.mockResolvedValue({ error: { message: 'bad code' } })
     const res = await GET(request('?code=BADCODE&next=/dashboard'))
     expect(exchangeCodeForSession).toHaveBeenCalledTimes(1)

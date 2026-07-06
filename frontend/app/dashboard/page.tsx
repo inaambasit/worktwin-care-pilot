@@ -10,7 +10,7 @@ const quickActions = [
   { href: '/ask', icon: MessageCircle, label: 'Ask WorkTwin', desc: 'Ask policy-grounded questions' },
   { href: '/policies', icon: BookOpen, label: 'Policy Library', desc: 'Browse approved documents' },
   { href: '/onboarding', icon: ClipboardList, label: 'My Onboarding', desc: 'Continue the example pathway' },
-  { href: '/scenarios', icon: PlayCircle, label: 'Scenario Guidance', desc: 'Guidance for real care situations' },
+  { href: '/scenarios', icon: PlayCircle, label: 'Scenario Guidance', desc: 'Guidance for fictional care scenarios' },
   { href: '/notes', icon: Lock, label: 'Private Notes', desc: 'Session-only pilot notes' },
 ]
 
@@ -39,7 +39,7 @@ export default async function DashboardPage() {
             </span>
             <h1 className="text-3xl font-bold mb-2.5 leading-snug">Welcome back, {greetingName}</h1>
             <p className="text-teal-100 text-sm leading-relaxed max-w-lg mb-5">
-              WorkTwin helps you find approved guidance, practise safe scenarios and keep private notes during this controlled pilot.
+              WorkTwin helps you find staff-visible guidance, practise safe scenarios and keep private notes during this controlled pilot.
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
               {CONTEXT_CHIPS.map(chip => (
@@ -60,7 +60,7 @@ export default async function DashboardPage() {
           <ol className="space-y-2">
             {[
               { n: 1, label: 'Ask a safe example question', sub: 'Ask WorkTwin', href: '/ask' },
-              { n: 2, label: 'Browse approved pilot policies', sub: 'Policy Library', href: '/policies' },
+              { n: 2, label: 'Browse staff-visible pilot policies', sub: 'Policy Library', href: '/policies' },
               { n: 3, label: 'Try Scenario Guidance', sub: 'Realistic care situations', href: '/scenarios' },
               { n: 4, label: 'Check escalation contacts', sub: 'Who to call for high-risk situations', href: '/escalation' },
               { n: 5, label: 'Continue your onboarding preview', sub: 'Example induction pathway', href: '/onboarding' },
@@ -89,7 +89,7 @@ export default async function DashboardPage() {
             </div>
             <div>
               <p className="text-sm font-bold text-slate-700 leading-tight">Policy Library</p>
-              <p className="text-xs text-slate-500">Approved staff-visible documents shown when available</p>
+              <p className="text-xs text-slate-500">Staff-visible documents shown when available</p>
             </div>
           </div>
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-3">

@@ -38,13 +38,13 @@ const features = [
     icon: CheckCircle,
     title: 'Source-cited answers',
     description:
-      'WorkTwin is designed to show approved sources for answers, so staff can see where guidance comes from and audit trails stay clear.',
+      'WorkTwin is designed to show governed preview sources for answers, so staff can see where guidance comes from and audit trails stay clear.',
   },
 ]
 
 const trustItems = [
   'Employee chat content is not shown on manager pages in this controlled pilot preview',
-  'Designed for answers grounded in approved documents',
+  'Designed for answers grounded in governed preview documents',
   'Sensitive topics are routed safely to human escalation where judgement is needed',
   'No performance scoring, surveillance or sentiment tracking',
   'Designed around UK GDPR principles',
@@ -52,7 +52,7 @@ const trustItems = [
 
 const previewBoundaryItems = [
   'Controlled care-sector preview',
-  'Approved example policies are loaded',
+  'Sample policy documents are loaded',
   'Fictional scenario guidance is included',
   'No real staff, service-user or care data is connected',
   'Admin tools and integrations are disabled in this public deployment',
@@ -62,13 +62,13 @@ const previewBoundaryItems = [
 const steps = [
   {
     step: '1',
-    title: 'Upload approved documents',
-    description: 'Upload approved handbooks, SOPs, policies, workflows and training documents. WorkTwin prepares them for governed retrieval once the right checks are in place.',
+    title: 'Upload governed documents',
+    description: 'Upload reviewed handbooks, SOPs, policies, workflows and training documents. WorkTwin prepares them for governed retrieval once the right checks are in place.',
   },
   {
     step: '2',
     title: 'Employees ask questions',
-    description: 'Staff ask questions in plain English. WorkTwin is designed to answer from approved documents and show the source when the required document and governance checks are in place.',
+    description: 'Staff ask questions in plain English. WorkTwin is designed to answer from governed documents and show the source when the required document and governance checks are in place.',
   },
   {
     step: '3',
@@ -262,7 +262,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-8 sm:mb-14">
             <h2 className="text-3xl font-bold text-slate-900 mb-3">How it works</h2>
-            <p className="text-slate-500">Start small with approved documents.</p>
+            <p className="text-slate-500">Start small with reviewed documents.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {steps.map(({ step, title, description }) => (
@@ -319,7 +319,7 @@ export default function LandingPage() {
             Ready to test a focused WorkTwin vertical?
           </h2>
           <p className="text-teal-100 mb-8 leading-relaxed">
-            We start small with approved documents, a narrow employee group and anonymised insight
+            We start small with reviewed documents, a narrow employee group and anonymised insight
             reporting. No surveillance, no performance scoring, no productivity tracking.
           </p>
           <Link

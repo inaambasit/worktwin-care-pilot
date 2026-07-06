@@ -371,7 +371,7 @@ export default function AskPage() {
                   <BookOpen size={15} className="text-teal-600" />
                   <h2 className="font-semibold text-teal-900 text-sm">Example of an approved-source answer</h2>
                 </div>
-                <span className="text-xs bg-amber-100 text-amber-800 font-semibold px-2.5 py-1 rounded-full">Pilot example only - not a live retrieved answer</span>
+                <span className="text-xs bg-amber-100 text-amber-800 font-semibold px-2.5 py-1 rounded-full">Pilot example only - not a retrieved answer from this session</span>
               </div>
               <div className="p-5">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Question</p>
@@ -594,7 +594,7 @@ export default function AskPage() {
             {isDemoFallback && (
               <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-800">
                 <AlertTriangle size={13} className="shrink-0 text-amber-600" />
-                Backend unavailable - showing a controlled pilot example response. Live answers require approved documents and active safety gates.
+                Backend unavailable - showing a controlled pilot example response. Retrieved answers require approved documents and active safety gates.
               </div>
             )}
 

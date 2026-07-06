@@ -39,7 +39,7 @@ const CATEGORY_COLOURS: Record<string, string> = {
   Onboarding: 'bg-emerald-50 text-emerald-700',
 }
 
-const CONTEXT_CHIPS = ['Approved documents', 'Staff-visible guidance', 'Source-grounded answers', 'Care provider pilot']
+const CONTEXT_CHIPS = ['Approved documents', 'Staff-visible guidance', 'Source-grounded support when enabled', 'Care provider pilot']
 
 function formatDate(iso?: string): string {
   if (!iso) return '-'
@@ -306,7 +306,7 @@ export default function PoliciesPage() {
             </span>
             <h1 className="text-3xl font-bold mb-2.5 leading-snug">Policy Library</h1>
             <p className="text-teal-100 text-sm leading-relaxed max-w-lg mb-5">
-              Policy Library shows approved staff-visible documents for this controlled preview. Ask WorkTwin may use eligible approved documents for answers where governance and safety checks allow.
+              Policy Library shows approved staff-visible documents for this controlled preview. Ask WorkTwin only uses eligible approved documents for answers where the feature is enabled and governance and safety checks allow.
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
               {CONTEXT_CHIPS.map(chip => (
@@ -547,7 +547,7 @@ export default function PoliciesPage() {
             <li className="flex items-start gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0 mt-[7px]" />
               <span className="text-sm text-slate-600 leading-relaxed">
-                Eligible approved documents may support staff-facing answers where governance checks allow. WorkTwin does not use the internet or external sources.
+                Eligible approved documents may support staff-facing answers only where the feature is enabled and governance checks allow. WorkTwin does not use the internet or external sources.
               </span>
             </li>
             <li className="flex items-start gap-2.5 bg-red-50 rounded-xl px-3 py-2.5 -mx-1">

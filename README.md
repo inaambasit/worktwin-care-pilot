@@ -1,6 +1,10 @@
 # WorkTwin Care Pilot
 
-A privacy-first AI staff support and policy assistant prototype for regulated care settings.
+> **For hiring teams:** [Read the public product case study](docs/recruiter-case-study.md) for the business problem, discovery decisions, architecture, evaluation and contribution.
+>
+> **Validation note — audit baseline, 3 November 2026:** the 33/33 smoke-test result below is a historical checkpoint. The audited 6 July workflow passed backend tests but failed frontend smoke tests; subsequent middleware/build steps were skipped. This is not a current all-green or production-readiness claim. See the case study for limitations and check current workflow results before use.
+
+A controlled-preview AI policy and scenario-guidance prototype for regulated care settings.
 
 This is a working pilot and demo prototype. It is not production-ready.
 
